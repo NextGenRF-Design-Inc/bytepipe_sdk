@@ -1,0 +1,3 @@
+Layer Pairs Export File for PCB: C:\Active Projects\NextGen\HDK\Hardware\Files For Customer Release\PCB\BytePipe_x9002_HDK_Rev2.PcbDoc
+LayersSetName=Top_Bot_Thru_Holes|DrillFile=bytepipe_x9002_hdk_rev2-roundholes.txt|DrillLayers=gtl,g1,g2,g3,g4,g5,g6,gbl
+LayersSetName=Top_Bot_Slot_Holes|DrillFile=bytepipe_x9002_hdk_rev2-slotholes.txt|DrillLayers=gtl,g1,g2,g3,g4,g5,g6,gbl

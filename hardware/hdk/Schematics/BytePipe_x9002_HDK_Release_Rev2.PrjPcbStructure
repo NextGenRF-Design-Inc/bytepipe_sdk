@@ -1,0 +1,7 @@
+Record=TopLevelDocument|FileName=1-Notes.SchDoc|SheetNumber=1
+Record=NoMainPathDocument|SourceDocument=1-Notes.SchDoc|FileName=2-SOM Interface.SchDoc|SheetNumber=2
+Record=NoMainPathDocument|SourceDocument=1-Notes.SchDoc|FileName=3-RF Frontend.SchDoc|SheetNumber=3
+Record=NoMainPathDocument|SourceDocument=1-Notes.SchDoc|FileName=4-USB & SATA.SchDoc|SheetNumber=4
+Record=NoMainPathDocument|SourceDocument=1-Notes.SchDoc|FileName=5-DisplayPort & Ethernet.SchDoc|SheetNumber=5
+Record=NoMainPathDocument|SourceDocument=1-Notes.SchDoc|FileName=6-User IO.SchDoc|SheetNumber=6
+Record=NoMainPathDocument|SourceDocument=1-Notes.SchDoc|FileName=7-JTAG & Power.SchDoc|SheetNumber=7

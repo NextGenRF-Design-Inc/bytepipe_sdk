@@ -1,0 +1,37 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: BytePipe_x9002_HDK_Rev2.PcbDoc   10/11/2021  4:14:39 PM
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : BytePipe_x9002_HDK_Rev2-RoundHoles.TXT
+ASCII SlotHoles File : BytePipe_x9002_HDK_Rev2-SlotHoles.TXT
+EIA File   : BytePipe_x9002_HDK_Rev2.DRL
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      8mil (0.203mm)          +0mil (0mm)                       Round             1980      PTH        0.00inch (0.00mm)
+T2      8mil (0.203mm)                                            Round             307       PTH        0.00inch (0.00mm)
+T3      10mil (0.254mm)         +0mil (0mm)                       Round             39        PTH        0.00inch (0.00mm)
+T4      10mil (0.254mm)                                           Round             60        PTH        0.00inch (0.00mm)
+T5      22mil (0.559mm)                                           Round             20        PTH        0.00inch (0.00mm)
+T6      24mil (0.61mm)                                            Slot              2         PTH        0.00inch (0.00mm)
+T7      28mil (0.7mm)                                             Slot              2         PTH        0.00inch (0.00mm)
+T8      31mil (0.787mm)                                           Slot              3         PTH        0.00inch (0.00mm)
+T9      35mil (0.9mm)                                             Slot              2         PTH        0.00inch (0.00mm)
+T10     38mil (0.965mm)                                           Round             43        PTH        0.00inch (0.00mm)
+T11     41mil (1.04mm)                                            Round             24        PTH        0.00inch (0.00mm)
+T12     41mil (1.041mm)                                           Round             12        PTH        0.00inch (0.00mm)
+T13     43mil (1.092mm)                                           Round             15        PTH        0.00inch (0.00mm)
+T14     50mil (1.27mm)                                            Round             5         PTH        0.00inch (0.00mm)
+T15     61mil (1.55mm)                                            Round             2         PTH        0.00inch (0.00mm)
+T16     62mil (1.575mm)                                           Round             2         PTH        0.00inch (0.00mm)
+T17     78mil (1.981mm)                                           Round             4         PTH        0.00inch (0.00mm)
+T18     120mil (3.048mm)                                          Round             4         PTH        0.00inch (0.00mm)
+T19     26mil (0.65mm)                                            Round             2         NPTH       0.00inch (0.00mm)
+T20     40mil (1.016mm)                                           Round             4         NPTH       0.00inch (0.00mm)
+T21     41mil (1.041mm)                                           Round             6         NPTH       0.00inch (0.00mm)
+T22     130mil (3.302mm)                                          Round             2         NPTH       0.00inch (0.00mm)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              2540
+
+Total Processing Time (hh:mm:ss) : 00:00:01
