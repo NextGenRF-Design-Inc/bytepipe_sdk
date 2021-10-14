@@ -27,6 +27,10 @@ If it is desired to connect a keyboard and mouse a [OTG USB Adapter](https://www
 
 The BytePipe software boots from JTAG, eMMC, or a SD card.  The quickest way to load the software is to flash the SD card with the latest released image found [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  Instructions for formatting and copying the appropriate build outputs to the SD card are described in subsequent sections and are often needed when building the source.  However, the most efficient way to load an existing release is to erase and flash the SD card with the lastest SD card image.  Flashing the SD card ensures it is formatted all necessary files are copied correctly.  
 
+To flash the SD card download and install [dotNet Disk Imager](https://sourceforge.net/projects/dotnetdiskimager/).  
+
+![flashing_sd_01](flashing_sd_01.png)
+
 # User Interface
 
 The BytePipe SDK supports several different user interfaces tools.  For interfacing to the RFLAN directly refer to [RFLAN CLI](../RflanCli/RflanCli.md) and [BytePipe Terminal](../BytePipeTerminal/BytePipeTerminal.md).  For interfacing to the Linux framework refer to [BytePipe Terminal](../BytePipeTerminal/BytePipeTerminal.md), [Industrial I/O](../IIO/IIO.md), and [Ubuntu Desktop](../Ubuntu/Ubuntu.md).
