@@ -26,9 +26,9 @@ Build instructions for each component are documented in [Building RFLAN](docs/Rf
 
 # User Interface
 
-The BytePipe SDK supports several different user interfaces tools.  For interfacing to the RFLAN directly refer to [RFLAN CLI](../RflanCli/RflanCli.md) and [BytePipe Terminal](../BytePipeTerminal/BytePipeTerminal.md).  For interfacing to the Linux framework refer to [BytePipe Terminal](../BytePipeTerminal/BytePipeTerminal.md), [Industrial I/O](../IIO/IIO.md), and [Ubuntu Desktop](../Ubuntu/Ubuntu.md).
+The BytePipe SDK supports several different user interfaces tools.  For interfacing to the RFLAN directly refer to [RFLAN CLI](docs/RflanCli/RflanCli.md) and [BytePipe Terminal](docs/BytePipeTerminal/BytePipeTerminal.md).  For interfacing to the Linux framework refer to [BytePipe Terminal](docs/BytePipeTerminal/BytePipeTerminal.md), [Industrial I/O](docs/IIO/IIO.md), and [Ubuntu Desktop](docs/Ubuntu/Ubuntu.md).
 
-The [Industrial I/O](../IIO/IIO.md) Linux kernel driver supports several off the shelf programs include [Matlab](../Matlab/Matlab.md), [GNU Radio](../GnuRadio/GnuRadio.md), [IIO-Oscilloscope](../IIO-Oscilloscope/IIO-Oscilloscope.md), and many other tools that support the [Industrail I/O Driver](https://www.kernel.org/doc/html/v5.0/driver-api/iio/index.html).
+The [Industrial I/O](docs/IIO/IIO.md) Linux kernel driver supports several off the shelf programs include [Matlab](docs/Matlab/Matlab.md), [GNU Radio](docs/GnuRadio/GnuRadio.md), [IIO-Oscilloscope](docs/IIO-Oscilloscope/IIO-Oscilloscope.md), and many other tools that support the [Industrail I/O Driver](https://www.kernel.org/doc/html/v5.0/driver-api/iio/index.html).
 
 
 # Hardware Overview
