@@ -12,12 +12,19 @@
 #include "app.h"
 #include "app_cli.h"
 #include "adrv9001.h"
+#include "adrv9001_cli.h"
 #include "sd.h"
+#include "phy.h"
 
 
 static TaskHandle_t 			AppTask;
 
-static void APP_Task( void *pvParameters )
+static void App_PhyCallback( phy_evt_t Evt, void *param )
+{
+
+}
+
+static void App_Task( void *pvParameters )
 {
 	int status;
 
@@ -28,29 +35,27 @@ static void APP_Task( void *pvParameters )
 	if((status = AppCli_Initialize()) != 0)
 	  xil_printf("CLI Initialize Error %d\r\n",status);
 
+  /* Initialize ADRV9001 CLI */
+  if((status = Adrv9001Cli_Initialize()) != 0)
+    xil_printf("Adrv9001 CLI Initialize Error %d\r\n",status);
+
 	xil_printf("\r\n\r\n\r\n");
 	xil_printf("************************************************\r\n");
-	xil_printf("    BytePipe_x900x RFLAN - Version %d.%d.%d\r\n", APP_FW_VER_MAJOR, APP_FW_VER_MINOR, APP_FW_VER_REV );
+	xil_printf("        BytePipe_x900x RFLAN - v%d.%d.%d\r\n", APP_FW_VER_MINOR, APP_FW_VER_REV, APP_FW_VER_MAJOR );
 	xil_printf("************************************************\r\n");
 
 	xil_printf("\r\nType help for a list of commands\r\n\r\n");
 
+	phy_cfg_t PhyCfg = {
+	    .Callback     = App_PhyCallback,
+	    .CallbackRef  = NULL
+	};
 
-	/* Initialize ADRV9001 */
-	if((status = Adrv9001_Initialize( NULL )) != 0)
-    printf("Adrv9001 Initialize Error %d\r\n",status);
+  /* Initialize PHY */
+  if((status = Phy_Initialize( &PhyCfg )) != 0)
+    printf("Phy Initialize Error %d\r\n",status);
 
-  /* Load ADRV9001 Profile */
-  if((status = Adrv9001_LoadProfile( )) != 0)
-    printf("Adrv9001 Load Profile Error %d\r\n",status);
 
-  /* Begin Receiving */
-  if((status = Adrv9001_BeginReceiving( )) != 0)
-    printf("Adrv9001 Begin Receiving Error %d\r\n",status);
-
-  /* Begin Transmitting */
-  if((status = Adrv9001_BeginTransmitting( )) != 0)
-    printf("Adrv9001 Begin Transmitting Error %d\r\n",status);
 
 
 
@@ -64,7 +69,7 @@ static void APP_Task( void *pvParameters )
 int main()
 {
 	/* Create App Task */
-	xTaskCreate( APP_Task,
+	xTaskCreate( App_Task,
 			( const char * ) APP_TASK_NAME,
 			APP_TASK_STACK_SIZE,
 			NULL,

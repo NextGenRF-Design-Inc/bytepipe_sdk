@@ -349,9 +349,8 @@ int32_t Cli_GetParameter(const char *s, uint8_t pNum, CliParamType_t type, void 
 const char *Cli_FindParameter( const char *s, uint16_t pNum, uint16_t *len )
 {
   uint16_t cnt = 0;
+  uint16_t length = 0;
   const char *sReturn = NULL;
-
-  *len = 0;
 
   while( cnt < pNum )
   {
@@ -371,11 +370,11 @@ const char *Cli_FindParameter( const char *s, uint16_t pNum, uint16_t *len )
     	  sReturn = s;
         while((( *s ) != 0x00 ) && ( ( *s ) != ' ' ))
         {
-          ( *len )++;
+          length++;
           s++;
         }
 
-        if( *len == 0 ) sReturn = NULL;
+        if( length == 0 ) sReturn = NULL;
 
         break;
       }
@@ -385,6 +384,9 @@ const char *Cli_FindParameter( const char *s, uint16_t pNum, uint16_t *len )
       break;
     }
   }
+
+  if( len != NULL)
+    *len = length;
 
   return sReturn;
 }

@@ -6,7 +6,9 @@
 #include <stdbool.h>
 
 
+
 #define ADRV9001_STATUS_OFFSET      (-1000)
+#define ADRV9001_PROFILE_SIZE       (0x80000)
 
 /**
 **  ADRV9001 Status
@@ -26,6 +28,7 @@ typedef enum
   Adrv9001Status_ProfileCfgError              = (ADRV9001_STATUS_OFFSET - 9),
   Adrv9001Status_ProfileCalError              = (ADRV9001_STATUS_OFFSET - 10),
   Adrv9001Status_ProfilePrimeError            = (ADRV9001_STATUS_OFFSET - 11),
+  Adrv9001Status_NotSupported                 = (ADRV9001_STATUS_OFFSET - 12),
 } adrv9001_status_t;
 
 /**
@@ -51,13 +54,60 @@ typedef enum
 } adrv9001_radio_state_t;
 
 /**
+ **  ADRV9001 IQ Data Sample
+ */
+typedef struct
+{
+  uint16_t    idata;
+  uint16_t    qdata;
+} adrv9001_iqdata_t;
+
+/**
+ **  ADRV9001 Stream Event
+ */
+typedef struct
+{
+  adrv9001_port_t     Port;
+} adrv9001_evt_stream_t;
+
+/**
+ **  ADRV9001 Event Data
+ */
+typedef union
+{
+  adrv9001_evt_stream_t     Stream;
+} adrv9001_evt_data_t;
+
+/**
+ **  ADRV9001 Event Type
+ */
+typedef enum
+{
+  Adrv9001EvtType_Stream        = 0,
+} adrv9001_evt_type_t;
+
+/**
+ **  ADRV9001 Event
+ */
+typedef struct
+{
+  adrv9001_evt_type_t       Type;
+  adrv9001_evt_data_t      *Data;
+} adrv9001_evt_t;
+
+/**
+** ADRV9001 Callback
+*/
+typedef void (*adrv9001_callback_t)( adrv9001_evt_t evt, void *param );
+
+/**
  **  ADRV9001 Configuration
  */
 typedef struct
 {
-
-
-} adrv9001_Cfg_t;
+  adrv9001_callback_t    Callback;     ///< Callback
+  void                  *CallbackRef;  ///< Callback reference data
+} adrv9001_cfg_t;
 
 /*******************************************************************************
 *
@@ -80,7 +130,6 @@ adrv9001_status_t Adrv9001_BeginReceiving( void );
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_BeginTransmitting( void );
-
 
 /*******************************************************************************
 *
@@ -141,6 +190,43 @@ adrv9001_status_t Adrv9001_GetRadioState( adrv9001_port_t Port, adrv9001_radio_s
 *
 * \details
 *
+* This function enables continuous streaming of IQ data.  This function enables
+* the appropriate radio state and sets up the appropriate DMA to cyclically
+* transfer IQ samples from memory to the SSI or vice versa.
+*
+* When selecting a transmit port the IQ data is copied to an internal buffer
+* and continuously streamed to the SSI looping back to the first IQ sample
+* after a SampleCnt number of samples are reached.  Once this function has been
+* called the user can reuse or free the memory location of Buf.
+*
+* When selecting a receive port the DMA continuously streams IQ data to an
+* internal buffer.  Once a SampleCnt number of samples have been received the
+* memory is copied to the user provided buffer and a callback is generated
+* indicating to the user the buffer is full.  The DMA will continue to stream
+* samples to the internal 1M sample buffer and generate callbacks as a
+* SampleCnt number of samples are received.  This allows for some throttling
+* before samples are dropped.  If the user callback is not executed immediately
+* samples will not be dropped until the 1M buffer overflows.  The user must
+* provide Buf with a size of SampleCnt as long as the stream is enabled.
+*
+* To disable the stream for a particular port call this function with SampleCnt
+* set to zero.
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Buf is a buffer of 32bit IQ data
+*
+* \param[in]  SampleCnt is the number of samples and the length of Buf
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_IQStream( adrv9001_port_t Port, adrv9001_iqdata_t *Buf, uint32_t SampleCnt );
+
+/*******************************************************************************
+*
+* \details
+*
 * This function clears any errors within the adi_adrv9001 device driver.
 *
 * \return     none
@@ -184,6 +270,6 @@ adrv9001_status_t Adrv9001_HwReset( void );
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_Initialize( adrv9001_Cfg_t *Cfg );
+adrv9001_status_t Adrv9001_Initialize( adrv9001_cfg_t *Cfg );
 
 #endif

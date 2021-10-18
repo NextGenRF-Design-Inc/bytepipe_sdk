@@ -24,6 +24,11 @@ static const char* Adrv9001Cli_ParsePort(const char *cmd, uint16_t pNum, adrv900
   return s;
 }
 
+/*******************************************************************************
+*
+* \details Set Radio State
+*
+*******************************************************************************/
 static void Adrv9001Cli_SetRadioState(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t     port;
@@ -49,9 +54,6 @@ static void Adrv9001Cli_SetRadioState(Cli_t *CliInstance, const char *cmd, void 
   }
 }
 
-/**
-*  Set State
-*/
 static const CliCmd_t Adrv9001CliSetRadioStateDef =
 {
   "SetRadioState",
@@ -62,6 +64,11 @@ static const CliCmd_t Adrv9001CliSetRadioStateDef =
   NULL
 };
 
+/*******************************************************************************
+*
+* \details Get Radio State
+*
+*******************************************************************************/
 static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -89,9 +96,6 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
   }
 }
 
-/**
-*  Get Radio State
-*/
 static const CliCmd_t Adrv9001CliGetRadioStateDef =
 {
   "GetRadioState",
@@ -101,7 +105,6 @@ static const CliCmd_t Adrv9001CliGetRadioStateDef =
   1,
   NULL
 };
-
 
 /*******************************************************************************
 
