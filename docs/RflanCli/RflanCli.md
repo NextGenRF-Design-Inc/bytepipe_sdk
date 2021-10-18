@@ -2,6 +2,29 @@
 
 # RFLAN CLI
 
+The RFLAN application supports a custom command line interface (CLI) allowing users to interact with the RFLAN through a serial port and terminal program.  For information on adding custom CLI commands refer to [RFLAN CLI Architecture](../Architecture/Architecture.md#rflan-cli).
+
+# Hardware Connection
+
+To connect to the RFLAN serial port plug in a usb microb cable into the JTAG & Serial Port connector on the BytePipe HDK.
+
+![hdk](../../hardware/hdk/Overview/hdk.png)
+
+# Software Connection
+
+To access the RFLAN CLI a serial terminal such as [Tera Term](https://osdn.net/projects/ttssh2/releases/) or [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) should be installed.  The serial port on the BytePipe HDK will enumerate as a Virtual COM port using the [FTDI USB Driver](https://ftdichip.com/drivers/). Open the terminal program on the PC and connect to the appropriate COMM port with the settings shown below.
+
+![rflan_cli_02](rflan_cli_02.png)
+
+# Bootup
+
+When the RFLAN is initially booted it will display welcome text followed by the results of the ADRV900x initialization.  The welcome text includes the RFLAN version and instructions for displaying a list of CLI commands.
+
+![rflan_cli_01](rflan_cli_01.png)
+
+# Help
+
+
 
 
 

@@ -97,6 +97,7 @@ Add the directories as shown below.
 "${workspace_loc:/${ProjName}/src/adrv9001/common}"
 "${workspace_loc:/${ProjName}/src/adrv9001/jsmn}"
 "${workspace_loc:/${ProjName}/src/csl}"
+"${workspace_loc:/${ProjName}/src/phy}"
 "${workspace_loc:/${ProjName}/src/lib}"
 "${workspace_loc:/${ProjName}/src}"
 ```
