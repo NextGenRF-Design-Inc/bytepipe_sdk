@@ -55,48 +55,6 @@ module system_top (
   output wire             adrv9001_tx2_strobe_p
 );
 
-  wire adrv9001_spi_io0_i;
-  wire adrv9001_spi_io0_o;
-  wire adrv9001_spi_io0_t;
-  wire adrv9001_spi_io1_i;
-  wire adrv9001_spi_io1_o;
-  wire adrv9001_spi_io1_t;
-  wire adrv9001_spi_sck_i;
-  wire adrv9001_spi_sck_o;
-  wire adrv9001_spi_sck_t;
-  wire adrv9001_spi_ss_i;
-  wire adrv9001_spi_ss_o;
-  wire adrv9001_spi_ss_t;
-
-IOBUF adrv9001_spi_io0_iobuf (
-  .I(adrv9001_spi_io0_o),
-  .IO(adrv9001_miso),
-  .O(adrv9001_spi_io0_i),
-  .T(adrv9001_spi_io0_t)
-);
-  
-IOBUF adrv9001_spi_io1_iobuf(
-  .I(adrv9001_spi_io1_o),
-  .IO(adrv9001_mosi),
-  .O(adrv9001_spi_io1_i),
-  .T(adrv9001_spi_io1_t)
-);
-  
-IOBUF adrv9001_spi_sck_iobuf(
-  .I(adrv9001_spi_sck_o),
-  .IO(adrv9001_sclk),
-  .O(adrv9001_spi_sck_i),
-  .T(adrv9001_spi_sck_t)
-);
-
-IOBUF adrv9001_spi_ss_iobuf(
-  .I(adrv9001_spi_ss_o),
-  .IO(adrv9001_csn),
-  .O(adrv9001_spi_ss_i),
-  .T(adrv9001_spi_ss_t)
-);
-
-
 wire [4:0]cpu_gpio_o;
 
 assign adrv9001_rstn    = cpu_gpio_o[0];
@@ -239,18 +197,10 @@ system system_i(
   .adrv9001_rx2_qdata_p(adrv9001_rx2_qdata_p),
   .adrv9001_rx2_strobe_n(adrv9001_rx2_strobe_n),
   .adrv9001_rx2_strobe_p(adrv9001_rx2_strobe_p),
-  .adrv9001_spi_io0_i(adrv9001_spi_io0_i),
-  .adrv9001_spi_io0_o(adrv9001_spi_io0_o),
-  .adrv9001_spi_io0_t(adrv9001_spi_io0_t),
-  .adrv9001_spi_io1_i(adrv9001_spi_io1_i),
-  .adrv9001_spi_io1_o(adrv9001_spi_io1_o),
-  .adrv9001_spi_io1_t(adrv9001_spi_io1_t),
-  .adrv9001_spi_sck_i(adrv9001_spi_sck_i),
-  .adrv9001_spi_sck_o(adrv9001_spi_sck_o),
-  .adrv9001_spi_sck_t(adrv9001_spi_sck_t),
-  .adrv9001_spi_ss_i(adrv9001_spi_ss_i),
-  .adrv9001_spi_ss_o(adrv9001_spi_ss_o),
-  .adrv9001_spi_ss_t(adrv9001_spi_ss_t),
+  .adrv9001_csn(adrv9001_csn),
+  .adrv9001_miso(adrv9001_miso),
+  .adrv9001_mosi(adrv9001_mosi),
+  .adrv9001_sclk(adrv9001_sclk),
   .adrv9001_tx1_dclk_n(adrv9001_tx1_dclk_n),
   .adrv9001_tx1_dclk_p(adrv9001_tx1_dclk_p),
   .adrv9001_tx1_idata_n(adrv9001_tx1_idata_n),
