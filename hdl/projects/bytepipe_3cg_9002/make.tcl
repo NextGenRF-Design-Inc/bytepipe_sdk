@@ -49,6 +49,11 @@ generate_target all [get_files  $wrkDir/vivado/$project_name.srcs/sources_1/bd/s
 launch_runs impl_1 -to_step write_bitstream -jobs 8
 wait_on_run -quiet impl_1
 
+reset_msg_config -suppress -severity INFO
+reset_msg_config -suppress -severity WARNING
+reset_msg_config -suppress -severity STATUS
+reset_msg_config -suppress -severity {CRITICAL WARNING}
+
 # Export Hardware Defintion Files
 update_compile_order -fileset sources_1
 file copy -force $wrkDir/vivado/$project_name.runs/impl_1/system_top.sysdef $wrkDir/system_top.hdf

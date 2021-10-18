@@ -1,4 +1,4 @@
-set_property  -dict {PACKAGE_PIN D5    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dev_clk_in]     ; # IO_L7P_HDGC_AD5P_26
+#set_property  -dict {PACKAGE_PIN D5    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dev_clk_in]     ; # IO_L7P_HDGC_AD5P_26
 set_property  -dict {PACKAGE_PIN D8    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[0]]       ; # IO_L6N_HDGC_AD6N_26
 set_property  -dict {PACKAGE_PIN E5    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[1]]       ; # IO_L3N_AD9N_26
 set_property  -dict {PACKAGE_PIN D6    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[2]]       ; # IO_L5N_HDGC_AD7N_26
@@ -85,23 +85,21 @@ set_property  -dict {PACKAGE_PIN N5     IOSTANDARD LVDS}                        
 
 # clocks
 
-#create_clock -name ref_clk        -period  8.00 [get_ports fpga_ref_clk_p]
-
-create_clock -name rx1_dclk_out   -period  2.034 [get_ports rx1_dclk_in_p]
-create_clock -name rx2_dclk_out   -period  2.034 [get_ports rx2_dclk_in_p]
-create_clock -name tx1_dclk_out   -period  2.034 [get_ports tx1_dclk_in_p]
-create_clock -name tx2_dclk_out   -period  2.034 [get_ports tx2_dclk_in_p]
+create_clock -name adrv9001_rx1_dclk_out   -period  2.034 [get_ports adrv9001_rx1_dclk_p]
+create_clock -name adrv9001_rx2_dclk_out   -period  2.034 [get_ports adrv9001_rx2_dclk_p]
+create_clock -name adrv9001_tx1_dclk_out   -period  2.034 [get_ports adrv9001_tx1_ref_clk_p]
+create_clock -name adrv9001_tx2_dclk_out   -period  2.034 [get_ports adrv9001_tx2_ref_clk_p]
 
 # Allow max skew of 0.5 ns between input clocks
-set_clock_latency -source -early -0.25 [get_clocks rx1_dclk_out]
-set_clock_latency -source -early -0.25 [get_clocks rx2_dclk_out]
+set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx1_dclk_out]
+set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx2_dclk_out]
 
-set_clock_latency -source -late 0.25 [get_clocks rx1_dclk_out]
-set_clock_latency -source -late 0.25 [get_clocks rx2_dclk_out]
+set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx1_dclk_out]
+set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx2_dclk_out]
 
 
-set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports tx1_strobe_out_p]
-set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports tx2_idata_out_p]
+#set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports adrv9001_tx1_strobe_p]
+#set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports adrv9001_tx2_idata_p]
 
 # Define SPI clock
 create_clock -name spi0_clk      -period 40   [get_pins -hier */EMIOSPI0SCLKO]

@@ -37,13 +37,6 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 # To test this script, run the following commands from Vivado Tcl console:
 # source system_script.tcl
 
-
-# The design that will be created by this Tcl script contains the following 
-# module references:
-# gpio
-
-# Please add the sources of those modules before sourcing this Tcl script.
-
 # If there is no project opened, this script will create a
 # project, but make sure you do not have an existing project
 # <./myproj/project_1.xpr> in the current working folder.
@@ -131,6 +124,7 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
+xilinx.com:ip:axi_gpio:2.0\
 xilinx.com:ip:smartconnect:1.0\
 NGRF:ip:adrv9001_rx:1.0\
 analog.com:user:axi_dmac:1.0\
@@ -157,31 +151,6 @@ xilinx.com:ip:util_vector_logic:2.0\
       set bCheckIPsPassed 0
    }
 
-}
-
-##################################################################
-# CHECK Modules
-##################################################################
-set bCheckModules 1
-if { $bCheckModules == 1 } {
-   set list_check_mods "\ 
-gpio\
-"
-
-   set list_mods_missing ""
-   common::send_msg_id "BD_TCL-006" "INFO" "Checking if the following modules exist in the project's sources: $list_check_mods ."
-
-   foreach mod_vlnv $list_check_mods {
-      if { [can_resolve_reference $mod_vlnv] == 0 } {
-         lappend list_mods_missing $mod_vlnv
-      }
-   }
-
-   if { $list_mods_missing ne "" } {
-      catch {common::send_msg_id "BD_TCL-115" "ERROR" "The following module(s) are not found in the project: $list_mods_missing" }
-      common::send_msg_id "BD_TCL-008" "INFO" "Please add source files for the missing module(s) above."
-      set bCheckIPsPassed 0
-   }
 }
 
 if { $bCheckIPsPassed != 1 } {
@@ -229,6 +198,8 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   current_bd_instance $hier_obj
 
   # Create interface pins
+  create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO_0
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M_AXI_HPM0_LPD
 
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:spi_rtl:1.0 SPI_0
@@ -237,13 +208,7 @@ proc create_hier_cell_cpu { parentCell nameHier } {
 
 
   # Create pins
-  create_bd_pin -dir IO -from 11 -to 0 adrv9001_dgpio
-  create_bd_pin -dir I adrv9001_irq
-  create_bd_pin -dir O adrv9001_rstn
-  create_bd_pin -dir O adrv9001_rx1_en
-  create_bd_pin -dir O adrv9001_rx2_en
-  create_bd_pin -dir O adrv9001_tx1_en
-  create_bd_pin -dir O adrv9001_tx2_en
+  create_bd_pin -dir I irq0
   create_bd_pin -dir I -from 0 -to 0 irq11
   create_bd_pin -dir I -from 0 -to 0 irq12
   create_bd_pin -dir I -from 0 -to 0 irq13
@@ -261,17 +226,6 @@ proc create_hier_cell_cpu { parentCell nameHier } {
    CONFIG.CONST_WIDTH {1} \
  ] $GND_1
 
-  # Create instance: gpio_0, and set properties
-  set block_name gpio
-  set block_cell_name gpio_0
-  if { [catch {set gpio_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_msg_id "BD_TCL-105" "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $gpio_0 eq "" } {
-     catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
   # Create instance: sys_concat_intc_0, and set properties
   set sys_concat_intc_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 sys_concat_intc_0 ]
   set_property -dict [ list \
@@ -1351,9 +1305,9 @@ proc create_hier_cell_cpu { parentCell nameHier } {
    CONFIG.PSU__GPIO1_MIO__IO {MIO 26 .. 51} \
    CONFIG.PSU__GPIO1_MIO__PERIPHERAL__ENABLE {1} \
    CONFIG.PSU__GPIO2_MIO__PERIPHERAL__ENABLE {0} \
-   CONFIG.PSU__GPIO_EMIO_WIDTH {16} \
+   CONFIG.PSU__GPIO_EMIO_WIDTH {5} \
    CONFIG.PSU__GPIO_EMIO__PERIPHERAL__ENABLE {1} \
-   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {16} \
+   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {5} \
    CONFIG.PSU__GPIO_EMIO__WIDTH {[94:0]} \
    CONFIG.PSU__GPU_PP0__POWER__ON {0} \
    CONFIG.PSU__GPU_PP1__POWER__ON {0} \
@@ -1829,29 +1783,21 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   # Create interface connections
   connect_bd_intf_net -intf_net Conn1 [get_bd_intf_pins M_AXI_HPM0_LPD] [get_bd_intf_pins sys_ps8/M_AXI_HPM0_LPD]
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins S_AXI_HP1_FPD] [get_bd_intf_pins sys_ps8/S_AXI_HP1_FPD]
+  connect_bd_intf_net -intf_net sys_ps8_GPIO_0 [get_bd_intf_pins GPIO_0] [get_bd_intf_pins sys_ps8/GPIO_0]
   connect_bd_intf_net -intf_net sys_ps8_SPI_0 [get_bd_intf_pins SPI_0] [get_bd_intf_pins sys_ps8/SPI_0]
 
   # Create port connections
-  connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc_0/In0] [get_bd_pins sys_concat_intc_0/In1] [get_bd_pins sys_concat_intc_0/In2] [get_bd_pins sys_concat_intc_0/In3] [get_bd_pins sys_concat_intc_0/In4] [get_bd_pins sys_concat_intc_0/In5] [get_bd_pins sys_concat_intc_0/In6] [get_bd_pins sys_concat_intc_0/In7] [get_bd_pins sys_concat_intc_1/In0] [get_bd_pins sys_concat_intc_1/In1] [get_bd_pins sys_concat_intc_1/In6] [get_bd_pins sys_concat_intc_1/In7]
-  connect_bd_net -net Net [get_bd_pins adrv9001_dgpio] [get_bd_pins gpio_0/adrv9001_dgpio]
-  connect_bd_net -net adrv9001_irq_1 [get_bd_pins adrv9001_irq] [get_bd_pins gpio_0/adrv9001_irq]
+  connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc_0/In1] [get_bd_pins sys_concat_intc_0/In2] [get_bd_pins sys_concat_intc_0/In3] [get_bd_pins sys_concat_intc_0/In4] [get_bd_pins sys_concat_intc_0/In5] [get_bd_pins sys_concat_intc_0/In6] [get_bd_pins sys_concat_intc_0/In7] [get_bd_pins sys_concat_intc_1/In0] [get_bd_pins sys_concat_intc_1/In1] [get_bd_pins sys_concat_intc_1/In6] [get_bd_pins sys_concat_intc_1/In7]
   connect_bd_net -net axi_adrv9001_rx1_dma_irq [get_bd_pins irq14] [get_bd_pins sys_concat_intc_1/In5]
   connect_bd_net -net axi_adrv9001_rx2_dma_irq [get_bd_pins irq13] [get_bd_pins sys_concat_intc_1/In4]
   connect_bd_net -net axi_adrv9001_tx1_dma_irq [get_bd_pins irq12] [get_bd_pins sys_concat_intc_1/In3]
   connect_bd_net -net axi_adrv9001_tx2_dma_irq [get_bd_pins irq11] [get_bd_pins sys_concat_intc_1/In2]
-  connect_bd_net -net gpio_0_adrv9001_rstn [get_bd_pins adrv9001_rstn] [get_bd_pins gpio_0/adrv9001_rstn]
-  connect_bd_net -net gpio_0_adrv9001_rx1 [get_bd_pins adrv9001_rx1_en] [get_bd_pins gpio_0/adrv9001_rx1]
-  connect_bd_net -net gpio_0_adrv9001_rx2 [get_bd_pins adrv9001_rx2_en] [get_bd_pins gpio_0/adrv9001_rx2]
-  connect_bd_net -net gpio_0_adrv9001_tx1 [get_bd_pins adrv9001_tx1_en] [get_bd_pins gpio_0/adrv9001_tx1]
-  connect_bd_net -net gpio_0_adrv9001_tx2 [get_bd_pins adrv9001_tx2_en] [get_bd_pins gpio_0/adrv9001_tx2]
-  connect_bd_net -net gpio_0_gpio_tri_i [get_bd_pins gpio_0/gpio_tri_i] [get_bd_pins sys_ps8/emio_gpio_i]
+  connect_bd_net -net irq0_1 [get_bd_pins irq0] [get_bd_pins sys_concat_intc_0/In0]
   connect_bd_net -net sys_concat_intc_0_dout [get_bd_pins sys_concat_intc_0/dout] [get_bd_pins sys_ps8/pl_ps_irq0]
   connect_bd_net -net sys_concat_intc_1_dout [get_bd_pins sys_concat_intc_1/dout] [get_bd_pins sys_ps8/pl_ps_irq1]
   connect_bd_net -net sys_cpu_clk [get_bd_pins m_axi_aclk] [get_bd_pins sys_ps8/maxihpm0_lpd_aclk] [get_bd_pins sys_ps8/pl_clk0] [get_bd_pins sys_ps8/saxihp1_fpd_aclk] [get_bd_pins sys_rstgen/slowest_sync_clk]
   connect_bd_net -net sys_cpu_reset [get_bd_pins m_axi_rst] [get_bd_pins sys_rstgen/peripheral_reset]
   connect_bd_net -net sys_cpu_resetn [get_bd_pins m_axi_rstn] [get_bd_pins sys_rstgen/peripheral_aresetn]
-  connect_bd_net -net sys_ps8_emio_gpio_o [get_bd_pins gpio_0/gpio_tri_o] [get_bd_pins sys_ps8/emio_gpio_o]
-  connect_bd_net -net sys_ps8_emio_gpio_t [get_bd_pins gpio_0/gpio_tri_t] [get_bd_pins sys_ps8/emio_gpio_t]
   connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins pl_rstn] [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins util_vector_logic_1/Op1]
   connect_bd_net -net util_vector_logic_1_Res [get_bd_pins pl_rst] [get_bd_pins util_vector_logic_1/Res]
 
@@ -2222,6 +2168,8 @@ proc create_root_design { parentCell } {
 
 
   # Create interface ports
+  set adrv9001_dgpio [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 adrv9001_dgpio ]
+
   set adrv9001_rx1 [ create_bd_intf_port -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx1 ]
 
   set adrv9001_rx2 [ create_bd_intf_port -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx2 ]
@@ -2232,15 +2180,11 @@ proc create_root_design { parentCell } {
 
   set adrv9001_tx2 [ create_bd_intf_port -mode Master -vlnv NextGenRFDesign:adrv9001:adrv9001_tx_rtl:1.0 adrv9001_tx2 ]
 
+  set cpu_gpio [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 cpu_gpio ]
+
 
   # Create ports
-  set adrv9001_dgpio [ create_bd_port -dir IO -from 11 -to 0 adrv9001_dgpio ]
   set adrv9001_irq [ create_bd_port -dir I adrv9001_irq ]
-  set adrv9001_rstn [ create_bd_port -dir O adrv9001_rstn ]
-  set adrv9001_rx1_en [ create_bd_port -dir O adrv9001_rx1_en ]
-  set adrv9001_rx2_en [ create_bd_port -dir O adrv9001_rx2_en ]
-  set adrv9001_tx1_en [ create_bd_port -dir O adrv9001_tx1_en ]
-  set adrv9001_tx2_en [ create_bd_port -dir O adrv9001_tx2_en ]
 
   # Create instance: adrv9001_rx1
   create_hier_cell_adrv9001_rx1 [current_bd_instance .] adrv9001_rx1
@@ -2254,10 +2198,16 @@ proc create_root_design { parentCell } {
   # Create instance: adrv9001_tx2
   create_hier_cell_adrv9001_tx2 [current_bd_instance .] adrv9001_tx2
 
+  # Create instance: axi_adrv9001_dgpio, and set properties
+  set axi_adrv9001_dgpio [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_adrv9001_dgpio ]
+  set_property -dict [ list \
+   CONFIG.C_GPIO_WIDTH {12} \
+ ] $axi_adrv9001_dgpio
+
   # Create instance: axi_cpu_interconnect, and set properties
   set axi_cpu_interconnect [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_cpu_interconnect ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {4} \
+   CONFIG.NUM_MI {5} \
  ] $axi_cpu_interconnect
 
   # Create instance: axi_hp1_interconnect, and set properties
@@ -2282,26 +2232,23 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M00_AXI [get_bd_intf_pins adrv9001_rx1/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M00_AXI]
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M01_AXI [get_bd_intf_pins adrv9001_rx2/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M01_AXI]
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M03_AXI [get_bd_intf_pins adrv9001_tx2/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M03_AXI]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M04_AXI [get_bd_intf_pins axi_adrv9001_dgpio/S_AXI] [get_bd_intf_pins axi_cpu_interconnect/M04_AXI]
+  connect_bd_intf_net -intf_net axi_gpio_0_GPIO [get_bd_intf_ports adrv9001_dgpio] [get_bd_intf_pins axi_adrv9001_dgpio/GPIO]
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins axi_hp1_interconnect/M00_AXI] [get_bd_intf_pins cpu/S_AXI_HP1_FPD]
+  connect_bd_intf_net -intf_net cpu_GPIO_0 [get_bd_intf_ports cpu_gpio] [get_bd_intf_pins cpu/GPIO_0]
   connect_bd_intf_net -intf_net cpu_SPI_0 [get_bd_intf_ports adrv9001_spi] [get_bd_intf_pins cpu/SPI_0]
   connect_bd_intf_net -intf_net rx2_m_dest_axi [get_bd_intf_pins adrv9001_rx2/m_axi] [get_bd_intf_pins axi_hp1_interconnect/S01_AXI]
   connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins adrv9001_tx1/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M02_AXI]
 
   # Create port connections
   connect_bd_net -net In4_1 [get_bd_pins adrv9001_rx2/irq] [get_bd_pins cpu/irq13]
-  connect_bd_net -net Net [get_bd_ports adrv9001_dgpio] [get_bd_pins cpu/adrv9001_dgpio]
-  connect_bd_net -net adrv9001_irq_1 [get_bd_ports adrv9001_irq] [get_bd_pins cpu/adrv9001_irq]
+  connect_bd_net -net adrv9001_irq_1 [get_bd_ports adrv9001_irq] [get_bd_pins cpu/irq0]
   connect_bd_net -net adrv9001_rx3_irq [get_bd_pins adrv9001_rx1/irq] [get_bd_pins cpu/irq14]
   connect_bd_net -net adrv9001_tx2_irq [get_bd_pins adrv9001_tx2/irq] [get_bd_pins cpu/irq11]
   connect_bd_net -net axi_adrv9001_tx1_dma_irq [get_bd_pins adrv9001_tx1/irq] [get_bd_pins cpu/irq12]
-  connect_bd_net -net cpu_adrv9001_rstn [get_bd_ports adrv9001_rstn] [get_bd_pins cpu/adrv9001_rstn]
-  connect_bd_net -net cpu_adrv9001_rx1_en [get_bd_ports adrv9001_rx1_en] [get_bd_pins cpu/adrv9001_rx1_en]
-  connect_bd_net -net cpu_adrv9001_rx2_en [get_bd_ports adrv9001_rx2_en] [get_bd_pins cpu/adrv9001_rx2_en]
-  connect_bd_net -net cpu_adrv9001_tx1_en [get_bd_ports adrv9001_tx1_en] [get_bd_pins cpu/adrv9001_tx1_en]
-  connect_bd_net -net cpu_adrv9001_tx2_en [get_bd_ports adrv9001_tx2_en] [get_bd_pins cpu/adrv9001_tx2_en]
   connect_bd_net -net sys_500m_reset [get_bd_pins adrv9001_rx1/rst] [get_bd_pins adrv9001_rx2/rst] [get_bd_pins adrv9001_tx1/rst] [get_bd_pins adrv9001_tx2/rst] [get_bd_pins cpu/pl_rst]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9001_rx1/axi_aclk] [get_bd_pins adrv9001_rx2/axi_aclk] [get_bd_pins adrv9001_tx1/axi_aclk] [get_bd_pins adrv9001_tx2/axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk]
-  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9001_rx1/axi_rstn] [get_bd_pins adrv9001_rx2/axi_rstn] [get_bd_pins adrv9001_tx1/axi_rstn] [get_bd_pins adrv9001_tx2/axi_rstn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9001_rx1/axi_aclk] [get_bd_pins adrv9001_rx2/axi_aclk] [get_bd_pins adrv9001_tx1/axi_aclk] [get_bd_pins adrv9001_tx2/axi_aclk] [get_bd_pins axi_adrv9001_dgpio/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk]
+  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9001_rx1/axi_rstn] [get_bd_pins adrv9001_rx2/axi_rstn] [get_bd_pins adrv9001_tx1/axi_rstn] [get_bd_pins adrv9001_tx2/axi_rstn] [get_bd_pins axi_adrv9001_dgpio/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn]
 
   # Create address segments
   create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_rx1/dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
@@ -2312,6 +2259,7 @@ proc create_root_design { parentCell } {
   create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_tx1/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
   create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_tx2/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
   create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_tx2/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
+  create_bd_addr_seg -range 0x00001000 -offset 0x80004000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs axi_adrv9001_dgpio/S_AXI/Reg] SEG_axi_gpio_0_Reg
   create_bd_addr_seg -range 0x00001000 -offset 0x80000000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_rx1/dma/s_axi/axi_lite] SEG_dma_axi_lite
   create_bd_addr_seg -range 0x00001000 -offset 0x80001000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_rx2/dma/s_axi/axi_lite] SEG_dma_axi_lite10
   create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_tx1/dma/s_axi/axi_lite] SEG_dma_axi_lite12
@@ -2321,6 +2269,7 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -2332,6 +2281,4 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
-
-common::send_msg_id "BD_TCL-1000" "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
