@@ -11,12 +11,12 @@ The BytePipe_x9002 is a high performance RF Systom On Module (SOM).  The BytePip
 
 The following shows the BytePipe_x900x System on Module (SOM).  
 
-![som](som.png)
+![som](som_01.png)
 
 
 # J600
 
-J600 is a board to board connector which provides access to all of the digital signals on the SOM.  Some of these signals provide hardcoded functionality while others can be configured by the baseband processor.  The mating connector used on the host board is the WR120SB-VHF30-N1.  For additional information see the datasheet on [NextGenRF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/) 
+J600 is a board to board connector which provides access to all of the digital signals on the SOM.  Some of these signals provide hardcoded functionality while others can be configured by the baseband processor.  The mating connector used on the host board is the WR-120S-VHF30-N1.  For additional information see the datasheet on [NextGenRF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/) 
 
 
 |       Description             |    Signal      | Pin | Pin |    Signal      |       Description             |
@@ -111,7 +111,7 @@ J601 is a board to board connector which provides access to power and RF control
 
 # Boot Switch
 
-The boot switch allows user to select the location of boot code for the baseband processor.  When SD is selected the basband processor will boot from the external SD card.  When EMMC is selected the baseband processor will boot from the 8GB on-board EMMC flash.    
+The boot switch allows the user to select the location of boot code for the baseband processor.  When SD is selected the basband processor will boot from the external SD card.  When EMMC is selected the baseband processor will boot from the 8GB on-board EMMC flash.    
 
 ![boot_switch](boot_switch.png)
 
