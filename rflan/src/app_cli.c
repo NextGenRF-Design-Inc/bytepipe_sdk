@@ -180,6 +180,8 @@ static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
     xil_printf("%s\r\n", fno.fname);
   }
 
+  xil_printf("\r\n\r\n");
+
   f_closedir(&dp);
 }
 

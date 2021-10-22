@@ -23,13 +23,33 @@ If it is desired to connect a keyboard and mouse a [OTG USB Adapter](https://www
 ![hdk](../../hardware/hdk/Overview/overview.png)
 
 
+# Programming
+
+The BytePipe software boots from eMMC or a SD card.  The process for programming either boot disk is similar with the exception of copying the files to the physical device.  The files created and the process for creating them are the same wheather booting from the eMMC or SD card.  The most full proof method for ensuring the boot disk is formatted correctly and all the appropriate files are copied is to flash it with a pre-built image.  This is escpecially true if Linux is included as multiple disk partitions must be created.  For Linux applications the disk must be formatted with an EXT4 partition and a FAT partition.  The FAT partition is referred to as the BOOT partition while the EXT4 partition is used for the Linux file system.  See [Flashing SD Card](#flashing-sd-card), [Flashing eMMC](#flashing-emmc), or [Programming Boot Partition](#programming-boot-partition) sections below for more information.
+
+If you are only interested in the RFLAN application without Linux the most efficient way is to review [Programming Boot Partition](#programming-boot-partition) and simply copy the latest BOOT.BIN to the SD card.
+
+In addition to the firmware files the BOOT partition can contain additional files used by the RFLAN application.  For example the RFLAN uses the BOOT partition for streaming waveform files to and from the radio.  Waveform files can be pre-loaded when programming the SD card.  The following shows the BOOT partition loaded with the RFLAN BOOT.BIN firmware along with several pre-generated waveforms that can be used for transmission.  
+
+![boot_02](boot_02.png)
+
 # Flashing SD Card
 
-The BytePipe software boots from JTAG, eMMC, or a SD card.  The quickest way to load the software is to flash the SD card with the latest released image found [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  Instructions for formatting and copying the appropriate build outputs to the SD card are described in subsequent sections and are often needed when building the source.  However, the most efficient way to load an existing release is to erase and flash the SD card with the lastest SD card image.  Flashing the SD card ensures it is formatted all necessary files are copied correctly.  
-
-To flash the SD card download and install [dotNet Disk Imager](https://sourceforge.net/projects/dotnetdiskimager/).  
+Flashing the SD card ensures it is formatted and all necessary files are copied correctly.  This section assumes there is a SD card image available and does not detail the steps for creating the image.  Releasd versions which can be found [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases) typically include a preformatted image that has been tested.  To flash the SD card download and install [dotNet Disk Imager](https://sourceforge.net/projects/dotnetdiskimager/).  Start by selecting `Wipe Device` to make sure you are starting with a clean SD card.  Then browse to the downloaded image select `Write to Device`.  
 
 ![flashing_sd_01](flashing_sd_01.png)
+
+# Flashing eMMC
+
+This documenation is not currently available.
+
+# Programming Boot Parition
+
+The BOOT partition is formatted as a FAT file system and is required whether running Linux or the RFLAN application.  At a minimum the FAT partition must include a `BOOT.BIN` file.  The boot file includes the first stage bootloader (`FSBL`).  For Linux applications the `FSBL` loads `U-BOOT` which then loads the seperate linux image from the FAT file system.  The `FSBL` also loads any additional bare-metal applications included in BOOT.BIN that run on other processors.  For example when booting the RFLAN application the BOOT.BIN includes both the `FSBL` and `rflan.elf` application.  If Linux is also included BOOT.BIN will include the `FSBL`, `rflan.elf`, and `U-BOOT.elf`.  `U-BOOT.elf` will then load the Linux kernel and device tree from seperate files on the FAT file system labeled `image.ub` and `system.dtb` respectively.  The following shows the requried files on the FAT partition for booting Linux.  If Linux isn't included only `BOOT.BIN` is required. 
+
+The latest BOOT.BIN and Linux images can be found in the latest relase folder [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  The SD card must have a FAT partition created either by flashing the disk with a pre-built image or by formatting the SD card.  
+
+![boot_01](boot_01.png)
 
 # User Interface
 

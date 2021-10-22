@@ -24,9 +24,22 @@ When the RFLAN is initially booted it will display welcome text followed by the 
 
 # Help
 
+Typing `help` displays all the CLI commands available and instructions for using them.  Typeing `help` followed by text will display CLI commands that contain the provided text.
+
+![rflan_cli_03](rflan_cli_03.png)
+
+# File System
+
+To list the files BOOT partition type `ls`.  Files can be read issuing the fread command.  
+
+![rflan_cli_04](rflan_cli_04.png)
 
 
+# Waveform Streaming
 
+The RFLAN application supports streaming of IQ data to and from the file system to the radio.  
+
+![rflan_cli_05](rflan_cli_05.png)
 
 # Disclaimer
 ----------------------

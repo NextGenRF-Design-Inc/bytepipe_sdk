@@ -1,4 +1,4 @@
-![logo](https://www.nextgenrf.com/assets/uploads/2020/06/logo.jpg)
+![logo](../../../docs/BytePipe_Logo.png)
 
 ---
 

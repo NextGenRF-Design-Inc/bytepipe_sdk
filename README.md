@@ -8,8 +8,11 @@ The BytePipe Software Development Kit (SDK) provides a framework for quickly eva
 
 Below is a high level block diagram of the software.  The software includes Linux Desktop running on one of the Cortex A53 application processors and the RFLAN FreeRTOS application running on one of the Cortex R5 DSP processors.  The programmable logic can be used to support a wide variety of RF communication protocols and includes Mathworks examples.  
 
+---
+
 ![sdk_01](docs/Architecture/sdk_01.png)
 
+---
 
 # Evaluation Quick Start
 
