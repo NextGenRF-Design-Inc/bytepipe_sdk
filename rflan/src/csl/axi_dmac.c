@@ -130,8 +130,11 @@ int32_t axi_dmac_transfer_nonblocking(struct axi_dmac *dmac, uint32_t address, u
 {
 	uint32_t reg_val;
 
-	if (size == 0)
-		return SUCCESS; /* nothing to do */
+  if (size == 0)
+  {
+    axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
+    return SUCCESS;
+  }
 
 	axi_dmac_read(dmac, AXI_DMAC_REG_CTRL, &reg_val);
 	if (!(reg_val & AXI_DMAC_CTRL_ENABLE))
@@ -212,7 +215,10 @@ int32_t axi_dmac_transfer(struct axi_dmac *dmac, uint32_t address, uint32_t size
 	uint32_t timeout = 0;
 
 	if (size == 0)
-		return SUCCESS; /* nothing to do */
+	{
+	  axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
+		return SUCCESS;
+	}
 
 	axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
 	axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, AXI_DMAC_CTRL_ENABLE);

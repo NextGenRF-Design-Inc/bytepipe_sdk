@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 #include "adrv9001.h"
 #include "phy_cli.h"
 #include "app_cli.h"
-#include "sd.h"
 #include "phy.h"
+#include "parameters.h"
 
-static uint8_t ProfileBuf[ADRV9001_PROFILE_SIZE];
+
 
 static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_port_t *port)
 {
@@ -37,11 +38,13 @@ static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_por
 *******************************************************************************/
 static void PhyCli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  const char *filename = Cli_FindParameter( cmd, 1, NULL );
+  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
 
-  if( SD_ReadBinary( filename, ProfileBuf, 0, ADRV9001_PROFILE_SIZE ) == FR_OK)
+  if( Phy_LoadProfile( filename ) == XST_SUCCESS)
   {
-    Phy_LoadProfile( ProfileBuf );
+    printf("Success\r\n");
   }
   else
   {
@@ -74,7 +77,9 @@ static void PhyCli_IqStream(Cli_t *CliInstance, const char *cmd, void *userData)
     return;
   }
 
-  const char *filename = Cli_FindParameter( cmd, 2, NULL );
+  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
+  Cli_GetParameter(cmd, 2, CliParamTypeStr, &filename[strlen(filename)]);
 
   Adrv9001_ClearError( );
 
@@ -91,9 +96,9 @@ static void PhyCli_IqStream(Cli_t *CliInstance, const char *cmd, void *userData)
 
 static const CliCmd_t PhyCliIqStreamDef =
 {
-  "IqStream",
-  "IqStream:  Stream IQ data to or from a file. \r\n"
-  "IqStream < port ( Rx1,Rx2,Tx1,Tx2 ), filename >\r\n\r\n",
+  "PhyIqStream",
+  "PhyIqStream:  Stream IQ data to or from a file. \r\n"
+  "PhyIqStream < port ( Rx1,Rx2,Tx1,Tx2 ), filename (NULL = stop streaming) >\r\n\r\n",
   (CliCmdFn_t)PhyCli_IqStream,
   2,
   NULL
@@ -115,5 +120,5 @@ int PhyCli_Initialize( void )
   Cli_RegisterCommand(Instance, &PhyCliLoadProfileDef);
 
 
-	return Adrv9001Status_Success;
+	return PhyStatus_Success;
 }

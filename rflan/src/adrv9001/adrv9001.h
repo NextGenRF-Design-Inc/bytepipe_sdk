@@ -29,6 +29,8 @@ typedef enum
   Adrv9001Status_ProfileCalError              = (ADRV9001_STATUS_OFFSET - 10),
   Adrv9001Status_ProfilePrimeError            = (ADRV9001_STATUS_OFFSET - 11),
   Adrv9001Status_NotSupported                 = (ADRV9001_STATUS_OFFSET - 12),
+  Adrv9001Status_DriverError                  = (ADRV9001_STATUS_OFFSET - 13),
+
 } adrv9001_status_t;
 
 /**
@@ -108,6 +110,96 @@ typedef struct
   adrv9001_callback_t    Callback;     ///< Callback
   void                  *CallbackRef;  ///< Callback reference data
 } adrv9001_cfg_t;
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the transmit port power boost setting
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Enable indicates if power boost is enabled
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SetTxBoost( adrv9001_port_t Port, bool Enable );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the transmit port power boost setting
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Enable indicates if power boost is enabled
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetTxBoost( adrv9001_port_t Port, bool *Enable );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the transmit port attenuation
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Attn_mdB is the attenuation in milli dB, ie 10000 = 10.000dB
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SetTxAttenuation( adrv9001_port_t Port, uint16_t Attn_mdB );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the transmit port attenuation
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Attn_mdB is the attenuation in milli dB, ie 10000 = 10.000dB
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetTxAttenuation( adrv9001_port_t Port, uint16_t *Attn_mdB );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the sample rate for the requested port.
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  FreqHz is the sample frequency in Hz
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetSampleRate( adrv9001_port_t Port, uint32_t *FreqHz );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the carrier frequency for the requested port.
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  FreqHz is the carrier frequency in Hz
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetCarrierFrequency( adrv9001_port_t Port, uint64_t *FreqHz );
 
 /*******************************************************************************
 *

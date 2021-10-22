@@ -13,11 +13,12 @@
 #include "app_cli.h"
 #include "adrv9001.h"
 #include "adrv9001_cli.h"
-#include "sd.h"
 #include "phy.h"
-
+#include "ff.h"
 
 static TaskHandle_t 			AppTask;
+FATFS sdfs;
+
 
 static void App_PhyCallback( phy_evt_t Evt, void *param )
 {
@@ -28,8 +29,9 @@ static void App_Task( void *pvParameters )
 {
 	int status;
 
-  /* Initialize SD */
-  SD_Init();
+  /* Mount File System */
+  if(f_mount(&sdfs, FF_LOGICAL_DRIVE_PATH, 1) != FR_OK)
+    xil_printf("Failed to initialize file system\r\n");
 
 	/* Initialize CLI */
 	if((status = AppCli_Initialize()) != 0)
@@ -81,3 +83,6 @@ int main()
 
 	for( ;; );
 }
+
+
+

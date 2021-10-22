@@ -26,6 +26,266 @@ static const char* Adrv9001Cli_ParsePort(const char *cmd, uint16_t pNum, adrv900
 
 /*******************************************************************************
 *
+* \details Get Transmitter Boost
+*
+*******************************************************************************/
+static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  const char         *s = NULL;
+  bool                Enable;
+
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_GetTxBoost(port, &Enable) == Adrv9001Status_Success)
+  {
+    printf("%s Boost %s\r\n", s, Enable? "Enabled" : "Disabled");
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+/**
+*  Get Transmitter Boost
+*/
+static const CliCmd_t Adrv9001CliGetTxBoostDef =
+{
+  "GetTxBoost",
+  "GetTxBoost: Get Transmit boost \r\n"
+  "GetTxBoost < port ( Tx1,Tx2 )>\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetTxBoost,
+  1,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Set Transmitter Boost
+*
+*******************************************************************************/
+static void Adrv9001Cli_SetTxBoost(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  uint32_t                Enable;
+
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Cli_GetParameter(cmd, 2, CliParamTypeU32,  &Enable);
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_SetTxBoost(port, Enable) == Adrv9001Status_Success)
+  {
+    printf("Success\r\n");
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+/**
+*  Set Transmitter Boost
+*/
+static const CliCmd_t Adrv9001CliSetTxBoostDef =
+{
+  "SetTxBoost",
+  "SetTxBoost: Set Transmit boost \r\n"
+  "SetTxBoost < port ( Tx1,Tx2 ), Enable (ie. 0 or 1) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_SetTxBoost,
+  2,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Set Transmitter Attenuation
+*
+*******************************************************************************/
+static void Adrv9001Cli_SetTxAttn(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  uint16_t                attn_mdB;
+  float                   attn;
+
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Cli_GetParameter(cmd, 2, CliParamTypeFloat,  &attn);
+
+  attn_mdB = (uint16_t)(attn * 1000);
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_SetTxAttenuation(port, attn_mdB) == Adrv9001Status_Success)
+  {
+    printf("Success\r\n");
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+/**
+*  Set Transmitter Attenuation
+*/
+static const CliCmd_t Adrv9001CliSetTxAttnDef =
+{
+  "SetTxAttn",
+  "SetTxAttn: Set Transmit attenuation in dB \r\n"
+  "SetTxAttn < port ( Tx1,Tx2 ), attn ( ie 10.5 ) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_SetTxAttn,
+  2,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Get Transmitter Attenuation
+*
+*******************************************************************************/
+static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  const char         *s = NULL;
+  uint16_t                attn_mdB;
+  float                   attn;
+
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_GetTxAttenuation(port, &attn_mdB) == Adrv9001Status_Success)
+  {
+    attn = (float)attn_mdB;
+    attn = attn / 1000;
+    printf("%s Attenuation = %f dB\r\n",s, attn);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+/**
+*  Get Transmitter Attenuation
+*/
+static const CliCmd_t Adrv9001CliGetTxAttnDef =
+{
+  "GetTxAttn",
+  "GetTxAttn: Get Transmit attenuation in dB \r\n"
+  "GetTxAttn < port ( Tx1,Tx2 ) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetTxAttn,
+  1,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Get Sample Rate Frequency
+*
+*******************************************************************************/
+static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  const char         *s = NULL;
+  uint32_t                freq;
+
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_GetSampleRate(port, &freq) == Adrv9001Status_Success)
+  {
+    printf("%s Sample Rate = %d Hz\r\n",s,freq);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+/**
+*  Get Sample Rate
+*/
+static const CliCmd_t Adrv9001CliGetSampleRateDef =
+{
+  "GetSampleRate",
+  "GetSampleRate: Get SSI IQ Sample Rate \r\n"
+  "GetSampleRate < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetSampleRate,
+  1,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Get Carrier Frequency
+*
+*******************************************************************************/
+static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  const char         *s = NULL;
+  uint64_t                freq;
+
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_GetCarrierFrequency(port, &freq) == Adrv9001Status_Success)
+  {
+    printf("%s Carrier Frequency = %ld Hz\r\n",s,freq);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+/**
+*  Get Carrier Frequency
+*/
+static const CliCmd_t Adrv9001CliGetCarrierFrequencyDef =
+{
+  "GetCarrierFrequency",
+  "GetCarrierFrequency: Get Carrier Frequency \r\n"
+  "GetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetCarrierFrequency,
+  1,
+  NULL
+};
+
+/*******************************************************************************
+*
 * \details Set Radio State
 *
 *******************************************************************************/
@@ -119,6 +379,12 @@ int Adrv9001Cli_Initialize( void )
 
   Cli_RegisterCommand(Instance, &Adrv9001CliSetRadioStateDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetRadioStateDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetCarrierFrequencyDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetSampleRateDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetTxAttnDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliSetTxAttnDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetTxBoostDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliSetTxBoostDef);
 
 	return Adrv9001Status_Success;
 }
