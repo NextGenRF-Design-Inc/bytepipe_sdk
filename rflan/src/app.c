@@ -5,6 +5,7 @@
  *      Author: enelson
  */
 #include <stdlib.h>
+#include <stdio.h>
 #include "xparameters.h"
 #include "xil_printf.h"
 #include "FreeRTOS.h"
@@ -18,7 +19,6 @@
 
 static TaskHandle_t 			AppTask;
 FATFS sdfs;
-
 
 static void App_PhyCallback( phy_evt_t Evt, void *param )
 {
@@ -56,10 +56,6 @@ static void App_Task( void *pvParameters )
   /* Initialize PHY */
   if((status = Phy_Initialize( &PhyCfg )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
-
-
-
-
 
 	for( ;; )
 	{

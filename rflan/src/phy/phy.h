@@ -30,8 +30,8 @@ typedef enum
 */
 typedef struct{
   uint32_t       *Buf;
+  uint32_t        Length;
   adrv9001_port_t Port;
-  char            filename[FF_FILENAME_MAX_LEN];
 }phy_stream_t;
 
 /**
@@ -49,6 +49,7 @@ typedef enum
 {
   PhyEvtType_StreamStart      = 0,
   PhyEvtType_StreamStop       = 1,
+  PhyEvtType_StreamError      = 2,
 } phy_evt_type_t;
 
 /**
@@ -82,26 +83,25 @@ typedef struct
   phy_evt_t     Evt;
 } phy_queue_t;
 
-
-
-
 /*******************************************************************************
 *
 * \details
 *
-* This function enables continuous streaming of IQ data to or from a file.
+* This function enables continuous streaming of IQ data
 *
 * To disable the stream for a particular port call this function the filename
 * set to NULL.
 *
 * \param[in]  Port is the port being requested
 *
-* \param[in]  filename is the name of the file
+* \param[in]  Buf is the IQ sample buffer
+*
+* \param[in]  Length is the IQ length of samples to stream
 *
 * \return     Status
 *
 *******************************************************************************/
-int32_t Phy_IqStream( adrv9001_port_t Port, const char *filename );
+int32_t Phy_IqStream( adrv9001_port_t Port, adrv9001_iqdata_t *Buf, uint32_t Length );
 
 /*******************************************************************************
 *

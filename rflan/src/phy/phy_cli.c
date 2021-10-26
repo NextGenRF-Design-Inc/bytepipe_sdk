@@ -7,8 +7,7 @@
 #include "app_cli.h"
 #include "phy.h"
 #include "parameters.h"
-
-
+#include "iq_file.h"
 
 static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_port_t *port)
 {
@@ -69,29 +68,46 @@ static const CliCmd_t PhyCliLoadProfileDef =
 *******************************************************************************/
 static void PhyCli_IqStream(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  adrv9001_port_t         port;
+  adrv9001_port_t     port;
+  uint32_t            Length;
+  uint32_t           *Buf;
 
+  /* Parse Port */
   if(PhyCli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
   }
 
+  /* Get Filename */
   char *filename = calloc(1, FF_FILENAME_MAX_LEN );
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
   Cli_GetParameter(cmd, 2, CliParamTypeStr, &filename[strlen(filename)]);
 
   Adrv9001_ClearError( );
 
-  if(Phy_IqStream(port, filename) == XST_SUCCESS)
+  if( PHY_IS_PORT_TX( port ))
   {
-    printf("Success\r\n");
+    if(IqFile_Read( filename, &Buf, &Length ) != XST_SUCCESS)
+    {
+      printf("Invalid Parameter\r\n");
+      return;
+    }
+
+    /* Enable Streaming */
+    if(Phy_IqStream( port, (adrv9001_iqdata_t*)Buf, Length ) != PhyStatus_Success)
+    {
+      printf("Invalid Parameter\r\n");
+      free(Buf);
+      return;
+    }
   }
-  else
+  else if( PHY_IS_PORT_RX( port ) )
   {
-    printf("Failed\r\n");
+    printf("Invalid Parameter\r\n");
   }
 
+  printf("Success\r\n");
 }
 
 static const CliCmd_t PhyCliIqStreamDef =
