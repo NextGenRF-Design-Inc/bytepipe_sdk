@@ -6,9 +6,9 @@ The HDL build outputs are used for creating a hardware platform and board suppor
 
 Before building the HDL make sure the environment is properly setup.  See [Build Environment](../BuildEnv/BuildEnv.md) for additional information.
 
-The building of the HDL source code involves creating a project using the appropriate integrated development environment (IDE), importing the source fies, and generating the output products.  Only the source files and build scripts need to be maintained in the repository allowing for the project and output products to be generated at any time.  The build script executes all steps from creating a project, building appropriate ip, and generating the final output products.  To invoke the build script one needs to simply issue the "make" command from a bash terminal with the corresponding project path specified.  The current directory from which the script is called will determine the project location.  
+The building of the HDL source code involves creating a project using the appropriate integrated development environment (IDE), importing the source files, and generating the output products.  Only the source files and build scripts need to be maintained in the repository allowing for the project and output products to be generated at any time.  The build script executes all steps from creating a project, building appropriate intellectual property (IP) cores, and generating the final output products.  To invoke the build script one needs to simply issue the "make" command from a bash terminal with the corresponding project path specified.  The current directory from which the script is called will determine the project location.  
 
-The following example uses cygwin to build the HDL.  This example creates a `workspace` folder that will contain the project files and output products.  The source remains in the orignial repository folder.  Once the project is created any source files that are modified will be modified in the original repository where changes can be committed.  The project files and output products will remain in the workspace folder where they can eventually be deleted.  
+The following example uses Cygwin to build the HDL.  This example creates a `workspace` folder that will contain the project files and output products.  The source remains in the original repository folder.  Once the project is created any source files that are modified will be modified in the original repository where changes can be committed.  The project files and output products will remain in the workspace folder where they can eventually be deleted.  
 
 ```
 cd D:
@@ -22,7 +22,7 @@ make -f ../hdl/projects/bytepipe_3cg_9002/Makefile
  
 # bytepipe_3cg_9002
 
-The following example builds the `bytepipe_3cg_9002` HDL using cygwin running on Windows 10.
+The following example builds the `bytepipe_3cg_9002` HDL using Cygwin running on Windows 10.
 
 ![hdl_build_01](hdl_build_01.png)
 
