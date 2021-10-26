@@ -1,10 +1,10 @@
-![logo](https://www.nextgenrf.com/assets/uploads/2020/06/logo.jpg)
+![logo](../../../docs/BytePipe_Logo.png)
 
 ---
 
 # BytePipe_x900x
 
-The BytePipe_x9002 is a high performance RF Systom On Module (SOM).  The BytePipe_x9002 integrates a high performance Xilinx Zynq UltraScale+ baseband processor with the Analog Devices ADRV9002 RFIC.  Below is a block diagram of the BytePipe_x9002 SOM along with pictures of the physical hardware.  Additional information can be found on [NextGenRF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)
+The BytePipe_x9002 is a high performance RF System On Module (SOM).  The BytePipe_x9002 integrates a high performance Xilinx Zynq UltraScale+ baseband processor (BBP) with the Analog Devices ADRV9002 RFIC.  Below is a block diagram of the BytePipe_x9002 SOM along with pictures of the physical hardware.  Additional information can be found on [NextGen RF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)
 
 ![blockdiagram](blockdiagram.png)
 
@@ -16,7 +16,7 @@ The following shows the BytePipe_x900x System on Module (SOM).
 
 # J600
 
-J600 is a board to board connector which provides access to all of the digital signals on the SOM.  Some of these signals provide hardcoded functionality while others can be configured by the baseband processor.  The mating connector used on the host board is the WR120SB-VHF30-N1.  For additional information see the datasheet on [NextGenRF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/) 
+J600 is a board to board connector which provides access to all of the digital signals on the SOM.  Some of these signals provide hardcoded functionality while others can be configured by the BBP.  The mating connector used on the host board is JAE Electronics WR-120S-VHF30-N1.  For additional information see the datasheet on [NextGen RF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/) 
 
 
 |       Description             |    Signal      | Pin | Pin |    Signal      |       Description             |
@@ -84,7 +84,7 @@ J600 is a board to board connector which provides access to all of the digital s
 
 # J601
 
-J601 is a board to board connector which provides access to power and RF control signals.  The mating connector used on the host board is the WR-40SB-VHF30-N1.  For additional information see the datasheet on [NextGenRF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)  
+J601 is a board to board connector which provides access to power and RF control signals.  The mating connector used on the host board is JAE Electronics WR-40SB-VHF30-N1.  For additional information see the datasheet on [NextGen RF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)  
 
 |       Description             |    Signal      | Pin | Pin |    Signal      |       Description             |
 |-------------------------------|----------------|-----|-----|----------------|-------------------------------|
@@ -111,29 +111,29 @@ J601 is a board to board connector which provides access to power and RF control
 
 # Boot Switch
 
-The boot switch allows user to select the location of boot code for the baseband processor.  When SD is selected the basband processor will boot from the external SD card.  When EMMC is selected the baseband processor will boot from the 8GB on-board EMMC flash.    
+The boot switch allows the user to select the location of boot code for the baseband processor.  When SD is selected the BBP will boot from the external SD card.  When EMMC is selected the BBP will boot from the 8GB on-board eMMC flash.    
 
 ![boot_switch](boot_switch.png)
 
 # ADRV900x Interface
 
-Additional information can be found on [NextGenRF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)
+Additional information can be found on [NextGen RF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)
 
-# DAC](bytepipe_x900x-dac)
+# DAC
 
-The BytePipe_x9002 provides three 12bit digital to analog converters for controlling external analog peripherals.
+The BytePipe_x9002 provides three 12-bit digital to analog converters (DAC) for controlling external analog peripherals.
 
 ![dac](dac.png)
 
 # ADC
 
-The BytePipe_x9002 supports several different ADC channels accessible by the host.  Two ADRV9002 auxiliary ADCs are useful for measuring DC and near-DC signals.  The auxiliary ADCs operate from 0.05V to 0.95V with 12-bits of resolution.  In addition to the auxiliary ADCs the BBP supports up to 4 differential ADC channels through J600.  The BBP ADCs support up to 200kSps with 10-bits of resolution.
+The BytePipe_x9002 supports several different analog to digital converter (ADC) channels accessible by the host.  Two ADRV9002 auxiliary ADCs are useful for measuring DC and near-DC signals.  The auxiliary ADCs operate from 0.05V to 0.95V with 12-bits of resolution.  In addition to the auxiliary ADCs, the BBP supports up to 4 differential ADC channels through J600.  The BBP ADCs support up to 200kSps with 10-bits of resolution.
 
 ![adc](adc.png)
 
 # MCS
 
-The BytePipe_x9002 allows for multiple SOMs to be synchronized by connecting the MCS signal between devices.  When multi-chip synchronization is used the RF clock must also be shared across devices.
+The BytePipe_x9002 allows for multiple SOMs to be synchronized by connecting the multi-chip synchronization (MCS) signal between devices.  When multi-chip synchronization is used, the RF clock must also be shared across devices.
 
 ![mcs](mcs.png)
 
@@ -148,7 +148,7 @@ Up to two SPI peripherals can be mapped to the PS MIO pins.   Each SPI periphera
 
 # UART
 
-The BytePipe_x9002 has two dedicated UART channels, UART0 and UART1.   Both channels operate at the host defined VCCIO voltage.  They are connected to PS bank 500 and routed to the two internal PS UART channels.  The following table shows the BBP connections. Each UART can be configured for any standard baud rate from 110baud to 921600 baud.  If additional UART channels or non-standard baud rates are required, they can be implemented using the programmable logic and connected to a combination of IO_L[x]_N/P pins.
+The BytePipe_x9002 has two dedicated UART channels, UART0 and UART1.   Both channels operate at the host defined VCCIO voltage.  They are connected to PS bank 500 and routed to the two internal PS UART channels.  The following table shows the BBP connections. Each UART can be configured for any standard baud rate from 110 baud to 921600 baud.  If additional UART channels or non-standard baud rates are required, they can be implemented using the programmable logic and connected to a combination of IO_L[x]_N/P pins.
 
 |  Signal             | BBP Pin     | Description                  |
 |---------------------|-------------|------------------------------|
@@ -169,7 +169,7 @@ The BytePipe_x9002 has one dedicated I2C channel (I2C1) operating at the host de
 # CAN
 
 Up to two CAN peripherals can be mapped to the PS MIO pins.  Each CAN peripheral supports the following functionality:
-*	Conforms to the ISO 11898 -1, CAN2.0A, and CAN 2.0B standards
+*	Conforms to the ISO 11898-1, CAN2.0A, and CAN 2.0B standards
 *	Both standard (11-bit identifier) and extended (29-bit identifier) frames
 *	Bit rates up to 1Mb/s
 *	64 byte transmit and receive FIFOs
@@ -185,13 +185,13 @@ The PS multiplexed I/O (MIO) are connected directly to bank 501 of the BBP.   Th
 
 ![ps_mio](ps_mio.png)
 
-# GigaBit Tranceivers (GTR)
+# GigaBit Transceivers (GTR)
 
-Four giga-bit transceivers (GTR) are connected from bank 505 to J600.  Each of the four GTR transceiver channels can be connected to one of five high-speed serial I/O peripherals.  The serial I/O peripherals include PCIe, SATA, Display Port, USB3.0, and GMII.  
+Four gigabit transceivers (GTR) are connected from bank 505 to J600.  Each of the four GTR channels can be connected to one of five high-speed serial I/O peripherals.  The serial I/O peripherals include PCIe, SATA, Display Port, USB3.0, and GMII.  
 
 # RF Ports
 
-The BytePipe_x9002 RF interface allows for a wide range of applications.  The ADRV9002’s two transmit and four receive ports are matched to a single-ended 50ohm impedance and accessible through U.FL top side connectors or SMPM bottom side connectors.  All 6 ports support 30MHz to 6GHz.  The top side U.FL connectors allow for cabled connections to be made to any of the ports.  The SMPM bottom side connectors allow for either a cabled connector or board to board connection using a SMPM blind adapter.  The connectors are not switched.  Instead both the U.FL and SMPM connections are connected in parallel and directly above or below one another.  A single via connects directly to both connectors from the 50ohm RF stripline.  This connection is not ideal but sufficient and allows users to connect using top side U.FL cables or bottom side SMPM board to board connectors with minimal complexity.  Most applications will require an external RF frontend due to the modest output power and relatively high receiver noise figure of the ADRV9002.  The minimal losses associated with the connectors will be easily made up for on the transmit path with an external PA and on the receive path where an external LNA is required to reduce the noise figure.
+The BytePipe_x9002 RF interface allows for a wide range of applications.  The ADRV9002’s two transmit and four receive ports are matched to a single-ended 50ohm impedance and accessible through U.FL top side connectors or SMPM bottom side connectors.  All 6 ports support 30MHz to 6GHz.  The top side U.FL connectors allow for cabled connections to be made to any of the ports.  The SMPM bottom side connectors allow for either a cabled connector or board to board connection using a SMPM blind adapter.  The connectors are not switched.  Instead both the U.FL and SMPM connections are connected in parallel and directly above or below one another.  A single via connects directly to both connectors from the 50ohm RF stripline.  This connection is not ideal, but it is sufficient and allows users to connect using top side U.FL cables or bottom side SMPM board to board connectors with minimal complexity.  Most applications will require an external RF frontend due to the modest output power and relatively high receiver noise figure of the ADRV9002.  The minimal losses associated with the connectors will be easily made up for on the transmit path with an external PA and on the receive path where an external LNA is required to reduce the noise figure.
 
 ![rf_ports](rf_ports.png)
 
@@ -204,7 +204,7 @@ The RF clock provides the ADRV9002 a reference for its internal PLLs and clocks.
 
 # Gigabit Ethernet
 
-The Gigabit Ethernet signals are generated by the DP83867IRRGZR ethernet transceiver connected to the BBP via RGMII interface through PS bank 502. The BBP includes a gigabit Ethernet controller (GEM) which implements a 10/100/1000 Mb/s Ethernet MAC that is compatible with the IEEE Standard for Ethernet (IEEE Std 802.3-2008) and capable of operating in either half or full-duplex mode in 10/100 mode and full-duplex in 1000 mode. The following table shows the BBP connections to the Ethernet transceiver. 
+The Gigabit Ethernet signals are generated by the DP83867IRRGZR Ethernet transceiver connected to the BBP via RGMII interface through PS bank 502. The BBP includes a gigabit Ethernet MAC (GEM) controller which implements a 10/100/1000 Mb/s Ethernet MAC that is compatible with the IEEE Standard for Ethernet (IEEE Std 802.3-2008) and capable of operating in either half or full-duplex mode in 10/100 mode and full-duplex in 1000 mode. The following table shows the BBP connections to the Ethernet transceiver. 
 
 |  Signal             | BBP Pin    | Description                  |
 |---------------------|------------|------------------------------|
@@ -223,7 +223,7 @@ The Gigabit Ethernet signals are generated by the DP83867IRRGZR ethernet transce
 | MDC                 | MIO76      | MDC Clock                    |
 | MDCIO               | MIO77      | MDC Data                     |
 
-The BBP supports up to four gigabit Ethernet controllers (GEM). GEM3 is used for the dedicated BytePipe_x9002 gigabit ethernet interface. GEM0 or GEM1 can be configured to implement additional gigabit ethernet interfaces on the host PCB. This is supported by configuring PS bank 501 MIO pins as reduced gigabit media independent interface (RGMII) 2.0. The host will have to implement an ethernet transceiver like the DP83867IRRGZR.
+The BBP supports up to four GEMs. GEM3 is used for the dedicated BytePipe_x9002 gigabit Ethernet interface. GEM0 or GEM1 can be configured to implement additional gigabit Ethernet interfaces on the host PCB. This is supported by configuring PS bank 501 MIO pins as reduced gigabit media independent interface (RGMII) 2.0. The host will have to implement an Ethernet transceiver like the DP83867IRRGZR.
 
 * IEEE Standard 802.3-2008 compatible
 * 10/100/1000 Mb/s transfer rates
@@ -270,7 +270,7 @@ USB2.0 and USB3.0 are supported when using a combination of the USB2.0 PHY and G
 The gold anodized aluminum cover provides RF shielding along with a heat sink interface.  
 
 # ADRV900x Version
-Early engineering samples of the BytePipe_x9002 had a mix of ADRV9002 silicon.  Early versions used the ADRV9002 RevB0 silicon while later versions used the ADRV9002 RevC0 silicon.  Currently all released versions of the BytePipe_x9002 have the ADRV9002 RevC0 silicon. 
+Early engineering samples of the BytePipe_x9002 had a mix of ADRV9002 silicon.  These versions used the ADRV9002 RevB0 silicon while later versions used the ADRV9002 RevC0 silicon.  Currently all released versions of the BytePipe_x9002 have the ADRV9002 RevC0 silicon. 
 
 # Disclaimer
 ----------------------
