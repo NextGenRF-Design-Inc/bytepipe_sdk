@@ -1,10 +1,10 @@
-![logo](https://www.nextgenrf.com/assets/uploads/2020/06/logo.jpg)
+![logo](../../../docs/BytePipe_Logo.png)
 
 ---
 
 # BytePipe Hardware Development Kit
 
-The BytePipe SOM requires a carrier board to supply power and provide access to its peripherials.  NextGenRF Design provides a hardware development kit (HDK) described in following sections.
+The BytePipe SOM requires a carrier board to supply power and provide access to its peripherals.  NextGen RF Design provides a hardware development kit (HDK) described in following sections.
 
 ![overview](overview.png)
 
@@ -14,19 +14,19 @@ The BytePipe SOM requires a carrier board to supply power and provide access to 
 
 # Power
 
-The power jack supplies power to the HDK and SOM.  A nominal 12V 24W power supply should be connected using a 2.1mm x 5.5mm barrel jack.  Although 12V is suggested the input can range from 7V to 24V as long as the supply is capable of sourceing 24W.   
+The power jack supplies power to the HDK and SOM.  A nominal 12V 24W power supply should be connected using a 2.1mm x 5.5mm center positive barrel jack.  Although 12V is suggested the input can range from 7V to 24V as long as the supply is capable of sourcing 24W.   
 
 ![power](power.png)
 
 # Power Switch
 
-The power switch is next to the power jack and clearly labeled "on" and "off".  When turned on a 5.0V regulator supplies power to the HDK, SOM, and fan.
+The power switch is next to the power jack and clearly labeled "ON" and "OFF".  When turned on a 5.0V regulator supplies power to the HDK, SOM, and fan.
 
 # Ethernet
 
 The Ethernet signals are accessible through J600. 
 
-# Displayport
+# DisplayPort
 
 The HDK uses the MIO pins combined with dual GTR channels to support a 4K DisplayPort output.
 
@@ -44,8 +44,7 @@ The HDK uses the MIO pins combined with dual GTR channels to support a 4K Displa
 
 # USB
 
-The HDK supports USB2 and USB3.0 by combining the USB signals from the SOM with a single GTR land.  A micro-B 
-USB connector allows for USB2 or USB3.0 along with Device, Host, or OTG modes.  The following table shows the jumper locations for configuring the appropriate modes.
+The HDK supports USB2 and USB3.0 by combining the USB signals from the SOM with a single GTR land.  A micro-B USB connector allows for USB2 or USB3.0 along with Device, Host, or OTG modes.  The following table shows the jumper locations for configuring the appropriate modes.
 
 |  Jumper   | Host Mode | Device Mode | OTG Mode  |
 |-----------|-----------|-------------|-----------|
@@ -58,7 +57,7 @@ USB connector allows for USB2 or USB3.0 along with Device, Host, or OTG modes.  
 
 # SD Card
 
-The HDK implments a SD card using the following MIO signals.
+The HDK implements an SD card using the following MIO signals.
 
 |  Signal           | J600 Pin      | Description                     |
 |-------------------|---------------|---------------------------------|
@@ -72,7 +71,7 @@ The HDK implments a SD card using the following MIO signals.
 
 # SATA
 
-The HDK implments a 6Gbps SATA interface using GTR_TX1 and GTR_RX1 signals.
+The HDK implements a 6Gbps SATA interface using GTR_TX1 and GTR_RX1 signals.
 
 # PS MIO
 
@@ -94,7 +93,7 @@ The HDK routes unused MIO signals to J23.
 | Ground             | GND         | 23  | 24  | GND         | Ground             |
 | 3.3V  VCCIO        | VCC3V3      | 25  | 26  | VCC3V3      | 3.3V  VCCIO        |
 
-# RFIC GPIO]
+# RFIC GPIO
 
 The HDK routes unused RFIC GPIO to J22.
 
@@ -120,7 +119,7 @@ The HDK allows for an external MCS signal be connected to J15.  Software can be 
 
 ![fan](fan.png)
 
-The HDK supports a 3pin 5V Fan connection using J1.  
+The HDK supports a 3pin 5V fan connection using J1.  
 
 |  Signal    | J1 Pin  | Description     |
 |------------|---------|-----------------|
@@ -130,7 +129,7 @@ The HDK supports a 3pin 5V Fan connection using J1.
 
 # RF SMA Ports
 
-The HDK provides direct access to the SOM transmit and receive RF ports.  In addition each receiver can be routed through a TQP3M9035 LNA on the HDK.   
+The HDK provides direct access to the SOM transmit and receive RF ports.  In addition, each receiver can be routed through a TQP3M9035 low noise amplifier (LNA) on the HDK.   
 
 |  Signal     | Connector   | Description                           |
 |-------------|-------------|---------------------------------------|
@@ -145,7 +144,7 @@ The HDK provides direct access to the SOM transmit and receive RF ports.  In add
 
 # LNA
 
-The HDK includes a low noise amplifier connected to RX1A and RX2A.  Currently IIO-Oscilloscope does not support the enabling of the LNAs.  By default the LNAs are powered down resulting in roughly 20dB of insertion loss.  The LNAs can be enabled by apply a jumper between the LNA enable pin and 1.8V from the HDK J22 and J23.
+The HDK includes an LNA connected to RX1A and RX2A.  Currently IIO-Oscilloscope does not support the enabling of the LNAs.  By default the LNAs are powered down resulting in roughly 20dB of insertion loss.  The LNAs can be enabled by applying a jumper between the LNA enable pin and 1.8V from the HDK J22 and J23.
 
 |  LNA Enable Pin  | Receive Port  | Connector |Description                              |
 |------------------|---------------|-----------|-----------------------------------------|
@@ -157,7 +156,7 @@ The HDK includes a low noise amplifier connected to RX1A and RX2A.  Currently II
 
 # PMOD
 
-The HDK routes the baseband processor programable logic I/O through two PMODs, J28 and J31.  All signals are level shifted from 1.8V to 3.3V to comply with the PMOD standard. 
+The HDK routes the baseband processor (BBP) programmable logic I/O through two peripheral module (PMOD) interfaces, J28 and J31.  All signals are level shifted from 1.8V to 3.3V to comply with the PMOD standard. 
 
 PMODA - J28:
 
