@@ -7,8 +7,8 @@
 
 
 
-#define ADRV9001_STATUS_OFFSET      (-1000)
-#define ADRV9001_PROFILE_SIZE       (0x80000)
+#define ADRV9001_STATUS_OFFSET              (-1000)
+#define ADRV9001_PROFILE_SIZE               (0x80000)
 
 /**
 **  ADRV9001 Status
@@ -17,7 +17,7 @@ typedef enum
 {
   Adrv9001Status_Success                      = (0),
   Adrv9001Status_InvalidPort                  = (ADRV9001_STATUS_OFFSET - 1),
-  Adrv9001Status_InvalidChannel               = (ADRV9001_STATUS_OFFSET - 2),
+  Adrv9001Status_InvalidParameter             = (ADRV9001_STATUS_OFFSET - 2),
   Adrv9001Status_Initialized                  = (ADRV9001_STATUS_OFFSET - 3),
   Adrv9001Status_MemoryError                  = (ADRV9001_STATUS_OFFSET - 3),
   Adrv9001Status_InvalidSSI                   = (ADRV9001_STATUS_OFFSET - 4),
@@ -30,7 +30,7 @@ typedef enum
   Adrv9001Status_ProfilePrimeError            = (ADRV9001_STATUS_OFFSET - 11),
   Adrv9001Status_NotSupported                 = (ADRV9001_STATUS_OFFSET - 12),
   Adrv9001Status_DriverError                  = (ADRV9001_STATUS_OFFSET - 13),
-
+  Adrv9001Status_DmaError                     = (ADRV9001_STATUS_OFFSET - 14),
 } adrv9001_status_t;
 
 /**
@@ -43,6 +43,22 @@ typedef enum
   Adrv9001Port_Tx1    = (2),
   Adrv9001Port_Tx2    = (3)
 } adrv9001_port_t;
+
+#define ADRV9001_NUM_RX_PORTS               (2)
+#define ADRV9001_NUM_TX_PORTS               (2)
+#define ADRV9001_NUM_PORTS                  (ADRV9001_NUM_RX_PORTS + ADRV9001_NUM_TX_PORTS)
+#define ADRV9001_TX1_LOGICAL_PORT           (0)
+#define ADRV9001_TX2_LOGICAL_PORT           (1)
+#define ADRV9001_RX1_LOGICAL_PORT           (2)
+#define ADRV9001_RX2_LOGICAL_PORT           (3)
+#define ADRV9001_IS_PORT_TX(p)              ((( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false)
+#define ADRV9001_IS_PORT_RX(p)              ((( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false)
+#define ADRV9001_IS_LOGICAL_PORT_TX(p)      ((( p == ADRV9001_TX1_LOGICAL_PORT ) || ( p == ADRV9001_TX2_LOGICAL_PORT )) ? true : false)
+#define ADRV9001_IS_LOGICAL_PORT_RX(p)      ((( p == ADRV9001_RX1_LOGICAL_PORT ) || ( p == ADRV9001_RX2_LOGICAL_PORT )) ? true : false)
+#define ADRV9001_LOGICAL_PORT(p)            ((p == Adrv9001Port_Rx1)? ADRV9001_RX1_LOGICAL_PORT : \
+                                             (p == Adrv9001Port_Rx2)? ADRV9001_RX2_LOGICAL_PORT : \
+                                             (p == Adrv9001Port_Tx1)? ADRV9001_TX1_LOGICAL_PORT : \
+                                             (p == Adrv9001Port_Tx2)? ADRV9001_TX2_LOGICAL_PORT : 0)
 
 /**
  **  ADRV9001 Radio State
@@ -103,12 +119,24 @@ typedef struct
 typedef void (*adrv9001_callback_t)( adrv9001_evt_t evt, void *param );
 
 /**
+ **  ADRV9001 DMA Configuration
+ */
+typedef struct {
+  uint32_t              BufAddr;                       ///< DMA Buffer Memory Address
+  uint32_t              BufSize;                       ///< Size in bytes of DMA buffer, must by 8 byte aligned
+  uint32_t              IrqId[ADRV9001_NUM_PORTS];     ///< DMA Processor IRQ ID
+  uint32_t              BaseAddr[ADRV9001_NUM_PORTS];  ///< DMA AXI Bus Address
+} adrv9001_dma_cfg_t;
+
+/**
  **  ADRV9001 Configuration
  */
 typedef struct
 {
-  adrv9001_callback_t    Callback;     ///< Callback
-  void                  *CallbackRef;  ///< Callback reference data
+  adrv9001_callback_t   Callback;           ///< Callback
+  void                 *CallbackRef;        ///< Callback reference data
+  adrv9001_dma_cfg_t   *DmaCfg;             ///< DMA Configuration
+  void                 *IrqInstance;        ///< Processor Interrupt Instance
 } adrv9001_cfg_t;
 
 /*******************************************************************************

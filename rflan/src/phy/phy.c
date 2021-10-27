@@ -8,19 +8,22 @@
 #include "task.h"
 #include "queue.h"
 #include "phy_cli.h"
+#include "parameters.h"
+#include "xscugic.h"
+#include "adrv9001.h"
 
 #define PHY_TX_STREAM_MAX_CNT         (0x20000)
 #define PHY_TX_STREAM_MAX_BUF_SIZE    (PHY_TX_STREAM_MAX_CNT * sizeof(adrv9001_iqdata_t))
 #define PHY_RX_STREAM_CNT             (1024)
 #define PHY_RX_STREAM_BUF_SIZE        (PHY_RX_STREAM_CNT * sizeof(adrv9001_iqdata_t))
-#define PHY_NUM_RX_CHANNELS           (2)
-#define PHY_NUM_TX_CHANNELS           (2)
-#define PHY_NUM_CHANNELS              (PHY_NUM_RX_CHANNELS + PHY_NUM_TX_CHANNELS)
-#define PHY_IS_PORT_TX(p)             ((( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false)
-#define PHY_IS_PORT_RX(p)             ((( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false)
-#define PHY_CHANNEL(p)                ((p == Adrv9001Port_Rx1)? 0 : (p == Adrv9001Port_Rx2)? 1 : (p == Adrv9001Port_Tx1)? 2 : 3)
+#define PHY_NUM_RX_PORTS              (ADRV9001_NUM_RX_PORTS)
+#define PHY_NUM_TX_PORTS              (ADRV9001_NUM_TX_PORTS)
+#define PHY_NUM_PORTS                 (ADRV9001_NUM_PORTS)
+#define PHY_IS_PORT_TX(p)             ADRV9001_IS_PORT_TX(p)
+#define PHY_IS_PORT_RX(p)             ADRV9001_IS_PORT_RX(p)
+#define PHY_LOGICAL_PORT(p)           ADRV9001_LOGICAL_PORT(p)
 
-
+extern XScuGic          xInterruptController;
 /**
 **  PHY Queue
 */
@@ -39,7 +42,7 @@ typedef struct
 } phy_queue_t;
 
 static QueueHandle_t      PhyQueue;                       ///< PHY Queue
-static phy_stream_t      *PhyStream[PHY_NUM_CHANNELS];    ///< Stream Data
+static phy_stream_t      *PhyStream[PHY_NUM_PORTS];       ///< Stream Data
 
 
 static void Phy_Adrv9001Callback( adrv9001_evt_t evt, void *param )
@@ -53,7 +56,7 @@ static void Phy_Adrv9001Callback( adrv9001_evt_t evt, void *param )
 
 static void Phy_IqStreamStop( adrv9001_port_t Port )
 {
-  phy_stream_t *Stream = PhyStream[PHY_CHANNEL(Port)];
+  phy_stream_t *Stream = PhyStream[PHY_LOGICAL_PORT(Port)];
 
   /* Check if Valid */
   if( Stream != NULL )
@@ -77,10 +80,10 @@ static void Phy_IqStreamStop( adrv9001_port_t Port )
     free( Stream->SampleBuf );
 
     /* Free Stream Data */
-    free( PhyStream[PHY_CHANNEL(Port)] );
+    free( PhyStream[PHY_LOGICAL_PORT(Port)] );
 
     /* Clear Stream Data */
-    PhyStream[PHY_CHANNEL(Port)] = NULL;
+    PhyStream[PHY_LOGICAL_PORT(Port)] = NULL;
   }
 }
 
@@ -90,7 +93,7 @@ static void Phy_IqStreamStart( phy_stream_t *Stream )
     return;
 
   /* Copy Stream Reference */
-  PhyStream[PHY_CHANNEL(Stream->Port)] = Stream;
+  PhyStream[PHY_LOGICAL_PORT(Stream->Port)] = Stream;
 
   /* Enable RF */
   if( Adrv9001_ToRfEnabled( Stream->Port ) != Adrv9001Status_Success )
@@ -187,12 +190,18 @@ phy_status_t Phy_LoadProfile( profile_t *Profile )
   return status;
 }
 
+/* Memory */
+#define XPAR_DDR_MEM_BASEADDR                   0x00000000U
+#define DDR_MEM_BASEADDR                        XPAR_DDR_MEM_BASEADDR
+#define ADRV9001_DMA_BUF_ADDR                   (DDR_MEM_BASEADDR + 0x800000)
+#define ADRV9001_DMA_BUF_SIZE                   (0x400000) //4MB
+
 phy_status_t Phy_Initialize( void )
 {
   int32_t status;
 
   /* Clear Stream Data */
-  for(int i = 0; i < PHY_NUM_CHANNELS; i++)
+  for(int i = 0; i < PHY_NUM_PORTS; i++)
     PhyStream[i] = NULL;
 
   /* Create Queue */
@@ -206,9 +215,26 @@ phy_status_t Phy_Initialize( void )
   if((status = PhyCli_Initialize()) != PhyStatus_Success)
     return status;
 
+  adrv9001_dma_cfg_t DmaCfg = {
+    .BufAddr = ADRV9001_DMA_BUF_ADDR,
+    .BufSize = ADRV9001_DMA_BUF_SIZE
+  };
+
+  DmaCfg.BaseAddr[ADRV9001_TX1_LOGICAL_PORT] = XPAR_ADRV9001_TX1_DMA_BASEADDR;
+  DmaCfg.BaseAddr[ADRV9001_TX2_LOGICAL_PORT] = XPAR_ADRV9001_TX2_DMA_BASEADDR;
+  DmaCfg.BaseAddr[ADRV9001_RX1_LOGICAL_PORT] = XPAR_ADRV9001_RX1_DMA_BASEADDR;
+  DmaCfg.BaseAddr[ADRV9001_RX2_LOGICAL_PORT] = XPAR_ADRV9001_RX2_DMA_BASEADDR;
+
+  DmaCfg.IrqId[ADRV9001_TX1_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_TX1_DMA_IRQ_INTR;
+  DmaCfg.IrqId[ADRV9001_TX2_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_TX2_DMA_IRQ_INTR;
+  DmaCfg.IrqId[ADRV9001_RX1_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_RX1_DMA_IRQ_INTR;
+  DmaCfg.IrqId[ADRV9001_RX2_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_RX2_DMA_IRQ_INTR;
+
   adrv9001_cfg_t Adrv9001Cfg = {
-     .Callback = Phy_Adrv9001Callback,
-     .CallbackRef = NULL
+     .Callback      = Phy_Adrv9001Callback,
+     .CallbackRef   = NULL,
+     .DmaCfg        = &DmaCfg,
+     .IrqInstance   = &xInterruptController
   };
 
   /* Initialize ADRV9001 */
