@@ -367,6 +367,117 @@ static const CliCmd_t Adrv9001CliGetRadioStateDef =
 };
 
 /*******************************************************************************
+*
+* \details To RF Enabled
+*
+*******************************************************************************/
+static void Adrv9001Cli_ToRfEnabled(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_ToRfEnabled(port) == Adrv9001Status_Success)
+  {
+    printf("Success\r\n");
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+static const CliCmd_t Adrv9001CliToRfEnabledDef =
+{
+  "ToRfEnabled",
+  "ToRfEnabled: Transition to RF enabled \r\n"
+  "ToRfEnabled < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_ToRfEnabled,
+  1,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details To RF Calibrated
+*
+*******************************************************************************/
+static void Adrv9001Cli_ToRfCalibrated(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_ToRfCalibrated(port) == Adrv9001Status_Success)
+  {
+    printf("Success\r\n");
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+static const CliCmd_t Adrv9001CliToRfCalibratedDef =
+{
+  "ToRfCalibrated",
+  "ToRfCalibrated: Transition to RF calibrated \r\n"
+  "ToRfCalibrated < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_ToRfCalibrated,
+  1,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details To RF Primed
+*
+*******************************************************************************/
+static void Adrv9001Cli_ToRfPrimed(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_ToRfPrimed(port) == Adrv9001Status_Success)
+  {
+    printf("Success\r\n");
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+static const CliCmd_t Adrv9001CliToRfPrimedDef =
+{
+  "ToRfPrimed",
+  "ToRfPrimed: Transition to RF primed \r\n"
+  "ToRfPrimed < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_ToRfPrimed,
+  1,
+  NULL
+};
+
+/*******************************************************************************
 
   PURPOSE:  Initialize APP CLI
 
@@ -385,6 +496,10 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliSetTxAttnDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetTxBoostDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliSetTxBoostDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliToRfPrimedDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliToRfCalibratedDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliToRfEnabledDef);
+
 
 	return Adrv9001Status_Success;
 }

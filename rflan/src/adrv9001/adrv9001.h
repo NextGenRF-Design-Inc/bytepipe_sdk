@@ -282,6 +282,48 @@ adrv9001_status_t Adrv9001_GetRadioState( adrv9001_port_t Port, adrv9001_radio_s
 *
 * \details
 *
+* This function will transition the specified port to the PRIMED state from any
+* state where it is valid to do so.
+*
+* \param[in]  Port is the port being requested
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_ToRfPrimed( adrv9001_port_t Port );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function will transition the specified port to the Enabled state from any
+* state where it is valid to do so.
+*
+* \param[in]  Port is the port being requested
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_ToRfEnabled( adrv9001_port_t Port );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function will transition the specified port to the Calibrated state from
+* any state where it is valid to do so.
+*
+* \param[in]  Port is the port being requested
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_ToRfCalibrated( adrv9001_port_t Port );
+
+/*******************************************************************************
+*
+* \details
+*
 * This function enables continuous streaming of IQ data.  This function enables
 * the appropriate radio state and sets up the appropriate DMA to cyclically
 * transfer IQ samples from memory to the SSI or vice versa.
