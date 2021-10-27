@@ -82,7 +82,7 @@ int32_t IqFile_Read( const char* filename, uint32_t **Buf, uint32_t *Length )
   FIL fil;
   int32_t status;
   uint32_t cnt = 0;
-  uint32_t *SampleBuf;
+  uint32_t *SampleBuf = NULL;
   uint32_t SampleCnt = 0;
 
   *Length = SampleCnt;

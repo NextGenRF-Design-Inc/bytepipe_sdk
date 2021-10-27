@@ -39,7 +39,7 @@ The board support package settings window will be displayed.  Enable the Generic
 
 ![bsp_02](bsp_02.png)
 
-Next configure FreeRTOS.  Change the tick rate to 10000, minimum stack to 2000, and total_heap_size to 1048576 as shown below.
+Next configure FreeRTOS.  Change the `tick_rate` to 10000, `total_heap_size` to 16777216, and set `generate_runtime_stats` to 1 as shown below.
 
 ![bsp_03](bsp_03.png)
 
