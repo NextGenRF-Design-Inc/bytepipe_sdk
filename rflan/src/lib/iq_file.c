@@ -85,6 +85,9 @@ int32_t IqFile_Read( const char* filename, uint32_t **Buf, uint32_t *Length )
   uint32_t *SampleBuf;
   uint32_t SampleCnt = 0;
 
+  *Length = SampleCnt;
+  *Buf = SampleBuf;
+
   /* Open File */
   if(f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ) != FR_OK)
     return XST_FAILURE;
