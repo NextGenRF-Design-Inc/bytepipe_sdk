@@ -7,101 +7,110 @@
 
 
 #define PHY_STATUS_OFFSET           (-2000)
-#define PHY_IS_PORT_TX(p)           (( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false
-#define PHY_IS_PORT_RX(p)           (( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false
-#define PHY_CHANNEL(p)              (( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Rx1 )) ? 0 : 1
+
 
 /**
 **  ADRV9001 Status
 */
 typedef enum
 {
-  PhyStatus_Success                     = (0),
-  PhyStatus_InvalidPort                 = (PHY_STATUS_OFFSET - 1),
-  PhyStatus_MemoryError                 = (PHY_STATUS_OFFSET - 2),
-  PhyStatus_NotSupported                = (PHY_STATUS_OFFSET - 3),
-  PhyStatus_FileError                   = (PHY_STATUS_OFFSET - 4),
-  PhyStatus_OsError                     = (PHY_STATUS_OFFSET - 5),
-  PhyStatus_InvalidParameter            = (PHY_STATUS_OFFSET - 6),
+  PhyStatus_Success             = (0),
+  PhyStatus_InvalidPort         = (PHY_STATUS_OFFSET - 1),
+  PhyStatus_MemoryError         = (PHY_STATUS_OFFSET - 2),
+  PhyStatus_NotSupported        = (PHY_STATUS_OFFSET - 3),
+  PhyStatus_OsError             = (PHY_STATUS_OFFSET - 4),
+  PhyStatus_Busy                = (PHY_STATUS_OFFSET - 5),
+  PhyStatus_InvalidParameter    = (PHY_STATUS_OFFSET - 6),
+  PhyStatus_Adrv9001Error       = (PHY_STATUS_OFFSET - 7),
 } phy_status_t;
-
-/**
-**  PHY Stream
-*/
-typedef struct{
-  uint32_t       *Buf;
-  uint32_t        Length;
-  adrv9001_port_t Port;
-}phy_stream_t;
-
-/**
- **  PHY Event Data
- */
-typedef union
-{
-  phy_stream_t     *Stream;
-} phy_evt_data_t;
 
 /**
  **  PHY Event Type
  */
 typedef enum
 {
-  PhyEvtType_StreamStart      = 0,
-  PhyEvtType_StreamStop       = 1,
-  PhyEvtType_StreamError      = 2,
+  PhyEvtType_StreamStart      = 0,      ///< Indicates Stream has started. EvtData = phy_stream_t
+  PhyEvtType_StreamStop       = 1,      ///< Indicates Stream has started. EvtData = phy_stream_t
+  PhyEvtType_StreamError      = 2,      ///< Indicates Stream has an error and has aborted. EvtData = phy_stream_t
+  PhyEvtType_StreamData       = 3,      ///< Indicates stream is ready for more data or has more data to deliver. EvtData = phy_stream_t
+  PhyEvtType_ProfileUpdated   = 4,      ///< Indicates profile has been updated. No Evt data
 } phy_evt_type_t;
-
-/**
- **  ADRV9001 Event
- */
-typedef struct
-{
-  phy_evt_type_t       Type;
-  phy_evt_data_t       Data;
-} phy_evt_t;
 
 /**
 ** PHY Callback
 */
-typedef void (*phy_callback_t)( phy_evt_t evt, void *param );
+typedef void (*phy_callback_t)( phy_evt_type_t EvtType, void *EvtData, void *param );
 
 /**
-**  PHY Layer Configuration
+**  PHY Stream
 */
-typedef struct
-{
-  phy_callback_t     Callback;     ///< Callback
-  void              *CallbackRef;  ///< Callback reference data
-} phy_cfg_t;
+typedef struct{
+  uint32_t         *SampleBuf;        ///< Sample Buffer
+  uint32_t          SampleCnt;        ///< Length in samples
+  adrv9001_port_t   Port;             ///< Port
+  phy_callback_t    Callback;         ///< Callback
+  void             *CallbackRef;      ///< User Data
+  bool              Cyclic;           ///< Flag indicates the stream will continue Indefinitely
+}phy_stream_t;
 
 /**
-**  PHY Queue
+** PHY Profile
 */
-typedef struct
-{
-  phy_evt_t     Evt;
-} phy_queue_t;
+typedef uint8_t profile_t[ADRV9001_PROFILE_SIZE];
 
 /*******************************************************************************
 *
 * \details
 *
-* This function enables continuous streaming of IQ data
+* This function enables continuous streaming of IQ data.
 *
-* To disable the stream for a particular port call this function the filename
-* set to NULL.
+* \param[in]  Stream is the stream configuration.  This parameter is provided
+*             by the caller and can be released once the function is returned.
+*             However some of the parameters making up this variable must be
+*             maintained in memory for parts or the duration the stream.
 *
-* \param[in]  Port is the port being requested
+*             All streams are non-blocking.  The caller will receive event
+*             callbacks indicating when the stream starts, stops, there is an
+*             error, or it is ready for more data.  The callback function is
+*             unique to each stream.  The caller also has the option of
+*             providing a CallbackRef which points to user specific data.
 *
-* \param[in]  Buf is the IQ sample buffer
+*            -Transmit Stream
+*             When streaming to a transmit port the SampleBuf must be maintained
+*             until the Stream Start event is triggered and the caller receives
+*             a callback with PhyEvtType_StreamStart.  At this point the caller
+*             can free or re-purpose memory associated with SampleBuf.  This
+*             applies to all modes including cyclic mode.  If the cyclic flag
+*             is set the SampleBuf will be streamed continuously until the caller
+*             executes Phy_IqStreamDisable.  If the cyclic flag is not set the
+*             stream will stop once a number of SampleCnt samples have been
+*             streamed.  Once the stream is done a callback of
+*             PhyEvtType_StreamStop will be executed informing the caller.
 *
-* \param[in]  Length is the IQ length of samples to stream
+*            -Receive Stream
+*             When streaming to a receive port the caller will receive a
+*             callback of PhyEvtType_StreamStart once streaming has started.
+*             Once SampleCnt number of samples have been streamed to memory
+*             the user will receive a callback .
+*
 *
 * \return     Status
 *
 *******************************************************************************/
-int32_t Phy_IqStream( adrv9001_port_t Port, adrv9001_iqdata_t *Buf, uint32_t Length );
+phy_status_t Phy_IqStreamEnable( phy_stream_t *Stream );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function enables continuous streaming of IQ data.
+*
+* \param[in]  Stream is the stream configuration
+*
+* \return     Status
+*
+*******************************************************************************/
+phy_status_t Phy_IqStreamDisable( adrv9001_port_t Port );
 
 /*******************************************************************************
 *
@@ -109,24 +118,24 @@ int32_t Phy_IqStream( adrv9001_port_t Port, adrv9001_iqdata_t *Buf, uint32_t Len
 *
 * This function loads a new ADRV9001 profile from the file system
 *
-* \param[in]  filename is the name of the file containing the profile
+* \param[in]  Buf is a buffer containing the profile
+*
+* \param[in]  Length is the length of the buffer in bytes
 *
 * \return     Status
 *
 *******************************************************************************/
-int32_t Phy_LoadProfile( const char *filename );
+phy_status_t Phy_LoadProfile( profile_t *Profile );
 
 /*******************************************************************************
 *
 * \details
 * This function initializes the PHY layer which includes the ADRV9002
 *
-* \param[in]  Cfg contains configuration data for initializing this PHY instance
-*
 * \return   int32_t - status
 *
 *******************************************************************************/
-int32_t Phy_Initialize( phy_cfg_t *Cfg );
+int32_t Phy_Initialize( void );
 
 
 

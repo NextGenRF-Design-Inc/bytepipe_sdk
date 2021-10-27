@@ -15,13 +15,32 @@
 #define PHY_RX_STREAM_BUF_SIZE        (PHY_RX_STREAM_CNT * sizeof(adrv9001_iqdata_t))
 #define PHY_NUM_RX_CHANNELS           (2)
 #define PHY_NUM_TX_CHANNELS           (2)
+#define PHY_NUM_CHANNELS              (PHY_NUM_RX_CHANNELS + PHY_NUM_TX_CHANNELS)
+#define PHY_IS_PORT_TX(p)             ((( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false)
+#define PHY_IS_PORT_RX(p)             ((( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false)
+#define PHY_CHANNEL(p)                ((p == Adrv9001Port_Rx1)? 0 : (p == Adrv9001Port_Rx2)? 1 : (p == Adrv9001Port_Tx1)? 2 : 3)
 
 
-static QueueHandle_t            PhyQueue;             ///< PHY Queue
-static phy_callback_t           PhyCallback;          ///< Callback
-static void                    *PhyCallbackRef;       ///< Callback reference data
-static phy_stream_t            *PhyTxStream[PHY_NUM_TX_CHANNELS] = {NULL, NULL};
-static phy_stream_t            *PhyRxStream[PHY_NUM_TX_CHANNELS] = {NULL, NULL};
+/**
+**  PHY Queue
+*/
+typedef struct
+{
+  enum
+  {
+    PhyQEvt_StreamEnable     = 0,
+    PhyQEvt_StreamDisable    = 1,
+  }Evt;
+  union
+  {
+    phy_stream_t       *Stream;
+    adrv9001_port_t     Port;
+  }Data;
+} phy_queue_t;
+
+static QueueHandle_t      PhyQueue;                       ///< PHY Queue
+static phy_stream_t      *PhyStream[PHY_NUM_CHANNELS];    ///< Stream Data
+
 
 static void Phy_Adrv9001Callback( adrv9001_evt_t evt, void *param )
 {
@@ -32,172 +51,149 @@ static void Phy_Adrv9001Callback( adrv9001_evt_t evt, void *param )
   }
 }
 
-static int32_t Phy_IqStreamStop( phy_stream_t *Stream )
+static void Phy_IqStreamStop( adrv9001_port_t Port )
 {
-  if( Stream == NULL)
-    return PhyStatus_Success;
+  phy_stream_t *Stream = PhyStream[PHY_CHANNEL(Port)];
 
-  /* Disable Streaming */
-  Adrv9001_IQStream( Stream->Port, NULL, 0 );
-
-  if( PHY_IS_PORT_TX( Stream->Port ))
+  /* Check if Valid */
+  if( Stream != NULL )
   {
-    /* Clear Global Stream Variable */
-    PhyTxStream[PHY_CHANNEL(Stream->Port)] = NULL;
-  }
-  else if( PHY_IS_PORT_RX( Stream->Port ) )
-  {
-    /* Clear Global Stream Variable */
-    PhyRxStream[PHY_CHANNEL(Stream->Port)] = NULL;
-  }
+    /* Disable RF */
+    if( Adrv9001_ToRfCalibrated( Port ) != Adrv9001Status_Success )
+    {
+      /* Execute Callback */
+      if(Stream->Callback != NULL)
+        Stream->Callback( PhyEvtType_StreamError, Stream, Stream->CallbackRef );
+    }
 
-  /* Free Memory */
-  free( Stream->Buf );
-  free( Stream );
+    /* Disable Streaming */
+    Adrv9001_IQStream( Stream->Port, NULL, 0 );
 
-  return PhyStatus_Success;
+    /* Execute Callback */
+    if(Stream->Callback != NULL)
+      Stream->Callback( PhyEvtType_StreamStop, Stream, Stream->CallbackRef );
+
+    /* Free Sample Buffer */
+    free( Stream->SampleBuf );
+
+    /* Free Stream Data */
+    free( PhyStream[PHY_CHANNEL(Port)] );
+
+    /* Clear Stream Data */
+    PhyStream[PHY_CHANNEL(Port)] = NULL;
+  }
 }
 
-static int32_t Phy_IqStreamStart( phy_stream_t *Stream )
+static void Phy_IqStreamStart( phy_stream_t *Stream )
 {
-  int32_t status = PhyStatus_FileError;
+  if( Stream == NULL )
+    return;
 
-  if( PHY_IS_PORT_TX( Stream->Port ))
+  /* Copy Stream Reference */
+  PhyStream[PHY_CHANNEL(Stream->Port)] = Stream;
+
+  /* Enable RF */
+  if( Adrv9001_ToRfEnabled( Stream->Port ) != Adrv9001Status_Success )
   {
-    /* Update Global Stream Variable */
-    PhyTxStream[PHY_CHANNEL(Stream->Port)] = Stream;
-  }
-  else if( PHY_IS_PORT_RX( Stream->Port ) )
-  {
-    /* Update Global Stream Variable */
-    PhyRxStream[PHY_CHANNEL(Stream->Port)] = Stream;
+    /* Execute Callback */
+    if(Stream->Callback != NULL)
+      Stream->Callback( PhyEvtType_StreamError, Stream, Stream->CallbackRef );
   }
 
   /* Enable Streaming */
-  if((status = Adrv9001_IQStream( Stream->Port, (adrv9001_iqdata_t*)Stream->Buf, Stream->Length )) != Adrv9001Status_Success)
+  if(Adrv9001_IQStream( Stream->Port, (adrv9001_iqdata_t*)Stream->SampleBuf, Stream->SampleCnt ) != Adrv9001Status_Success)
   {
-    free( Stream->Buf );
-    free( Stream );
-  }
+    /* Execute Callback */
+    if(Stream->Callback != NULL)
+      Stream->Callback( PhyEvtType_StreamError, Stream, Stream->CallbackRef );
 
-  return status;
+    /* Attempt Stop Current Stream */
+    Phy_IqStreamStop( Stream->Port );
+  }
+  else
+  {
+    /* Execute Callback */
+    if(Stream->Callback != NULL)
+      Stream->Callback( PhyEvtType_StreamStart, Stream, Stream->CallbackRef );
+  }
 }
 
 static void Phy_Task( void *pvParameters )
 {
   phy_queue_t qItem;
-  int32_t status;
 
   for( ;; )
   {
+    /* Wait for Message */
     xQueueReceive( PhyQueue, (void *)&qItem, portMAX_DELAY);
 
-    if( qItem.Evt.Type == PhyEvtType_StreamStop )
+    /* Process Message */
+    switch( qItem.Evt )
     {
-      if((status = Phy_IqStreamStop( qItem.Evt.Data.Stream )) != PhyStatus_Success)
-        printf("Phy_IqStreamStop Error %d\r\n",status);
-    }
-    else if( qItem.Evt.Type == PhyEvtType_StreamStart )
-    {
-      if((status = Phy_IqStreamStart( qItem.Evt.Data.Stream  )) != PhyStatus_Success)
-        printf("Phy_IqStreamStart Error %d\r\n",status);
+      case PhyQEvt_StreamEnable:      Phy_IqStreamStart( qItem.Data.Stream );       break;
+      case PhyQEvt_StreamDisable:     Phy_IqStreamStop( qItem.Data.Port );          break;
     }
   }
 }
 
-phy_status_t Phy_IqStream( adrv9001_port_t Port, adrv9001_iqdata_t *Buf, uint32_t Length)
+int32_t Phy_IqStreamDisable( adrv9001_port_t Port )
 {
-  phy_evt_t Evt = {.Type = PhyEvtType_StreamStop};
+  /* Create Queue Item */
+  phy_queue_t qItem = {.Evt = PhyQEvt_StreamDisable, .Data.Port = Port };
 
-  if( PHY_IS_PORT_TX( Port ))
-  {
-    /* Abstract Stream */
-    Evt.Data.Stream = PhyTxStream[PHY_CHANNEL(Port)];
-  }
-  else if( PHY_IS_PORT_RX( Port ) )
-  {
-    /* Abstract Stream */
-    Evt.Data.Stream = PhyRxStream[PHY_CHANNEL(Port)];
-  }
-  else
-  {
-    return PhyStatus_InvalidParameter;
-  }
-
-  /* Send Stream Stop to PHY Task */
-  if( xQueueSend( PhyQueue, &Evt, 1) != pdPASS )
-    return PhyStatus_OsError;
-
-  /* Create New Stream */
-  if((Evt.Data.Stream = calloc(1, sizeof(phy_stream_t))) == NULL)
-    return PhyStatus_MemoryError;
-
-  /* Initialize Stream */
-  Evt.Data.Stream->Buf = (uint32_t*)Buf;
-  Evt.Data.Stream->Length = Length;
-  Evt.Data.Stream->Port = Port;
-
-  /* Update Event Type to Stream Start */
-  Evt.Type = PhyEvtType_StreamStart;
-
-  /* Send Stream Stop to PHY Task */
-  if( xQueueSend( PhyQueue, &Evt, 1) != pdPASS )
-  {
-    free( Evt.Data.Stream );
-    return PhyStatus_OsError;
-  }
+  /* Send to PHY Task */
+  if( xQueueSend( PhyQueue, &qItem, 1) != pdPASS )
+    return PhyStatus_Busy;
 
   return PhyStatus_Success;
 }
 
-phy_status_t Phy_LoadProfile( const char *filename )
+phy_status_t Phy_IqStreamEnable( phy_stream_t *Stream )
 {
-  FIL fil;
-  int32_t status = PhyStatus_FileError;
-  uint32_t *ProfileBuf = NULL;;
+  if( Stream == NULL )
+    return PhyStatus_InvalidParameter;
 
-  do
-  {
-    /* Open File */
-    if(f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ) != FR_OK) break;
+  if( PHY_IS_PORT_TX(Stream->Port) && ((Stream->SampleBuf == NULL) || (Stream->SampleCnt == 0)) )
+    return PhyStatus_InvalidParameter;
 
-    /* Get Size */
-    uint32_t size = f_size(&fil);
+  if( Stream->Callback == NULL )
+    return PhyStatus_InvalidParameter;
 
-    /* Check Size */
-    if( size > ADRV9001_PROFILE_SIZE ) break;
+  /* Disable Current Streams on Same Port */
+  Phy_IqStreamDisable( Stream->Port );
 
-    /* Allocate Memory */
-    ProfileBuf = malloc(size);
+  /* Create Queue Item */
+  phy_queue_t qItem = {.Evt = PhyQEvt_StreamEnable};
 
-    /* Set Pointer to beginning of file */
-    if(f_lseek(&fil, 0) != FR_OK) break;
+  /* Create New Stream */
+  if((qItem.Data.Stream = calloc(1, sizeof(phy_stream_t))) == NULL)
+    return PhyStatus_MemoryError;
 
-    /* Read data from file */
-    if(f_read(&fil, ProfileBuf, size, &size) != FR_OK) break;
+  /* Copy Stream */
+  memcpy((uint8_t*)qItem.Data.Stream, (uint8_t*)Stream, sizeof(phy_stream_t));
 
-    /* Copy to memory */
-    status = 0;
+  /* Send to PHY Task */
+  if( xQueueSend( PhyQueue, &qItem, 1) != pdPASS )
+    return PhyStatus_Busy;
 
-  }while(0);
+  return PhyStatus_Success;
+}
 
-  /* Free Memory */
-  free( ProfileBuf );
+phy_status_t Phy_LoadProfile( profile_t *Profile )
+{
+  int32_t status = PhyStatus_NotSupported;
 
-  /* Close File */
-  if(f_close( &fil ) != FR_OK)
-    return PhyStatus_FileError;
 
   return status;
 }
 
-phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
+phy_status_t Phy_Initialize( void )
 {
   int32_t status;
 
-  /* Copy Configuration Items */
-  PhyCallback = Cfg->Callback;
-  PhyCallbackRef = Cfg->CallbackRef;
+  /* Clear Stream Data */
+  for(int i = 0; i < PHY_NUM_CHANNELS; i++)
+    PhyStream[i] = NULL;
 
   /* Create Queue */
   PhyQueue = xQueueCreate(PHY_QUEUE_SIZE, sizeof(phy_queue_t));

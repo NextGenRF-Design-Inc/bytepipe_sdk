@@ -20,10 +20,7 @@
 static TaskHandle_t 			AppTask;
 FATFS sdfs;
 
-static void App_PhyCallback( phy_evt_t Evt, void *param )
-{
 
-}
 
 static void App_Task( void *pvParameters )
 {
@@ -48,13 +45,9 @@ static void App_Task( void *pvParameters )
 
 	xil_printf("\r\nType help for a list of commands\r\n\r\n");
 
-	phy_cfg_t PhyCfg = {
-	    .Callback     = App_PhyCallback,
-	    .CallbackRef  = NULL
-	};
 
   /* Initialize PHY */
-  if((status = Phy_Initialize( &PhyCfg )) != 0)
+  if((status = Phy_Initialize( )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
 
 	for( ;; )

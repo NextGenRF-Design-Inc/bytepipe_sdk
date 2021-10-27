@@ -41,7 +41,53 @@ static void PhyCli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userDa
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
   Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
 
-  if( Phy_LoadProfile( filename ) == XST_SUCCESS)
+
+  FIL fil;
+  profile_t *Buf = NULL;
+
+  /* Open File */
+  if(f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ) != FR_OK)
+  {
+    printf("Invalid Filename\r\n");
+    return;
+  }
+
+  /* Get Size */
+  uint32_t length = f_size(&fil);
+
+  /* Check Size */
+  if( length > ADRV9001_PROFILE_SIZE )
+  {
+    printf("Invalid File Size\r\n");
+    f_close( &fil );
+    return;
+  }
+
+  /* Allocate Memory */
+  if((Buf = malloc( ADRV9001_PROFILE_SIZE )) == NULL)
+  {
+    printf("Insufficient Memory\r\n");
+    f_close( &fil );
+    return;
+  }
+
+  /* Set Pointer to beginning of file */
+  f_lseek(&fil, 0);
+
+  /* Read data from file */
+  if(f_read(&fil, Buf, length, &length) != FR_OK)
+  {
+    printf("Read File Error\r\n");
+    free( Buf );
+    f_close( &fil );
+    return;
+  }
+
+  /* Close File */
+  f_close( &fil );
+
+  /* Load Profile */
+  if( Phy_LoadProfile( Buf ) == PhyStatus_Success)
   {
     printf("Success\r\n");
   }
@@ -49,6 +95,10 @@ static void PhyCli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userDa
   {
     printf("Failed\r\n");
   }
+
+  /* Free Memory */
+  free( Buf );
+
 }
 
 static const CliCmd_t PhyCliLoadProfileDef =
@@ -66,14 +116,59 @@ static const CliCmd_t PhyCliLoadProfileDef =
 * \details IQ Stream
 *
 *******************************************************************************/
-static void PhyCli_IqStream(Cli_t *CliInstance, const char *cmd, void *userData)
+#define PHY_STREAM_RX_SAMPLE_CNT          (16384)
+
+static void PhyCli_PhyCallback( phy_evt_type_t EvtType, void *EvtData, void *param )
 {
-  adrv9001_port_t     port;
-  uint32_t            Length;
-  uint32_t           *Buf;
+  if( EvtType == PhyEvtType_StreamStart )
+  {
+    phy_stream_t *Stream = (phy_stream_t*)EvtData;
+
+    printf("%s stream has started\r\n", (Stream->Port == Adrv9001Port_Tx1)? "Tx1" :
+                                        (Stream->Port == Adrv9001Port_Tx2)? "Tx2" :
+                                        (Stream->Port == Adrv9001Port_Rx1)? "Rx1" :
+                                        (Stream->Port == Adrv9001Port_Rx2)? "Rx2" : "Unknown");
+  }
+  else if( EvtType == PhyEvtType_StreamStop )
+  {
+    phy_stream_t *Stream = (phy_stream_t*)EvtData;
+
+    printf("%s stream has stopped\r\n", (Stream->Port == Adrv9001Port_Tx1)? "Tx1" :
+                                        (Stream->Port == Adrv9001Port_Tx2)? "Tx2" :
+                                        (Stream->Port == Adrv9001Port_Rx1)? "Rx1" :
+                                        (Stream->Port == Adrv9001Port_Rx2)? "Rx2" : "Unknown");
+  }
+  else if( EvtType == PhyEvtType_StreamError )
+  {
+    phy_stream_t *Stream = (phy_stream_t*)EvtData;
+
+    printf("%s stream error\r\n", (Stream->Port == Adrv9001Port_Tx1)? "Tx1" :
+                                  (Stream->Port == Adrv9001Port_Tx2)? "Tx2" :
+                                  (Stream->Port == Adrv9001Port_Rx1)? "Rx1" :
+                                  (Stream->Port == Adrv9001Port_Rx2)? "Rx2" : "Unknown");
+  }
+  else if( EvtType == PhyEvtType_StreamData )
+  {
+//    phy_stream_t *Stream = (phy_stream_t*)EvtData;
+
+
+  }
+  else if( EvtType == PhyEvtType_ProfileUpdated )
+  {
+    printf("Profile Update Success\r\n");
+  }
+  else
+  {
+    printf("Unknown PHY Event Callback\r\n");
+  }
+}
+
+static void PhyCli_IqStreamEnable(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  phy_stream_t Stream = {.Callback = PhyCli_PhyCallback, .Cyclic = true};
 
   /* Parse Port */
-  if(PhyCli_ParsePort(cmd, 1, &port) == NULL)
+  if(PhyCli_ParsePort(cmd, 1, &Stream.Port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -86,23 +181,22 @@ static void PhyCli_IqStream(Cli_t *CliInstance, const char *cmd, void *userData)
 
   Adrv9001_ClearError( );
 
-  if( PHY_IS_PORT_TX( port ))
+  if( (Stream.Port == Adrv9001Port_Tx1) || (Stream.Port == Adrv9001Port_Tx2) )
   {
-    if(IqFile_Read( filename, &Buf, &Length ) != XST_SUCCESS)
+    if(IqFile_Read( filename, &Stream.SampleBuf, &Stream.SampleCnt ) != XST_SUCCESS)
     {
       printf("Invalid Parameter\r\n");
       return;
     }
 
     /* Enable Streaming */
-    if(Phy_IqStream( port, (adrv9001_iqdata_t*)Buf, Length ) != PhyStatus_Success)
+    if(Phy_IqStreamEnable( &Stream ) != PhyStatus_Success)
     {
-      printf("Invalid Parameter\r\n");
-      free(Buf);
+      printf("Failed\r\n");
       return;
     }
   }
-  else if( PHY_IS_PORT_RX( port ) )
+  else if( (Stream.Port == Adrv9001Port_Rx1) || (Stream.Port == Adrv9001Port_Rx2) )
   {
     printf("Invalid Parameter\r\n");
   }
@@ -110,13 +204,45 @@ static void PhyCli_IqStream(Cli_t *CliInstance, const char *cmd, void *userData)
   printf("Success\r\n");
 }
 
-static const CliCmd_t PhyCliIqStreamDef =
+static void PhyCli_IqStreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  "PhyIqStream",
-  "PhyIqStream:  Stream IQ data to or from a file. \r\n"
-  "PhyIqStream < port ( Rx1,Rx2,Tx1,Tx2 ), filename (NULL = stop streaming) >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_IqStream,
+  adrv9001_port_t     port;
+
+  /* Parse Port */
+  if(PhyCli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  /* Disable Stream */
+  if( Phy_IqStreamDisable( port ) != PhyStatus_Success )
+  {
+    printf("Failed\r\n");
+  }
+  else
+  {
+    printf("Success\r\n");
+  }
+}
+
+static const CliCmd_t PhyCliIqStreamEnableDef =
+{
+  "PhyIqStreamEnable",
+  "PhyIqStreamEnable:  Enable IQ stream or from a file. \r\n"
+  "PhyIqStreamEnable < port ( Rx1,Rx2,Tx1,Tx2 ), filename >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_IqStreamEnable,
   2,
+  NULL
+};
+
+static const CliCmd_t PhyCliIqStreamDisableDef =
+{
+  "PhyIqStreamDisable",
+  "PhyIqStreamDisable:  Disable IQ stream. \r\n"
+  "PhyIqStreamDisable < port ( Rx1,Rx2,Tx1,Tx2 ) >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_IqStreamDisable,
+  1,
   NULL
 };
 
@@ -132,7 +258,8 @@ int PhyCli_Initialize( void )
 {
   Cli_t *Instance = AppCli_GetInstance( );
 
-  Cli_RegisterCommand(Instance, &PhyCliIqStreamDef);
+  Cli_RegisterCommand(Instance, &PhyCliIqStreamEnableDef);
+  Cli_RegisterCommand(Instance, &PhyCliIqStreamDisableDef);
   Cli_RegisterCommand(Instance, &PhyCliLoadProfileDef);
 
 
