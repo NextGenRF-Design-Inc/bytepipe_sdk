@@ -2,7 +2,7 @@
 
 # GNU Radio
 
-Documenation is not currently available.
+Documentation is not currently available.
 
 
 # Disclaimer

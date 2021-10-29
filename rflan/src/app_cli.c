@@ -1,5 +1,7 @@
-#include "stdio.h"
-#include "stdbool.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include "cli.h"
 #include "xil_printf.h"
 #include "xparameters.h"
@@ -12,8 +14,7 @@
 #include "queue.h"
 #include "portmacro.h"
 #include "app.h"
-#include "sd.h"
-
+#include "ff.h"
 
 
 #if CLI_UART_DEVICE_ID == XPAR_PSU_UART_0_DEVICE_ID
@@ -163,7 +164,7 @@ static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int status;
   DIR dp;
-  const TCHAR path[10] = "0:/"; /* Pointer to the directory path */
+  const TCHAR path[10] = FF_LOGICAL_DRIVE_PATH;
   FILINFO fno;
 
   if((status = f_opendir(&dp, path)) != XST_SUCCESS)
@@ -178,6 +179,8 @@ static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
 
     xil_printf("%s\r\n", fno.fname);
   }
+
+  xil_printf("\r\n\r\n");
 
   f_closedir(&dp);
 }
@@ -264,6 +267,75 @@ static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
 
 /******************************************************************************/
 /**
+*  \details   CLI Command for Processing fread
+*
+*  \param     CliInstance
+*
+*  \param     cmd is the command string
+*
+*  \param     NULL
+*
+*  \return    none
+*******************************************************************************/
+static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int32_t offset;
+  int32_t length;
+  FIL fil;
+  int32_t status = -1;
+  uint32_t size;
+  uint8_t *Buf = NULL;
+
+  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
+
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
+  Cli_GetParameter(cmd, 2, CliParamTypeS32, &offset);
+  Cli_GetParameter(cmd, 3, CliParamTypeS32, &length);
+
+  do
+  {
+    /* Open File */
+    if(f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ) != FR_OK) break;
+
+    /* Get Size of file */
+    size = f_size(&fil);
+
+    if(length == -1) length = size;
+
+    size = size - offset;
+
+    if(size < length)
+      length = size;
+
+    /* Check length */
+    if(length > APP_CLI_PRINT_BUF_SIZE ) break;
+
+    /* Pointer to beginning of file */
+    if(f_lseek(&fil, offset) != FR_OK) break;
+
+    /* Allocate Buffer */
+    if((Buf = malloc(length)) == NULL) break;
+
+    /* Read data from file */
+    if(f_read(&fil, Buf, length, (UINT*)&length) != FR_OK) break;
+
+    printf("%s\r\n",Buf);
+
+  }while(0);
+
+  if(status == 0)
+  {
+    printf("Failed\r\n");
+  }
+
+  free(filename);
+  f_close(&fil);
+  free(Buf);
+}
+
+/******************************************************************************/
+/**
 *  \details   CLI Callback
 *
 *  \param 	  param is a pointer to the CLI instance
@@ -324,6 +396,19 @@ static const CliCmd_t AppCliTaskInfoDef =
   "TaskInfo < >\r\n\n",
   (CliCmdFn_t)AppCli_TaskInfo,
   0,
+  NULL
+};
+
+/**
+*  Read File
+*/
+static const CliCmd_t AppCliReadFileDef =
+{
+  "fread",
+  "fread: Read contents of a file \r\n"
+  "fread < filename, offset, length >\r\n\n",
+  (CliCmdFn_t)AppCli_fread,
+  3,
   NULL
 };
 
@@ -428,6 +513,7 @@ int AppCli_Initialize( void )
 	  Cli_RegisterCommand(&AppCli, &AppCliClsDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliLsDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliTaskInfoDef);
+	  Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
 
 	return XST_SUCCESS;
 }

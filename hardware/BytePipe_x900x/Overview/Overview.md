@@ -11,7 +11,7 @@ The BytePipe_x9002 is a high performance RF System On Module (SOM).  The BytePip
 
 The following shows the BytePipe_x900x System on Module (SOM).  
 
-![som](som.png)
+![som](som_02.png)
 
 
 # J600

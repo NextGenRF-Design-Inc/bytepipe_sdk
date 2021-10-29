@@ -48,14 +48,14 @@
 #include "error.h"
 #include "axi_dmac.h"
 #include "util.h"
-
+#include "xscugic.h"
 
 /***************************************************************************//**
  * @brief dma_isr
 *******************************************************************************/
 void axi_dmac_default_isr(void *instance)
 {
-	struct axi_dmac *dmac = (struct axi_dmac *)instance;
+	axi_dmac_t *dmac = (axi_dmac_t *)instance;
 	uint32_t remaining_size, burst_size;
 	uint32_t reg_val;
 
@@ -97,6 +97,11 @@ void axi_dmac_default_isr(void *instance)
 	if (reg_val & AXI_DMAC_IRQ_EOT)
 	{
 		dmac->big_transfer.transfer_done = true;
+
+		if( dmac->Callback != NULL )
+		{
+		  dmac->Callback(&dmac->big_transfer, dmac->CallbackRef );
+		}
 		dmac->big_transfer.address = 0;
 		dmac->big_transfer.size = 0;
 		dmac->big_transfer.size_done = 0;
@@ -106,7 +111,7 @@ void axi_dmac_default_isr(void *instance)
 /***************************************************************************//**
  * @brief axi_dmac_read
  *******************************************************************************/
-int32_t axi_dmac_read(struct axi_dmac *dmac, uint32_t reg_addr, uint32_t *reg_data)
+int32_t axi_dmac_read(axi_dmac_t *dmac, uint32_t reg_addr, uint32_t *reg_data)
 {
 	axi_io_read(dmac->base, reg_addr, reg_data);
 
@@ -116,7 +121,7 @@ int32_t axi_dmac_read(struct axi_dmac *dmac, uint32_t reg_addr, uint32_t *reg_da
 /***************************************************************************//**
  * @brief axi_dmac_write
  *******************************************************************************/
-int32_t axi_dmac_write(struct axi_dmac *dmac, uint32_t reg_addr, uint32_t reg_data)
+int32_t axi_dmac_write(axi_dmac_t *dmac, uint32_t reg_addr, uint32_t reg_data)
 {
 	axi_io_write(dmac->base, reg_addr, reg_data);
 
@@ -126,12 +131,15 @@ int32_t axi_dmac_write(struct axi_dmac *dmac, uint32_t reg_addr, uint32_t reg_da
 /***************************************************************************//**
  * @brief axi_dmac_transfer_nonblock
  *******************************************************************************/
-int32_t axi_dmac_transfer_nonblocking(struct axi_dmac *dmac, uint32_t address, uint32_t size)
+int32_t axi_dmac_transfer_nonblocking(axi_dmac_t *dmac, uint32_t address, uint32_t size)
 {
 	uint32_t reg_val;
 
-	if (size == 0)
-		return SUCCESS; /* nothing to do */
+  if (size == 0)
+  {
+    axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
+    return SUCCESS;
+  }
 
 	axi_dmac_read(dmac, AXI_DMAC_REG_CTRL, &reg_val);
 	if (!(reg_val & AXI_DMAC_CTRL_ENABLE))
@@ -195,7 +203,7 @@ int32_t axi_dmac_transfer_nonblocking(struct axi_dmac *dmac, uint32_t address, u
 /***************************************************************************//**
  * @brief axi_dmac_is_transfer_ready
  *******************************************************************************/
-int32_t axi_dmac_is_transfer_ready(struct axi_dmac *dmac, bool *rdy)
+int32_t axi_dmac_is_transfer_ready(axi_dmac_t *dmac, bool *rdy)
 {
 	*rdy = dmac->big_transfer.transfer_done;
 
@@ -205,14 +213,17 @@ int32_t axi_dmac_is_transfer_ready(struct axi_dmac *dmac, bool *rdy)
 /***************************************************************************//**
  * @brief axi_dmac_transfer
  *******************************************************************************/
-int32_t axi_dmac_transfer(struct axi_dmac *dmac, uint32_t address, uint32_t size)
+int32_t axi_dmac_transfer(axi_dmac_t *dmac, uint32_t address, uint32_t size)
 {
 	uint32_t transfer_id;
 	uint32_t reg_val;
 	uint32_t timeout = 0;
 
 	if (size == 0)
-		return SUCCESS; /* nothing to do */
+	{
+	  axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
+		return SUCCESS;
+	}
 
 	axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
 	axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, AXI_DMAC_CTRL_ENABLE);
@@ -305,16 +316,17 @@ int32_t axi_dmac_transfer(struct axi_dmac *dmac, uint32_t address, uint32_t size
 /***************************************************************************//**
  * @brief axi_dmac_init
  *******************************************************************************/
-int32_t axi_dmac_init(struct axi_dmac **dmac_core, const struct axi_dmac_init *init)
+int32_t axi_dmac_init(axi_dmac_t **dmac_core, axi_dmac_init_t *init)
 {
-	struct axi_dmac *dmac;
+	axi_dmac_t *dmac;
 
-	dmac = (struct axi_dmac *)malloc(sizeof(*dmac));
+	dmac = (axi_dmac_t *)malloc(sizeof(*dmac));
 	if (!dmac)
 		return FAILURE;
 
-	dmac->name = init->name;
 	dmac->base = init->base;
+	dmac->Callback = init->Callback;
+	dmac->CallbackRef = init->CallbackRef;
 	dmac->direction = init->direction;
 	dmac->flags = init->flags;
 	dmac->transfer_max_size = -1;
@@ -327,13 +339,16 @@ int32_t axi_dmac_init(struct axi_dmac **dmac_core, const struct axi_dmac_init *i
 
 	*dmac_core = dmac;
 
+  XScuGic_Connect((XScuGic*)init->irqInstance, init->irqId, (XInterruptHandler)axi_dmac_default_isr, dmac );
+  XScuGic_Enable((XScuGic*)init->irqInstance, init->irqId);
+
 	return SUCCESS;
 }
 
 /***************************************************************************//**
  * @brief axi_dmac_remove
  *******************************************************************************/
-int32_t axi_dmac_remove(struct axi_dmac *dmac)
+int32_t axi_dmac_remove(axi_dmac_t *dmac)
 {
 	if(!dmac)
 		return FAILURE;

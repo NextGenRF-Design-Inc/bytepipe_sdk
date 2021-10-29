@@ -13,25 +13,25 @@ mkdir workspace
 cd workspace
 ```
 
-The next step is to launch the Xilinx SDK software selecting the previsoulsy generated workspace folder as the workspace.
+The next step is to launch the Xilinx SDK software selecting the previously generated workspace folder as the workspace.
 
 ![workspace_01](workspace_01.png)
 
 # Hardware Platform
 
-The hardware platform is created based on the HDL outputs.  The HDL can be built from source by following the the HDL build instructions [here](../HdlBuild/HdlBuild.md).  The latest pre-built hdl outputs can also be used from the releases folder [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  Once the HDL is built or downloaded from the latest release `system_top.hdf` must be copied to the workspace folder.  
+The hardware platform is created based on the HDL outputs.  The HDL can be built from source by following the HDL build instructions [here](../HdlBuild/HdlBuild.md).  The latest pre-built HDL outputs can also be used from the releases folder [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  Once the HDL is built or downloaded from the latest release, `system_top.hdf` must be copied to the workspace folder.  
 
-Next navigate to file->new->other in the Xilinx SDK.  Select Hardware Platform Specification as shown below.
+Next navigate to file->new->other in the Xilinx SDK.  Select Hardware Platform Specification as shown below, then click Next.
 
 ![hwp_01](hwp_01.png)
 
-Set the project name to `hwp` and browse to the hardware specification created from the HDL build.  The HDL used for this project can be found [here](https://github.com/NextGenRF-Design-Inc/hdl).  Select finish, the hardware platform will be created as a separate project within the SDK.
+Set the project name to `hwp` and browse to the hardware specification created from the HDL build.  Select finish, the hardware platform will be created as a separate project within the SDK.
 
 ![hwp_02](hwp_02.png)
 
 # BSP
 
-Next a board support package must be created based on the hardware platform.  Navigate to File->New->Board Support Package.  Select a project name, target hardware platform, and operating system as shown below, then click finish.
+Next a board support package must be created based on the hardware platform.  Navigate to File->New->Board Support Package.  Select a project name, target hardware platform, and operating system as shown below, and then click finish.
 
 ![bsp_01](bsp_01.png)
 
@@ -39,15 +39,15 @@ The board support package settings window will be displayed.  Enable the Generic
 
 ![bsp_02](bsp_02.png)
 
-Next configure freertos.  Change the tick rate to 10000, minimum stack to 2000, and total_heap_size to 655360 as shown below.
+Next configure FreeRTOS.  Change the `tick_rate` to 10000, `total_heap_size` to 16777216, and set `generate_runtime_stats` to 1 as shown below.
 
 ![bsp_03](bsp_03.png)
 
-Then configure the file system by changing the maximum supported file name length as shown below. 
+Then configure the file system by changing the maximum supported file name length `use_lfn` from 0 to 1 as shown below. 
 
 ![bsp_04](bsp_04.png)
 
-Configure the display port driver as shown below. 
+Configure the display port driver by changing `psu_dp` to `dppsu` as shown below. 
 
 ![bsp_05](bsp_05.png)
 
@@ -67,9 +67,9 @@ After the src folder is deleted right click on the `rflan` project in the projec
 
 ![app_04](app_04.png)
 
-Right click on the rflan project and select properties.  Add the following symbols as shown below.
-
 ![app_05](app_05.png)
+
+Right click on the `rflan` project and select properties.  Add the following symbols as shown below.
 
 ```
 CUSTOMER_PLATFORM
@@ -126,13 +126,13 @@ Next navigate to file->new->application.  Create a new application called fsbl a
 
 # Create Boot Image
 
-Select the rflan project in the project explorer.  Navigate to Xilinx->Create Boot Image.  This should automatically import the appropriate files as shown below.  If not exit and make sure the rflan project is highlighted in the project explorer before trying again.  Select create image, this will generate a BOOT.bin under the rflan folder which can be loaded onto the device for testing.
+Select the `rflan` project in the project explorer.  Navigate to Xilinx->Create Boot Image.  This should automatically import the appropriate files as shown below.  If not, exit and make sure the `rflan` project is highlighted in the project explorer before trying again.  Select create image, this will generate a BOOT.bin under the `rflan` folder which can be loaded onto the device for testing.
 
 ![boot_01](boot_01.png)
 
 # Debugging
 
-See [Debugging](../Debugging/Debugging.md) for additional information.
+See [Debugging](./Debugging.md) for additional information.
 
 
 ### Disclaimer

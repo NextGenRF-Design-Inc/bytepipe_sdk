@@ -14,7 +14,6 @@ set_property board_part nextgenrf.com:bytepipe_3cg_som:part0:1.0 [current_projec
 # Add Source Files
 add_files -fileset constrs_1 -norecurse $srcDir/constr.xdc
 add_files -norecurse $srcDir/system_top.v
-add_files -norecurse $srcDir/gpio.v
 
 # Disable Messages
 set_msg_config -severity {CRITICAL WARNING} -suppress
