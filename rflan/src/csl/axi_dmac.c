@@ -94,18 +94,25 @@ void axi_dmac_default_isr(void *instance)
 		axi_dmac_write(dmac, AXI_DMAC_REG_START_TRANSFER, 0x1);
 	}
 
+  axi_dmac_evt_type_t evt;
+
 	if (reg_val & AXI_DMAC_IRQ_EOT)
 	{
-		dmac->big_transfer.transfer_done = true;
-
-		if( dmac->Callback != NULL )
-		{
-		  dmac->Callback(&dmac->big_transfer, dmac->CallbackRef );
-		}
-		dmac->big_transfer.address = 0;
-		dmac->big_transfer.size = 0;
-		dmac->big_transfer.size_done = 0;
+	  evt = EvtType_EndofTransfer;
+	  dmac->big_transfer.transfer_done = true;
+    dmac->big_transfer.address = 0;
+    dmac->big_transfer.size = 0;
+    dmac->big_transfer.size_done = 0;
 	}
+	else if(reg_val & AXI_DMAC_IRQ_SOT)
+	{
+    evt = EvtType_StartofTransfer;
+	}
+
+  if( dmac->Callback != NULL )
+  {
+    dmac->Callback(evt, dmac->CallbackRef );
+  }
 }
 
 /***************************************************************************//**
@@ -174,22 +181,16 @@ int32_t axi_dmac_transfer_nonblocking(axi_dmac_t *dmac, uint32_t address, uint32
 			dmac->big_transfer.size = size - 1;
 			dmac->big_transfer.size_done = dmac->transfer_max_size;
 
-			axi_dmac_write(dmac, AXI_DMAC_REG_X_LENGTH,
-				       dmac->transfer_max_size);
+			axi_dmac_write(dmac, AXI_DMAC_REG_X_LENGTH, dmac->transfer_max_size);
 			axi_dmac_write(dmac, AXI_DMAC_REG_Y_LENGTH, 0x0);
-
 			axi_dmac_write(dmac, AXI_DMAC_REG_FLAGS, dmac->flags);
-
 			axi_dmac_write(dmac, AXI_DMAC_REG_START_TRANSFER, 0x1);
 		}
 		else
 		{
-			axi_dmac_write(dmac, AXI_DMAC_REG_X_LENGTH,
-				       size - 1);
+			axi_dmac_write(dmac, AXI_DMAC_REG_X_LENGTH, size - 1);
 			axi_dmac_write(dmac, AXI_DMAC_REG_Y_LENGTH, 0x0);
-
 			axi_dmac_write(dmac, AXI_DMAC_REG_FLAGS, dmac->flags);
-
 			axi_dmac_write(dmac, AXI_DMAC_REG_START_TRANSFER, 0x1);
 		}
 	}

@@ -264,6 +264,34 @@ static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
   }
 
 }
+/******************************************************************************/
+/**
+*  \details   CLI Command for Processing fdelete
+*
+*  \param     CliInstance
+*
+*  \param     cmd is the command string
+*
+*  \param     NULL
+*
+*  \return    none
+*******************************************************************************/
+static void AppCli_fdelete(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
+
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
+
+  if( f_unlink(filename) != FR_OK)
+  {
+    printf("Failed\r\n");
+  }
+  else
+  {
+    printf("Success\r\n");
+  }
+}
 
 /******************************************************************************/
 /**
@@ -281,10 +309,11 @@ static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int32_t offset;
   int32_t length;
+  UINT len;
   FIL fil;
   int32_t status = -1;
   uint32_t size;
-  uint8_t *Buf = NULL;
+  char c;
 
   char *filename = calloc(1, FF_FILENAME_MAX_LEN );
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
@@ -314,13 +343,13 @@ static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
     /* Pointer to beginning of file */
     if(f_lseek(&fil, offset) != FR_OK) break;
 
-    /* Allocate Buffer */
-    if((Buf = malloc(length)) == NULL) break;
+    for(int i = 0; i < length; i++)
+    {
+      /* Read data from file */
+      if(f_read(&fil, (void*)&c, 1, (UINT*)&len) != FR_OK) break;
 
-    /* Read data from file */
-    if(f_read(&fil, Buf, length, (UINT*)&length) != FR_OK) break;
-
-    printf("%s\r\n",Buf);
+      printf("%c",c);
+    }
 
   }while(0);
 
@@ -331,7 +360,6 @@ static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
 
   free(filename);
   f_close(&fil);
-  free(Buf);
 }
 
 /******************************************************************************/
@@ -387,7 +415,7 @@ static const CliCmd_t AppCliLsDef =
 };
 
 /**
-*  List Files
+*  Task Info
 */
 static const CliCmd_t AppCliTaskInfoDef =
 {
@@ -409,6 +437,19 @@ static const CliCmd_t AppCliReadFileDef =
   "fread < filename, offset, length >\r\n\n",
   (CliCmdFn_t)AppCli_fread,
   3,
+  NULL
+};
+
+/**
+*  Delete File
+*/
+static const CliCmd_t AppCliDeleteFileDef =
+{
+  "fdelete",
+  "fdelete: Delete file \r\n"
+  "fdelete < filename >\r\n\n",
+  (CliCmdFn_t)AppCli_fdelete,
+  1,
   NULL
 };
 
@@ -514,6 +555,7 @@ int AppCli_Initialize( void )
 	  Cli_RegisterCommand(&AppCli, &AppCliLsDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliTaskInfoDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
+	  Cli_RegisterCommand(&AppCli, &AppCliDeleteFileDef);
 
 	return XST_SUCCESS;
 }

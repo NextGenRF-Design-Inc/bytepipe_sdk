@@ -31,6 +31,10 @@ typedef enum
   Adrv9001Status_NotSupported                 = (ADRV9001_STATUS_OFFSET - 12),
   Adrv9001Status_DriverError                  = (ADRV9001_STATUS_OFFSET - 13),
   Adrv9001Status_DmaError                     = (ADRV9001_STATUS_OFFSET - 14),
+  Adrv9001Status_ExceedsDmaBuffer             = (ADRV9001_STATUS_OFFSET - 15),
+  Adrv9001Status_PortDisabled                 = (ADRV9001_STATUS_OFFSET - 16),
+  Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 17),
+  Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 18),
 } adrv9001_status_t;
 
 /**
@@ -55,10 +59,19 @@ typedef enum
 #define ADRV9001_IS_PORT_RX(p)              ((( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false)
 #define ADRV9001_IS_LOGICAL_PORT_TX(p)      ((( p == ADRV9001_TX1_LOGICAL_PORT ) || ( p == ADRV9001_TX2_LOGICAL_PORT )) ? true : false)
 #define ADRV9001_IS_LOGICAL_PORT_RX(p)      ((( p == ADRV9001_RX1_LOGICAL_PORT ) || ( p == ADRV9001_RX2_LOGICAL_PORT )) ? true : false)
-#define ADRV9001_LOGICAL_PORT(p)            ((p == Adrv9001Port_Rx1)? ADRV9001_RX1_LOGICAL_PORT : \
-                                             (p == Adrv9001Port_Rx2)? ADRV9001_RX2_LOGICAL_PORT : \
-                                             (p == Adrv9001Port_Tx1)? ADRV9001_TX1_LOGICAL_PORT : \
-                                             (p == Adrv9001Port_Tx2)? ADRV9001_TX2_LOGICAL_PORT : 0)
+#define ADRV9001_PORT_2_LOGICAL(p)          (( p == Adrv9001Port_Rx1)? ADRV9001_RX1_LOGICAL_PORT : \
+                                             ( p == Adrv9001Port_Rx2)? ADRV9001_RX2_LOGICAL_PORT : \
+                                             ( p == Adrv9001Port_Tx1)? ADRV9001_TX1_LOGICAL_PORT : \
+                                             ( p == Adrv9001Port_Tx2)? ADRV9001_TX2_LOGICAL_PORT : 0)
+#define ADRV9001_LOGICAL_2_PORT(p)          (( p == ADRV9001_TX1_LOGICAL_PORT)? Adrv9001Port_Tx1 : \
+                                             ( p == ADRV9001_TX2_LOGICAL_PORT)? Adrv9001Port_Tx2 : \
+                                             ( p == ADRV9001_RX1_LOGICAL_PORT)? Adrv9001Port_Rx1 : \
+                                             ( p == ADRV9001_RX2_LOGICAL_PORT)? Adrv9001Port_Rx2 : 0)
+
+#define ADRV9001_PORT_2_STR(p)              (( p == Adrv9001Port_Tx1 )? "Tx1" :                 \
+                                             ( p == Adrv9001Port_Tx2 )? "Tx2" :                 \
+                                             ( p == Adrv9001Port_Rx1 )? "Rx1" :                 \
+                                             ( p == Adrv9001Port_Rx2 )? "Rx2" : "Unknown")
 
 /**
  **  ADRV9001 Radio State
@@ -81,19 +94,16 @@ typedef struct
 } adrv9001_iqdata_t;
 
 /**
- **  ADRV9001 Stream Event
- */
-typedef struct
-{
-  adrv9001_port_t     Port;
-} adrv9001_evt_stream_t;
-
-/**
  **  ADRV9001 Event Data
  */
 typedef union
 {
-  adrv9001_evt_stream_t     Stream;
+  struct
+  {
+    adrv9001_port_t     Port;
+    adrv9001_status_t   Status;
+  }Stream;
+
 } adrv9001_evt_data_t;
 
 /**
@@ -101,32 +111,44 @@ typedef union
  */
 typedef enum
 {
-  Adrv9001EvtType_Stream        = 0,
+  Adrv9001EvtType_Stream       = 0,
 } adrv9001_evt_type_t;
-
-/**
- **  ADRV9001 Event
- */
-typedef struct
-{
-  adrv9001_evt_type_t       Type;
-  adrv9001_evt_data_t      *Data;
-} adrv9001_evt_t;
 
 /**
 ** ADRV9001 Callback
 */
-typedef void (*adrv9001_callback_t)( adrv9001_evt_t evt, void *param );
+typedef void (*adrv9001_callback_t)( adrv9001_evt_type_t EvtType, adrv9001_evt_data_t EvtData, void *param );
 
 /**
  **  ADRV9001 DMA Configuration
  */
 typedef struct {
-  uint32_t              BufAddr;                       ///< DMA Buffer Memory Address
-  uint32_t              BufSize;                       ///< Size in bytes of DMA buffer, must by 8 byte aligned
+  uint32_t              BufAddr[ADRV9001_NUM_PORTS];   ///< DMA Buffer Memory Address
+  uint32_t              BufSize[ADRV9001_NUM_PORTS];   ///< Size in bytes of DMA buffer, must by 8 byte aligned
   uint32_t              IrqId[ADRV9001_NUM_PORTS];     ///< DMA Processor IRQ ID
   uint32_t              BaseAddr[ADRV9001_NUM_PORTS];  ///< DMA AXI Bus Address
 } adrv9001_dma_cfg_t;
+
+/**
+ **  ADRV9001 GPIO Configuration
+ */
+typedef struct {
+  uint32_t              DeviceId;           ///< Device ID
+  uint32_t              RstnPin;            ///< Reset pin number
+  uint32_t              Rx1EnPin;           ///< Rx1 enable pin number
+  uint32_t              Rx2EnPin;           ///< Rx2 enable pin number
+  uint32_t              Tx1EnPin;           ///< Tx1 enable pin number
+  uint32_t              Tx2EnPin;           ///< Tx2 enable pin number
+  uint32_t              IrqPin;             ///< Irq enable pin number
+} adrv9001_gpio_cfg_t;
+
+/**
+ **  ADRV9001 SPI Configuration
+ */
+typedef struct {
+  uint32_t              DeviceId;           ///< Device ID
+  uint32_t              CsPinId;            ///< Chip Select pin number relative to the SPI hardware (0 to 3)
+} adrv9001_spi_cfg_t;
 
 /**
  **  ADRV9001 Configuration
@@ -136,8 +158,158 @@ typedef struct
   adrv9001_callback_t   Callback;           ///< Callback
   void                 *CallbackRef;        ///< Callback reference data
   adrv9001_dma_cfg_t   *DmaCfg;             ///< DMA Configuration
+  adrv9001_gpio_cfg_t  *GpioCfg;            ///< GPIO Configuration
+  adrv9001_spi_cfg_t   *SpiCfg;             ///< SPI Configuration
   void                 *IrqInstance;        ///< Processor Interrupt Instance
 } adrv9001_cfg_t;
+
+/**
+ **  ADRV9001 Version Info
+ */
+typedef struct
+{
+  struct
+  {
+    uint32_t major;                         ///< API Major Version number
+    uint32_t minor;                         ///< API Minor Version number
+    uint32_t patch;                         ///< API Patch Version number
+  }Api;                                     ///< adi_adrv9001 API Version
+  struct
+  {
+    uint8_t major;                          ///< ARM Major Version number
+    uint8_t minor;                          ///< ARM Minor Version number
+    uint8_t maint;                          ///< ARM Maintenance Version number
+    uint8_t rcVer;                          ///< ARM RC Version number
+  }Arm;
+  struct
+  {
+    uint8_t major;                          ///< Major silicon version (0xA, 0xB, etc)
+    uint8_t minor;                          ///< Minor silicon version
+  }Silicon;
+} adrv9001_ver_t;
+
+/*******************************************************************************
+*
+* \details
+*
+* This function performs a SPI write
+*
+* \param[in]  txData is the data to be sent
+*
+* \param[in]  numTxBytes specifies how many bytes are to be sent
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SpiWrite( const uint8_t txData[], uint32_t numTxBytes );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function performs a SPI read
+*
+* \param[in]  txData is the data to be sent
+*
+* \param[out] rxData is the data that is read
+*
+* \param[in]  numRxBytes specifies how many bytes are to be read
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SpiRead( const uint8_t txData[], uint8_t rxData[], uint32_t numRxBytes );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the RESETN pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_ResetbPinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the RX1 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Rx1EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the TX1 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Tx1EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the RX2 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Rx2EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the TX2 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Tx2EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the adrv9001 version information
+*
+* \param[out] Version Information
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetVersionInfo( adrv9001_ver_t *VerInfo );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the junction temperature of the ADRV9002
+*
+* \param[out] Temperature in degrees C
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetTemperature( int16_t *Temp_C );
 
 /*******************************************************************************
 *

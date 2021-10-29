@@ -8,6 +8,12 @@
 
 #define PHY_STATUS_OFFSET           (-2000)
 
+#define PHY_NUM_RX_PORTS              (ADRV9001_NUM_RX_PORTS)
+#define PHY_NUM_TX_PORTS              (ADRV9001_NUM_TX_PORTS)
+#define PHY_NUM_PORTS                 (ADRV9001_NUM_PORTS)
+#define PHY_IS_PORT_TX(p)             ADRV9001_IS_PORT_TX(p)
+#define PHY_IS_PORT_RX(p)             ADRV9001_IS_PORT_RX(p)
+#define PHY_PORT_2_LOGICAL(p)         ADRV9001_PORT_2_LOGICAL(p)
 
 /**
 **  ADRV9001 Status
@@ -22,24 +28,45 @@ typedef enum
   PhyStatus_Busy                = (PHY_STATUS_OFFSET - 5),
   PhyStatus_InvalidParameter    = (PHY_STATUS_OFFSET - 6),
   PhyStatus_Adrv9001Error       = (PHY_STATUS_OFFSET - 7),
+  PhyStatus_RadioStateError     = (PHY_STATUS_OFFSET - 8),
+  PhyStatus_IqStreamAbort       = (PHY_STATUS_OFFSET - 9),
 } phy_status_t;
+
+/**
+** PHY Profile
+*/
+typedef uint8_t profile_t[ADRV9001_PROFILE_SIZE];
+
+/**
+ **  PHY Event Data
+ */
+typedef union
+{
+  struct
+  {
+    adrv9001_port_t       Port;         ///< Port
+    uint32_t             *SampleBuf;    ///< Sample Buffer
+    uint32_t              SampleCnt;    ///< Length in samples
+    phy_status_t          Status;       ///< Status
+    void                 *CallbackRef;  ///< User Data
+  }Stream;
+
+} phy_evt_data_t;
+
 
 /**
  **  PHY Event Type
  */
 typedef enum
 {
-  PhyEvtType_StreamStart      = 0,      ///< Indicates Stream has started. EvtData = phy_stream_t
-  PhyEvtType_StreamStop       = 1,      ///< Indicates Stream has started. EvtData = phy_stream_t
-  PhyEvtType_StreamError      = 2,      ///< Indicates Stream has an error and has aborted. EvtData = phy_stream_t
-  PhyEvtType_StreamData       = 3,      ///< Indicates stream is ready for more data or has more data to deliver. EvtData = phy_stream_t
-  PhyEvtType_ProfileUpdated   = 4,      ///< Indicates profile has been updated. No Evt data
+  PhyEvtType_StreamDone       = 0,    ///< Indicates stream is done. EvtData = phy_stream_t
+  PhyEvtType_ProfileUpdated   = 1,    ///< Indicates profile has been updated. No Evt data
 } phy_evt_type_t;
 
 /**
 ** PHY Callback
 */
-typedef void (*phy_callback_t)( phy_evt_type_t EvtType, void *EvtData, void *param );
+typedef void (*phy_callback_t)( phy_evt_type_t EvtType, phy_evt_data_t EvtData, void *param );
 
 /**
 **  PHY Stream
@@ -50,13 +77,9 @@ typedef struct{
   adrv9001_port_t   Port;             ///< Port
   phy_callback_t    Callback;         ///< Callback
   void             *CallbackRef;      ///< User Data
+  phy_status_t      Status;           ///< Status
   bool              Cyclic;           ///< Flag indicates the stream will continue Indefinitely
 }phy_stream_t;
-
-/**
-** PHY Profile
-*/
-typedef uint8_t profile_t[ADRV9001_PROFILE_SIZE];
 
 /*******************************************************************************
 *
@@ -125,7 +148,7 @@ phy_status_t Phy_IqStreamDisable( adrv9001_port_t Port );
 * \return     Status
 *
 *******************************************************************************/
-phy_status_t Phy_LoadProfile( profile_t *Profile );
+phy_status_t Phy_UpdateProfile( profile_t *Profile );
 
 /*******************************************************************************
 *

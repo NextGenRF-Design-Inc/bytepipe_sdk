@@ -5,6 +5,8 @@
 #include "ff.h"
 #include "xstatus.h"
 
+#define IQ_FILE_MAX_LINE_SIZE       (64)
+
 static int32_t IqFile_ReadLine( FIL *fil, char *line, int size )
 {
   uint32_t len = 1;
@@ -59,7 +61,7 @@ static int32_t IqFile_GetSampleCnt( FIL *fil, uint32_t *SampleCnt )
 
 static int32_t IqFile_ReadSample( FIL *fil, uint32_t *Sample )
 {
-  char line[256] = {0};
+  char line[IQ_FILE_MAX_LINE_SIZE] = {0};
 
   if(IqFile_ReadLine( fil, line, sizeof(line) ) != XST_SUCCESS)
     return XST_FAILURE;
@@ -88,41 +90,88 @@ int32_t IqFile_Read( const char* filename, uint32_t **Buf, uint32_t *Length )
   *Length = SampleCnt;
   *Buf = SampleBuf;
 
-  /* Open File */
-  if(f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ) != FR_OK)
-    return XST_FAILURE;
-
-  /* Get Number of Samples */
-  if(IqFile_GetSampleCnt( &fil, &SampleCnt ) != XST_SUCCESS)
-    return XST_FAILURE;
-
-  /* Allocate Buffer */
-  if((SampleBuf = malloc(SampleCnt * sizeof(uint32_t))) == NULL)
-    return XST_FAILURE;
-
-  /* Pointer to beginning of file */
-  if(f_lseek(&fil, 0) != FR_OK)
-    return XST_FAILURE;
-
-  while(cnt < SampleCnt)
+  do
   {
-    if(( status = IqFile_ReadSample( &fil, &SampleBuf[cnt] )) != XST_SUCCESS )
+    /* Open File */
+    if((status = f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
+
+    /* Get Number of Samples */
+    if((status = IqFile_GetSampleCnt( &fil, &SampleCnt )) != XST_SUCCESS) break;
+
+    /* Allocate Buffer */
+    if((SampleBuf = malloc(SampleCnt * sizeof(uint32_t))) == NULL)
     {
-      free(SampleBuf);
+      status = XST_FAILURE;
       break;
     }
 
-    cnt++;
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, 0)) != FR_OK) break;
+
+    while(cnt < SampleCnt)
+    {
+      if(( status = IqFile_ReadSample( &fil, &SampleBuf[cnt] )) != XST_SUCCESS )
+        break;
+
+      cnt++;
+    }
+
+  }while(0);
+
+  f_close(&fil);
+
+  if( status != XST_SUCCESS)
+  {
+    free(SampleBuf);
   }
-
-  if(f_close(&fil) != FR_OK)
-    status = XST_FAILURE;
-
-  *Length = SampleCnt;
-  *Buf = SampleBuf;
+  else
+  {
+    *Length = SampleCnt;
+    *Buf = SampleBuf;
+  }
 
   return status;
 }
 
+int32_t IqFile_Write( const char* filename, uint32_t *Buf, uint32_t Length )
+{
+  FIL fil;
+  UINT len = 0;
+  int32_t status;
+
+  do
+  {
+    /* Open File */
+    if((status = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK) break;
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, 0)) != FR_OK) break;
+
+    char line[IQ_FILE_MAX_LINE_SIZE];
+    int16_t idata, qdata;
+
+    /* Write data to file */
+    for(int i = 0; i < Length; i++)
+    {
+      line[0] = 0;
+      idata = (int16_t)(Buf[i] >> 16);
+      qdata = (int16_t)Buf[i];
+
+      snprintf(line, IQ_FILE_MAX_LINE_SIZE, "%d, %d\r\n", idata, qdata );
+
+      if((status = f_write(&fil, (const void*)line, strlen(line), (UINT*)&len)) != FR_OK) break;
+
+      if(strlen(line) != len)
+      {
+        status = XST_FAILURE;
+        break;
+      }
+    }
+  }while(0);
+
+  f_close(&fil);
+
+  return status;
+}
 
 

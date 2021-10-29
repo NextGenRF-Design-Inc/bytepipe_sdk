@@ -72,6 +72,11 @@
 /*************************** Types Declarations *******************************/
 /******************************************************************************/
 typedef enum {
+  EvtType_StartofTransfer  = 0,
+  EvtType_EndofTransfer    = 1,
+}axi_dmac_evt_type_t;
+
+typedef enum {
   DMA_DEV_TO_MEM,
   DMA_MEM_TO_DEV
 }axi_dmac_direction_t;
@@ -88,7 +93,7 @@ typedef struct {
   volatile bool transfer_done;
 }axi_dmac_transfer_t;
 
-typedef void (*axi_dmac_callback_t)( axi_dmac_transfer_t *transfer, void *param );
+typedef void (*axi_dmac_callback_t)( axi_dmac_evt_type_t evt, void *param );
 
 typedef struct {
   axi_dmac_callback_t           Callback;

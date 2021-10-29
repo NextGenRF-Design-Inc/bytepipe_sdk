@@ -21,8 +21,9 @@ _EL2_STACK_SIZE = DEFINED(_EL2_STACK_SIZE) ? _EL2_STACK_SIZE : 1024;
 
 MEMORY
 {
-   psu_ddr_0_MEM_0 : ORIGIN = 0x0, LENGTH = 0x7FF00000
+   psu_ddr_0_MEM_0 : ORIGIN = 0x0, LENGTH = 0x3FFFFFFF
    psu_ocm_ram_0_MEM_0 : ORIGIN = 0xFFFC0000, LENGTH = 0x40000
+   psu_ddr_0_MEM_1  : ORIGIN = 0x40000000, LENGTH = 0x7FF00000
 }
 
 /* Specify the default entry point to the program */
