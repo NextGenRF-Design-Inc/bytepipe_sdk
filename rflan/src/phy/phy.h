@@ -8,12 +8,8 @@
 
 #define PHY_STATUS_OFFSET           (-2000)
 
-#define PHY_NUM_RX_PORTS              (ADRV9001_NUM_RX_PORTS)
-#define PHY_NUM_TX_PORTS              (ADRV9001_NUM_TX_PORTS)
-#define PHY_NUM_PORTS                 (ADRV9001_NUM_PORTS)
 #define PHY_IS_PORT_TX(p)             ADRV9001_IS_PORT_TX(p)
 #define PHY_IS_PORT_RX(p)             ADRV9001_IS_PORT_RX(p)
-#define PHY_PORT_2_LOGICAL(p)         ADRV9001_PORT_2_LOGICAL(p)
 
 /**
 **  ADRV9001 Status

@@ -38,23 +38,26 @@ typedef struct
 } phy_queue_t;
 
 static QueueHandle_t      PhyQueue;                       ///< PHY Queue
-static phy_stream_t      *PhyStream[PHY_NUM_PORTS];       ///< Stream Data
+static phy_stream_t      *PhyStream[Adrv9001Port_Num];    ///< Stream Data
 
 static void Phy_IqStreamRemove( adrv9001_port_t Port )
 {
-  /* Free Stream Data */
-  free( PhyStream[PHY_PORT_2_LOGICAL(Port)] );
+  if( Port < Adrv9001Port_Num )
+  {
+    /* Free Stream Data */
+    free( PhyStream[ Port ] );
 
-  /* Clear Stream Data */
-  PhyStream[PHY_PORT_2_LOGICAL(Port)] = NULL;
+    /* Clear Stream Data */
+    PhyStream[ Port ] = NULL;
+  }
 }
 
 static void Phy_IqStreamStop( adrv9001_port_t Port )
 {
-  phy_stream_t *Stream = PhyStream[PHY_PORT_2_LOGICAL(Port)];
+  phy_stream_t *Stream = PhyStream[ Port ];
 
   /* Check if Valid */
-  if( Stream != NULL )
+  if( (Stream != NULL) && (Port < Adrv9001Port_Num) )
   {
     /* Disable RF */
     if( Adrv9001_ToRfCalibrated( Port ) != Adrv9001Status_Success )
@@ -68,24 +71,19 @@ static void Phy_IqStreamStop( adrv9001_port_t Port )
 
 static void Phy_IqStreamDone( adrv9001_port_t Port, adrv9001_status_t Status )
 {
-  phy_stream_t *Stream = PhyStream[PHY_PORT_2_LOGICAL( Port )];
+  phy_stream_t *Stream = PhyStream[ Port ];
+
+  if(( Stream == NULL) || (Port >= Adrv9001Port_Num))
+    return;
 
   /* Send Stream Error */
   phy_evt_data_t PhyEvtData = {
       .Stream.Port = Port,
-      .Stream.SampleBuf = NULL,
-      .Stream.SampleCnt = 0,
-      .Stream.Status = PhyStatus_InvalidParameter,
-      .Stream.CallbackRef = NULL
+      .Stream.SampleBuf = Stream->SampleBuf,
+      .Stream.SampleCnt = Stream->SampleCnt,
+      .Stream.Status = Status,
+      .Stream.CallbackRef = Stream->CallbackRef
   };
-
-  if( Stream != NULL )
-  {
-    PhyEvtData.Stream.SampleBuf = Stream->SampleBuf;
-    PhyEvtData.Stream.SampleCnt = Stream->SampleCnt;
-    PhyEvtData.Stream.Status = Status;
-    PhyEvtData.Stream.CallbackRef = Stream->CallbackRef;
-  }
 
   if(Stream->Callback != NULL)
     Stream->Callback( PhyEvtType_StreamDone, PhyEvtData, Stream->CallbackRef );
@@ -97,7 +95,7 @@ static void Phy_IqStreamStart( phy_stream_t *Stream )
     return;
 
   /* Copy Stream Reference */
-  PhyStream[PHY_PORT_2_LOGICAL(Stream->Port)] = Stream;
+  PhyStream[ Stream->Port ] = Stream;
 
   /* Enable RF */
   if( Adrv9001_ToRfEnabled( Stream->Port ) != Adrv9001Status_Success )
@@ -144,9 +142,11 @@ static void Phy_Task( void *pvParameters )
 
 static void Phy_Adrv9001Callback( adrv9001_evt_type_t EvtType, adrv9001_evt_data_t EvtData, void *param )
 {
-  if(EvtType == Adrv9001EvtType_Stream)
+  if(EvtType == Adrv9001EvtType_StreamDone)
   {
-    phy_queue_t qItem = {.Data.Port = EvtData.Stream.Port };
+    PhyStream[EvtData.Stream.Port]->Status = EvtData.Stream.Status;
+
+    phy_queue_t qItem = {.Data.Port = EvtData.Stream.Port, .Data.Status = EvtData.Stream.Status};
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     /* Disable Stream */
@@ -156,7 +156,6 @@ static void Phy_Adrv9001Callback( adrv9001_evt_type_t EvtType, adrv9001_evt_data
 
     /* Process Stream Done */
     qItem.Evt = PhyQEvt_StreamDone;
-    qItem.Data.Status = EvtData.Stream.Status;
     xQueueSendFromISR( PhyQueue, &qItem, &xHigherPriorityTaskWoken );
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
@@ -255,7 +254,7 @@ phy_status_t Phy_Initialize( void )
   int32_t status;
 
   /* Clear Stream Data */
-  for(int i = 0; i < PHY_NUM_PORTS; i++)
+  for(adrv9001_port_t i = 0; i < Adrv9001Port_Num; i++)
     PhyStream[i] = NULL;
 
   /* Create Queue */
@@ -271,25 +270,15 @@ phy_status_t Phy_Initialize( void )
 
   adrv9001_dma_cfg_t DmaCfg;
 
-  DmaCfg.BaseAddr[ADRV9001_TX1_LOGICAL_PORT] = XPAR_ADRV9001_TX1_DMA_BASEADDR;
-  DmaCfg.BaseAddr[ADRV9001_TX2_LOGICAL_PORT] = XPAR_ADRV9001_TX2_DMA_BASEADDR;
-  DmaCfg.BaseAddr[ADRV9001_RX1_LOGICAL_PORT] = XPAR_ADRV9001_RX1_DMA_BASEADDR;
-  DmaCfg.BaseAddr[ADRV9001_RX2_LOGICAL_PORT] = XPAR_ADRV9001_RX2_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Tx1] = XPAR_ADRV9001_TX1_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Tx2] = XPAR_ADRV9001_TX2_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Rx1] = XPAR_ADRV9001_RX1_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Rx2] = XPAR_ADRV9001_RX2_DMA_BASEADDR;
 
-  DmaCfg.IrqId[ADRV9001_TX1_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_TX1_DMA_IRQ_INTR;
-  DmaCfg.IrqId[ADRV9001_TX2_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_TX2_DMA_IRQ_INTR;
-  DmaCfg.IrqId[ADRV9001_RX1_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_RX1_DMA_IRQ_INTR;
-  DmaCfg.IrqId[ADRV9001_RX2_LOGICAL_PORT] = XPAR_FABRIC_ADRV9001_RX2_DMA_IRQ_INTR;
-
-  DmaCfg.BufAddr[ADRV9001_TX1_LOGICAL_PORT] = ADRV9001_TX1_DMA_BUF_ADDR;
-  DmaCfg.BufAddr[ADRV9001_TX2_LOGICAL_PORT] = ADRV9001_TX2_DMA_BUF_ADDR;
-  DmaCfg.BufAddr[ADRV9001_RX1_LOGICAL_PORT] = ADRV9001_RX1_DMA_BUF_ADDR;
-  DmaCfg.BufAddr[ADRV9001_RX2_LOGICAL_PORT] = ADRV9001_RX2_DMA_BUF_ADDR;
-
-  DmaCfg.BufSize[ADRV9001_TX1_LOGICAL_PORT] = ADRV9001_TX1_DMA_BUF_SIZE;
-  DmaCfg.BufSize[ADRV9001_TX2_LOGICAL_PORT] = ADRV9001_TX2_DMA_BUF_SIZE;
-  DmaCfg.BufSize[ADRV9001_RX1_LOGICAL_PORT] = ADRV9001_RX1_DMA_BUF_SIZE;
-  DmaCfg.BufSize[ADRV9001_RX2_LOGICAL_PORT] = ADRV9001_RX2_DMA_BUF_SIZE;
+  DmaCfg.IrqId[Adrv9001Port_Tx1] = XPAR_FABRIC_ADRV9001_TX1_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Tx2] = XPAR_FABRIC_ADRV9001_TX2_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Rx1] = XPAR_FABRIC_ADRV9001_RX1_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Rx2] = XPAR_FABRIC_ADRV9001_RX2_DMA_IRQ_INTR;
 
 
   adrv9001_gpio_cfg_t GpioCfg = {
@@ -334,13 +323,6 @@ phy_status_t Phy_Initialize( void )
   printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
   printf("  -API Version: %u.%u.%u\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
 
-  /* Begin Receiving */
-  if((status = Adrv9001_BeginReceiving( )) != Adrv9001Status_Success)
-    return status;
-
-  /* Begin Transmitting */
-  if((status = Adrv9001_BeginTransmitting( )) != Adrv9001Status_Success)
-    return status;
 
   return XST_SUCCESS;
 }

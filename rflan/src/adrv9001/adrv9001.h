@@ -35,6 +35,7 @@ typedef enum
   Adrv9001Status_PortDisabled                 = (ADRV9001_STATUS_OFFSET - 16),
   Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 17),
   Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 18),
+  Adrv9001Status_MemoryAlignmentError         = (ADRV9001_STATUS_OFFSET - 19),
 } adrv9001_status_t;
 
 /**
@@ -45,29 +46,13 @@ typedef enum
   Adrv9001Port_Rx1    = (0),
   Adrv9001Port_Rx2    = (1),
   Adrv9001Port_Tx1    = (2),
-  Adrv9001Port_Tx2    = (3)
+  Adrv9001Port_Tx2    = (3),
+  Adrv9001Port_Num    = (4),
+
 } adrv9001_port_t;
 
-#define ADRV9001_NUM_RX_PORTS               (2)
-#define ADRV9001_NUM_TX_PORTS               (2)
-#define ADRV9001_NUM_PORTS                  (ADRV9001_NUM_RX_PORTS + ADRV9001_NUM_TX_PORTS)
-#define ADRV9001_TX1_LOGICAL_PORT           (0)
-#define ADRV9001_TX2_LOGICAL_PORT           (1)
-#define ADRV9001_RX1_LOGICAL_PORT           (2)
-#define ADRV9001_RX2_LOGICAL_PORT           (3)
 #define ADRV9001_IS_PORT_TX(p)              ((( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false)
 #define ADRV9001_IS_PORT_RX(p)              ((( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false)
-#define ADRV9001_IS_LOGICAL_PORT_TX(p)      ((( p == ADRV9001_TX1_LOGICAL_PORT ) || ( p == ADRV9001_TX2_LOGICAL_PORT )) ? true : false)
-#define ADRV9001_IS_LOGICAL_PORT_RX(p)      ((( p == ADRV9001_RX1_LOGICAL_PORT ) || ( p == ADRV9001_RX2_LOGICAL_PORT )) ? true : false)
-#define ADRV9001_PORT_2_LOGICAL(p)          (( p == Adrv9001Port_Rx1)? ADRV9001_RX1_LOGICAL_PORT : \
-                                             ( p == Adrv9001Port_Rx2)? ADRV9001_RX2_LOGICAL_PORT : \
-                                             ( p == Adrv9001Port_Tx1)? ADRV9001_TX1_LOGICAL_PORT : \
-                                             ( p == Adrv9001Port_Tx2)? ADRV9001_TX2_LOGICAL_PORT : 0)
-#define ADRV9001_LOGICAL_2_PORT(p)          (( p == ADRV9001_TX1_LOGICAL_PORT)? Adrv9001Port_Tx1 : \
-                                             ( p == ADRV9001_TX2_LOGICAL_PORT)? Adrv9001Port_Tx2 : \
-                                             ( p == ADRV9001_RX1_LOGICAL_PORT)? Adrv9001Port_Rx1 : \
-                                             ( p == ADRV9001_RX2_LOGICAL_PORT)? Adrv9001Port_Rx2 : 0)
-
 #define ADRV9001_PORT_2_STR(p)              (( p == Adrv9001Port_Tx1 )? "Tx1" :                 \
                                              ( p == Adrv9001Port_Tx2 )? "Tx2" :                 \
                                              ( p == Adrv9001Port_Rx1 )? "Rx1" :                 \
@@ -111,7 +96,8 @@ typedef union
  */
 typedef enum
 {
-  Adrv9001EvtType_Stream       = 0,
+  Adrv9001EvtType_StreamStart   = 0,
+  Adrv9001EvtType_StreamDone    = 1,
 } adrv9001_evt_type_t;
 
 /**
@@ -123,11 +109,10 @@ typedef void (*adrv9001_callback_t)( adrv9001_evt_type_t EvtType, adrv9001_evt_d
  **  ADRV9001 DMA Configuration
  */
 typedef struct {
-  uint32_t              BufAddr[ADRV9001_NUM_PORTS];   ///< DMA Buffer Memory Address
-  uint32_t              BufSize[ADRV9001_NUM_PORTS];   ///< Size in bytes of DMA buffer, must by 8 byte aligned
-  uint32_t              IrqId[ADRV9001_NUM_PORTS];     ///< DMA Processor IRQ ID
-  uint32_t              BaseAddr[ADRV9001_NUM_PORTS];  ///< DMA AXI Bus Address
+  uint32_t              IrqId[Adrv9001Port_Num];     ///< DMA Processor IRQ ID
+  uint32_t              BaseAddr[Adrv9001Port_Num];  ///< DMA AXI Bus Address
 } adrv9001_dma_cfg_t;
+
 
 /**
  **  ADRV9001 GPIO Configuration
@@ -140,6 +125,7 @@ typedef struct {
   uint32_t              Tx1EnPin;           ///< Tx1 enable pin number
   uint32_t              Tx2EnPin;           ///< Tx2 enable pin number
   uint32_t              IrqPin;             ///< Irq enable pin number
+
 } adrv9001_gpio_cfg_t;
 
 /**
@@ -187,6 +173,21 @@ typedef struct
     uint8_t minor;                          ///< Minor silicon version
   }Silicon;
 } adrv9001_ver_t;
+
+/*******************************************************************************
+*
+* \details
+*
+* This function enables or disables the external LNA
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Enable true for enabling and false for disabling
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_LnaEnable( adrv9001_port_t Port, bool Enable );
 
 /*******************************************************************************
 *
@@ -405,28 +406,6 @@ adrv9001_status_t Adrv9001_GetCarrierFrequency( adrv9001_port_t Port, uint64_t *
 *
 * \details
 *
-* This function starts receiving based on the TES profile.
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_BeginReceiving( void );
-
-/*******************************************************************************
-*
-* \details
-*
-* This function starts transmitting based on the TES profile.
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_BeginTransmitting( void );
-
-/*******************************************************************************
-*
-* \details
-*
 * This function enables or disables the internal loop back within the ADRV9001
 * based on the requested port.  The requested port results in the following loop
 * back path within the ADRV9001.
@@ -525,26 +504,16 @@ adrv9001_status_t Adrv9001_ToRfCalibrated( adrv9001_port_t Port );
 * \details
 *
 * This function enables continuous streaming of IQ data.  This function enables
-* the appropriate radio state and sets up the appropriate DMA to cyclically
-* transfer IQ samples from memory to the SSI or vice versa.
+* the appropriate radio state and sets up the appropriate DMA to transfer IQ
+* samples from memory to the SSI or vice versa.  The DMA streams directly from
+* the buffer provided by the caller.  This buffer and its contents must not be
+* modified until the Adrv9001EvtType_StreamDone callback event is received by
+* the caller.
 *
-* When selecting a transmit port the IQ data is copied to an internal buffer
-* and continuously streamed to the SSI looping back to the first IQ sample
-* after a SampleCnt number of samples are reached.  Once this function has been
-* called the user can reuse or free the memory location of Buf.
-*
-* When selecting a receive port the DMA continuously streams IQ data to an
-* internal buffer.  Once a SampleCnt number of samples have been received the
-* memory is copied to the user provided buffer and a callback is generated
-* indicating to the user the buffer is full.  The DMA will continue to stream
-* samples to the internal 1M sample buffer and generate callbacks as a
-* SampleCnt number of samples are received.  This allows for some throttling
-* before samples are dropped.  If the user callback is not executed immediately
-* samples will not be dropped until the 1M buffer overflows.  The user must
-* provide Buf with a size of SampleCnt as long as the stream is enabled.
-*
-* To disable the stream for a particular port call this function with SampleCnt
-* set to zero.
+* If the DMA is setup to stream continuously the IQ samples will be streamed
+* continuously streamed to the SSI looping back to the first IQ sample
+* after a SampleCnt number of samples are reached.  To disable the stream for
+* a particular port call this function with SampleCnt set to zero.
 *
 * \param[in]  Port is the port being requested
 *

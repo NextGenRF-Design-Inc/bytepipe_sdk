@@ -3,9 +3,8 @@ clear all;
 
 fs = 15.36e6;
 
-iq = BytePipe_WavformFileRead("rx.csv");
+iq = BytePipe_WavformFileRead("rx2.csv");
 
-figure();
 bins = 1000; 
 h2 = spectrum.welch('Hamming',bins);
 spec = msspectrum(h2,iq,...
@@ -14,11 +13,6 @@ spec = msspectrum(h2,iq,...
         'CenterDC',true);    
 f = spec.Frequencies/1e6;
 a = 10*log10(spec.Data);    
-plot(f,a);
-grid on;
-xlabel('Frequency (MHz)');
-ylabel('Power (dB)');
-title('Spectrum');
 
 figure; 
 subplot(2,2,1); plot(f,a);

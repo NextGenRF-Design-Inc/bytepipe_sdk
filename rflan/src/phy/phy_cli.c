@@ -216,7 +216,7 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
     }
 
     /* Allocate Buffer */
-    if((Stream.SampleBuf = malloc(SampleCnt * sizeof(uint32_t))) == NULL)
+    if((Stream.SampleBuf = calloc(1, SampleCnt * sizeof(uint32_t))) == NULL)
     {
       printf("Memory Error\r\n");
       return;

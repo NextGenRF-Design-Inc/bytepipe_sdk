@@ -41,17 +41,6 @@ extern "C"
 #define APP_CLI_CMD_LIST_SIZE           100
 #define APP_CLI_HISTORY_BUF_SIZE        256
 
-
-#define DMA_BUF_ADDR                    (0x40000000)      // Upper half of DDR. Reserved in linker script
-#define ADRV9001_TX1_DMA_BUF_ADDR       (DMA_BUF_ADDR)
-#define ADRV9001_TX1_DMA_BUF_SIZE       (0x400000)
-#define ADRV9001_TX2_DMA_BUF_ADDR       (ADRV9001_TX1_DMA_BUF_ADDR + ADRV9001_TX1_DMA_BUF_SIZE)
-#define ADRV9001_TX2_DMA_BUF_SIZE       (0x400000)
-#define ADRV9001_RX1_DMA_BUF_ADDR       (ADRV9001_TX2_DMA_BUF_ADDR + ADRV9001_TX2_DMA_BUF_SIZE)
-#define ADRV9001_RX1_DMA_BUF_SIZE       (0x10000000)
-#define ADRV9001_RX2_DMA_BUF_ADDR       (ADRV9001_RX1_DMA_BUF_ADDR + ADRV9001_RX1_DMA_BUF_SIZE)
-#define ADRV9001_RX2_DMA_BUF_SIZE       (0x10000000)
-
 #define GPIO_DEVICE_ID                  (XPAR_PSU_GPIO_0_DEVICE_ID)
 #define GPIO_OFFSET                     (78)
 #define ADRV9001_GPIO_RX2_EN            (4 + GPIO_OFFSET)
