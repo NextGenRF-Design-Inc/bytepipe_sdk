@@ -27,5 +27,5 @@ The following example builds the `bytepipe_3cg_9002` HDL using Cygwin running on
 ![hdl_build_01](hdl_build_01.png)
 
 # DISCLAIMER
----
+
 THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
