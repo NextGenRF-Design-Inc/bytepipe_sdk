@@ -22,5 +22,5 @@ Once the desired settings are made, navigate to `Sample Code` and select `C99`. 
 Documentation is currently not available.
 
 # DISCLAIMER
----
+
 THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
