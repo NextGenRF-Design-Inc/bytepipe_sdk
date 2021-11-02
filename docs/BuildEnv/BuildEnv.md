@@ -48,5 +48,5 @@ The Vivado Design Suite from Xilinx must be installed on both the Windows PC and
 ![vivado_2019.1_download](vivado_2019_1_download.png)
 
 # DISCLAIMER
----
+
 THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
