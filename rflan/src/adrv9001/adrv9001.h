@@ -31,6 +31,11 @@ typedef enum
   Adrv9001Status_NotSupported                 = (ADRV9001_STATUS_OFFSET - 12),
   Adrv9001Status_DriverError                  = (ADRV9001_STATUS_OFFSET - 13),
   Adrv9001Status_DmaError                     = (ADRV9001_STATUS_OFFSET - 14),
+  Adrv9001Status_ExceedsDmaBuffer             = (ADRV9001_STATUS_OFFSET - 15),
+  Adrv9001Status_PortDisabled                 = (ADRV9001_STATUS_OFFSET - 16),
+  Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 17),
+  Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 18),
+  Adrv9001Status_MemoryAlignmentError         = (ADRV9001_STATUS_OFFSET - 19),
 } adrv9001_status_t;
 
 /**
@@ -41,24 +46,17 @@ typedef enum
   Adrv9001Port_Rx1    = (0),
   Adrv9001Port_Rx2    = (1),
   Adrv9001Port_Tx1    = (2),
-  Adrv9001Port_Tx2    = (3)
+  Adrv9001Port_Tx2    = (3),
+  Adrv9001Port_Num    = (4),
+
 } adrv9001_port_t;
 
-#define ADRV9001_NUM_RX_PORTS               (2)
-#define ADRV9001_NUM_TX_PORTS               (2)
-#define ADRV9001_NUM_PORTS                  (ADRV9001_NUM_RX_PORTS + ADRV9001_NUM_TX_PORTS)
-#define ADRV9001_TX1_LOGICAL_PORT           (0)
-#define ADRV9001_TX2_LOGICAL_PORT           (1)
-#define ADRV9001_RX1_LOGICAL_PORT           (2)
-#define ADRV9001_RX2_LOGICAL_PORT           (3)
 #define ADRV9001_IS_PORT_TX(p)              ((( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false)
 #define ADRV9001_IS_PORT_RX(p)              ((( p == Adrv9001Port_Rx1 ) || ( p == Adrv9001Port_Rx2 )) ? true : false)
-#define ADRV9001_IS_LOGICAL_PORT_TX(p)      ((( p == ADRV9001_TX1_LOGICAL_PORT ) || ( p == ADRV9001_TX2_LOGICAL_PORT )) ? true : false)
-#define ADRV9001_IS_LOGICAL_PORT_RX(p)      ((( p == ADRV9001_RX1_LOGICAL_PORT ) || ( p == ADRV9001_RX2_LOGICAL_PORT )) ? true : false)
-#define ADRV9001_LOGICAL_PORT(p)            ((p == Adrv9001Port_Rx1)? ADRV9001_RX1_LOGICAL_PORT : \
-                                             (p == Adrv9001Port_Rx2)? ADRV9001_RX2_LOGICAL_PORT : \
-                                             (p == Adrv9001Port_Tx1)? ADRV9001_TX1_LOGICAL_PORT : \
-                                             (p == Adrv9001Port_Tx2)? ADRV9001_TX2_LOGICAL_PORT : 0)
+#define ADRV9001_PORT_2_STR(p)              (( p == Adrv9001Port_Tx1 )? "Tx1" :                 \
+                                             ( p == Adrv9001Port_Tx2 )? "Tx2" :                 \
+                                             ( p == Adrv9001Port_Rx1 )? "Rx1" :                 \
+                                             ( p == Adrv9001Port_Rx2 )? "Rx2" : "Unknown")
 
 /**
  **  ADRV9001 Radio State
@@ -81,19 +79,15 @@ typedef struct
 } adrv9001_iqdata_t;
 
 /**
- **  ADRV9001 Stream Event
- */
-typedef struct
-{
-  adrv9001_port_t     Port;
-} adrv9001_evt_stream_t;
-
-/**
  **  ADRV9001 Event Data
  */
 typedef union
 {
-  adrv9001_evt_stream_t     Stream;
+  struct
+  {
+    adrv9001_port_t     Port;
+    adrv9001_status_t   Status;
+  }Stream;
 } adrv9001_evt_data_t;
 
 /**
@@ -101,32 +95,43 @@ typedef union
  */
 typedef enum
 {
-  Adrv9001EvtType_Stream        = 0,
+  Adrv9001EvtType_StreamStart   = 0,
+  Adrv9001EvtType_StreamDone    = 1,
 } adrv9001_evt_type_t;
-
-/**
- **  ADRV9001 Event
- */
-typedef struct
-{
-  adrv9001_evt_type_t       Type;
-  adrv9001_evt_data_t      *Data;
-} adrv9001_evt_t;
 
 /**
 ** ADRV9001 Callback
 */
-typedef void (*adrv9001_callback_t)( adrv9001_evt_t evt, void *param );
+typedef void (*adrv9001_callback_t)( adrv9001_evt_type_t EvtType, adrv9001_evt_data_t EvtData, void *param );
 
 /**
  **  ADRV9001 DMA Configuration
  */
 typedef struct {
-  uint32_t              BufAddr;                       ///< DMA Buffer Memory Address
-  uint32_t              BufSize;                       ///< Size in bytes of DMA buffer, must by 8 byte aligned
-  uint32_t              IrqId[ADRV9001_NUM_PORTS];     ///< DMA Processor IRQ ID
-  uint32_t              BaseAddr[ADRV9001_NUM_PORTS];  ///< DMA AXI Bus Address
+  uint32_t              IrqId[Adrv9001Port_Num];     ///< DMA Processor IRQ ID
+  uint32_t              BaseAddr[Adrv9001Port_Num];  ///< DMA AXI Bus Address
 } adrv9001_dma_cfg_t;
+
+/**
+ **  ADRV9001 GPIO Configuration
+ */
+typedef struct {
+  uint32_t              DeviceId;           ///< Device ID
+  uint32_t              RstnPin;            ///< Reset pin number
+  uint32_t              Rx1EnPin;           ///< Rx1 enable pin number
+  uint32_t              Rx2EnPin;           ///< Rx2 enable pin number
+  uint32_t              Tx1EnPin;           ///< Tx1 enable pin number
+  uint32_t              Tx2EnPin;           ///< Tx2 enable pin number
+  uint32_t              IrqPin;             ///< Irq enable pin number
+} adrv9001_gpio_cfg_t;
+
+/**
+ **  ADRV9001 SPI Configuration
+ */
+typedef struct {
+  uint32_t              DeviceId;           ///< Device ID
+  uint32_t              CsPinId;            ///< Chip Select pin number relative to the SPI hardware (0 to 3)
+} adrv9001_spi_cfg_t;
 
 /**
  **  ADRV9001 Configuration
@@ -136,8 +141,173 @@ typedef struct
   adrv9001_callback_t   Callback;           ///< Callback
   void                 *CallbackRef;        ///< Callback reference data
   adrv9001_dma_cfg_t   *DmaCfg;             ///< DMA Configuration
+  adrv9001_gpio_cfg_t  *GpioCfg;            ///< GPIO Configuration
+  adrv9001_spi_cfg_t   *SpiCfg;             ///< SPI Configuration
   void                 *IrqInstance;        ///< Processor Interrupt Instance
 } adrv9001_cfg_t;
+
+/**
+ **  ADRV9001 Version Info
+ */
+typedef struct
+{
+  struct
+  {
+    uint32_t major;                         ///< API Major Version number
+    uint32_t minor;                         ///< API Minor Version number
+    uint32_t patch;                         ///< API Patch Version number
+  }Api;                                     ///< adi_adrv9001 API Version
+  struct
+  {
+    uint8_t major;                          ///< ARM Major Version number
+    uint8_t minor;                          ///< ARM Minor Version number
+    uint8_t maint;                          ///< ARM Maintenance Version number
+    uint8_t rcVer;                          ///< ARM RC Version number
+  }Arm;
+  struct
+  {
+    uint8_t major;                          ///< Major silicon version (0xA, 0xB, etc)
+    uint8_t minor;                          ///< Minor silicon version
+  }Silicon;
+} adrv9001_ver_t;
+
+/*******************************************************************************
+*
+* \details
+*
+* This function enables or disables the external LNA
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Enable true for enabling and false for disabling
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_LnaEnable( adrv9001_port_t Port, bool Enable );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function performs a SPI write
+*
+* \param[in]  txData is the data to be sent
+*
+* \param[in]  numTxBytes specifies how many bytes are to be sent
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SpiWrite( const uint8_t txData[], uint32_t numTxBytes );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function performs a SPI read
+*
+* \param[in]  txData is the data to be sent
+*
+* \param[out] rxData is the data that is read
+*
+* \param[in]  numRxBytes specifies how many bytes are to be read
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SpiRead( const uint8_t txData[], uint8_t rxData[], uint32_t numRxBytes );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the RESETN pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_ResetbPinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the RX1 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Rx1EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the TX1 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Tx1EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the RX2 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Rx2EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the TX2 enable pin
+*
+* \param[in]  PinLevel
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_Tx2EnablePinSet( uint8_t PinLevel );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the adrv9001 version information
+*
+* \param[out] Version Information
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetVersionInfo( adrv9001_ver_t *VerInfo );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the junction temperature of the ADRV9002
+*
+* \param[out] Temperature in degrees C
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetTemperature( int16_t *Temp_C );
 
 /*******************************************************************************
 *
@@ -228,28 +398,6 @@ adrv9001_status_t Adrv9001_GetSampleRate( adrv9001_port_t Port, uint32_t *FreqHz
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_GetCarrierFrequency( adrv9001_port_t Port, uint64_t *FreqHz );
-
-/*******************************************************************************
-*
-* \details
-*
-* This function starts receiving based on the TES profile.
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_BeginReceiving( void );
-
-/*******************************************************************************
-*
-* \details
-*
-* This function starts transmitting based on the TES profile.
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_BeginTransmitting( void );
 
 /*******************************************************************************
 *
@@ -353,26 +501,16 @@ adrv9001_status_t Adrv9001_ToRfCalibrated( adrv9001_port_t Port );
 * \details
 *
 * This function enables continuous streaming of IQ data.  This function enables
-* the appropriate radio state and sets up the appropriate DMA to cyclically
-* transfer IQ samples from memory to the SSI or vice versa.
+* the appropriate radio state and sets up the appropriate DMA to transfer IQ
+* samples from memory to the SSI or vice versa.  The DMA streams directly from
+* the buffer provided by the caller.  This buffer and its contents must not be
+* modified until the Adrv9001EvtType_StreamDone callback event is received by
+* the caller.
 *
-* When selecting a transmit port the IQ data is copied to an internal buffer
-* and continuously streamed to the SSI looping back to the first IQ sample
-* after a SampleCnt number of samples are reached.  Once this function has been
-* called the user can reuse or free the memory location of Buf.
-*
-* When selecting a receive port the DMA continuously streams IQ data to an
-* internal buffer.  Once a SampleCnt number of samples have been received the
-* memory is copied to the user provided buffer and a callback is generated
-* indicating to the user the buffer is full.  The DMA will continue to stream
-* samples to the internal 1M sample buffer and generate callbacks as a
-* SampleCnt number of samples are received.  This allows for some throttling
-* before samples are dropped.  If the user callback is not executed immediately
-* samples will not be dropped until the 1M buffer overflows.  The user must
-* provide Buf with a size of SampleCnt as long as the stream is enabled.
-*
-* To disable the stream for a particular port call this function with SampleCnt
-* set to zero.
+* If the DMA is setup to stream continuously the IQ samples will be streamed
+* continuously streamed to the SSI looping back to the first IQ sample
+* after a SampleCnt number of samples are reached.  To disable the stream for
+* a particular port call this function with SampleCnt set to zero.
 *
 * \param[in]  Port is the port being requested
 *
@@ -427,11 +565,14 @@ adrv9001_status_t Adrv9001_HwReset( void );
 * This function initializes the ADRV9001 using the adi_adrv9001 device driver
 * along with initializing the HDL associated with the ADRV9001.
 *
+* \param[out] Instance returns the adi_adrv9001_Device_t Instance which can be
+*             used by the caller to call adi_adrv9001 APIs directly.
+*
 * \param[in]  Cfg contains configuration data for initializing the ADRV9001
 *
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_Initialize( adrv9001_cfg_t *Cfg );
+adrv9001_status_t Adrv9001_Initialize( void **Instance, adrv9001_cfg_t *Cfg );
 
 #endif

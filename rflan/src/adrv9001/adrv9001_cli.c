@@ -58,9 +58,9 @@ static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
 */
 static const CliCmd_t Adrv9001CliGetTxBoostDef =
 {
-  "GetTxBoost",
-  "GetTxBoost: Get Transmit boost \r\n"
-  "GetTxBoost < port ( Tx1,Tx2 )>\r\n\r\n",
+  "Adrv9001GetTxBoost",
+  "Adrv9001GetTxBoost: Get Transmit boost \r\n"
+  "Adrv9001GetTxBoost < port ( Tx1,Tx2 )>\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetTxBoost,
   1,
   NULL
@@ -101,9 +101,9 @@ static void Adrv9001Cli_SetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
 */
 static const CliCmd_t Adrv9001CliSetTxBoostDef =
 {
-  "SetTxBoost",
-  "SetTxBoost: Set Transmit boost \r\n"
-  "SetTxBoost < port ( Tx1,Tx2 ), Enable (ie. 0 or 1) >\r\n\r\n",
+  "Adrv9001SetTxBoost",
+  "Adrv9001SetTxBoost: Set Transmit boost \r\n"
+  "Adrv9001SetTxBoost < port ( Tx1,Tx2 ), Enable (ie. 0 or 1) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_SetTxBoost,
   2,
   NULL
@@ -147,9 +147,9 @@ static void Adrv9001Cli_SetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
 */
 static const CliCmd_t Adrv9001CliSetTxAttnDef =
 {
-  "SetTxAttn",
-  "SetTxAttn: Set Transmit attenuation in dB \r\n"
-  "SetTxAttn < port ( Tx1,Tx2 ), attn ( ie 10.5 ) >\r\n\r\n",
+  "Adrv9001SetTxAttn",
+  "Adrv9001SetTxAttn: Set Transmit attenuation in dB \r\n"
+  "Adrv9001SetTxAttn < port ( Tx1,Tx2 ), attn ( ie 10.5 ) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_SetTxAttn,
   2,
   NULL
@@ -192,9 +192,9 @@ static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
 */
 static const CliCmd_t Adrv9001CliGetTxAttnDef =
 {
-  "GetTxAttn",
-  "GetTxAttn: Get Transmit attenuation in dB \r\n"
-  "GetTxAttn < port ( Tx1,Tx2 ) >\r\n\r\n",
+  "Adrv9001GetTxAttn",
+  "Adrv9001GetTxAttn: Get Transmit attenuation in dB \r\n"
+  "Adrv9001GetTxAttn < port ( Tx1,Tx2 ) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetTxAttn,
   1,
   NULL
@@ -234,9 +234,9 @@ static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void 
 */
 static const CliCmd_t Adrv9001CliGetSampleRateDef =
 {
-  "GetSampleRate",
-  "GetSampleRate: Get SSI IQ Sample Rate \r\n"
-  "GetSampleRate < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001GetSampleRate",
+  "Adrv9001GetSampleRate: Get SSI IQ Sample Rate \r\n"
+  "Adrv9001GetSampleRate < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetSampleRate,
   1,
   NULL
@@ -276,9 +276,9 @@ static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
 */
 static const CliCmd_t Adrv9001CliGetCarrierFrequencyDef =
 {
-  "GetCarrierFrequency",
-  "GetCarrierFrequency: Get Carrier Frequency \r\n"
-  "GetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001GetCarrierFrequency",
+  "Adrv9001GetCarrierFrequency: Get Carrier Frequency \r\n"
+  "Adrv9001GetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetCarrierFrequency,
   1,
   NULL
@@ -316,9 +316,9 @@ static void Adrv9001Cli_SetRadioState(Cli_t *CliInstance, const char *cmd, void 
 
 static const CliCmd_t Adrv9001CliSetRadioStateDef =
 {
-  "SetRadioState",
-  "SetRadioState: Set radio state \r\n"
-  "SetRadioState < port ( Rx1,Rx2,Tx1,Tx2), state (0=standby, 1=calibrated, 2=primed, 3=enabled) >\r\n\r\n",
+  "Adrv9001SetRadioState",
+  "Adrv9001SetRadioState: Set radio state \r\n"
+  "Adrv9001SetRadioState < port ( Rx1,Rx2,Tx1,Tx2), state (0=standby, 1=calibrated, 2=primed, 3=enabled) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_SetRadioState,
   2,
   NULL
@@ -358,9 +358,9 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
 
 static const CliCmd_t Adrv9001CliGetRadioStateDef =
 {
-  "GetRadioState",
-  "GetRadioState: Get radio state \r\n"
-  "GetRadioState < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001GetRadioState",
+  "Adrv9001GetRadioState: Get radio state \r\n"
+  "Adrv9001GetRadioState < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetRadioState,
   1,
   NULL
@@ -395,9 +395,9 @@ static void Adrv9001Cli_ToRfEnabled(Cli_t *CliInstance, const char *cmd, void *u
 
 static const CliCmd_t Adrv9001CliToRfEnabledDef =
 {
-  "ToRfEnabled",
-  "ToRfEnabled: Transition to RF enabled \r\n"
-  "ToRfEnabled < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001ToRfEnabled",
+  "Adrv9001ToRfEnabled: Transition to RF enabled \r\n"
+  "Adrv9001ToRfEnabled < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_ToRfEnabled,
   1,
   NULL
@@ -432,9 +432,9 @@ static void Adrv9001Cli_ToRfCalibrated(Cli_t *CliInstance, const char *cmd, void
 
 static const CliCmd_t Adrv9001CliToRfCalibratedDef =
 {
-  "ToRfCalibrated",
-  "ToRfCalibrated: Transition to RF calibrated \r\n"
-  "ToRfCalibrated < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001ToRfCalibrated",
+  "Adrv9001ToRfCalibrated: Transition to RF calibrated \r\n"
+  "Adrv9001ToRfCalibrated < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_ToRfCalibrated,
   1,
   NULL
@@ -469,11 +469,76 @@ static void Adrv9001Cli_ToRfPrimed(Cli_t *CliInstance, const char *cmd, void *us
 
 static const CliCmd_t Adrv9001CliToRfPrimedDef =
 {
-  "ToRfPrimed",
-  "ToRfPrimed: Transition to RF primed \r\n"
-  "ToRfPrimed < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001ToRfPrimed",
+  "Adrv9001ToRfPrimed: Transition to RF primed \r\n"
+  "Adrv9001ToRfPrimed < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_ToRfPrimed,
   1,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Get Temperature
+*
+*******************************************************************************/
+static void Adrv9001Cli_GetTemp(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int16_t Temp_C;
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_GetTemperature( &Temp_C ) == Adrv9001Status_Success)
+  {
+    printf("%dC\r\n", Temp_C);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+static const CliCmd_t Adrv9001CliGetTempDef =
+{
+  "Adrv9001GetTemp",
+  "Adrv9001GetTemp: Get Temperature in degC \r\n"
+  "Adrv9001GetTemp <  >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetTemp,
+  0,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Get Version Information
+*
+*******************************************************************************/
+static void Adrv9001Cli_GetVerInfo(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_ver_t VerInfo;
+
+  Adrv9001_ClearError( );
+
+  if(Adrv9001_GetVersionInfo( &VerInfo ) == Adrv9001Status_Success)
+  {
+    printf("%s Version Information:\r\n","ADRV9002");
+    printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
+    printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
+    printf("  -API Version: %u.%u.%u\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+static const CliCmd_t Adrv9001CliGetVerInfoDef =
+{
+  "Adrv9001GetVerInfo",
+  "Adrv9001GetVerInfo: Get version information \r\n"
+  "Adrv9001GetVerInfo <  >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetVerInfo,
+  0,
   NULL
 };
 
@@ -499,7 +564,8 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliToRfPrimedDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliToRfCalibratedDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliToRfEnabledDef);
-
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetTempDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetVerInfoDef);
 
 	return Adrv9001Status_Success;
 }

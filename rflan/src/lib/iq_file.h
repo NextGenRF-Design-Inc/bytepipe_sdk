@@ -9,7 +9,7 @@ extern "C"
 
 #include <stdint.h>
 
-
+int32_t IqFile_Write( const char* filename, uint32_t *Buf, uint32_t Length );
 int32_t IqFile_Read( const char* filename, uint32_t **Buf, uint32_t *Length );
 
 #endif /* PHY_CLI_H_ */
