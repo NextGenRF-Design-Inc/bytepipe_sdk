@@ -2,7 +2,7 @@
 
 # RFLAN CLI
 
-The RFLAN application supports a custom command line interface (CLI) allowing users to interact with the RFLAN through a serial port and terminal program.  For information on adding custom CLI commands refer to [RFLAN CLI Architecture](../Architecture/Architecture.md#-rflan-cli).
+The RFLAN application supports a custom command line interface (CLI) allowing users to interact with the RFLAN through a serial port and terminal program.  For information on adding custom CLI commands refer to [RFLAN CLI Architecture](../Architecture/Architecture.md#rflcli).
 
 # Hardware Connection
 
