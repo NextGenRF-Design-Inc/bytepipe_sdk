@@ -272,10 +272,6 @@ The gold anodized aluminum cover provides RF shielding along with a heat sink in
 # ADRV900x Version
 Early engineering samples of the BytePipe_x9002 had a mix of ADRV9002 silicon.  These versions used the ADRV9002 RevB0 silicon while later versions used the ADRV9002 RevC0 silicon.  Currently all released versions of the BytePipe_x9002 have the ADRV9002 RevC0 silicon. 
 
-# Disclaimer
-----------------------
-NextGen RF Design makes no warranty for the use of this code or design. This code is provided  "As Is". NextGen RF Design assumes no responsibility for
-any errors, which may appear in this code, nor does it make a commitment to update the information contained herein. NextGen RF Design specifically
-disclaims any implied warranties of fitness for a particular purpose.
-Copyright(c) NextGen RF Design
-All rights reserved.
+# DISCLAIMER
+
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../../DISCLAIMER.md).
