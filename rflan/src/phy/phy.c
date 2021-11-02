@@ -11,9 +11,10 @@
 #include "parameters.h"
 #include "xscugic.h"
 #include "adrv9001.h"
+#include "adi_adrv9001_types.h"
 
 
-extern XScuGic          xInterruptController;
+extern XScuGic                  xInterruptController;
 /**
 **  PHY Queue
 */
@@ -37,8 +38,9 @@ typedef struct
   }Data;
 } phy_queue_t;
 
-static QueueHandle_t      PhyQueue;                       ///< PHY Queue
-static phy_stream_t      *PhyStream[Adrv9001Port_Num];    ///< Stream Data
+static QueueHandle_t            PhyQueue;                       ///< PHY Queue
+static phy_stream_t            *PhyStream[Adrv9001Port_Num];    ///< Stream Data
+static adi_adrv9001_Device_t   *Adrv9001;
 
 static void Phy_IqStreamRemove( adrv9001_port_t Port )
 {
@@ -306,7 +308,7 @@ phy_status_t Phy_Initialize( void )
   };
 
   /* Initialize ADRV9001 */
-  if((status = Adrv9001_Initialize( &Adrv9001Cfg )) != Adrv9001Status_Success)
+  if((status = Adrv9001_Initialize( (void**)&Adrv9001, &Adrv9001Cfg )) != Adrv9001Status_Success)
     return status;
 
   /* Load ADRV9001 Profile */

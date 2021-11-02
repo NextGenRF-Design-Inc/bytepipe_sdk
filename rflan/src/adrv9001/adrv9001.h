@@ -88,7 +88,6 @@ typedef union
     adrv9001_port_t     Port;
     adrv9001_status_t   Status;
   }Stream;
-
 } adrv9001_evt_data_t;
 
 /**
@@ -113,7 +112,6 @@ typedef struct {
   uint32_t              BaseAddr[Adrv9001Port_Num];  ///< DMA AXI Bus Address
 } adrv9001_dma_cfg_t;
 
-
 /**
  **  ADRV9001 GPIO Configuration
  */
@@ -125,7 +123,6 @@ typedef struct {
   uint32_t              Tx1EnPin;           ///< Tx1 enable pin number
   uint32_t              Tx2EnPin;           ///< Tx2 enable pin number
   uint32_t              IrqPin;             ///< Irq enable pin number
-
 } adrv9001_gpio_cfg_t;
 
 /**
@@ -568,11 +565,14 @@ adrv9001_status_t Adrv9001_HwReset( void );
 * This function initializes the ADRV9001 using the adi_adrv9001 device driver
 * along with initializing the HDL associated with the ADRV9001.
 *
+* \param[out] Instance returns the adi_adrv9001_Device_t Instance which can be
+*             used by the caller to call adi_adrv9001 APIs directly.
+*
 * \param[in]  Cfg contains configuration data for initializing the ADRV9001
 *
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_Initialize( adrv9001_cfg_t *Cfg );
+adrv9001_status_t Adrv9001_Initialize( void **Instance, adrv9001_cfg_t *Cfg );
 
 #endif
