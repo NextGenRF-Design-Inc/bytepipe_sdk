@@ -198,10 +198,6 @@ The HDK provides serial port access through the UART0 signals via the [digilent]
 
 The HDK connects PS_SRST_N to SW1 providing a push button reset to the user.
 
-# Disclaimer
-----------------------
-NextGen RF Design makes no warranty for the use of this code or design. This code is provided  "As Is". NextGen RF Design assumes no responsibility for
-any errors, which may appear in this code, nor does it make a commitment to update the information contained herein. NextGen RF Design specifically
-disclaims any implied warranties of fitness for a particular purpose.
-Copyright(c) NextGen RF Design
-All rights reserved.
+# DISCLAIMER
+
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../../DISCLAIMER.md).
