@@ -57,7 +57,6 @@ The BytePipe SDK supports several different user interface tools.  For interfaci
 
 The [Industrial I/O](../IIO/IIO.md) Linux kernel driver supports several off the shelf programs including [Matlab](../Matlab/Matlab.md), [GNU Radio](../GnuRadio/GnuRadio.md), [IIO-Oscilloscope](../IIO-Oscilloscope/IIO-Oscilloscope.md), and many other tools that support the [Industrial I/O Driver](https://www.kernel.org/doc/html/v5.0/driver-api/iio/index.html).
 
+# DISCLAIMER
 
-
-
-
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
