@@ -20,6 +20,8 @@ The RF receive and transmit ports can be connected to the HDK with the supplied 
 
 If it is desired to connect a keyboard and mouse an [OTG USB Adapter](https://www.amazon.com/UGREEN-Adapter-Samsung-Controller-Smartphone/dp/B00LN3LQKQ/ref=sr_1_5?dchild=1&keywords=usb+otg+adapter&qid=1624389445&sr=8-5) is required.  If using a display it should be connected using a mini display port cable. The display must natively support display port and no display port adapters should be used.
 
+:memo: Note: Both the OTG and display port are only supported when using a Linux release.
+
 ![hdk](../../hardware/hdk/Overview/overview.png)
 
 
@@ -37,6 +39,8 @@ In addition to the firmware files, the BOOT partition can contain additional fil
 
 Flashing the SD card ensures it is formatted and all necessary files are copied correctly.  This section assumes there is an SD card image available and does not detail the steps for creating the image.  Released versions which can be found [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases) typically include a preformatted image that has been tested.  To flash the SD card, download and install [dotNet Disk Imager](https://sourceforge.net/projects/dotnetdiskimager/).  Begin by selecting `Wipe Device` to make sure you are starting with a clean SD card.  Then browse to the downloaded image and select `Write to Device`.  
 
+:memo: Note: The HDK does not include a connection that enumerates the SD card as a storage device.  To flash the SD card, it must be placed in an SD card reader connected to a PC.
+
 ![flashing_sd_01](flashing_sd_01.png)
 
 # Flashing eMMC
@@ -48,6 +52,8 @@ This documentation is not currently available.
 The BOOT partition is formatted as a FAT file system and is required whether running Linux or the RFLAN application.  At a minimum, the FAT partition must include a `BOOT.BIN` file.  The boot file includes the first stage bootloader (`FSBL`).  For Linux applications the `FSBL` loads `U-BOOT` which then loads the separate Linux image from the FAT file system.  The `FSBL` also loads any additional bare-metal applications included in BOOT.BIN that run on other processors.  For example, when booting the RFLAN application, the BOOT.BIN includes both the `FSBL` and `rflan.elf` application.  If Linux is also included, BOOT.BIN will include the `FSBL`, `rflan.elf`, and `U-BOOT.elf`.  `U-BOOT.elf` will then load the Linux kernel and device tree from separate files on the FAT file system labeled `image.ub` and `system.dtb` respectively.  The following shows the required files on the FAT partition for booting Linux.  If Linux isn't included, only `BOOT.BIN` is required. 
 
 The latest BOOT.BIN and Linux images can be found in the latest release folder [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  The SD card must have a FAT partition created either by flashing the disk with a pre-built image or by formatting the SD card.  
+
+:memo: Note: The HDK does not include a connection that enumerates the SD card as a storage device.  To format and/or write files to the SD card, it must be placed in an SD card reader connected to a PC.
 
 ![boot_01](boot_01.png)
 
