@@ -20,6 +20,8 @@ The RF receive and transmit ports can be connected to the HDK with the supplied 
 
 If it is desired to connect a keyboard and mouse an [OTG USB Adapter](https://www.amazon.com/UGREEN-Adapter-Samsung-Controller-Smartphone/dp/B00LN3LQKQ/ref=sr_1_5?dchild=1&keywords=usb+otg+adapter&qid=1624389445&sr=8-5) is required.  If using a display it should be connected using a mini display port cable. The display must natively support display port and no display port adapters should be used.
 
+:memo: Note: Both the OTG and display port are only supported when using a Linux release.
+
 ![hdk](../../hardware/hdk/Overview/overview.png)
 
 
@@ -37,6 +39,8 @@ In addition to the firmware files, the BOOT partition can contain additional fil
 
 Flashing the SD card ensures it is formatted and all necessary files are copied correctly.  This section assumes there is an SD card image available and does not detail the steps for creating the image.  Released versions which can be found [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases) typically include a preformatted image that has been tested.  To flash the SD card, download and install [dotNet Disk Imager](https://sourceforge.net/projects/dotnetdiskimager/).  Begin by selecting `Wipe Device` to make sure you are starting with a clean SD card.  Then browse to the downloaded image and select `Write to Device`.  
 
+:memo: Note: The HDK does not include a connection that enumerates the SD card as a storage device.  To flash the SD card, it must be placed in an SD card reader connected to a PC.
+
 ![flashing_sd_01](flashing_sd_01.png)
 
 # Flashing eMMC
@@ -49,6 +53,8 @@ The BOOT partition is formatted as a FAT file system and is required whether run
 
 The latest BOOT.BIN and Linux images can be found in the latest release folder [here](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases).  The SD card must have a FAT partition created either by flashing the disk with a pre-built image or by formatting the SD card.  
 
+:memo: Note: The HDK does not include a connection that enumerates the SD card as a storage device.  To format and/or write files to the SD card, it must be placed in an SD card reader connected to a PC.
+
 ![boot_01](boot_01.png)
 
 # User Interface
@@ -57,7 +63,6 @@ The BytePipe SDK supports several different user interface tools.  For interfaci
 
 The [Industrial I/O](../IIO/IIO.md) Linux kernel driver supports several off the shelf programs including [Matlab](../Matlab/Matlab.md), [GNU Radio](../GnuRadio/GnuRadio.md), [IIO-Oscilloscope](../IIO-Oscilloscope/IIO-Oscilloscope.md), and many other tools that support the [Industrial I/O Driver](https://www.kernel.org/doc/html/v5.0/driver-api/iio/index.html).
 
+# DISCLAIMER
 
-
-
-
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).

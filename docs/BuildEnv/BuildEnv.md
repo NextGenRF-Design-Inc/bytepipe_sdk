@@ -47,10 +47,6 @@ The Vivado Design Suite from Xilinx must be installed on both the Windows PC and
 
 ![vivado_2019.1_download](vivado_2019_1_download.png)
 
+# DISCLAIMER
 
-# Disclaimer
-----------------------
-NextGen RF Design makes no warranty for the use of this code or design. This code is provided "As Is". NextGen RF Design assumes no responsibility for any errors, which may appear in this code, nor does it make a commitment to update the information contained herein. NextGen RF Design specifically disclaims any implied warranties of fitness for a particular purpose.
-
-Copyright (c) NextGen RF Design. All rights reserved.
-
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
