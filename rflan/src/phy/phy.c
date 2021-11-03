@@ -208,7 +208,7 @@ static void Phy_Adrv9001Callback( adrv9001_evt_type_t EvtType, adrv9001_evt_data
   }
 }
 
-int32_t Phy_IqStreamDisable( adrv9001_port_t Port )
+phy_status_t Phy_IqStreamDisable( adrv9001_port_t Port )
 {
   /* Create Queue Item */
   phy_queue_t qItem = {.Data.Port = Port, .Data.Status = PhyStatus_IqStreamAbort};

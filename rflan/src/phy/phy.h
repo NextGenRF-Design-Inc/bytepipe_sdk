@@ -197,7 +197,7 @@ phy_status_t Phy_UpdateProfile( profile_t *Profile );
 * \return   int32_t - status
 *
 *******************************************************************************/
-int32_t Phy_Initialize( void );
+phy_status_t Phy_Initialize( void );
 
 
 

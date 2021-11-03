@@ -72,6 +72,7 @@ After the src folder is deleted right click on the `rflan` project in the projec
 Right click on the `rflan` project and select properties.  Add the following symbols as shown below.
 
 ```
+ARMR5
 CUSTOMER_PLATFORM
 ADI_DYNAMIC_PROFILE_LOAD
 ADI_ADRV9001_ARM_VERBOSE
