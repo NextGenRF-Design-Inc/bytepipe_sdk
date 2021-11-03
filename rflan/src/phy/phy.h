@@ -99,7 +99,8 @@ typedef union
 typedef enum
 {
   PhyEvtType_StreamDone       = 0,    ///< Indicates stream is done. EvtData = phy_stream_t
-  PhyEvtType_ProfileUpdated   = 1,    ///< Indicates profile has been updated. No Evt data
+  PhyEvtType_StreamStart      = 1,    ///< Indicates stream has started. EvtData = phy_stream_t
+  PhyEvtType_ProfileUpdated   = 2,    ///< Indicates profile has been updated. No Evt data
 } phy_evt_type_t;
 
 /**

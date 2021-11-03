@@ -106,7 +106,7 @@ static void Phy_IqStreamStop( adrv9001_port_t Port )
       Stream->Status = PhyStatus_RadioStateError;
 
     /* Disable Streaming */
-    if( Adrv9001_IQStream( Stream->Port, NULL, 0 ) != Adrv9001Status_Success)
+    if( Adrv9001_IQStream( Stream->Port, Stream->Cyclic, NULL, 0 ) != Adrv9001Status_Success)
       Stream->Status = PhyStatus_Adrv9001Error;
   }
 }
@@ -149,7 +149,7 @@ static void Phy_IqStreamStart( phy_stream_t *Stream )
     Phy_IqStreamRemove( Stream->Port );
   }
   /* Enable Streaming */
-  else if(Adrv9001_IQStream( Stream->Port, (adrv9001_iqdata_t*)Stream->SampleBuf, Stream->SampleCnt ) != Adrv9001Status_Success)
+  else if(Adrv9001_IQStream( Stream->Port, Stream->Cyclic, (adrv9001_iqdata_t*)Stream->SampleBuf, Stream->SampleCnt ) != Adrv9001Status_Success)
   {
     /* Attempt Stop Current Stream */
     Phy_IqStreamStop( Stream->Port );
@@ -159,6 +159,20 @@ static void Phy_IqStreamStart( phy_stream_t *Stream )
 
     /* Remove Stream */
     Phy_IqStreamRemove( Stream->Port );
+  }
+  else
+  {
+    /* Send Stream Error */
+    phy_evt_data_t PhyEvtData = {
+        .Stream.Port = Stream->Port ,
+        .Stream.SampleBuf = Stream->SampleBuf,
+        .Stream.SampleCnt = Stream->SampleCnt,
+        .Stream.Status = PhyStatus_Success,
+        .Stream.CallbackRef = Stream->CallbackRef
+    };
+
+    if(Stream->Callback != NULL)
+      Stream->Callback( PhyEvtType_StreamStart, PhyEvtData, Stream->CallbackRef );
   }
 }
 

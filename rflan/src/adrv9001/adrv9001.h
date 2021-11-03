@@ -565,7 +565,7 @@ adrv9001_status_t Adrv9001_ToRfCalibrated( adrv9001_port_t Port );
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_IQStream( adrv9001_port_t Port, adrv9001_iqdata_t *Buf, uint32_t SampleCnt );
+adrv9001_status_t Adrv9001_IQStream( adrv9001_port_t Port, bool Cyclic, adrv9001_iqdata_t *Buf, uint32_t SampleCnt );
 
 /*******************************************************************************
 *

@@ -132,6 +132,7 @@ typedef enum{
   CliParamTypeH8      	= 12,	///< hex uint8_t
   CliParamTypeH16     	= 13,	///< hex uint16_t
   CliParamTypeH32     	= 14,	///< hex uint32_t
+  CliParamTypeNum       = 15, ///< Number
 } CliParamType_t;
 
 /**

@@ -43,6 +43,7 @@
 #include "stdio.h"
 #include "stdarg.h"
 #include "stdbool.h"
+#include "stdlib.h"
 #include "string.h"
 #include "ctype.h"
 #include "cli.h"
@@ -154,18 +155,18 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 	case CliParamTypeH32:
 
 		if( (p[1] == 'x') || (p[1] == 'X') )
-			tmpResult = sscanf( p, "%x", (uint32_t*)&utemp );
+			tmpResult = sscanf( p, "%lx", (uint32_t*)&utemp );
 		else
-			tmpResult = sscanf( p, "%u", (uint32_t*)&utemp );
+			tmpResult = sscanf( p, "%lu", (uint32_t*)&utemp );
 
 		memcpy((uint8_t*)param, (uint8_t*)&utemp, sizeof(uint32_t));
 		break;
 
 	case CliParamTypeU64:	// This is a work around for the Cortex M4
 		if( (p[1] == 'x') || (p[1] == 'X') )
-			tmpResult = sscanf( p, "%lx", (uint64_t*)param );
+			tmpResult = sscanf( p, "%llx", (uint64_t*)param );
 		else
-			tmpResult = sscanf( p, "%lu", (uint64_t*)param );
+			tmpResult = sscanf( p, "%llu", (uint64_t*)param );
 		break;
 
 	case CliParamTypeS8:
@@ -181,16 +182,16 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 
 	case CliParamTypeS16:
 		if( (p[1] == 'x') || (p[1] == 'X') )
-			tmpResult = sscanf( p, "%hx", (short*)param );
+			tmpResult = sscanf( p, "%hx", (int16_t*)param );
 		else
-			tmpResult = sscanf( p, "%hi", (short*)param );
+			tmpResult = sscanf( p, "%hi", (int16_t*)param );
 		break;
 
 	case CliParamTypeS32:
 		if( (p[1] == 'x') || (p[1] == 'X') )
-			tmpResult = sscanf( p, "%lx", (long*)param );
+			tmpResult = sscanf( p, "%lx", (int32_t*)param );
 		else
-			tmpResult = sscanf( p, "%li", (long*)param );
+			tmpResult = sscanf( p, "%d", (int*)param );
 		break;
 
 	case CliParamTypeS64:	// This is a work around for the Cortex M4
@@ -226,6 +227,100 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 
 	return 0;
 }
+
+static void CliStr2Num(Cli_t *CliInstance, const char *cmd, void *param )
+{
+  char *type = calloc(1, 32 );
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, type);
+
+  char *str = calloc(1, 32 );
+  Cli_GetParameter(cmd, 2, CliParamTypeStr, str);
+
+  if(strcmp(type, "c") == 0)
+  {
+    char tmp;
+    Cli_StrToNum(str, CliParamTypeChar, &tmp);
+    printf("%c\r\n",tmp);
+  }
+  else if(strcmp(type, "u8") == 0)
+  {
+    uint8_t tmp;
+    Cli_StrToNum(str, CliParamTypeU8, &tmp );
+    printf("%hhu\r\n",tmp);
+  }
+  else if(strcmp(type, "s8") == 0)
+  {
+    int8_t tmp;
+    Cli_StrToNum(str, CliParamTypeS8, &tmp );
+    printf("%hhi\r\n",tmp);
+  }
+  else if(strcmp(type, "u16") == 0)
+  {
+    uint16_t tmp;
+    Cli_StrToNum(str, CliParamTypeU16, &tmp );
+    printf("%hu\r\n",tmp);
+  }
+  else if(strcmp(type, "s16") == 0)
+  {
+    int16_t tmp;
+    Cli_StrToNum(str, CliParamTypeS16, &tmp );
+    printf("%hi\r\n",tmp);
+  }
+  else if(strcmp(type, "u32") == 0)
+  {
+    uint32_t tmp;
+    Cli_StrToNum(str, CliParamTypeU32, &tmp );
+    printf("%lu\r\n",tmp);
+  }
+  else if(strcmp(type, "s32") == 0)
+  {
+    int32_t tmp;
+    Cli_StrToNum(str, CliParamTypeS32, &tmp );
+    printf("%li\r\n",tmp);
+  }
+  else if(strcmp(type, "u64") == 0)
+  {
+    uint64_t tmp;
+    Cli_StrToNum(str, CliParamTypeU64, &tmp );
+    printf("%llu\r\n",tmp);
+  }
+  else if(strcmp(type, "s64") == 0)
+  {
+    int64_t tmp;
+    Cli_StrToNum(str, CliParamTypeS64, &tmp );
+    printf("%lli\r\n",tmp);
+  }
+  else if(strcmp(type, "float") == 0)
+  {
+    float tmp;
+    Cli_StrToNum(str, CliParamTypeFloat, &tmp );
+    printf("%f\r\n",tmp);
+  }
+  else if(strcmp(type, "double") == 0)
+  {
+    double tmp;
+    Cli_StrToNum(str, CliParamTypeDouble, &tmp );
+    printf("%lf\r\n",tmp);
+  }
+  else
+  {
+    printf("Valid Formats include: c,u8,s8,u16,s16,u32,s32,u64,s64,float,double\r\n");
+  }
+
+}
+
+/**
+* Str2Num Command Definition
+*/
+const CliCmd_t CliStr2NumDef =
+{
+    "Str2Num",
+    "Str2Num: Convert String to number\r\n"
+    "Str2Num <format, value>\r\n\r\n",
+    (CliCmdFn_t)CliStr2Num,
+    2,
+    NULL
+};
 
 /******************************************************************************/
 /**
@@ -720,6 +815,7 @@ int32_t CLi_Init(Cli_t *Instance, CliCfg_t *Cfg )
 
     /* Register Help Commands */
     Cli_RegisterCommand(Instance, &CliHelpDef);
+//    Cli_RegisterCommand(Instance, &CliStr2NumDef);
 		return 0;
   }
 }

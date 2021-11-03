@@ -52,6 +52,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include "ff.h"
 
 /*******************************************************************************
 *
@@ -88,5 +89,20 @@ int32_t IqFile_Write( const char* filename, uint32_t *Buf, uint32_t Length );
 *
 *******************************************************************************/
 int32_t IqFile_Read( const char* filename, uint32_t **Buf, uint32_t *Length );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function returns the number of IQ samples from a csv formatted file.
+*
+* \param[in]  filename is the name of the file created.
+*
+* \param[in]  SampleCnt is the number of iq samples contained within the file.
+*
+* \return     Status
+*
+*******************************************************************************/
+int32_t IqFile_GetSampleCnt( FIL *fil, uint32_t *SampleCnt );
 
 #endif /* IQ_FILE_H_ */

@@ -184,6 +184,11 @@ static void PhyCli_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, 
     /* Free Sample Buffer */
     free(EvtData.Stream.SampleBuf);
   }
+  else if( EvtType == PhyEvtType_StreamStart )
+  {
+    /* Indicate Event to User */
+    printf("%s stream start\r\n", ADRV9001_PORT_2_STR( EvtData.Stream.Port ));
+  }
   else if( EvtType == PhyEvtType_ProfileUpdated )
   {
     /* Indicate Event to User */
@@ -219,21 +224,20 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
 
   if( SampleCnt == -1 )
     Stream.Cyclic = true;
+  else
+    Stream.Cyclic = false;
 
 
   if( (Stream.Port == Adrv9001Port_Tx1) || (Stream.Port == Adrv9001Port_Tx2) )
   {
-    if( SampleCnt > 0 )
-    {
-      printf("Invalid Parameter. Sample Count must be -1(indefinite) or 0(file size)\r\n");
-      return;
-    }
-
     if(IqFile_Read( filename, &Stream.SampleBuf, &Stream.SampleCnt ) != XST_SUCCESS)
     {
       printf("Invalid Parameter\r\n");
       return;
     }
+
+    if( SampleCnt > 0 )
+      Stream.SampleCnt = SampleCnt;
   }
   else if( (Stream.Port == Adrv9001Port_Rx1) || (Stream.Port == Adrv9001Port_Rx2) )
   {
@@ -269,10 +273,6 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   {
     printf("Failed\r\n");
   }
-  else
-  {
-    printf("Success\r\n");
-  }
 }
 
 static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
@@ -297,6 +297,35 @@ static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void
   }
 }
 
+static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int32_t status;
+
+  /* Get Filename */
+  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
+
+  uint32_t SampleCnt;
+  FIL fil;
+
+  if((status = f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ)) == FR_OK)
+  {
+    status = IqFile_GetSampleCnt( &fil, &SampleCnt);
+  }
+
+  f_close(&fil);
+
+  if(status == 0)
+  {
+    printf("%s contains %lu samples\r\n", filename, SampleCnt);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
 static const CliCmd_t PhyCliIqFileStreamEnableDef =
 {
   "PhyIqFileStreamEnable",
@@ -317,6 +346,16 @@ static const CliCmd_t PhyCliIqFileStreamDisableDef =
   NULL
 };
 
+static const CliCmd_t PhyCliIqFileSizeDef =
+{
+  "PhyIqFileSize",
+  "PhyIqFileSize:  Returns number of IQ samples in file \r\n"
+  "PhyIqFileSize < filename >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_IqFileSize,
+  1,
+  NULL
+};
+
 /*******************************************************************************
 
   PURPOSE:  Initialize APP CLI
@@ -330,6 +369,7 @@ int PhyCli_Initialize( void )
 
   Cli_RegisterCommand(Instance, &PhyCliIqFileStreamEnableDef);
   Cli_RegisterCommand(Instance, &PhyCliIqFileStreamDisableDef);
+  Cli_RegisterCommand(Instance, &PhyCliIqFileSizeDef);
   Cli_RegisterCommand(Instance, &PhyCliUpdateProfileDef);
 
 

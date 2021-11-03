@@ -51,7 +51,7 @@
 
 static int32_t IqFile_ReadLine( FIL *fil, char *line, int size )
 {
-  uint32_t len = 1;
+  UINT len = 1;
   char c;
 
   while((len > 0) && (size > 0))
@@ -79,9 +79,9 @@ static int32_t IqFile_ReadLine( FIL *fil, char *line, int size )
   return XST_FAILURE;
 }
 
-static int32_t IqFile_GetSampleCnt( FIL *fil, uint32_t *SampleCnt )
+int32_t IqFile_GetSampleCnt( FIL *fil, uint32_t *SampleCnt )
 {
-  uint32_t len = 1;
+  UINT len = 1;
   char c;
   uint32_t cnt = 0;
 
@@ -112,10 +112,10 @@ static int32_t IqFile_ReadSample( FIL *fil, uint32_t *Sample )
   int32_t qdata;
 
   char *iq = strtok(line,",");
-  sscanf( iq, "%i", (int32_t*)&idata );
+  sscanf( iq, "%li", (int32_t*)&idata );
 
   iq = strtok(NULL,",");
-  sscanf( iq, "%i", (int32_t*)&qdata );
+  sscanf( iq, "%li", (int32_t*)&qdata );
   *Sample = (((uint32_t)idata & 0xffff) << 16) | ((uint32_t)qdata & 0xffff);
 
   return XST_SUCCESS;
