@@ -1,9 +1,50 @@
+/***************************************************************************//**
+*  \addtogroup APP_CLI
+*   @{
+*******************************************************************************/
+/***************************************************************************//**
+*  \file       app_cli.c
+*
+*  \details    This file contains the RFLAN application CLI implementation.
+*
+*  \copyright
+*
+*  Copyright 2021(c) NextGen RF Design, Inc.
+*
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*   - Redistributions of source code must retain the above copyright
+*     notice, this list of conditions and the following disclaimer.
+*   - Redistributions in binary form must reproduce the above copyright notice,
+*     this list of conditions and the following disclaimer in the documentation
+*     and/or other materials provided with the distribution.
+*   - The use of this software may or may not infringe the patent rights of one
+*     or more patent holders.  This license does not release you from the
+*     requirement that you obtain separate licenses from these patent holders
+*     to use this software.
+*   - Use of the software either in source or binary form, must be run on or
+*     directly connected to a NextGen RF Design, Inc. product.
+*
+*  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
+*  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+*  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+*  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+*  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+*  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*
+*******************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "cli.h"
-#include "xil_printf.h"
 #include "xparameters.h"
 #include "xil_types.h"
 #include "xstatus.h"
@@ -15,19 +56,8 @@
 #include "portmacro.h"
 #include "app.h"
 #include "ff.h"
-
-
-#if CLI_UART_DEVICE_ID == XPAR_PSU_UART_0_DEVICE_ID
-#define CLI_UART_PS
-#elif CLI_UART_DEVICE_ID == XPAR_PSU_UART_1_DEVICE_ID
-#define CLI_UART_PS
-#endif
-
-#ifdef CLI_UART_PS
 #include "xuartps.h"
-#else
-#include "xuartlite.h"
-#endif
+
 
 static Cli_t            AppCli;
 static QueueHandle_t    AppCliRxCharQueue;
@@ -37,16 +67,9 @@ extern XScuGic 			    xInterruptController;
 static char             AppCliHistoryBuf[ APP_CLI_HISTORY_BUF_SIZE ];
 static char             AppCliCmdBuf[ APP_CLI_CMD_BUF_SIZE ];
 static CliCmd_t const  *AppCliCmdList[ APP_CLI_CMD_LIST_SIZE ];
+static XUartPs          AppCliUart;
 
-#ifdef CLI_UART_PS
-XUartPs cliUart;
-#else
-XUartLite cliUart;
-#endif
 
-/**
-* 	Outbyte for printing to console
-*/
 void outbyte(char c)
 {
 	if(AppCliTxCharQueue != NULL)
@@ -64,11 +87,6 @@ void outbyte(char c)
 	}
 }
 
-
-/**
-* 	UART Handler
-*/
-#ifdef CLI_UART_PS
 static void CLI_UartHandler(void *CallBackRef, u32 Event, unsigned int EventData)
 {
 	if(Event == XUARTPS_EVENT_RECV_DATA)
@@ -77,33 +95,16 @@ static void CLI_UartHandler(void *CallBackRef, u32 Event, unsigned int EventData
 
 		if( AppCliRxCharQueue != NULL )
 		{
-			xQueueSendFromISR( AppCliRxCharQueue, &cliRxChar, &xHigherPriorityTaskWoken );
+			xQueueSendFromISR( AppCliRxCharQueue, (u8*)&cliRxChar, &xHigherPriorityTaskWoken );
 
 			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 		}
 	}
 
 	/* Enable Receive */
-	XUartPs_Recv(&cliUart, (u8*)&cliRxChar, 1);
+	XUartPs_Recv(&AppCliUart, (u8*)&cliRxChar, 1);
 }
-#else
-static void CLI_RxUartHandler(void *CallBackRef, unsigned int EventData)
-{
-	/* Send Rx Byte to Queue */
-	xQueueSendFromISR( cliRxCharQueue, &cliRxChar, 1 );
 
-	/* Echo */
-	outbyte(cliRxChar);
-
-	/* Enable Receive */
-	XUartLite_Recv(&cliUart, (u8*)&cliRxChar, 1);
-}
-#endif
-
-
-/**
-*  CLI Task
-*/
 static void AppCli_TxTask( void *pvParameters )
 {
 	u8 c;
@@ -112,30 +113,12 @@ static void AppCli_TxTask( void *pvParameters )
 	{
 		xQueueReceive( AppCliTxCharQueue, (void *)&c, portMAX_DELAY);
 
-#ifdef CLI_UART_PS
+		while(XUartPs_IsSending(&AppCliUart)) vTaskDelay(1);
 
-		while(XUartPs_IsSending(&cliUart)) vTaskDelay(1);
-
-		XUartPs_Send(&cliUart, &c, 1);
-
-#else
-		while(XUartLite_IsSending(&cliUart)) vTaskDelay(1);
-
-		XUartLite_Send(&cliUart, &c, 1);
-
-#endif
+		XUartPs_Send(&AppCliUart, &c, 1);
 	}
 }
 
-/******************************************************************************/
-/**
-*  \details   CLI Rx Task receives one character at a time from queue and
-*  						passes to CLI library for processing.
-*
-*  \param 	  param is a pointer to the CLI instance
-*
-*  \return    none
-*******************************************************************************/
 static void AppCli_RxTask( void *param )
 {
   uint8_t c;
@@ -148,17 +131,10 @@ static void AppCli_RxTask( void *param )
 	}
 }
 
-/******************************************************************************/
-/**
-*  \details   CLI Command for Processing List Files Command
+/*******************************************************************************
 *
-*  \param     CliInstance
+* \details List Files
 *
-*  \param     cmd is the command string
-*
-*  \param     NULL
-*
-*  \return    none
 *******************************************************************************/
 static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
 {
@@ -185,34 +161,40 @@ static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
   f_closedir(&dp);
 }
 
-/******************************************************************************/
-/**
-*  \details   CLI Command for Processing Clear Screen Command
+static const CliCmd_t AppCliLsDef =
+{
+  "ls",
+  "ls: List files \r\n"
+  "ls < >\r\n\n",
+  (CliCmdFn_t)AppCli_CliLs,
+  0,
+  NULL
+};
+
+/*******************************************************************************
 *
-*  \param     CliInstance
+* \details Clear Screen
 *
-*  \param     cmd is the command string
-*
-*  \param     NULL
-*
-*  \return    none
 *******************************************************************************/
 static void AppCli_CliCls(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   CliInstance->Callback( "\e[1;1H\e[2J", CliInstance->CallbackRef );
 }
 
-/******************************************************************************/
-/**
-*  \details   CLI Command for Processing Get Task Info
+static const CliCmd_t AppCliClsDef =
+{
+  "cls",
+  "cls: Clear screen \r\n"
+  "cls < >\r\n\n",
+  (CliCmdFn_t)AppCli_CliCls,
+  0,
+  NULL
+};
+
+/*******************************************************************************
 *
-*  \param     CliInstance
+* \details Report Task Info
 *
-*  \param     cmd is the command string
-*
-*  \param     NULL
-*
-*  \return    none
 *******************************************************************************/
 static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
 {
@@ -264,17 +246,21 @@ static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
   }
 
 }
-/******************************************************************************/
-/**
-*  \details   CLI Command for Processing fdelete
+
+static const CliCmd_t AppCliTaskInfoDef =
+{
+  "TaskInfo",
+  "TaskInfo: Get Task Info \r\n"
+  "TaskInfo < >\r\n\n",
+  (CliCmdFn_t)AppCli_TaskInfo,
+  0,
+  NULL
+};
+
+/*******************************************************************************
 *
-*  \param     CliInstance
+* \details Delete File
 *
-*  \param     cmd is the command string
-*
-*  \param     NULL
-*
-*  \return    none
 *******************************************************************************/
 static void AppCli_fdelete(Cli_t *CliInstance, const char *cmd, void *userData)
 {
@@ -293,17 +279,20 @@ static void AppCli_fdelete(Cli_t *CliInstance, const char *cmd, void *userData)
   }
 }
 
-/******************************************************************************/
-/**
-*  \details   CLI Command for Processing fread
+static const CliCmd_t AppCliDeleteFileDef =
+{
+  "fdelete",
+  "fdelete: Delete file \r\n"
+  "fdelete < filename >\r\n\n",
+  (CliCmdFn_t)AppCli_fdelete,
+  1,
+  NULL
+};
+
+/*******************************************************************************
 *
-*  \param     CliInstance
+* \details Read File
 *
-*  \param     cmd is the command string
-*
-*  \param     NULL
-*
-*  \return    none
 *******************************************************************************/
 static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
 {
@@ -362,14 +351,16 @@ static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
   f_close(&fil);
 }
 
-/******************************************************************************/
-/**
-*  \details   CLI Callback
-*
-*  \param 	  param is a pointer to the CLI instance
-*
-*  \return    none
-*******************************************************************************/
+static const CliCmd_t AppCliReadFileDef =
+{
+  "fread",
+  "fread: Read contents of a file \r\n"
+  "fread < filename, offset, length >\r\n\n",
+  (CliCmdFn_t)AppCli_fread,
+  3,
+  NULL
+};
+
 static void AppCli_Callback( const char *s, void *param )
 {
 	if(s == NULL)
@@ -387,136 +378,42 @@ static void AppCli_Callback( const char *s, void *param )
 	}
 }
 
-
-/**
-*  Clear Screen
-*/
-static const CliCmd_t AppCliClsDef =
-{
-  "cls",
-  "cls: Clear screen \r\n"
-  "cls < >\r\n\n",
-  (CliCmdFn_t)AppCli_CliCls,
-  0,
-  NULL
-};
-
-/**
-*  List Files
-*/
-static const CliCmd_t AppCliLsDef =
-{
-  "ls",
-  "ls: List files \r\n"
-  "ls < >\r\n\n",
-  (CliCmdFn_t)AppCli_CliLs,
-  0,
-  NULL
-};
-
-/**
-*  Task Info
-*/
-static const CliCmd_t AppCliTaskInfoDef =
-{
-  "TaskInfo",
-  "TaskInfo: Get Task Info \r\n"
-  "TaskInfo < >\r\n\n",
-  (CliCmdFn_t)AppCli_TaskInfo,
-  0,
-  NULL
-};
-
-/**
-*  Read File
-*/
-static const CliCmd_t AppCliReadFileDef =
-{
-  "fread",
-  "fread: Read contents of a file \r\n"
-  "fread < filename, offset, length >\r\n\n",
-  (CliCmdFn_t)AppCli_fread,
-  3,
-  NULL
-};
-
-/**
-*  Delete File
-*/
-static const CliCmd_t AppCliDeleteFileDef =
-{
-  "fdelete",
-  "fdelete: Delete file \r\n"
-  "fdelete < filename >\r\n\n",
-  (CliCmdFn_t)AppCli_fdelete,
-  1,
-  NULL
-};
-
 Cli_t *AppCli_GetInstance( void )
 {
 	return &AppCli;
 }
 
-/*******************************************************************************
-
-  PURPOSE:  Initialize APP CLI
-
-  COMMENT:
-
-*******************************************************************************/
 int AppCli_Initialize( void )
 {
-#ifdef CLI_UART_PS
-
 	XUartPs_Config *Config;
 
 	/* Lookup Configuration */
 	if((Config = XUartPs_LookupConfig(APP_CLI_UART_DEVICE_ID)) == NULL) return XST_FAILURE;
 
 	/* Initialize Driver */
-	if(XUartPs_CfgInitialize(&cliUart, Config, Config->BaseAddress) != XST_SUCCESS) return XST_FAILURE;
+	if(XUartPs_CfgInitialize(&AppCliUart, Config, Config->BaseAddress) != XST_SUCCESS) return XST_FAILURE;
 
 	/* Self Test */
-	if(XUartPs_SelfTest(&cliUart) != XST_SUCCESS) return XST_FAILURE;
+	if(XUartPs_SelfTest(&AppCliUart) != XST_SUCCESS) return XST_FAILURE;
 
 	/* Connect UART handler */
 	XScuGic_Connect(&xInterruptController, APP_CLI_UART_INTR_ID,
-			(Xil_ExceptionHandler) XUartPs_InterruptHandler, (void *) &cliUart);
+			(Xil_ExceptionHandler) XUartPs_InterruptHandler, (void *) &AppCliUart);
 
 	/* Set Local Handler */
-	XUartPs_SetHandler(&cliUart, (XUartPs_Handler)CLI_UartHandler, &cliUart);
+	XUartPs_SetHandler(&AppCliUart, (XUartPs_Handler)CLI_UartHandler, &AppCliUart);
 
 	/* Setup Interrupt Mask */
-	XUartPs_SetInterruptMask(&cliUart, XUARTPS_IXR_RXFULL | XUARTPS_IXR_RXOVR );
+	XUartPs_SetInterruptMask(&AppCliUart, XUARTPS_IXR_RXFULL | XUARTPS_IXR_RXOVR );
 
-	XUartPs_SetRecvTimeout(&cliUart, 0);
+	XUartPs_SetRecvTimeout(&AppCliUart, 0);
 
-	XUartPs_SetFifoThreshold(&cliUart, 1);
+	XUartPs_SetFifoThreshold(&AppCliUart, 1);
 
 	/* Enable the Interrupt */
 	XScuGic_Enable(&xInterruptController, APP_CLI_UART_INTR_ID);
 
-	XUartPs_Recv(&cliUart, (u8*)&cliRxChar, 1);
-
-#else
-	/* Initialize Controller */
-	XUartLite_Initialize(&cliUart, CLI_UART_DEVICE_ID);
-
-	/* Connect Interrupt Handler */
-	XScuGic_Connect(&xInterruptController, CLI_UART_INTR_ID,
-			   (XInterruptHandler)XUartLite_InterruptHandler, (void *)&cliUart);
-
-	/* Connect Rx Handler */
-	XUartLite_SetRecvHandler(&cliUart, CLI_RxUartHandler, &cliUart);
-
-	/* Enable Interrupt */
-	XUartLite_EnableInterrupt(&cliUart);
-
-	/* Start Receiving */
-	XUartLite_Recv(&cliUart, (u8*)&cliRxChar, 1);
-
-#endif
+	XUartPs_Recv(&AppCliUart, (u8*)&cliRxChar, 1);
 
 	/* Set Priority */
 	XScuGic_SetPriorityTriggerType(&xInterruptController, APP_CLI_UART_INTR_ID, 0xA0, 0x3);
