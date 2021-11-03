@@ -3,7 +3,7 @@ clear all;
 
 fs = 15.36e6;
 
-iq = BytePipe_WavformFileRead("rx2.csv");
+iq = BytePipe_WavformFileRead("rx1.csv");
 
 bins = 1000; 
 h2 = spectrum.welch('Hamming',bins);
