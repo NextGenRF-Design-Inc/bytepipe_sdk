@@ -265,7 +265,7 @@ static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void 
 
   if(Adrv9001_GetSampleRate(port, &freq) == Adrv9001Status_Success)
   {
-    printf("%s Sample Rate = %d Hz\r\n",s,freq);
+    printf("%s Sample Rate = %lu Hz\r\n",s,freq);
   }
   else
   {
@@ -307,7 +307,7 @@ static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
 
   if(Adrv9001_GetCarrierFrequency(port, &freq) == Adrv9001Status_Success)
   {
-    printf("%s Carrier Frequency = %ld Hz\r\n",s,freq);
+    printf("%s Carrier Frequency = %lld Hz\r\n",s,freq);
   }
   else
   {
@@ -568,7 +568,7 @@ static void Adrv9001Cli_GetVerInfo(Cli_t *CliInstance, const char *cmd, void *us
     printf("%s Version Information:\r\n","ADRV9002");
     printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
     printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
-    printf("  -API Version: %u.%u.%u\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
+    printf("  -API Version: %lu.%lu.%lu\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
   }
   else
   {

@@ -291,10 +291,6 @@ static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void
   {
     printf("Failed\r\n");
   }
-  else
-  {
-    printf("Success\r\n");
-  }
 }
 
 static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userData)

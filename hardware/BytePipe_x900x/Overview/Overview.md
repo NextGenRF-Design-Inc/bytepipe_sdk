@@ -4,14 +4,15 @@
 
 # BytePipe_x900x
 
-The BytePipe_x9002 is a high performance RF System On Module (SOM).  The BytePipe_x9002 integrates a high performance Xilinx Zynq UltraScale+ baseband processor (BBP) with the Analog Devices ADRV9002 RFIC.  Below is a block diagram of the BytePipe_x9002 SOM along with pictures of the physical hardware.  Additional information can be found on [NextGen RF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/)
-
-![blockdiagram](blockdiagram.png)
-
-
-The following shows the BytePipe_x900x System on Module (SOM).  
+The BytePipe_x9002 is a high performance RF System On Module (SOM).  The BytePipe_x9002 integrates a high performance Xilinx Zynq UltraScale+ baseband processor (BBP) with the Analog Devices ADRV9002 RFIC.  
 
 ![som](som_02.png)
+
+# Hardware Architecture
+
+The following shows a block diagram of the BytePipe_x900x Hardware Architecture.
+
+![blockdiagram](blockdiagram.png)
 
 
 # J600

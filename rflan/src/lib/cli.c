@@ -523,11 +523,11 @@ void Cli_ProcessChar(Cli_t *Instance, char c )
   // Check to see if this is the end of the command string
 	if( (c == CR) || (c == LF) )
 	{
+    /* Echo New line */
+    Instance->Callback("\r\n", Instance->CallbackRef );
+
 		if( Instance->CmdLen != 0 )
 		{
-		  /* Echo New line */
-			Instance->Callback("\r\n", Instance->CallbackRef );
-
 			/* Add NULL to end of command */
 			Instance->Cmd[Instance->CmdLen] = 0;
 
