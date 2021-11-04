@@ -1,4 +1,4 @@
-![logo](../BytePipe_Logo.png)
+[![logo](../BytePipe_Logo.png)](../../README.md)
 
 # Building Linux
 

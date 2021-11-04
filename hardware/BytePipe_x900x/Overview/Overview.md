@@ -1,4 +1,4 @@
-![logo](../../../docs/BytePipe_Logo.png)
+[![logo](../../../docs/BytePipe_Logo.png)](../../../README.md)
 
 ---
 
