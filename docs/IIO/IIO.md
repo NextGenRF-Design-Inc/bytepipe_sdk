@@ -2,7 +2,7 @@
 
 # BytePipe Industrial I/O Driver
 
-Documentation is not currently available.
+Documentation comming soon.
 
 # DISCLAIMER
 

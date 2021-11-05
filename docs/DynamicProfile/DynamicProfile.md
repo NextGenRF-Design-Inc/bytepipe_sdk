@@ -3,7 +3,7 @@
 
 # Dynamic Profile
 
-Documentation is currently not available.
+Documentation comming soon.
 
 # Generating Profile from TES
 
@@ -18,7 +18,7 @@ Once the desired settings are made, navigate to `Sample Code` and select `C99`. 
 
 # Profile Build
 
-Documentation is currently not available.
+Documentation comming soon.
 
 # DISCLAIMER
 

@@ -2,7 +2,7 @@
 
 # IIO-Oscilloscope
 
-Documentation is not currently available.
+Documentation comming soon.
 
 # DISCLAIMER
 

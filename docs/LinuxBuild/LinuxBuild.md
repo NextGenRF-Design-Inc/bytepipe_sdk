@@ -2,7 +2,7 @@
 
 # Building Linux
 
-Documentation is not currently available.
+Documentation comming soon.
 
 # DISCLAIMER
 

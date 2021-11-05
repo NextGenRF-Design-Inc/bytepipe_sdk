@@ -45,7 +45,7 @@ Flashing the SD card ensures it is formatted and all necessary files are copied 
 
 # Flashing eMMC
 
-This documentation is not currently available.
+Documentation comming soon.
 
 # Programming Boot Partition
 

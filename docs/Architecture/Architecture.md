@@ -127,27 +127,27 @@ The adrv9001_tx HDL module converts sample based AXI4 stream interface to a seri
 
 # IQ DMA
 
-Documentation is not currently available.
+Documentation comming soon.
 
 # OFDM Receive HDL
 
-Documentation is not currently available.
+Documentation comming soon.
 
 # OFDM Transmit HDL
 
-Documentation is not currently available.
+Documentation comming soon.
 
 # Linux Overview
 
-Support for Linux is not currently available.
+Support for Linux is comming soon.
 
 # Linux Industrial I/O Kernel Driver
 
-Support for IIO is not currently available.
+Support for IIO is coming soon.
 
 # Linux Industrial I/O Server
 
-Support for IIO is not currently available.
+Support for IIO is coming soon.
 
 # DISCLAIMER
 
