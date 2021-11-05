@@ -22,7 +22,7 @@ If it is desired to connect a keyboard and mouse an [OTG USB Adapter](https://ww
 
 :memo: Note: Both the OTG and display port are only supported when using a Linux release.
 
-![hdk](../../hardware/hdk/Overview/overview.png)
+![hdk](../hdk/overview.png)
 
 
 # Programming

@@ -8,7 +8,7 @@ The RFLAN application supports a custom command line interface (CLI) allowing us
 
 To connect to the RFLAN serial port, plug a USB Micro-B cable into the JTAG & Serial Port connector on the BytePipe HDK.
 
-![hdk](../../hardware/hdk/Overview/hdk.png)
+![hdk](../hdk/hdk.png)
 
 # Software Connection
 

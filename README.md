@@ -38,11 +38,11 @@ The [Industrial I/O](docs/IIO/IIO.md) Linux kernel driver supports several off t
 
 The following hardware platforms are supported by the BytePipe_SDK.
 
-|  Document                                                             | Description                           |                                                                   |
-|-----------------------------------------------------------------------|---------------------------------------|-------------------------------------------------------------------|
-| [BytePipe_x900x](hardware/BytePipe_x900x/Overview/Overview.md)                 | BytePipe ZynqMP / ADRV900x SOM        | ![pic](hardware/BytePipe_x900x/Overview/bytepipe_x900x.png)               |
-| [BytePipe HDK](hardware/hdk/Overview/Overview.md)                     | BytePipe Hardware Development Kit     | ![pic](hardware/hdk/Overview/platform.png)                        |
-| [Radio Carbon Frontend](hardware/RadioCarbon/Overview/Overview.md)    | Richardson RFPD Radio Carbon Frontend | ![pic](hardware/RadioCarbon/Overview/radio_carbon.png)            |
+|  Document                                                 | Description                           |                                                      |
+|-----------------------------------------------------------|---------------------------------------|------------------------------------------------------|
+| [BytePipe_x900x](docs/BytePipe_x900x/BytePipe_x900x.md)   | BytePipe ZynqMP / ADRV900x SOM        | ![pic](docs/BytePipe_x900x/bytepipe_x900x.png)       |
+| [BytePipe HDK](docs/hdk/hdk.md)                           | BytePipe Hardware Development Kit     | ![pic](docs/hdk/platform.png)                        |
+| [Radio Carbon Frontend](docs/RadioCarbon/RadioCarbon.md)  | Richardson RFPD Radio Carbon Frontend | ![pic](docs/RadioCarbon/radio_carbon.png)            |
 
 
 # DISCLAIMER
