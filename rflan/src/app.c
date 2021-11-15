@@ -51,10 +51,10 @@
 #include "adrv9001_cli.h"
 #include "phy.h"
 #include "ff.h"
+#include "zmodem.h"
 
 static TaskHandle_t 			AppTask;
 FATFS sdfs;
-
 
 static void App_Task( void *pvParameters )
 {
@@ -67,6 +67,10 @@ static void App_Task( void *pvParameters )
 	/* Initialize CLI */
 	if((status = AppCli_Initialize()) != 0)
 	  xil_printf("CLI Initialize Error %d\r\n",status);
+
+	/* Initialize ZMODEM */
+	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH)) != 0)
+		xil_printf("ZMODEM Initialize Error %d\r\n",status);
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001Cli_Initialize()) != 0)

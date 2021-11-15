@@ -57,7 +57,7 @@
 #include "app.h"
 #include "ff.h"
 #include "xuartps.h"
-
+#include "zmodem.h"
 
 static Cli_t            AppCli;
 static QueueHandle_t    AppCliRxCharQueue;
@@ -69,6 +69,18 @@ static char             AppCliCmdBuf[ APP_CLI_CMD_BUF_SIZE ];
 static CliCmd_t const  *AppCliCmdList[ APP_CLI_CMD_LIST_SIZE ];
 static XUartPs          AppCliUart;
 
+void outubyte(u8 c)
+{
+	if(AppCliTxCharQueue != NULL)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+		/* Send Byte to Tx Queue */
+		xQueueSendFromISR( AppCliTxCharQueue, &c, &xHigherPriorityTaskWoken );
+
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+}
 
 void outbyte(char c)
 {
@@ -127,6 +139,7 @@ static void AppCli_RxTask( void *param )
 	{
 		xQueueReceive( AppCliRxCharQueue, (void *)&c, portMAX_DELAY );
 
+		if (ZModem_Parse(c))
 		Cli_ProcessChar((Cli_t*)param, c);
 	}
 }
