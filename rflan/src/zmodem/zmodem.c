@@ -32,7 +32,7 @@ typedef struct
   int ready;                                                // The module is ready
   int run;                                                  // User requested to disable it
   ZMODEM_INSTANCE instance;                                 // The ZMODEM control block (internal)
-											  
+                                              
 } ZMODEM_CTRL; 
 
 static ZMODEM_CTRL zmodem_ctrl;                             // The ZMODEM control block (external)
