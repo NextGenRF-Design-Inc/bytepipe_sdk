@@ -140,7 +140,7 @@ static void AppCli_RxTask( void *param )
 		xQueueReceive( AppCliRxCharQueue, (void *)&c, portMAX_DELAY );
 
 		if (ZModem_Parse(c))
-		Cli_ProcessChar((Cli_t*)param, c);
+			Cli_ProcessChar((Cli_t*)param, c);
 	}
 }
 
@@ -166,7 +166,7 @@ static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
     if ((status != FR_OK ) || (fno.fname[0] == 0))
       break;
 
-    xil_printf("%s\r\n", fno.fname);
+    xil_printf("%s (%ld bytes)\r\n", fno.fname, fno.fsize);
   }
 
   xil_printf("\r\n\r\n");
