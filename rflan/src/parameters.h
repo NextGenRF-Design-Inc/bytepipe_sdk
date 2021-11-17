@@ -93,4 +93,14 @@ extern "C"
 #define ADRV9001_SPI_DEVICE_ID          (XPAR_PSU_SPI_0_DEVICE_ID)
 #define ADRV9001_SPI_CS                 (0)
 
+#define GTR0_REFCLK_FREQ_HZ             (52000000)
+#define GTR1_REFCLK_FREQ_HZ             (125000000)
+#define GTR2_REFCLK_FREQ_HZ             (27000000)
+#define GTR3_REFCLK_FREQ_HZ             (300000000)
+
+#define GTR0_REFCLK_VERSACLK5_PORT      (2)
+#define GTR1_REFCLK_VERSACLK5_PORT      (3)
+#define GTR2_REFCLK_VERSACLK5_PORT      (1)
+#define GTR3_REFCLK_VERSACLK5_PORT      (0)
+
 #endif
