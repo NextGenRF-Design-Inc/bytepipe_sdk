@@ -90,6 +90,7 @@ Add the directories as shown below.
 
 ```
 "${workspace_loc:/${ProjName}/src/adrv9001}"
+"${workspace_loc:/${ProjName}/src/zmodem}"
 "${workspace_loc:/${ProjName}/src/adrv9001/adi_adrv9001}"
 "${workspace_loc:/${ProjName}/src/adrv9001/adi_adrv9001/private/include}"
 "${workspace_loc:/${ProjName}/src/adrv9001/adi_adrv9001/private/include/bitfields/c0}"
