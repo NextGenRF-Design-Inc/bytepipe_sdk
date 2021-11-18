@@ -59,6 +59,7 @@
 #include "xuartps.h"
 #include "zmodem.h"
 
+
 static Cli_t            AppCli;
 static QueueHandle_t    AppCliRxCharQueue;
 static QueueHandle_t  	AppCliTxCharQueue;
@@ -142,6 +143,28 @@ static void AppCli_RxTask( void *param )
 		if (ZModem_Parse(c))
 			Cli_ProcessChar((Cli_t*)param, c);
 	}
+}
+
+static void AppCli_Callback( const char *s, void *param )
+{
+  if(s == NULL)
+    return;
+
+  uint16_t len = strlen(s);
+
+  if( APP_CLI_TX_QUEUE_SIZE > len )
+  {
+    while(len > 0)
+    {
+      xQueueSend( AppCliTxCharQueue, s++, 1);
+      len--;
+    }
+  }
+}
+
+Cli_t *AppCli_GetInstance( void )
+{
+  return &AppCli;
 }
 
 /*******************************************************************************
@@ -251,8 +274,7 @@ static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
     		printf("%s"," ");
     	}
 
-    	printf("\t%u\t%u%%\r\n", TaskStatus[x].usStackHighWaterMark*4,
-    			(uint16_t) Percentage );
+    	printf("\t%lu\t%u%%\r\n", TaskStatus[x].usStackHighWaterMark*4, (uint16_t) Percentage );
     }
 
     vPortFree( TaskStatus );
@@ -374,27 +396,6 @@ static const CliCmd_t AppCliReadFileDef =
   NULL
 };
 
-static void AppCli_Callback( const char *s, void *param )
-{
-	if(s == NULL)
-		return;
-
-	uint16_t len = strlen(s);
-
-	if( APP_CLI_TX_QUEUE_SIZE > len )
-	{
-		while(len > 0)
-		{
-			xQueueSend( AppCliTxCharQueue, s++, 1);
-			len--;
-		}
-	}
-}
-
-Cli_t *AppCli_GetInstance( void )
-{
-	return &AppCli;
-}
 
 int AppCli_Initialize( void )
 {
@@ -467,5 +468,5 @@ int AppCli_Initialize( void )
 	  Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliDeleteFileDef);
 
-	return XST_SUCCESS;
+	  return XST_SUCCESS;
 }

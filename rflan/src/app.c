@@ -52,6 +52,8 @@
 #include "phy.h"
 #include "ff.h"
 #include "zmodem.h"
+#include "xdppsu.h"
+#include "versa_clock5.h"
 
 static TaskHandle_t 			AppTask;
 FATFS sdfs;
@@ -71,6 +73,17 @@ static void App_Task( void *pvParameters )
 	/* Initialize ZMODEM */
 	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH)) != 0)
 		xil_printf("ZMODEM Initialize Error %d\r\n",status);
+  
+  /* Initialize Clocks */
+  if(VersaClock5_Initialize() != 0)
+    xil_printf("Failed to initialize external clock driver\r\n");
+
+  /* Set VersaClock5 Clock Driver Frequency */
+  VersaClock5_SetClockFreq(GTR0_REFCLK_VERSACLK5_PORT, GTR0_REFCLK_FREQ_HZ);
+  VersaClock5_SetClockFreq(GTR1_REFCLK_VERSACLK5_PORT, GTR1_REFCLK_FREQ_HZ);
+  VersaClock5_SetClockFreq(GTR2_REFCLK_VERSACLK5_PORT, GTR2_REFCLK_FREQ_HZ);
+  VersaClock5_SetClockFreq(GTR3_REFCLK_VERSACLK5_PORT, GTR3_REFCLK_FREQ_HZ);
+  VersaClock5_GlobalReset( );
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001Cli_Initialize()) != 0)
@@ -86,6 +99,7 @@ static void App_Task( void *pvParameters )
   /* Initialize PHY */
   if((status = Phy_Initialize( )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
+
 
 	for( ;; )
 	{
