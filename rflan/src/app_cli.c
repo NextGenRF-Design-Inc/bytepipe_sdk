@@ -57,7 +57,7 @@
 #include "app.h"
 #include "ff.h"
 #include "xuartps.h"
-
+#include "zmodem.h"
 
 
 static Cli_t            AppCli;
@@ -70,6 +70,18 @@ static char             AppCliCmdBuf[ APP_CLI_CMD_BUF_SIZE ];
 static CliCmd_t const  *AppCliCmdList[ APP_CLI_CMD_LIST_SIZE ];
 static XUartPs          AppCliUart;
 
+void outubyte(u8 c)
+{
+	if(AppCliTxCharQueue != NULL)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+		/* Send Byte to Tx Queue */
+		xQueueSendFromISR( AppCliTxCharQueue, &c, &xHigherPriorityTaskWoken );
+
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+}
 
 void outbyte(char c)
 {
@@ -128,7 +140,8 @@ static void AppCli_RxTask( void *param )
 	{
 		xQueueReceive( AppCliRxCharQueue, (void *)&c, portMAX_DELAY );
 
-		Cli_ProcessChar((Cli_t*)param, c);
+		if (ZModem_Parse(c))
+			Cli_ProcessChar((Cli_t*)param, c);
 	}
 }
 
@@ -176,7 +189,7 @@ static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
     if ((status != FR_OK ) || (fno.fname[0] == 0))
       break;
 
-    xil_printf("%s\r\n", fno.fname);
+    xil_printf("%s (%ld bytes)\r\n", fno.fname, fno.fsize);
   }
 
   xil_printf("\r\n\r\n");

@@ -51,6 +51,7 @@
 #include "adrv9001_cli.h"
 #include "phy.h"
 #include "ff.h"
+#include "zmodem.h"
 #include "xdppsu.h"
 #include "versa_clock5.h"
 
@@ -70,6 +71,10 @@ static void App_Task( void *pvParameters )
 	if((status = AppCli_Initialize()) != 0)
 	  xil_printf("CLI Initialize Error %d\r\n",status);
 
+	/* Initialize ZMODEM */
+	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH)) != 0)
+		xil_printf("ZMODEM Initialize Error %d\r\n",status);
+  
   /* Initialize Clocks */
   if(VersaClock5_Initialize() != 0)
     xil_printf("Failed to initialize external clock driver\r\n");
