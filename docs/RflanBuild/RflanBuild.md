@@ -127,9 +127,20 @@ Next navigate to file->new->application.  Create a new application called fsbl a
 
 # Create Boot Image
 
-Select the `rflan` project in the project explorer.  Navigate to Xilinx->Create Boot Image.  This should automatically import the appropriate files as shown below.  If not, exit and make sure the `rflan` project is highlighted in the project explorer before trying again.  Select create image, this will generate a BOOT.bin under the `rflan` folder which can be loaded onto the device for testing.
+To create a boot image start by right clicking on the `rflan` project and select `Create Boot Image` as shown below.  
+
+![boot_00](boot_00.png)
+
+Three files are needed to create the boot image, first stage boot loader (FSBL), programmable logic bit string, and the rflan application.  These are shown below along with the settings for each.  Once the files are setup select `Create Image`.  This will create a file named `BOOT.BIN` which can be copied to the SD card or eMMC for booting.
 
 ![boot_01](boot_01.png)
+
+![boot_02](boot_02.png)
+
+![boot_03](boot_03.png)
+
+![boot_04](boot_04.png)
+
 
 # Debugging
 
