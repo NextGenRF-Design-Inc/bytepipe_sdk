@@ -117,9 +117,9 @@ static void ZModem_CliZmodem(Cli_t *CliInstance, const char *cmd, void *userData
   else if (strcmp(operation, "status") == 0)
   {
     printf("-------------------------------\r\n");
-    printf("ZMODEM\r\n");
+    printf("            ZMODEM             \r\n");
     printf("-------------------------------\r\n");
-    printf("Module state         : %s\r\n", (zmodem_ctrl.run ? "enabled" : "disabled"));
+    printf("Module state         : %s\r\n", (zmodem_ctrl.run ? "enabled(1)" : "disabled(0)"));
     printf("Last operation \r\n");
     printf("    file name        : %s\r\n", zmodem_ctrl.instance.Stats.FileName);
     printf("    file size        : %ld\r\n", zmodem_ctrl.instance.Stats.FileSize);
