@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "xil_types.h"
+#include "xil_printf.h"
 #include "zmodem_pub.h"
 #include "app_cli.h"
 
@@ -100,19 +101,11 @@ static void ZModem_CliZmodem(Cli_t *CliInstance, const char *cmd, void *userData
   {
     zmodem_ctrl.run = 1;
     zModemInit(&zmodem_ctrl.instance, ZModem_Write, NULL);
-
-    xil_printf("\r\n");
-    xil_printf("done\r\n");
-    xil_printf("\r\n");
   }
   else if (strcmp(operation, "disable") == 0)
   {
     zmodem_ctrl.run = 0;
     zModemInit(&zmodem_ctrl.instance, ZModem_Write, NULL);
-
-    xil_printf("\r\n");
-    xil_printf("done\r\n");
-    xil_printf("\r\n");
   }
   else if (strcmp(operation, "status") == 0)
   {
@@ -168,7 +161,7 @@ int ZModem_Initialize(char *drive)
     if (Cli_RegisterCommand(Instance, &ZModemCliDef) == 0)
     {
       RetVal = 0; // Success;
-      zmodem_ctrl.run = 1;
+      zmodem_ctrl.run = 0;
       zmodem_ctrl.ready = 1;
     }
   }
