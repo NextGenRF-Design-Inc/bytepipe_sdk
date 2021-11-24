@@ -70,19 +70,6 @@ static char             AppCliCmdBuf[ APP_CLI_CMD_BUF_SIZE ];
 static CliCmd_t const  *AppCliCmdList[ APP_CLI_CMD_LIST_SIZE ];
 static XUartPs          AppCliUart;
 
-void outubyte(u8 c)
-{
-	if(AppCliTxCharQueue != NULL)
-	{
-		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-		/* Send Byte to Tx Queue */
-		xQueueSendFromISR( AppCliTxCharQueue, &c, &xHigherPriorityTaskWoken );
-
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-	}
-}
-
 void outbyte(char c)
 {
 	if(AppCliTxCharQueue != NULL)

@@ -37,7 +37,7 @@ typedef struct
 
 static ZMODEM_CTRL zmodem_ctrl;                             // The ZMODEM control block (external)
 
-extern void outubyte(u8 c);
+extern void outbyte(char c);
 
 //--------------------------------------------------------------------------
 // Function:    ZModem_Write
@@ -52,7 +52,7 @@ extern void outubyte(u8 c);
 static SHORT ZModem_Write(UBYTE data)
 {
   if (zmodem_ctrl.ready && zmodem_ctrl.run)
-    outubyte(data);
+    outbyte(data);
 
   return (0);
 }
