@@ -101,37 +101,37 @@ static void ZModem_CliZmodem(Cli_t *CliInstance, const char *cmd, void *userData
     zmodem_ctrl.run = 1;
     zModemInit(&zmodem_ctrl.instance, ZModem_Write, NULL);
 
-    printf("\r\n");
-    printf("done\r\n");
-    printf("\r\n");
+    xil_printf("\r\n");
+    xil_printf("done\r\n");
+    xil_printf("\r\n");
   }
   else if (strcmp(operation, "disable") == 0)
   {
     zmodem_ctrl.run = 0;
     zModemInit(&zmodem_ctrl.instance, ZModem_Write, NULL);
 
-    printf("\r\n");
-    printf("done\r\n");
-    printf("\r\n");
+    xil_printf("\r\n");
+    xil_printf("done\r\n");
+    xil_printf("\r\n");
   }
   else if (strcmp(operation, "status") == 0)
   {
-    printf("-------------------------------\r\n");
-    printf("            ZMODEM             \r\n");
-    printf("-------------------------------\r\n");
-    printf("Module state         : %s\r\n", (zmodem_ctrl.run ? "enabled(1)" : "disabled(0)"));
-    printf("Last operation \r\n");
-    printf("    file name        : %s\r\n", zmodem_ctrl.instance.Stats.FileName);
-    printf("    file size        : %ld\r\n", zmodem_ctrl.instance.Stats.FileSize);
-    printf("    file read count  : %ld\r\n", zmodem_ctrl.instance.Stats.FileRead);
-    printf("    file write count : %ld\r\n", zmodem_ctrl.instance.Stats.FileWrite);
-    printf("\r\n");
+    xil_printf("-------------------------------\r\n");
+    xil_printf("            ZMODEM             \r\n");
+    xil_printf("-------------------------------\r\n");
+    xil_printf("Module state         : %s\r\n", (zmodem_ctrl.run ? "enabled(1)" : "disabled(0)"));
+    xil_printf("Last operation \r\n");
+    xil_printf("    file name        : %s\r\n", zmodem_ctrl.instance.Stats.FileName);
+    xil_printf("    file size        : %ld\r\n", zmodem_ctrl.instance.Stats.FileSize);
+    xil_printf("    file read count  : %ld\r\n", zmodem_ctrl.instance.Stats.FileRead);
+    xil_printf("    file write count : %ld\r\n", zmodem_ctrl.instance.Stats.FileWrite);
+    xil_printf("\r\n");
   }
   else
   {
-    printf("\r\n");
-    printf("unknown command\r\n");
-    printf("\r\n");
+    xil_printf("\r\n");
+    xil_printf("unknown command\r\n");
+    xil_printf("\r\n");
   }
 
 }
