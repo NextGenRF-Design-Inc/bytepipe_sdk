@@ -24,7 +24,6 @@
 
 // #define SIMULATE_FILESYSTEM (1)
 
-
 //--------------------------------------------------------------------------
 // Function:    zFileOpen                                   
 //
@@ -40,7 +39,7 @@ void *zFileOpen (void *Inst, BOOLEAN FileWrite)
 {
   ZMODEM_INSTANCE *Instance = (ZMODEM_INSTANCE *)Inst;
 
-  strncpy(Instance->Stats.FileName, Instance->File.Name, ZMODEM_FILE_NAME_LEN); 
+  strncpy(Instance->Stats.FileName, (char *)Instance->File.Name, ZMODEM_FILE_NAME_LEN); 
   Instance->Stats.FileName[ZMODEM_FILE_NAME_LEN-1] = '\0';
   Instance->Stats.FileRead  = 0;
   Instance->Stats.FileWrite = 0;
@@ -50,9 +49,9 @@ void *zFileOpen (void *Inst, BOOLEAN FileWrite)
   return ((void *)&Instance->fil);
 #else
 
-  char Filename[ZMODEM_FILE_NAME_LEN]; 
-  snprintf(Filename, ZMODEM_FILE_NAME_LEN, "%s%s", Instance->Drive, Instance->File.Name);
-  Filename[ZMODEM_FILE_NAME_LEN-1] = '\0';
+  char Filename[ZMODEM_DRIVE_NAME_LEN + ZMODEM_FILE_NAME_LEN];
+  snprintf(Filename, ZMODEM_DRIVE_NAME_LEN + ZMODEM_FILE_NAME_LEN, "%s%s", Instance->Drive, Instance->File.Name);
+  Filename[ZMODEM_DRIVE_NAME_LEN + ZMODEM_FILE_NAME_LEN - 1] = '\0';
 
   if (FileWrite == FALSE)
   {
