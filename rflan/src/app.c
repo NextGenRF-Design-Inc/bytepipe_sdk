@@ -72,7 +72,7 @@ static void App_Task( void *pvParameters )
 	  xil_printf("CLI Initialize Error %d\r\n",status);
 
 	/* Initialize ZMODEM */
-	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH)) != 0)
+	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH, outbyte)) != 0)
 		xil_printf("ZMODEM Initialize Error %d\r\n",status);
   
   /* Initialize Clocks */

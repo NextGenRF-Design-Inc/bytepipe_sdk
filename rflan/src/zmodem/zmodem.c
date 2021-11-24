@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include "xil_types.h"
 #include "xil_printf.h"
+#include "zmodem.h"
 #include "zmodem_pub.h"
 #include "app_cli.h"
 
@@ -32,13 +33,12 @@ typedef struct
 {   
   int ready;                                                // The module is ready
   int run;                                                  // User requested to disable it
+  FN_ZMODEM_OUT out;                                        // To send bytes out
   ZMODEM_INSTANCE instance;                                 // The ZMODEM control block (internal)
                                               
 } ZMODEM_CTRL; 
 
 static ZMODEM_CTRL zmodem_ctrl;                             // The ZMODEM control block (external)
-
-extern void outbyte(char c);
 
 //--------------------------------------------------------------------------
 // Function:    ZModem_Write
@@ -52,8 +52,8 @@ extern void outbyte(char c);
 
 static SHORT ZModem_Write(UBYTE data)
 {
-  if (zmodem_ctrl.ready && zmodem_ctrl.run)
-    outbyte(data);
+  if (zmodem_ctrl.ready && zmodem_ctrl.run && zmodem_ctrl.out)
+    zmodem_ctrl.out((char)data);
 
   return (0);
 }
@@ -148,7 +148,7 @@ static const CliCmd_t ZModemCliDef =
 // Description: Launch the ZMODEM module.
 //--------------------------------------------------------------------------
 
-int ZModem_Initialize(char *drive)
+int ZModem_Initialize(char *drive, FN_ZMODEM_OUT out)
 {
   int RetVal = -1;
   Cli_t *Instance = AppCli_GetInstance( );
@@ -160,6 +160,7 @@ int ZModem_Initialize(char *drive)
     {
       RetVal = 0; // Success;
       zmodem_ctrl.run = 0;
+      zmodem_ctrl.out = out;
       zmodem_ctrl.ready = 1;
     }
   }
