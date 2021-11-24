@@ -340,8 +340,11 @@ int32_t axi_dmac_init(axi_dmac_t **dmac_core, axi_dmac_init_t *init)
 
 	*dmac_core = dmac;
 
-  XScuGic_Connect((XScuGic*)init->irqInstance, init->irqId, (XInterruptHandler)axi_dmac_default_isr, dmac );
-  XScuGic_Enable((XScuGic*)init->irqInstance, init->irqId);
+	if( init->irqInstance != NULL )
+	{
+	  XScuGic_Connect((XScuGic*)init->irqInstance, init->irqId, (XInterruptHandler)axi_dmac_default_isr, dmac );
+	  XScuGic_Enable((XScuGic*)init->irqInstance, init->irqId);
+	}
 
 	return SUCCESS;
 }
