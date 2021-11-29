@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "xil_types.h"
+#include "xil_printf.h"
+#include "zmodem.h"
 #include "zmodem_pub.h"
 #include "app_cli.h"
 
@@ -31,6 +33,7 @@ typedef struct
 {   
   int ready;                                                // The module is ready
   int run;                                                  // User requested to disable it
+  FN_ZMODEM_OUT out;                                        // To send bytes out
   ZMODEM_INSTANCE instance;                                 // The ZMODEM control block (internal)
                                               
 } ZMODEM_CTRL; 
@@ -49,8 +52,8 @@ static ZMODEM_CTRL zmodem_ctrl;                             // The ZMODEM contro
 
 static SHORT ZModem_Write(UBYTE data)
 {
-  if (zmodem_ctrl.ready && zmodem_ctrl.run)
-    printf("%c",data);
+  if (zmodem_ctrl.ready && zmodem_ctrl.run && zmodem_ctrl.out)
+    zmodem_ctrl.out((char)data);
 
   return (0);
 }
@@ -98,40 +101,31 @@ static void ZModem_CliZmodem(Cli_t *CliInstance, const char *cmd, void *userData
   {
     zmodem_ctrl.run = 1;
     zModemInit(&zmodem_ctrl.instance, ZModem_Write, NULL);
-
-    printf("\r\n");
-    printf("done\r\n");
-    printf("\r\n");
   }
   else if (strcmp(operation, "disable") == 0)
   {
     zmodem_ctrl.run = 0;
     zModemInit(&zmodem_ctrl.instance, ZModem_Write, NULL);
-
-    printf("\r\n");
-    printf("done\r\n");
-    printf("\r\n");
   }
   else if (strcmp(operation, "status") == 0)
   {
-    printf("-------------------------------\r\n");
-    printf("ZMODEM\r\n");
-    printf("-------------------------------\r\n");
-    printf("Module state         : %s\r\n", (zmodem_ctrl.run ? "enabled" : "disabled"));
-    printf("Last operation \r\n");
-    printf("    file name        : %s\r\n", zmodem_ctrl.instance.Stats.FileName);
-    printf("    file size        : %ld\r\n", zmodem_ctrl.instance.Stats.FileSize);
-    printf("    file read count  : %ld\r\n", zmodem_ctrl.instance.Stats.FileRead);
-    printf("    file write count : %ld\r\n", zmodem_ctrl.instance.Stats.FileWrite);
-    printf("\r\n");
+    xil_printf("-------------------------------\r\n");
+    xil_printf("            ZMODEM             \r\n");
+    xil_printf("-------------------------------\r\n");
+    xil_printf("Module state         : %s\r\n", (zmodem_ctrl.run ? "enabled(1)" : "disabled(0)"));
+    xil_printf("Last operation \r\n");
+    xil_printf("    file name        : %s\r\n",  zmodem_ctrl.instance.Stats.FileName);
+    xil_printf("    file size        : %ld\r\n", zmodem_ctrl.instance.Stats.FileSize);
+    xil_printf("    file read count  : %ld\r\n", zmodem_ctrl.instance.Stats.FileRead);
+    xil_printf("    file write count : %ld\r\n", zmodem_ctrl.instance.Stats.FileWrite);
+    xil_printf("\r\n");
   }
   else
   {
-    printf("\r\n");
-    printf("unknown command\r\n");
-    printf("\r\n");
+    xil_printf("\r\n");
+    xil_printf("unknown command\r\n");
+    xil_printf("\r\n");
   }
-
 }
 
 static const CliCmd_t ZModemCliDef =
@@ -154,7 +148,7 @@ static const CliCmd_t ZModemCliDef =
 // Description: Launch the ZMODEM module.
 //--------------------------------------------------------------------------
 
-int ZModem_Initialize(char *drive)
+int ZModem_Initialize(char *drive, FN_ZMODEM_OUT out)
 {
   int RetVal = -1;
   Cli_t *Instance = AppCli_GetInstance( );
@@ -165,7 +159,8 @@ int ZModem_Initialize(char *drive)
     if (Cli_RegisterCommand(Instance, &ZModemCliDef) == 0)
     {
       RetVal = 0; // Success;
-      zmodem_ctrl.run = 1;
+      zmodem_ctrl.run = 0;
+      zmodem_ctrl.out = out;
       zmodem_ctrl.ready = 1;
     }
   }
