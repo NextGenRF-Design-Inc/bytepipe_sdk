@@ -64,6 +64,8 @@ static const char* Adrv9001Cli_ParsePort(const char *cmd, uint16_t pNum, adrv900
     *port = Adrv9001Port_Tx1;
   else if(!strncmp(s, "Tx2",len))
     *port = Adrv9001Port_Tx2;
+  else
+    *port = Adrv9001Port_Num;
 
   return s;
 }
@@ -78,6 +80,7 @@ static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
   adrv9001_port_t         port;
   const char         *s = NULL;
   bool                Enable;
+  int status;
 
   if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
   {
@@ -87,13 +90,13 @@ static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_GetTxBoost(port, &Enable) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetTxBoost(port, &Enable)) == Adrv9001Status_Success)
   {
     printf("%s Boost %s\r\n", s, Enable? "Enabled" : "Disabled");
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -130,14 +133,8 @@ static void Adrv9001Cli_SetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_SetTxBoost(port, Enable) == Adrv9001Status_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+  int status = Adrv9001_SetTxBoost(port, Enable);
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
 /**
@@ -176,14 +173,8 @@ static void Adrv9001Cli_SetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_SetTxAttenuation(port, attn_mdB) == Adrv9001Status_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+  int status = Adrv9001_SetTxAttenuation(port, attn_mdB);
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
 /**
@@ -210,6 +201,7 @@ static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
   const char         *s = NULL;
   uint16_t                attn_mdB;
   float                   attn;
+  int status;
 
   if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
   {
@@ -219,7 +211,7 @@ static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_GetTxAttenuation(port, &attn_mdB) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetTxAttenuation(port, &attn_mdB)) == Adrv9001Status_Success)
   {
     attn = (float)attn_mdB;
     attn = attn / 1000;
@@ -227,7 +219,7 @@ static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -254,6 +246,7 @@ static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void 
   adrv9001_port_t         port;
   const char         *s = NULL;
   uint32_t                freq;
+  int status;
 
   if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
   {
@@ -263,13 +256,13 @@ static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void 
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_GetSampleRate(port, &freq) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetSampleRate(port, &freq)) == Adrv9001Status_Success)
   {
     printf("%s Sample Rate = %lu Hz\r\n",s,freq);
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -296,6 +289,7 @@ static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
   adrv9001_port_t         port;
   const char         *s = NULL;
   uint64_t                freq;
+  int status;
 
   if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
   {
@@ -305,13 +299,13 @@ static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_GetCarrierFrequency(port, &freq) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetCarrierFrequency(port, &freq)) == Adrv9001Status_Success)
   {
     printf("%s Carrier Frequency = %lld Hz\r\n",s,freq);
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -325,6 +319,43 @@ static const CliCmd_t Adrv9001CliGetCarrierFrequencyDef =
   "Adrv9001GetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetCarrierFrequency,
   1,
+  NULL
+};
+
+static void Adrv9001Cli_SetCarrierFrequency(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  const char         *s = NULL;
+  uint64_t                freq;
+
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Cli_GetParameter(cmd, 2, CliParamTypeU64,  &freq);
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  int status = Adrv9001_SetCarrierFrequency(port, freq);
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+}
+
+/**
+*  Get Carrier Frequency
+*/
+static const CliCmd_t Adrv9001CliSetCarrierFrequencyDef =
+{
+  "Adrv9001SetCarrierFrequency",
+  "Adrv9001SetCarrierFrequency: Set Carrier Frequency \r\n"
+  "Adrv9001SetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_SetCarrierFrequency,
+  2,
   NULL
 };
 
@@ -348,14 +379,8 @@ static void Adrv9001Cli_SetRadioState(Cli_t *CliInstance, const char *cmd, void 
 
 	Adrv9001_ClearError( );
 
-	if(Adrv9001_SetRadioState(port, state) == Adrv9001Status_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+	int status = Adrv9001_SetRadioState(port, state);
+	printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
 static const CliCmd_t Adrv9001CliSetRadioStateDef =
@@ -378,6 +403,7 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
   adrv9001_port_t         port;
   adrv9001_radio_state_t  state;
   const char         *s = NULL;
+  int status;
 
   if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
   {
@@ -387,7 +413,7 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
 
 	Adrv9001_ClearError( );
 
-  if(Adrv9001_GetRadioState(port, &state) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetRadioState(port, &state)) == Adrv9001Status_Success)
   {
     printf("%s = %s\r\n",s, state == Adrv9001RadioState_Standby? "Standby" :
                             state == Adrv9001RadioState_Calibrated? "Calibrated" :
@@ -396,7 +422,7 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -427,14 +453,9 @@ static void Adrv9001Cli_ToRfEnabled(Cli_t *CliInstance, const char *cmd, void *u
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_ToRfEnabled(port) == Adrv9001Status_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+  int status = Adrv9001_ToRfEnabled(port);
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
 static const CliCmd_t Adrv9001CliToRfEnabledDef =
@@ -464,14 +485,9 @@ static void Adrv9001Cli_ToRfCalibrated(Cli_t *CliInstance, const char *cmd, void
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_ToRfCalibrated(port) == Adrv9001Status_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+  int status = Adrv9001_ToRfCalibrated(port);
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
 static const CliCmd_t Adrv9001CliToRfCalibratedDef =
@@ -501,14 +517,10 @@ static void Adrv9001Cli_ToRfPrimed(Cli_t *CliInstance, const char *cmd, void *us
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_ToRfPrimed(port) == Adrv9001Status_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+  int status = Adrv9001_ToRfPrimed(port);
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+
 }
 
 static const CliCmd_t Adrv9001CliToRfPrimedDef =
@@ -529,16 +541,17 @@ static const CliCmd_t Adrv9001CliToRfPrimedDef =
 static void Adrv9001Cli_GetTemp(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int16_t Temp_C;
+  int status;
 
   Adrv9001_ClearError( );
 
-  if(Adrv9001_GetTemperature( &Temp_C ) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetTemperature( &Temp_C )) == Adrv9001Status_Success)
   {
     printf("%dC\r\n", Temp_C);
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -560,10 +573,10 @@ static const CliCmd_t Adrv9001CliGetTempDef =
 static void Adrv9001Cli_GetVerInfo(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_ver_t VerInfo;
-
+  int status;
   Adrv9001_ClearError( );
 
-  if(Adrv9001_GetVersionInfo( &VerInfo ) == Adrv9001Status_Success)
+  if((status = Adrv9001_GetVersionInfo( &VerInfo )) == Adrv9001Status_Success)
   {
     printf("%s Version Information:\r\n","ADRV9002");
     printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
@@ -572,7 +585,7 @@ static void Adrv9001Cli_GetVerInfo(Cli_t *CliInstance, const char *cmd, void *us
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
 }
 
@@ -583,6 +596,99 @@ static const CliCmd_t Adrv9001CliGetVerInfoDef =
   "Adrv9001GetVerInfo <  >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetVerInfo,
   0,
+  NULL
+};
+
+static void Adrv9001Cli_GetRssi(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t         port;
+  const char         *s = NULL;
+  uint32_t                rssi;
+  int status;
+
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Adrv9001_ClearError( );
+
+  if((status = Adrv9001_GetRssi(port, &rssi)) == Adrv9001Status_Success)
+  {
+    printf("RSSI = %2.1fdB\r\n",((float)rssi)/1000);
+  }
+  else
+  {
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+  }
+}
+
+/**
+*  Get RSSI
+*/
+static const CliCmd_t Adrv9001CliGetRssiDef =
+{
+  "Adrv9001GetRssi",
+  "Adrv9001GetRssi: Get Received Signal Strength \r\n"
+  "Adrv9001GetRssi < port ( Rx1,Rx2) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetRssi,
+  1,
+  NULL
+};
+
+static void Adrv9001Cli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  Adrv9001_ClearError( );
+
+  int status = Adrv9001_LoadProfile( );
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+}
+
+/**
+*  Load Profile
+*/
+static const CliCmd_t Adrv9001CliLoadProfileDef =
+{
+  "Adrv9001LoadProfile",
+  "Adrv9001LoadProfile: Load profile settings into ADRV9002 \r\n"
+  "Adrv9001LoadProfile < >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_LoadProfile,
+  0,
+  NULL
+};
+
+static void Adrv9001Cli_SetLoopBack(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t     port;
+  uint32_t            state;
+
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
+
+  Cli_GetParameter(cmd, 2, CliParamTypeU32, &state);
+
+  Adrv9001_ClearError( );
+
+  int status = Adrv9001_SetInternalLoopBack(port, state);
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+}
+
+/**
+*  Set LoopBack
+*/
+static const CliCmd_t Adrv9001CliSetLoopBackDef =
+{
+  "SetLoopBack",
+  "SetLoopBack: Set loopback \r\n"
+  "SetLoopBack < port ( Rx1,Rx2,Tx1,Tx2), enabled >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_SetLoopBack,
+  2,
   NULL
 };
 
@@ -600,6 +706,7 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliSetRadioStateDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetRadioStateDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetCarrierFrequencyDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliSetCarrierFrequencyDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetSampleRateDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetTxAttnDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliSetTxAttnDef);
@@ -608,8 +715,11 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliToRfPrimedDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliToRfCalibratedDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliToRfEnabledDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetRssiDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetTempDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetVerInfoDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliLoadProfileDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliSetLoopBackDef);
 
 	return Adrv9001Status_Success;
 }

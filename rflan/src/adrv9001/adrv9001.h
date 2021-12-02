@@ -62,24 +62,18 @@ typedef enum
   Adrv9001Status_Success                      = (0),
   Adrv9001Status_InvalidPort                  = (ADRV9001_STATUS_OFFSET - 1),
   Adrv9001Status_InvalidParameter             = (ADRV9001_STATUS_OFFSET - 2),
-  Adrv9001Status_Initialized                  = (ADRV9001_STATUS_OFFSET - 3),
   Adrv9001Status_MemoryError                  = (ADRV9001_STATUS_OFFSET - 3),
-  Adrv9001Status_InvalidSSI                   = (ADRV9001_STATUS_OFFSET - 4),
-  Adrv9001Status_InvalidGpio                  = (ADRV9001_STATUS_OFFSET - 5),
-  Adrv9001Status_InvalidRadioState            = (ADRV9001_STATUS_OFFSET - 6),
-  Adrv9001Status_CommError                    = (ADRV9001_STATUS_OFFSET - 7),
-  Adrv9001Status_ProfileInitError             = (ADRV9001_STATUS_OFFSET - 8),
-  Adrv9001Status_ProfileCfgError              = (ADRV9001_STATUS_OFFSET - 9),
-  Adrv9001Status_ProfileCalError              = (ADRV9001_STATUS_OFFSET - 10),
-  Adrv9001Status_ProfilePrimeError            = (ADRV9001_STATUS_OFFSET - 11),
-  Adrv9001Status_NotSupported                 = (ADRV9001_STATUS_OFFSET - 12),
-  Adrv9001Status_DriverError                  = (ADRV9001_STATUS_OFFSET - 13),
-  Adrv9001Status_DmaError                     = (ADRV9001_STATUS_OFFSET - 14),
-  Adrv9001Status_ExceedsDmaBuffer             = (ADRV9001_STATUS_OFFSET - 15),
-  Adrv9001Status_PortDisabled                 = (ADRV9001_STATUS_OFFSET - 16),
-  Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 17),
-  Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 18),
-  Adrv9001Status_MemoryAlignmentError         = (ADRV9001_STATUS_OFFSET - 19),
+  Adrv9001Status_InvalidRadioState            = (ADRV9001_STATUS_OFFSET - 4),
+  Adrv9001Status_CommError                    = (ADRV9001_STATUS_OFFSET - 5),
+  Adrv9001Status_ProfileInitError             = (ADRV9001_STATUS_OFFSET - 6),
+  Adrv9001Status_ProfileCfgError              = (ADRV9001_STATUS_OFFSET - 7),
+  Adrv9001Status_ProfileCalError              = (ADRV9001_STATUS_OFFSET - 8),
+  Adrv9001Status_ProfilePrimeError            = (ADRV9001_STATUS_OFFSET - 9),
+  Adrv9001Status_DriverError                  = (ADRV9001_STATUS_OFFSET - 10),
+  Adrv9001Status_DmaError                     = (ADRV9001_STATUS_OFFSET - 11),
+  Adrv9001Status_PortDisabled                 = (ADRV9001_STATUS_OFFSET - 12),
+  Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 13),
+  Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 14),
 } adrv9001_status_t;
 
 /**
@@ -92,7 +86,6 @@ typedef enum
   Adrv9001Port_Tx1    = (2),
   Adrv9001Port_Tx2    = (3),
   Adrv9001Port_Num    = (4),
-
 } adrv9001_port_t;
 
 #define ADRV9001_IS_PORT_TX(p)              ((( p == Adrv9001Port_Tx1 ) || ( p == Adrv9001Port_Tx2 )) ? true : false)
@@ -101,6 +94,22 @@ typedef enum
                                              ( p == Adrv9001Port_Tx2 )? "Tx2" :                 \
                                              ( p == Adrv9001Port_Rx1 )? "Rx1" :                 \
                                              ( p == Adrv9001Port_Rx2 )? "Rx2" : "Unknown")
+
+#define ADRV9001_STATUS_2_STR(p)            (( p == Adrv9001Status_Success )?           "Success" :             \
+                                             ( p == Adrv9001Status_InvalidPort )?       "InvalidPort" :         \
+                                             ( p == Adrv9001Status_InvalidParameter )?  "InvalidParameter" :    \
+                                             ( p == Adrv9001Status_MemoryError )?       "MemoryError" :         \
+                                             ( p == Adrv9001Status_InvalidRadioState )? "InvalidRadioState" :   \
+                                             ( p == Adrv9001Status_CommError )?         "CommError" :           \
+                                             ( p == Adrv9001Status_ProfileInitError )?  "ProfileInitError" :    \
+                                             ( p == Adrv9001Status_ProfileCfgError )?   "ProfileCfgError" :     \
+                                             ( p == Adrv9001Status_ProfileCalError )?   "ProfileCalError" :     \
+                                             ( p == Adrv9001Status_ProfilePrimeError )? "ProfilePrimeError" :   \
+                                             ( p == Adrv9001Status_DriverError )?       "DriverError" :         \
+                                             ( p == Adrv9001Status_DmaError )?          "DmaError" :            \
+                                             ( p == Adrv9001Status_PortDisabled )?      "PortDisabled" :        \
+                                             ( p == Adrv9001Status_SpiError )?          "SpiError" :            \
+                                             ( p == Adrv9001Status_GpioError )?         "GpioError" : "Unknown")
 
 /**
  **  ADRV9001 Radio State
@@ -132,6 +141,7 @@ typedef union
     adrv9001_port_t     Port;
     adrv9001_status_t   Status;
   }Stream;
+  char                 *Message;
 } adrv9001_evt_data_t;
 
 /**
@@ -141,6 +151,7 @@ typedef enum
 {
   Adrv9001EvtType_StreamStart   = 0,
   Adrv9001EvtType_StreamDone    = 1,
+  Adrv9001EvtType_LogWrite      = 2,
 } adrv9001_evt_type_t;
 
 /**
@@ -157,17 +168,12 @@ typedef struct {
 } adrv9001_dma_cfg_t;
 
 /**
- **  ADRV9001 GPIO Configuration
+ **  AXI ADRV9001 Configuration
  */
 typedef struct {
-  uint32_t              DeviceId;           ///< Device ID
-  uint32_t              RstnPin;            ///< Reset pin number
-  uint32_t              Rx1EnPin;           ///< Rx1 enable pin number
-  uint32_t              Rx2EnPin;           ///< Rx2 enable pin number
-  uint32_t              Tx1EnPin;           ///< Tx1 enable pin number
-  uint32_t              Tx2EnPin;           ///< Tx2 enable pin number
-  uint32_t              IrqPin;             ///< Irq enable pin number
-} adrv9001_gpio_cfg_t;
+  uint32_t              IrqId;              ///< Processor IRQ ID
+  uint32_t              BaseAddr;           ///< AXI Bus Address
+} axi_adrv9001_cfg_t;
 
 /**
  **  ADRV9001 SPI Configuration
@@ -185,7 +191,7 @@ typedef struct
   adrv9001_callback_t   Callback;           ///< Callback
   void                 *CallbackRef;        ///< Callback reference data
   adrv9001_dma_cfg_t   *DmaCfg;             ///< DMA Configuration
-  adrv9001_gpio_cfg_t  *GpioCfg;            ///< GPIO Configuration
+  axi_adrv9001_cfg_t   *AxiAdrv9001Cfg;     ///< GPIO Configuration
   adrv9001_spi_cfg_t   *SpiCfg;             ///< SPI Configuration
   void                 *IrqInstance;        ///< Processor Interrupt Instance
 } adrv9001_cfg_t;
@@ -436,12 +442,42 @@ adrv9001_status_t Adrv9001_GetSampleRate( adrv9001_port_t Port, uint32_t *FreqHz
 *
 * \param[in]  Port is the port being requested
 *
-* \param[in]  FreqHz is the carrier frequency in Hz
+* \param[out]  FreqHz is the carrier frequency in Hz
 *
 * \return     Status
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_GetCarrierFrequency( adrv9001_port_t Port, uint64_t *FreqHz );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the carrier frequency for the requested port.
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  FreqHz is the carrier frequency in Hz
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SetCarrierFrequency( adrv9001_port_t Port, uint64_t FreqHz );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function gets the receive signal strength
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Rssi_mdB is the RSSI in milli dB, ie 10000 = 10.000dB
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetRssi( adrv9001_port_t Port, uint32_t *Rssi_mdB );
 
 /*******************************************************************************
 *
@@ -566,6 +602,19 @@ adrv9001_status_t Adrv9001_ToRfCalibrated( adrv9001_port_t Port );
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_IQStream( adrv9001_port_t Port, bool Cyclic, adrv9001_iqdata_t *Buf, uint32_t SampleCnt );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function will stop the IQ stream for a specified port.
+*
+* \param[in]  Port is the port being requested
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_IQStreamStop( adrv9001_port_t Port );
 
 /*******************************************************************************
 *

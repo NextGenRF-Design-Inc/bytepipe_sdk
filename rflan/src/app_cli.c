@@ -58,7 +58,8 @@
 #include "ff.h"
 #include "xuartps.h"
 #include "zmodem.h"
-
+#include "adrv9001.h"
+#include "xsysmonpsu.h"
 
 static Cli_t            AppCli;
 static QueueHandle_t    AppCliRxCharQueue;
@@ -383,6 +384,72 @@ static const CliCmd_t AppCliReadFileDef =
   NULL
 };
 
+/*******************************************************************************
+*
+* \details Get Temp
+*
+*******************************************************************************/
+static void AppCli_GetTemp(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int16_t Temp_C;
+  float cpuTemp;
+
+  if(Adrv9001_GetTemperature( &Temp_C ) == Adrv9001Status_Success)
+  {
+    App_GetCpuTemp( &cpuTemp );
+    printf("Adrv9001 = %dC; CPU = %dC\r\n", Temp_C,(int)cpuTemp);
+  }
+  else
+  {
+    printf("Failed\r\n");
+  }
+}
+
+static const CliCmd_t AppCliGetTempDef =
+{
+  "GetTemp",
+  "GetTemp: Read temperature \r\n"
+  "GetTemp < filename, offset, length >\r\n\n",
+  (CliCmdFn_t)AppCli_GetTemp,
+  0,
+  NULL
+};
+
+/*******************************************************************************
+*
+* \details Reboot
+*
+*******************************************************************************/
+static void AppCli_Reboot(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  App_Reboot();
+}
+
+static const CliCmd_t AppCliRebootDef =
+{
+  "Reboot",
+  "Reboot: Reboot processor \r\n"
+  "Reboot <  >\r\n\n",
+  (CliCmdFn_t)AppCli_Reboot,
+  0,
+  NULL
+};
+
+static void AppCli_ResetPl(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  App_ResetPl();
+}
+
+static const CliCmd_t AppCliResetPlDef =
+{
+  "ResetPl",
+  "ResetPl: Reset programmable logic \r\n"
+  "ResetPl <  >\r\n\n",
+  (CliCmdFn_t)AppCli_ResetPl,
+  0,
+  NULL
+};
+
 
 int AppCli_Initialize( void )
 {
@@ -454,6 +521,9 @@ int AppCli_Initialize( void )
 	  Cli_RegisterCommand(&AppCli, &AppCliTaskInfoDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
 	  Cli_RegisterCommand(&AppCli, &AppCliDeleteFileDef);
+	  Cli_RegisterCommand(&AppCli, &AppCliGetTempDef);
+	  Cli_RegisterCommand(&AppCli, &AppCliRebootDef);
+	  Cli_RegisterCommand(&AppCli, &AppCliResetPlDef);
 
 	  return XST_SUCCESS;
 }

@@ -45,6 +45,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "cli.h"
+#include "app_cli.h"
 #include "xparameters.h"
 #include "xil_types.h"
 #include "xstatus.h"
@@ -73,13 +74,13 @@ static void AppCli_ReadVersaClock5(Cli_t *CliInstance, const char *cmd, void *us
   {
     if(VersaClock5_Read(Buf, Length) == 0)
     {
-      print("0x");
+      printf("0x");
       for( int i = 0; i < Length; i++)
       {
-        xil_printf("%02x",Buf[i]);
+        printf("%02x",Buf[i]);
       }
 
-      print("\r\n");
+      printf("\r\n");
     }
     else
     {

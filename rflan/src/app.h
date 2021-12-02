@@ -47,6 +47,10 @@
 #include "xstatus.h"
 
 
+int32_t App_GetCpuTemp( float *Temp );
+void App_Reboot( void );
+int32_t App_ResetPl( void );
+
 /******************************************************************************/
 /**
 *   Build Version

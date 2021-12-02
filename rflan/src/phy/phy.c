@@ -220,6 +220,10 @@ static void Phy_Adrv9001Callback( adrv9001_evt_type_t EvtType, adrv9001_evt_data
     xQueueSendFromISR( PhyQueue, &qItem, &xHigherPriorityTaskWoken );
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   }
+  else if( EvtType == Adrv9001EvtType_LogWrite )
+  {
+    printf(EvtData.Message);
+  }
 }
 
 phy_status_t Phy_IqStreamDisable( adrv9001_port_t Port )
@@ -337,14 +341,9 @@ phy_status_t Phy_Initialize( void )
   DmaCfg.IrqId[Adrv9001Port_Rx2] = XPAR_FABRIC_ADRV9001_RX2_DMA_IRQ_INTR;
 
 
-  adrv9001_gpio_cfg_t GpioCfg = {
-      .DeviceId = GPIO_DEVICE_ID,
-      .IrqPin = 0,
-      .RstnPin = ADRV9001_GPIO_RSTN,
-      .Rx1EnPin = ADRV9001_GPIO_RX1_EN,
-      .Rx2EnPin = ADRV9001_GPIO_RX2_EN,
-      .Tx1EnPin = ADRV9001_GPIO_TX1_EN,
-      .Tx2EnPin = ADRV9001_GPIO_TX2_EN
+  axi_adrv9001_cfg_t AxiAdrv9001Cfg = {
+      .BaseAddr = XPAR_AXI_ADRV9001_0_BASEADDR,
+      .IrqId = 0,
   };
 
   adrv9001_spi_cfg_t SpiCfg = {
@@ -353,12 +352,12 @@ phy_status_t Phy_Initialize( void )
   };
 
   adrv9001_cfg_t Adrv9001Cfg = {
-     .Callback      = Phy_Adrv9001Callback,
-     .CallbackRef   = NULL,
-     .DmaCfg        = &DmaCfg,
-     .GpioCfg       = &GpioCfg,
-     .SpiCfg        = &SpiCfg,
-     .IrqInstance   = &xInterruptController
+     .Callback        = Phy_Adrv9001Callback,
+     .CallbackRef     = NULL,
+     .DmaCfg          = &DmaCfg,
+     .AxiAdrv9001Cfg  = &AxiAdrv9001Cfg,
+     .SpiCfg          = &SpiCfg,
+     .IrqInstance     = &xInterruptController
   };
 
   /* Initialize ADRV9001 */
@@ -377,7 +376,7 @@ phy_status_t Phy_Initialize( void )
   printf("%s Successfully Initialized\r\n","ADRV9002");
   printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
   printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
-  printf("  -API Version: %u.%u.%u\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
+  printf("  -API Version: %lu.%lu.%lu\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
 
   return XST_SUCCESS;
 }

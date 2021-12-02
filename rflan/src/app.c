@@ -54,10 +54,130 @@
 #include "zmodem.h"
 #include "xdppsu.h"
 #include "versa_clock5.h"
+#include "xsysmonpsu.h"
+#include "xresetps.h"
+
+#define SYSMON_DEVICE_ID  XPAR_XSYSMONPSU_0_DEVICE_ID
 
 static TaskHandle_t 			AppTask;
-FATFS sdfs;
+static XSysMonPsu         AppSysMon;
+static XResetPs           AppReset;
+FATFS                     sdfs;
 
+int32_t App_ResetPl( void )
+{
+  return XResetPs_ResetPulse(&AppReset, XRESETPS_RSTID_PL);
+}
+
+void App_Reboot( void )
+{
+  XResetPs_ResetPulse(&AppReset, XRESETPS_RSTID_SOFT);
+}
+
+static int32_t App_ResetInitialize( void )
+{
+  XResetPs_Config *Cfg = XResetPs_LookupConfig(XPAR_XRESETPS_DEVICE_ID);
+
+  return XResetPs_CfgInitialize(&AppReset, Cfg);
+}
+
+static int32_t App_SysMonInitialize( void )
+{
+  int Status;
+  XSysMonPsu_Config *ConfigPtr;
+  u64 IntrStatus;
+  XSysMonPsu *SysMonInstPtr = &AppSysMon;
+
+  /* Initialize the SysMon driver. */
+  if((ConfigPtr = XSysMonPsu_LookupConfig(SYSMON_DEVICE_ID)) == NULL )
+    return XST_FAILURE;
+
+  XSysMonPsu_CfgInitialize(SysMonInstPtr, ConfigPtr, ConfigPtr->BaseAddress);
+
+  /* Self Test the System Monitor device */
+  if((Status = XSysMonPsu_SelfTest(SysMonInstPtr)) != XST_SUCCESS)
+    return XST_FAILURE;
+
+  /*
+   * Disable the Channel Sequencer before configuring the Sequence
+   * registers.
+   */
+  XSysMonPsu_SetSequencerMode(SysMonInstPtr, XSM_SEQ_MODE_SAFE, XSYSMON_PS);
+
+
+  /* Disable all the alarms in the Configuration Register 1. */
+  XSysMonPsu_SetAlarmEnables(SysMonInstPtr, 0x0, XSYSMON_PS);
+
+  /*
+   * Setup the Averaging to be done for the channels in the
+   * Configuration 0 register as 16 samples:
+   */
+  XSysMonPsu_SetAvg(SysMonInstPtr, XSM_AVG_16_SAMPLES, XSYSMON_PS);
+
+  /*
+   * Setup the Sequence register for 1st Auxiliary channel
+   * Setting is:
+   *  - Add acquisition time by 6 ADCCLK cycles.
+   *  - Bipolar Mode
+   *
+   * Setup the Sequence register for 16th Auxiliary channel
+   * Setting is:
+   *  - Add acquisition time by 6 ADCCLK cycles.
+   *  - Unipolar Mode
+   */
+  if((Status = XSysMonPsu_SetSeqInputMode(SysMonInstPtr, XSYSMONPSU_SEQ_CH1_VAUX00_MASK << 16, XSYSMON_PS)) != XST_SUCCESS)
+    return XST_FAILURE;
+
+  if((Status = XSysMonPsu_SetSeqAcqTime(SysMonInstPtr, (XSYSMONPSU_SEQ_CH1_VAUX0F_MASK | XSYSMONPSU_SEQ_CH1_VAUX00_MASK) << 16, XSYSMON_PS)) != XST_SUCCESS)
+    return XST_FAILURE;
+
+
+  /*
+   * Enable the averaging on the following channels in the Sequencer
+   * registers:
+   *  - On-chip Temperature, VCCINT/VCCAUX  supply sensors
+   *  - 1st/16th Auxiliary Channels
+    * - Calibration Channel
+   */
+  Status =  XSysMonPsu_SetSeqAvgEnables(SysMonInstPtr, XSYSMONPSU_SEQ_CH0_TEMP_MASK |
+      XSYSMONPSU_SEQ_CH0_SUP1_MASK |
+      XSYSMONPSU_SEQ_CH0_SUP3_MASK |
+      ((XSYSMONPSU_SEQ_CH1_VAUX00_MASK |
+      XSYSMONPSU_SEQ_CH1_VAUX0F_MASK) << 16) |
+      XSYSMONPSU_SEQ_CH0_CALIBRTN_MASK, XSYSMON_PS);
+
+  if (Status != XST_SUCCESS)
+    return XST_FAILURE;
+
+  /*
+   * Enable the following channels in the Sequencer registers:
+   *  - On-chip Temperature, VCCINT/VCCAUX supply sensors
+   *  - 1st/16th Auxiliary Channel
+   *  - Calibration Channel
+   */
+  Status =  XSysMonPsu_SetSeqChEnables(SysMonInstPtr, XSYSMONPSU_SEQ_CH0_TEMP_MASK |
+      XSYSMONPSU_SEQ_CH0_SUP1_MASK |
+      XSYSMONPSU_SEQ_CH0_SUP3_MASK |
+      ((XSYSMONPSU_SEQ_CH1_VAUX00_MASK |
+      XSYSMONPSU_SEQ_CH1_VAUX0F_MASK) << 16) |
+      XSYSMONPSU_SEQ_CH0_CALIBRTN_MASK, XSYSMON_PS);
+
+  if (Status != XST_SUCCESS)
+    return XST_FAILURE;
+
+  /* Clear any bits set in the Interrupt Status Register. */
+  IntrStatus = XSysMonPsu_IntrGetStatus(SysMonInstPtr);
+  XSysMonPsu_IntrClear(SysMonInstPtr, IntrStatus);
+
+  /* Enable the Channel Sequencer in continuous sequencer cycling mode. */
+  XSysMonPsu_SetSequencerMode(SysMonInstPtr, XSM_SEQ_MODE_CONTINPASS, XSYSMON_PS);
+
+  /* Wait till the End of Sequence occurs */
+  while ((XSysMonPsu_IntrGetStatus(SysMonInstPtr) & ((u64)XSYSMONPSU_ISR_1_EOS_MASK<< 32)) !=
+      ((u64)XSYSMONPSU_ISR_1_EOS_MASK<< 32));
+
+  return XST_SUCCESS;
+}
 
 static void App_Task( void *pvParameters )
 {
@@ -71,10 +191,18 @@ static void App_Task( void *pvParameters )
 	if((status = AppCli_Initialize()) != 0)
 	  xil_printf("CLI Initialize Error %d\r\n",status);
 
+	/* Initialize System Monitor */
+	if((status = App_SysMonInitialize()) != 0)
+    xil_printf("System Monitor Initialize Error %d\r\n",status);
+
+  /* Initialize System Reset */
+  if((status = App_ResetInitialize()) != 0)
+    xil_printf("System Reset Initialize Error %d\r\n",status);
+
 	/* Initialize ZMODEM */
 	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH, outbyte)) != 0)
 		xil_printf("ZMODEM Initialize Error %d\r\n",status);
-  
+
   /* Initialize Clocks */
   if(VersaClock5_Initialize() != 0)
     xil_printf("Failed to initialize external clock driver\r\n");
@@ -101,6 +229,15 @@ static void App_Task( void *pvParameters )
 	}
 }
 
+int32_t App_GetCpuTemp( float *Temp )
+{
+  u32 TempRawData;
+
+  TempRawData = XSysMonPsu_GetAdcData(&AppSysMon, XSM_CH_TEMP, XSYSMON_PS);
+  *Temp = XSysMonPsu_RawToTemperature_OnChip(TempRawData);
+
+  return XST_SUCCESS;
+}
 
 int main()
 {

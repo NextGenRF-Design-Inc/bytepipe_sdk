@@ -85,11 +85,6 @@ extern "C"
 
 #define GPIO_DEVICE_ID                  (XPAR_PSU_GPIO_0_DEVICE_ID)
 #define GPIO_OFFSET                     (78)
-#define ADRV9001_GPIO_RX2_EN            (4 + GPIO_OFFSET)
-#define ADRV9001_GPIO_RX1_EN            (3 + GPIO_OFFSET)
-#define ADRV9001_GPIO_TX2_EN            (2 + GPIO_OFFSET)
-#define ADRV9001_GPIO_TX1_EN            (1 + GPIO_OFFSET)
-#define ADRV9001_GPIO_RSTN              (0 + GPIO_OFFSET)
 #define ADRV9001_SPI_DEVICE_ID          (XPAR_PSU_SPI_0_DEVICE_ID)
 #define ADRV9001_SPI_CS                 (0)
 
