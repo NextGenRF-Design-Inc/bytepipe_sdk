@@ -50,6 +50,7 @@
 #include "parameters.h"
 #include "iq_file.h"
 
+#define PHY_STREAM_RX_SAMPLE_CNT          (16384)
 
 static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_port_t *port)
 {
@@ -57,7 +58,6 @@ static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_por
   uint16_t            len;
 
   s = Cli_FindParameter( cmd, pNum, &len );
-
 
   if(!strncmp(s, "Rx1",len))
     *port = Adrv9001Port_Rx1;
@@ -71,18 +71,11 @@ static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_por
   return s;
 }
 
-
-/*******************************************************************************
-*
-* \details LoadProfile
-*
-*******************************************************************************/
 static void PhyCli_UpdateProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   char *filename = calloc(1, FF_FILENAME_MAX_LEN );
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
   Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
-
 
   FIL fil;
   profile_t *Buf = NULL;
@@ -117,7 +110,7 @@ static void PhyCli_UpdateProfile(Cli_t *CliInstance, const char *cmd, void *user
   f_lseek(&fil, 0);
 
   /* Read data from file */
-  if(f_read(&fil, Buf, length, &length) != FR_OK)
+  if(f_read(&fil, Buf, length, (UINT*)&length) != FR_OK)
   {
     printf("Read File Error\r\n");
     free( Buf );
@@ -152,13 +145,6 @@ static const CliCmd_t PhyCliUpdateProfileDef =
   1,
   NULL
 };
-
-/*******************************************************************************
-*
-* \details IQ Stream
-*
-*******************************************************************************/
-#define PHY_STREAM_RX_SAMPLE_CNT          (16384)
 
 static void PhyCli_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, void *param)
 {
@@ -275,6 +261,16 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   }
 }
 
+static const CliCmd_t PhyCliIqFileStreamEnableDef =
+{
+  "PhyIqFileStreamEnable",
+  "PhyIqFileStreamEnable:  Enable IQ stream to or from a file. \r\n"
+  "PhyIqFileStreamEnable <port (Rx1,Rx2,Tx1,Tx2), filename, SampleCnt (-1=cyclic, 0=file size)>\r\n\r\n",
+  (CliCmdFn_t)PhyCli_IqFileStreamEnable,
+  3,
+  NULL
+};
+
 static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t     port;
@@ -292,6 +288,16 @@ static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void
     printf("Failed\r\n");
   }
 }
+
+static const CliCmd_t PhyCliIqFileStreamDisableDef =
+{
+  "PhyIqFileStreamDisable",
+  "PhyIqFileStreamDisable:  Disable IQ stream. \r\n"
+  "PhyIqFileStreamDisable < port ( Rx1,Rx2,Tx1,Tx2 ) >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_IqFileStreamDisable,
+  1,
+  NULL
+};
 
 static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userData)
 {
@@ -322,26 +328,6 @@ static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userDat
   }
 }
 
-static const CliCmd_t PhyCliIqFileStreamEnableDef =
-{
-  "PhyIqFileStreamEnable",
-  "PhyIqFileStreamEnable:  Enable IQ stream to or from a file. \r\n"
-  "PhyIqFileStreamEnable < port ( Rx1,Rx2,Tx1,Tx2 ), filename, SampleCnt (-1 = indefinite, 0 = file size, >0 = number of samples ) >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_IqFileStreamEnable,
-  3,
-  NULL
-};
-
-static const CliCmd_t PhyCliIqFileStreamDisableDef =
-{
-  "PhyIqFileStreamDisable",
-  "PhyIqFileStreamDisable:  Disable IQ stream. \r\n"
-  "PhyIqFileStreamDisable < port ( Rx1,Rx2,Tx1,Tx2 ) >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_IqFileStreamDisable,
-  1,
-  NULL
-};
-
 static const CliCmd_t PhyCliIqFileSizeDef =
 {
   "PhyIqFileSize",
@@ -352,13 +338,6 @@ static const CliCmd_t PhyCliIqFileSizeDef =
   NULL
 };
 
-/*******************************************************************************
-
-  PURPOSE:  Initialize APP CLI
-
-  COMMENT:
-
-*******************************************************************************/
 int PhyCli_Initialize( void )
 {
   Cli_t *Instance = AppCli_GetInstance( );
@@ -367,7 +346,6 @@ int PhyCli_Initialize( void )
   Cli_RegisterCommand(Instance, &PhyCliIqFileStreamDisableDef);
   Cli_RegisterCommand(Instance, &PhyCliIqFileSizeDef);
   Cli_RegisterCommand(Instance, &PhyCliUpdateProfileDef);
-
 
 	return PhyStatus_Success;
 }

@@ -71,6 +71,16 @@ typedef enum
   PhyStatus_IqStreamAbort       = (PHY_STATUS_OFFSET - 9),
 } phy_status_t;
 
+#define PHY_STATUS_2_STR(p)   (( p == PhyStatus_Success )?                  "Success" :                         \
+                               ( p == PhyStatus_InvalidPort )?              "PHY InvalidPort" :                 \
+                               ( p == PhyStatus_InvalidParameter )?         "PHY InvalidParameter" :            \
+                               ( p == PhyStatus_MemoryError )?              "PHY MemoryError" :                 \
+                               ( p == PhyStatus_RadioStateError )?          "PHY InvalidRadioState" :           \
+                               ( p == PhyStatus_NotSupported )?             "PHY Functionality Not supported" : \
+                               ( p == PhyStatus_OsError )?                  "PHY OS Error" :                    \
+                               ( p == PhyStatus_Busy )?                     "PHY Busy" :                        \
+                               ( p == PhyStatus_Adrv9001Error )?            "PHY ADRV9001 Error" :              \
+                               ( p == PhyStatus_IqStreamAbort )?            "PHY IQ Stream Abort" : "Unknown")
 /**
 ** PHY Profile
 */

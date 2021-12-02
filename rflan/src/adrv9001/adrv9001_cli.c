@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 #include "adrv9001.h"
 #include "app_cli.h"
 
@@ -70,11 +71,6 @@ static const char* Adrv9001Cli_ParsePort(const char *cmd, uint16_t pNum, adrv900
   return s;
 }
 
-/*******************************************************************************
-*
-* \details Get Transmitter Boost
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -100,9 +96,6 @@ static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
   }
 }
 
-/**
-*  Get Transmitter Boost
-*/
 static const CliCmd_t Adrv9001CliGetTxBoostDef =
 {
   "Adrv9001GetTxBoost",
@@ -113,11 +106,6 @@ static const CliCmd_t Adrv9001CliGetTxBoostDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Set Transmitter Boost
-*
-*******************************************************************************/
 static void Adrv9001Cli_SetTxBoost(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -137,9 +125,6 @@ static void Adrv9001Cli_SetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
   printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
-/**
-*  Set Transmitter Boost
-*/
 static const CliCmd_t Adrv9001CliSetTxBoostDef =
 {
   "Adrv9001SetTxBoost",
@@ -150,11 +135,6 @@ static const CliCmd_t Adrv9001CliSetTxBoostDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Set Transmitter Attenuation
-*
-*******************************************************************************/
 static void Adrv9001Cli_SetTxAttn(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -177,9 +157,6 @@ static void Adrv9001Cli_SetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
   printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
-/**
-*  Set Transmitter Attenuation
-*/
 static const CliCmd_t Adrv9001CliSetTxAttnDef =
 {
   "Adrv9001SetTxAttn",
@@ -190,11 +167,6 @@ static const CliCmd_t Adrv9001CliSetTxAttnDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Transmitter Attenuation
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -223,9 +195,6 @@ static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
   }
 }
 
-/**
-*  Get Transmitter Attenuation
-*/
 static const CliCmd_t Adrv9001CliGetTxAttnDef =
 {
   "Adrv9001GetTxAttn",
@@ -236,11 +205,6 @@ static const CliCmd_t Adrv9001CliGetTxAttnDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Sample Rate Frequency
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -266,9 +230,6 @@ static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void 
   }
 }
 
-/**
-*  Get Sample Rate
-*/
 static const CliCmd_t Adrv9001CliGetSampleRateDef =
 {
   "Adrv9001GetSampleRate",
@@ -279,11 +240,6 @@ static const CliCmd_t Adrv9001CliGetSampleRateDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Carrier Frequency
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -309,9 +265,6 @@ static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
   }
 }
 
-/**
-*  Get Carrier Frequency
-*/
 static const CliCmd_t Adrv9001CliGetCarrierFrequencyDef =
 {
   "Adrv9001GetCarrierFrequency",
@@ -346,9 +299,6 @@ static void Adrv9001Cli_SetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
   printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
-/**
-*  Get Carrier Frequency
-*/
 static const CliCmd_t Adrv9001CliSetCarrierFrequencyDef =
 {
   "Adrv9001SetCarrierFrequency",
@@ -359,11 +309,6 @@ static const CliCmd_t Adrv9001CliSetCarrierFrequencyDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Set Radio State
-*
-*******************************************************************************/
 static void Adrv9001Cli_SetRadioState(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t     port;
@@ -393,11 +338,6 @@ static const CliCmd_t Adrv9001CliSetRadioStateDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Radio State
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -436,11 +376,6 @@ static const CliCmd_t Adrv9001CliGetRadioStateDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details To RF Enabled
-*
-*******************************************************************************/
 static void Adrv9001Cli_ToRfEnabled(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -468,11 +403,6 @@ static const CliCmd_t Adrv9001CliToRfEnabledDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details To RF Calibrated
-*
-*******************************************************************************/
 static void Adrv9001Cli_ToRfCalibrated(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -500,11 +430,6 @@ static const CliCmd_t Adrv9001CliToRfCalibratedDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details To RF Primed
-*
-*******************************************************************************/
 static void Adrv9001Cli_ToRfPrimed(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
@@ -533,11 +458,6 @@ static const CliCmd_t Adrv9001CliToRfPrimedDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Temperature
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetTemp(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int16_t Temp_C;
@@ -565,11 +485,6 @@ static const CliCmd_t Adrv9001CliGetTempDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Version Information
-*
-*******************************************************************************/
 static void Adrv9001Cli_GetVerInfo(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_ver_t VerInfo;
@@ -624,9 +539,6 @@ static void Adrv9001Cli_GetRssi(Cli_t *CliInstance, const char *cmd, void *userD
   }
 }
 
-/**
-*  Get RSSI
-*/
 static const CliCmd_t Adrv9001CliGetRssiDef =
 {
   "Adrv9001GetRssi",
@@ -646,9 +558,6 @@ static void Adrv9001Cli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *u
   printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
-/**
-*  Load Profile
-*/
 static const CliCmd_t Adrv9001CliLoadProfileDef =
 {
   "Adrv9001LoadProfile",
@@ -679,26 +588,62 @@ static void Adrv9001Cli_SetLoopBack(Cli_t *CliInstance, const char *cmd, void *u
   printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
 }
 
-/**
-*  Set LoopBack
-*/
 static const CliCmd_t Adrv9001CliSetLoopBackDef =
 {
-  "SetLoopBack",
-  "SetLoopBack: Set loopback \r\n"
-  "SetLoopBack < port ( Rx1,Rx2,Tx1,Tx2), enabled >\r\n\r\n",
+  "Adrv9001SetLoopBack",
+  "Adrv9001SetLoopBack: Set loopback \r\n"
+  "Adrv9001SetLoopBack < port ( Rx1,Rx2,Tx1,Tx2), enabled >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_SetLoopBack,
   2,
   NULL
 };
 
-/*******************************************************************************
+static void Adrv9001Cli_ReadDma(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  adrv9001_port_t     port;
+  const char         *s = NULL;
+  uint32_t            Length;
+  int status;
 
-  PURPOSE:  Initialize APP CLI
+  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  {
+    printf("Invalid Parameter\r\n");
+    return;
+  }
 
-  COMMENT:
+  Cli_GetParameter(cmd, 2, CliParamTypeU32,  &Length);
 
-*******************************************************************************/
+  uint32_t *Buf = malloc(Length * sizeof(uint32_t));
+
+  if((status = Adrv9001_DmaTransferBlocking(port, Buf, Length)) == Adrv9001Status_Success)
+  {
+    printf("%s DMA = \r\n",s);
+
+    uint16_t idata;
+    uint16_t qdata;
+    for(int i = 0; i < Length; i++)
+    {
+      idata = (uint16_t)(Buf[i] >> 16);
+      qdata = (uint16_t)Buf[i];
+      printf(" %04x %04x\r\n", idata, qdata );
+    }
+  }
+  else
+  {
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+  }
+}
+
+static const CliCmd_t Adrv9001CliReadDmaDef =
+{
+  "Adrv9001ReadDma",
+  "Adrv9001ReadDma: Read DMA Channel \r\n"
+  "Adrv9001ReadDma < port ( Rx1,Rx2 ), SampleCnt >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_ReadDma,
+  2,
+  NULL
+};
+
 int Adrv9001Cli_Initialize( void )
 {
   Cli_t *Instance = AppCli_GetInstance( );
@@ -720,6 +665,7 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliGetVerInfoDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliLoadProfileDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliSetLoopBackDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliReadDmaDef);
 
 	return Adrv9001Status_Success;
 }

@@ -95,21 +95,21 @@ typedef enum
                                              ( p == Adrv9001Port_Rx1 )? "Rx1" :                 \
                                              ( p == Adrv9001Port_Rx2 )? "Rx2" : "Unknown")
 
-#define ADRV9001_STATUS_2_STR(p)            (( p == Adrv9001Status_Success )?           "Success" :             \
-                                             ( p == Adrv9001Status_InvalidPort )?       "InvalidPort" :         \
-                                             ( p == Adrv9001Status_InvalidParameter )?  "InvalidParameter" :    \
-                                             ( p == Adrv9001Status_MemoryError )?       "MemoryError" :         \
-                                             ( p == Adrv9001Status_InvalidRadioState )? "InvalidRadioState" :   \
-                                             ( p == Adrv9001Status_CommError )?         "CommError" :           \
-                                             ( p == Adrv9001Status_ProfileInitError )?  "ProfileInitError" :    \
-                                             ( p == Adrv9001Status_ProfileCfgError )?   "ProfileCfgError" :     \
-                                             ( p == Adrv9001Status_ProfileCalError )?   "ProfileCalError" :     \
-                                             ( p == Adrv9001Status_ProfilePrimeError )? "ProfilePrimeError" :   \
-                                             ( p == Adrv9001Status_DriverError )?       "DriverError" :         \
-                                             ( p == Adrv9001Status_DmaError )?          "DmaError" :            \
-                                             ( p == Adrv9001Status_PortDisabled )?      "PortDisabled" :        \
-                                             ( p == Adrv9001Status_SpiError )?          "SpiError" :            \
-                                             ( p == Adrv9001Status_GpioError )?         "GpioError" : "Unknown")
+#define ADRV9001_STATUS_2_STR(p)            (( p == Adrv9001Status_Success )?           "Success" :                      \
+                                             ( p == Adrv9001Status_InvalidPort )?       "ADRV9001 InvalidPort" :         \
+                                             ( p == Adrv9001Status_InvalidParameter )?  "ADRV9001 InvalidParameter" :    \
+                                             ( p == Adrv9001Status_MemoryError )?       "ADRV9001 MemoryError" :         \
+                                             ( p == Adrv9001Status_InvalidRadioState )? "ADRV9001 InvalidRadioState" :   \
+                                             ( p == Adrv9001Status_CommError )?         "ADRV9001 CommError" :           \
+                                             ( p == Adrv9001Status_ProfileInitError )?  "ADRV9001 ProfileInitError" :    \
+                                             ( p == Adrv9001Status_ProfileCfgError )?   "ADRV9001 ProfileCfgError" :     \
+                                             ( p == Adrv9001Status_ProfileCalError )?   "ADRV9001 ProfileCalError" :     \
+                                             ( p == Adrv9001Status_ProfilePrimeError )? "ADRV9001 ProfilePrimeError" :   \
+                                             ( p == Adrv9001Status_DriverError )?       "ADRV9001 DriverError" :         \
+                                             ( p == Adrv9001Status_DmaError )?          "ADRV9001 DmaError" :            \
+                                             ( p == Adrv9001Status_PortDisabled )?      "ADRV9001 PortDisabled" :        \
+                                             ( p == Adrv9001Status_SpiError )?          "ADRV9001 SpiError" :            \
+                                             ( p == Adrv9001Status_GpioError )?         "ADRV9001 GpioError" : "Unknown")
 
 /**
  **  ADRV9001 Radio State
@@ -631,9 +631,7 @@ adrv9001_status_t Adrv9001_ClearError( void );
 *
 * \details
 *
-* This function initializes the ADRV9001 with the provided profile..
-*
-* \param[in]  Profile contains a reference to the profile to be loaded
+* This function initializes the ADRV9001 with the provided profile.
 *
 * \return     Status
 *
@@ -650,6 +648,80 @@ adrv9001_status_t Adrv9001_LoadProfile( void );
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_HwReset( void );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function transfers IQ data to the ADRV9001 through the DMA. This function
+* is blocking and will not return until the data is transferred to the DMA.
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Cyclic indicates if the DMA should continuously loop through the
+*             data.
+*
+* \param[in]  SampleBuf is a buffer containing IQ samples.  Bits 31:16 represents
+*             16bit signed in-phase data.  Bits [15:0] represent 16bit signed
+*             quadrature data.
+*
+* \param[in]  SampleCnt indicates the number of 32bit samples.
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_DmaTransferBlocking(adrv9001_port_t Port, uint32_t *SampleBuf, uint32_t SampleCnt);
+
+/*******************************************************************************
+*
+* \details
+*
+* This function transfers IQ data to the ADRV9001 through the DMA. This function
+* is non-blocking.  A callback will be executed once the transfer is complete.
+*
+* \param[in]  Port is the port being requested
+*
+* \param[in]  Cyclic indicates if the DMA should continuously loop through the
+*             data.
+*
+* \param[in]  SampleBuf is a buffer containing IQ samples.  Bits 31:16 represents
+*             16bit signed in-phase data.  Bits [15:0] represent 16bit signed
+*             quadrature data.
+*
+* \param[in]  SampleCnt indicates the number of 32bit samples.
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_DmaTransfer(adrv9001_port_t Port, bool Cyclic, uint32_t *SampleBuf, uint32_t SampleCnt);
+
+/*******************************************************************************
+*
+* \details
+*
+* This function initializes the DMA interface to the ADRV9001.
+*
+* \param[in]  Cfg contains the DMA configuration
+*
+* \param[in]  IrqInstance contains the CPU interrupt controller instance
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_DmaInitialize( adrv9001_dma_cfg_t *Cfg, void *IrqInstance );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function initializes the SPI connection to the ADRV9001.
+*
+* \param[in]  Cfg contains the SPI configuration
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SpiInitialize( adrv9001_spi_cfg_t *Cfg );
 
 /*******************************************************************************
 *

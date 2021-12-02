@@ -98,4 +98,7 @@ extern "C"
 #define GTR2_REFCLK_VERSACLK5_PORT      (1)
 #define GTR3_REFCLK_VERSACLK5_PORT      (0)
 
+
+#define SYSMON_DEVICE_ID                XPAR_XSYSMONPSU_0_DEVICE_ID
+
 #endif

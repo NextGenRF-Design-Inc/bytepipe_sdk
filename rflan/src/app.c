@@ -57,22 +57,12 @@
 #include "xsysmonpsu.h"
 #include "xresetps.h"
 
-#define SYSMON_DEVICE_ID  XPAR_XSYSMONPSU_0_DEVICE_ID
 
 static TaskHandle_t 			AppTask;
 static XSysMonPsu         AppSysMon;
 static XResetPs           AppReset;
-FATFS                     sdfs;
+static FATFS              AppFatFs;
 
-int32_t App_ResetPl( void )
-{
-  return XResetPs_ResetPulse(&AppReset, XRESETPS_RSTID_PL);
-}
-
-void App_Reboot( void )
-{
-  XResetPs_ResetPulse(&AppReset, XRESETPS_RSTID_SOFT);
-}
 
 static int32_t App_ResetInitialize( void )
 {
@@ -96,49 +86,25 @@ static int32_t App_SysMonInitialize( void )
 
   /* Self Test the System Monitor device */
   if((Status = XSysMonPsu_SelfTest(SysMonInstPtr)) != XST_SUCCESS)
-    return XST_FAILURE;
+    return Status;
 
-  /*
-   * Disable the Channel Sequencer before configuring the Sequence
-   * registers.
-   */
+  /* Disable the Channel Sequencer */
   XSysMonPsu_SetSequencerMode(SysMonInstPtr, XSM_SEQ_MODE_SAFE, XSYSMON_PS);
-
 
   /* Disable all the alarms in the Configuration Register 1. */
   XSysMonPsu_SetAlarmEnables(SysMonInstPtr, 0x0, XSYSMON_PS);
 
-  /*
-   * Setup the Averaging to be done for the channels in the
-   * Configuration 0 register as 16 samples:
-   */
+  /* Setup Averaging */
   XSysMonPsu_SetAvg(SysMonInstPtr, XSM_AVG_16_SAMPLES, XSYSMON_PS);
 
-  /*
-   * Setup the Sequence register for 1st Auxiliary channel
-   * Setting is:
-   *  - Add acquisition time by 6 ADCCLK cycles.
-   *  - Bipolar Mode
-   *
-   * Setup the Sequence register for 16th Auxiliary channel
-   * Setting is:
-   *  - Add acquisition time by 6 ADCCLK cycles.
-   *  - Unipolar Mode
-   */
+  /* Setup the Sequencer */
   if((Status = XSysMonPsu_SetSeqInputMode(SysMonInstPtr, XSYSMONPSU_SEQ_CH1_VAUX00_MASK << 16, XSYSMON_PS)) != XST_SUCCESS)
-    return XST_FAILURE;
+    return Status;
 
   if((Status = XSysMonPsu_SetSeqAcqTime(SysMonInstPtr, (XSYSMONPSU_SEQ_CH1_VAUX0F_MASK | XSYSMONPSU_SEQ_CH1_VAUX00_MASK) << 16, XSYSMON_PS)) != XST_SUCCESS)
-    return XST_FAILURE;
+    return Status;
 
-
-  /*
-   * Enable the averaging on the following channels in the Sequencer
-   * registers:
-   *  - On-chip Temperature, VCCINT/VCCAUX  supply sensors
-   *  - 1st/16th Auxiliary Channels
-    * - Calibration Channel
-   */
+  /* Enable the averaging */
   Status =  XSysMonPsu_SetSeqAvgEnables(SysMonInstPtr, XSYSMONPSU_SEQ_CH0_TEMP_MASK |
       XSYSMONPSU_SEQ_CH0_SUP1_MASK |
       XSYSMONPSU_SEQ_CH0_SUP3_MASK |
@@ -149,12 +115,7 @@ static int32_t App_SysMonInitialize( void )
   if (Status != XST_SUCCESS)
     return XST_FAILURE;
 
-  /*
-   * Enable the following channels in the Sequencer registers:
-   *  - On-chip Temperature, VCCINT/VCCAUX supply sensors
-   *  - 1st/16th Auxiliary Channel
-   *  - Calibration Channel
-   */
+  /* Enable channels */
   Status =  XSysMonPsu_SetSeqChEnables(SysMonInstPtr, XSYSMONPSU_SEQ_CH0_TEMP_MASK |
       XSYSMONPSU_SEQ_CH0_SUP1_MASK |
       XSYSMONPSU_SEQ_CH0_SUP3_MASK |
@@ -176,32 +137,32 @@ static int32_t App_SysMonInitialize( void )
   while ((XSysMonPsu_IntrGetStatus(SysMonInstPtr) & ((u64)XSYSMONPSU_ISR_1_EOS_MASK<< 32)) !=
       ((u64)XSYSMONPSU_ISR_1_EOS_MASK<< 32));
 
-  return XST_SUCCESS;
+  return Status;
 }
 
-static void App_Task( void *pvParameters )
+static int32_t App_Initialize( void )
 {
-	int status;
+  int status;
 
   /* Mount File System */
-  if(f_mount(&sdfs, FF_LOGICAL_DRIVE_PATH, 1) != FR_OK)
+  if(f_mount(&AppFatFs, FF_LOGICAL_DRIVE_PATH, 1) != FR_OK)
     xil_printf("Failed to initialize file system\r\n");
 
-	/* Initialize CLI */
-	if((status = AppCli_Initialize()) != 0)
-	  xil_printf("CLI Initialize Error %d\r\n",status);
+  /* Initialize CLI */
+  if((status = AppCli_Initialize()) != 0)
+    xil_printf("CLI Initialize Error %d\r\n",status);
 
-	/* Initialize System Monitor */
-	if((status = App_SysMonInitialize()) != 0)
+  /* Initialize System Monitor */
+  if((status = App_SysMonInitialize()) != 0)
     xil_printf("System Monitor Initialize Error %d\r\n",status);
 
   /* Initialize System Reset */
   if((status = App_ResetInitialize()) != 0)
     xil_printf("System Reset Initialize Error %d\r\n",status);
 
-	/* Initialize ZMODEM */
-	if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH, outbyte)) != 0)
-		xil_printf("ZMODEM Initialize Error %d\r\n",status);
+  /* Initialize ZMODEM */
+  if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH, outbyte)) != 0)
+    xil_printf("ZMODEM Initialize Error %d\r\n",status);
 
   /* Initialize Clocks */
   if(VersaClock5_Initialize() != 0)
@@ -211,32 +172,29 @@ static void App_Task( void *pvParameters )
   if((status = Adrv9001Cli_Initialize()) != 0)
     xil_printf("Adrv9001 CLI Initialize Error %d\r\n",status);
 
-	xil_printf("\r\n\r\n\r\n");
-	xil_printf("************************************************\r\n");
-	xil_printf("        BytePipe_x900x RFLAN - v%d.%d.%d\r\n", APP_FW_VER_MINOR, APP_FW_VER_REV, APP_FW_VER_MAJOR );
-	xil_printf("************************************************\r\n");
+  xil_printf("\r\n\r\n\r\n");
+  xil_printf("************************************************\r\n");
+  xil_printf("        BytePipe_x900x RFLAN - v%d.%d.%d\r\n", APP_FW_VER_MINOR, APP_FW_VER_REV, APP_FW_VER_MAJOR );
+  xil_printf("************************************************\r\n");
 
-	xil_printf("\r\nType help for a list of commands\r\n\r\n");
+  xil_printf("\r\nType help for a list of commands\r\n\r\n");
 
   /* Initialize PHY */
   if((status = Phy_Initialize( )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
 
+  return status;
+}
+
+static void App_Task( void *pvParameters )
+{
+  /* Initialize Application Routines */
+  App_Initialize( );
 
 	for( ;; )
 	{
 		vTaskDelay(1000);
 	}
-}
-
-int32_t App_GetCpuTemp( float *Temp )
-{
-  u32 TempRawData;
-
-  TempRawData = XSysMonPsu_GetAdcData(&AppSysMon, XSM_CH_TEMP, XSYSMON_PS);
-  *Temp = XSysMonPsu_RawToTemperature_OnChip(TempRawData);
-
-  return XST_SUCCESS;
 }
 
 int main()
@@ -255,5 +213,23 @@ int main()
 	for( ;; );
 }
 
+int32_t App_ResetPl( void )
+{
+  return XResetPs_ResetPulse(&AppReset, XRESETPS_RSTID_PL);
+}
 
+void App_Reboot( void )
+{
+  XResetPs_ResetPulse(&AppReset, XRESETPS_RSTID_SOFT);
+}
+
+int32_t App_GetCpuTemp( float *Temp )
+{
+  u32 TempRawData;
+
+  TempRawData = XSysMonPsu_GetAdcData(&AppSysMon, XSM_CH_TEMP, XSYSMON_PS);
+  *Temp = XSysMonPsu_RawToTemperature_OnChip(TempRawData);
+
+  return XST_SUCCESS;
+}
 

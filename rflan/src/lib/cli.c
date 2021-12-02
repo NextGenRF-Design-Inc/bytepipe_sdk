@@ -56,16 +56,6 @@
 #define DEL                      (0x7F)
 #define UP                       (27)
 
-/******************************************************************************/
-/**
-*  \details   CLI Command for Help
-*
-*  \param     Instance should be a reference to the CLI instance
-*
-*  \param     cmd is the command string
-*
-*  \return    none
-*******************************************************************************/
 static void CliHelpCmd(Cli_t *CliInstance, const char *cmd, void *param )
 {
   uint8_t len = strlen(cmd);
@@ -93,9 +83,6 @@ static void CliHelpCmd(Cli_t *CliInstance, const char *cmd, void *param )
   CliInstance->Callback("\r\n", CliInstance->CallbackRef );
 }
 
-/**
-* Help Command Definition
-*/
 const CliCmd_t CliHelpDef =
 {
     "help",
@@ -107,18 +94,6 @@ const CliCmd_t CliHelpDef =
 };
 
 
-/******************************************************************************/
-/**
-*  \details   Convert String to number
-*
-*  \param	  	p is a pointer to the string
-*
-*  \param	 	 	type is the data type
-*
-*  \param 	  param is a pointer to the number
-*
-*  \return    status
-*******************************************************************************/
 static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 {
 	short       tmpResult = -1;
@@ -162,7 +137,7 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 		memcpy((uint8_t*)param, (uint8_t*)&utemp, sizeof(uint32_t));
 		break;
 
-	case CliParamTypeU64:	// This is a work around for the Cortex M4
+	case CliParamTypeU64:
 		if( (p[1] == 'x') || (p[1] == 'X') )
 			tmpResult = sscanf( p, "%llx", (uint64_t*)param );
 		else
@@ -172,7 +147,7 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 	case CliParamTypeS8:
 		if( (p[1] == 'x') || (p[1] == 'X') )
 		{
-			int16_t itemp;							// this is a work around for scanf
+			int16_t itemp;
 			tmpResult = sscanf( p, "%hx", &itemp );
 			*(int8_t*)param = (int8_t)itemp;
 		}
@@ -194,7 +169,7 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 			tmpResult = sscanf( p, "%d", (int*)param );
 		break;
 
-	case CliParamTypeS64:	// This is a work around for the Cortex M4
+	case CliParamTypeS64:
 		temIPtr = (int64_t*)param;
 		tmpResult = sscanf( p, "%lf", (double*)&doubleFloat );
 		*temIPtr = (int64_t)doubleFloat;
@@ -223,7 +198,6 @@ static int Cli_StrToNum(char *p, CliParamType_t type, void *param )
 	}
 
 	if( tmpResult == 0 ) return -1;
-
 
 	return 0;
 }
@@ -309,9 +283,6 @@ static void CliStr2Num(Cli_t *CliInstance, const char *cmd, void *param )
 
 }
 
-/**
-* Str2Num Command Definition
-*/
 const CliCmd_t CliStr2NumDef =
 {
     "Str2Num",
@@ -322,14 +293,6 @@ const CliCmd_t CliStr2NumDef =
     NULL
 };
 
-/******************************************************************************/
-/**
-*  \details   Get Number of parameters in command string
-*
-*  \param	  	s is the command string
-*
-*  \return    number of parameters
-*******************************************************************************/
 static int16_t Cli_GetParameterCount( const char *s )
 {
   uint8_t cnt = 0;
@@ -359,14 +322,6 @@ static int16_t Cli_GetParameterCount( const char *s )
   return cnt;
 }
 
-/******************************************************************************/
-/**
-*  \details   Process a received command string
-*
-*  \param	  	Instance is a reference to the CLI Instance
-*
-*  \return    status
-*******************************************************************************/
 static int Cli_ProcessCommand( Cli_t *Instance )
 {
   const char   *cmdString;
@@ -435,13 +390,6 @@ static int Cli_ProcessCommand( Cli_t *Instance )
   return status;
 }
 
-/*******************************************************************************
-
-  PURPOSE:  Get the requested parameter by number.
-
-  COMMENT:
-
-*******************************************************************************/
 int32_t Cli_GetParameter(const char *s, uint8_t pNum, CliParamType_t type, void *param )
 {
 	const char   *p = NULL;
@@ -457,13 +405,6 @@ int32_t Cli_GetParameter(const char *s, uint8_t pNum, CliParamType_t type, void 
 	return Cli_StrToNum((char*)p, type, param );
 }
 
-/*******************************************************************************
-
-  PURPOSE:  Find Parameter string based on number
-
-  COMMENT:
-
-*******************************************************************************/
 const char *Cli_FindParameter( const char *s, uint16_t pNum, uint16_t *len )
 {
   uint16_t cnt = 0;
@@ -511,13 +452,6 @@ const char *Cli_FindParameter( const char *s, uint16_t pNum, uint16_t *len )
 
 static char pChar = ' ';
 
-/*******************************************************************************
-
-  PURPOSE:  Process a received character
-
-  COMMENT:
-
-*******************************************************************************/
 void Cli_ProcessChar(Cli_t *Instance, char c )
 {
   // Check to see if this is the end of the command string
@@ -742,13 +676,6 @@ void Cli_ProcessChar(Cli_t *Instance, char c )
 	pChar = c;
 }
 
-/*******************************************************************************
-
-  PURPOSE:  Register Command
-
-  COMMENT:
-
-*******************************************************************************/
 int32_t Cli_RegisterCommand(Cli_t *Instance, CliCmd_t const * cmd )
 {
 	/*  Make sure variables are initialized */
@@ -771,26 +698,12 @@ int32_t Cli_RegisterCommand(Cli_t *Instance, CliCmd_t const * cmd )
 	return 0;
 }
 
-/*******************************************************************************
-
-  PURPOSE:  CLI Set Callback Handler
-
-  COMMENT:
-
-*******************************************************************************/
 void Cli_SetCallback( Cli_t *Instance, CliCallback_t FuncPtr, void *CallBackRef )
 {
   Instance->Callback = FuncPtr;
   Instance->CallbackRef = CallBackRef;
 }
 
-/*******************************************************************************
-
-  PURPOSE:  Initializes CLI Instance
-
-  COMMENT:
-
-*******************************************************************************/
 int32_t CLi_Init(Cli_t *Instance, CliCfg_t *Cfg )
 {
   if ((Instance == NULL) || (Cfg == NULL))
