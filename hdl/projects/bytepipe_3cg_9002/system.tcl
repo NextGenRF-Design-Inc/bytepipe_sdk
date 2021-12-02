@@ -124,7 +124,7 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
-xilinx.com:ip:axi_gpio:2.0\
+NGRF:ip:axi_adrv9001:1.0\
 xilinx.com:ip:smartconnect:1.0\
 NGRF:ip:adrv9001_rx:1.0\
 analog.com:user:axi_dmac:1.0\
@@ -198,8 +198,6 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   current_bd_instance $hier_obj
 
   # Create interface pins
-  create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 GPIO_0
-
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M_AXI_HPM0_LPD
 
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI_HP1_FPD
@@ -210,16 +208,13 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   create_bd_pin -dir I adrv9001_spi_miso
   create_bd_pin -dir O adrv9001_spi_mosi
   create_bd_pin -dir O adrv9001_spi_sclk
-  create_bd_pin -dir I irq0
   create_bd_pin -dir I -from 0 -to 0 irq11
   create_bd_pin -dir I -from 0 -to 0 irq12
   create_bd_pin -dir I -from 0 -to 0 irq13
   create_bd_pin -dir I -from 0 -to 0 irq14
   create_bd_pin -dir O -type clk m_axi_aclk
-  create_bd_pin -dir O -from 0 -to 0 -type rst m_axi_rst
   create_bd_pin -dir O -from 0 -to 0 -type rst m_axi_rstn
   create_bd_pin -dir O -from 0 -to 0 pl_rst
-  create_bd_pin -dir O pl_rstn
 
   # Create instance: GND_1, and set properties
   set GND_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 GND_1 ]
@@ -1792,26 +1787,23 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   # Create interface connections
   connect_bd_intf_net -intf_net Conn1 [get_bd_intf_pins M_AXI_HPM0_LPD] [get_bd_intf_pins sys_ps8/M_AXI_HPM0_LPD]
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins S_AXI_HP1_FPD] [get_bd_intf_pins sys_ps8/S_AXI_HP1_FPD]
-  connect_bd_intf_net -intf_net sys_ps8_GPIO_0 [get_bd_intf_pins GPIO_0] [get_bd_intf_pins sys_ps8/GPIO_0]
 
   # Create port connections
-  connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc_0/In1] [get_bd_pins sys_concat_intc_0/In2] [get_bd_pins sys_concat_intc_0/In3] [get_bd_pins sys_concat_intc_0/In4] [get_bd_pins sys_concat_intc_0/In5] [get_bd_pins sys_concat_intc_0/In6] [get_bd_pins sys_concat_intc_0/In7] [get_bd_pins sys_concat_intc_1/In0] [get_bd_pins sys_concat_intc_1/In1] [get_bd_pins sys_concat_intc_1/In6] [get_bd_pins sys_concat_intc_1/In7]
+  connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc_0/In0] [get_bd_pins sys_concat_intc_0/In1] [get_bd_pins sys_concat_intc_0/In2] [get_bd_pins sys_concat_intc_0/In3] [get_bd_pins sys_concat_intc_0/In4] [get_bd_pins sys_concat_intc_0/In5] [get_bd_pins sys_concat_intc_0/In6] [get_bd_pins sys_concat_intc_0/In7] [get_bd_pins sys_concat_intc_1/In0] [get_bd_pins sys_concat_intc_1/In1] [get_bd_pins sys_concat_intc_1/In6] [get_bd_pins sys_concat_intc_1/In7]
   connect_bd_net -net GND_2_dout [get_bd_pins GND_2/dout] [get_bd_pins sys_ps8/emio_spi0_s_i] [get_bd_pins sys_ps8/emio_spi0_sclk_i] [get_bd_pins sys_ps8/emio_spi0_ss_i_n]
   connect_bd_net -net adrv9001_spi_miso_1 [get_bd_pins adrv9001_spi_miso] [get_bd_pins sys_ps8/emio_spi0_m_i]
   connect_bd_net -net axi_adrv9001_rx1_dma_irq [get_bd_pins irq14] [get_bd_pins sys_concat_intc_1/In5]
   connect_bd_net -net axi_adrv9001_rx2_dma_irq [get_bd_pins irq13] [get_bd_pins sys_concat_intc_1/In4]
   connect_bd_net -net axi_adrv9001_tx1_dma_irq [get_bd_pins irq12] [get_bd_pins sys_concat_intc_1/In3]
   connect_bd_net -net axi_adrv9001_tx2_dma_irq [get_bd_pins irq11] [get_bd_pins sys_concat_intc_1/In2]
-  connect_bd_net -net irq0_1 [get_bd_pins irq0] [get_bd_pins sys_concat_intc_0/In0]
   connect_bd_net -net sys_concat_intc_0_dout [get_bd_pins sys_concat_intc_0/dout] [get_bd_pins sys_ps8/pl_ps_irq0]
   connect_bd_net -net sys_concat_intc_1_dout [get_bd_pins sys_concat_intc_1/dout] [get_bd_pins sys_ps8/pl_ps_irq1]
   connect_bd_net -net sys_cpu_clk [get_bd_pins m_axi_aclk] [get_bd_pins sys_ps8/maxihpm0_lpd_aclk] [get_bd_pins sys_ps8/pl_clk0] [get_bd_pins sys_ps8/saxihp1_fpd_aclk] [get_bd_pins sys_rstgen/slowest_sync_clk]
-  connect_bd_net -net sys_cpu_reset [get_bd_pins m_axi_rst] [get_bd_pins sys_rstgen/peripheral_reset]
   connect_bd_net -net sys_cpu_resetn [get_bd_pins m_axi_rstn] [get_bd_pins sys_rstgen/peripheral_aresetn]
   connect_bd_net -net sys_ps8_emio_spi0_m_o [get_bd_pins adrv9001_spi_mosi] [get_bd_pins sys_ps8/emio_spi0_m_o]
   connect_bd_net -net sys_ps8_emio_spi0_sclk_o [get_bd_pins adrv9001_spi_sclk] [get_bd_pins sys_ps8/emio_spi0_sclk_o]
   connect_bd_net -net sys_ps8_emio_spi0_ss_o_n [get_bd_pins adrv9001_spi_csn] [get_bd_pins sys_ps8/emio_spi0_ss_o_n]
-  connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins pl_rstn] [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins util_vector_logic_1/Op1]
+  connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins util_vector_logic_1/Op1]
   connect_bd_net -net util_vector_logic_1_Res [get_bd_pins pl_rst] [get_bd_pins util_vector_logic_1/Res]
 
   # Restore current instance
@@ -1864,7 +1856,9 @@ proc create_hier_cell_adrv9001_tx2 { parentCell nameHier } {
   create_bd_pin -dir I -type clk axi_aclk
   create_bd_pin -dir I -type rst axi_rstn
   create_bd_pin -dir O -type intr irq
-  create_bd_pin -dir I -type rst rst
+  create_bd_pin -dir O overflow
+  create_bd_pin -dir I rst
+  create_bd_pin -dir O underflow
 
   # Create instance: adrv9001_tx, and set properties
   set adrv9001_tx [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9001_tx:1.0 adrv9001_tx ]
@@ -1884,16 +1878,16 @@ proc create_hier_cell_adrv9001_tx2 { parentCell nameHier } {
   # Create interface connections
   connect_bd_intf_net -intf_net adrv9001_tx_adrv9001_tx [get_bd_intf_pins adrv9001_tx] [get_bd_intf_pins adrv9001_tx/adrv9001_tx]
   connect_bd_intf_net -intf_net axi_dmac_0_m_src_axi [get_bd_intf_pins m_axi] [get_bd_intf_pins dma/m_src_axi]
+  connect_bd_intf_net -intf_net dma_m_axis [get_bd_intf_pins adrv9001_tx/s_axis] [get_bd_intf_pins dma/m_axis]
   connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins s_axi] [get_bd_intf_pins dma/s_axi]
 
   # Create port connections
+  connect_bd_net -net adrv9001_tx_overflow [get_bd_pins overflow] [get_bd_pins adrv9001_tx/overflow]
   connect_bd_net -net adrv9001_tx_s_axis_aclk [get_bd_pins adrv9001_tx/s_axis_aclk] [get_bd_pins dma/m_axis_aclk]
-  connect_bd_net -net adrv9001_tx_s_axis_tready [get_bd_pins adrv9001_tx/s_axis_tready] [get_bd_pins dma/m_axis_ready]
+  connect_bd_net -net adrv9001_tx_underflow [get_bd_pins underflow] [get_bd_pins adrv9001_tx/underflow]
   connect_bd_net -net axi_aclk_1 [get_bd_pins axi_aclk] [get_bd_pins dma/m_src_axi_aclk] [get_bd_pins dma/s_axi_aclk]
   connect_bd_net -net axi_dmac_0_irq [get_bd_pins irq] [get_bd_pins dma/irq]
   connect_bd_net -net axi_rstn_1 [get_bd_pins axi_rstn] [get_bd_pins dma/m_src_axi_aresetn] [get_bd_pins dma/s_axi_aresetn]
-  connect_bd_net -net dma_m_axis_data [get_bd_pins adrv9001_tx/s_axis_tdata] [get_bd_pins dma/m_axis_data]
-  connect_bd_net -net dma_m_axis_valid [get_bd_pins adrv9001_tx/s_axis_tvalid] [get_bd_pins dma/m_axis_valid]
   connect_bd_net -net rst_1 [get_bd_pins rst] [get_bd_pins adrv9001_tx/rst]
 
   # Restore current instance
@@ -1946,7 +1940,9 @@ proc create_hier_cell_adrv9001_tx1 { parentCell nameHier } {
   create_bd_pin -dir I -type clk axi_aclk
   create_bd_pin -dir I -type rst axi_rstn
   create_bd_pin -dir O -type intr irq
-  create_bd_pin -dir I -type rst rst
+  create_bd_pin -dir O overflow
+  create_bd_pin -dir I rst
+  create_bd_pin -dir O underflow
 
   # Create instance: adrv9001_tx, and set properties
   set adrv9001_tx [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9001_tx:1.0 adrv9001_tx ]
@@ -1974,6 +1970,8 @@ proc create_hier_cell_adrv9001_tx1 { parentCell nameHier } {
 
   # Create port connections
   connect_bd_net -net adrv9001_tx_1_s_axis_aclk [get_bd_pins adrv9001_tx/s_axis_aclk] [get_bd_pins dma/m_axis_aclk]
+  connect_bd_net -net adrv9001_tx_overflow [get_bd_pins overflow] [get_bd_pins adrv9001_tx/overflow]
+  connect_bd_net -net adrv9001_tx_underflow [get_bd_pins underflow] [get_bd_pins adrv9001_tx/underflow]
   connect_bd_net -net axi_aclk_1 [get_bd_pins axi_aclk] [get_bd_pins dma/m_src_axi_aclk] [get_bd_pins dma/s_axi_aclk]
   connect_bd_net -net axi_dmac_0_irq [get_bd_pins irq] [get_bd_pins dma/irq]
   connect_bd_net -net axi_rstn_1 [get_bd_pins axi_rstn] [get_bd_pins dma/m_src_axi_aresetn] [get_bd_pins dma/s_axi_aresetn]
@@ -2181,8 +2179,6 @@ proc create_root_design { parentCell } {
 
 
   # Create interface ports
-  set adrv9001_dgpio [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 adrv9001_dgpio ]
-
   set adrv9001_rx1 [ create_bd_intf_port -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx1 ]
 
   set adrv9001_rx2 [ create_bd_intf_port -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx2 ]
@@ -2191,15 +2187,19 @@ proc create_root_design { parentCell } {
 
   set adrv9001_tx2 [ create_bd_intf_port -mode Master -vlnv NextGenRFDesign:adrv9001:adrv9001_tx_rtl:1.0 adrv9001_tx2 ]
 
-  set cpu_gpio [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 cpu_gpio ]
-
 
   # Create ports
   set adrv9001_csn [ create_bd_port -dir O adrv9001_csn ]
+  set adrv9001_dgpio [ create_bd_port -dir IO -from 11 -to 0 adrv9001_dgpio ]
   set adrv9001_irq [ create_bd_port -dir I adrv9001_irq ]
   set adrv9001_miso [ create_bd_port -dir I adrv9001_miso ]
   set adrv9001_mosi [ create_bd_port -dir O adrv9001_mosi ]
+  set adrv9001_rstn [ create_bd_port -dir O -type rst adrv9001_rstn ]
+  set adrv9001_rx1_en [ create_bd_port -dir O adrv9001_rx1_en ]
+  set adrv9001_rx2_en [ create_bd_port -dir O adrv9001_rx2_en ]
   set adrv9001_sclk [ create_bd_port -dir O adrv9001_sclk ]
+  set adrv9001_tx1_en [ create_bd_port -dir O adrv9001_tx1_en ]
+  set adrv9001_tx2_en [ create_bd_port -dir O adrv9001_tx2_en ]
 
   # Create instance: adrv9001_rx1
   create_hier_cell_adrv9001_rx1 [current_bd_instance .] adrv9001_rx1
@@ -2213,11 +2213,8 @@ proc create_root_design { parentCell } {
   # Create instance: adrv9001_tx2
   create_hier_cell_adrv9001_tx2 [current_bd_instance .] adrv9001_tx2
 
-  # Create instance: axi_adrv9001_dgpio, and set properties
-  set axi_adrv9001_dgpio [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_adrv9001_dgpio ]
-  set_property -dict [ list \
-   CONFIG.C_GPIO_WIDTH {12} \
- ] $axi_adrv9001_dgpio
+  # Create instance: axi_adrv9001_0, and set properties
+  set axi_adrv9001_0 [ create_bd_cell -type ip -vlnv NGRF:ip:axi_adrv9001:1.0 axi_adrv9001_0 ]
 
   # Create instance: axi_cpu_interconnect, and set properties
   set axi_cpu_interconnect [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_cpu_interconnect ]
@@ -2247,26 +2244,33 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M00_AXI [get_bd_intf_pins adrv9001_rx1/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M00_AXI]
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M01_AXI [get_bd_intf_pins adrv9001_rx2/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M01_AXI]
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M03_AXI [get_bd_intf_pins adrv9001_tx2/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M03_AXI]
-  connect_bd_intf_net -intf_net axi_cpu_interconnect_M04_AXI [get_bd_intf_pins axi_adrv9001_dgpio/S_AXI] [get_bd_intf_pins axi_cpu_interconnect/M04_AXI]
-  connect_bd_intf_net -intf_net axi_gpio_0_GPIO [get_bd_intf_ports adrv9001_dgpio] [get_bd_intf_pins axi_adrv9001_dgpio/GPIO]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M04_AXI [get_bd_intf_pins axi_adrv9001_0/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M04_AXI]
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins axi_hp1_interconnect/M00_AXI] [get_bd_intf_pins cpu/S_AXI_HP1_FPD]
-  connect_bd_intf_net -intf_net cpu_GPIO_0 [get_bd_intf_ports cpu_gpio] [get_bd_intf_pins cpu/GPIO_0]
   connect_bd_intf_net -intf_net rx2_m_dest_axi [get_bd_intf_pins adrv9001_rx2/m_axi] [get_bd_intf_pins axi_hp1_interconnect/S01_AXI]
   connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins adrv9001_tx1/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M02_AXI]
 
   # Create port connections
   connect_bd_net -net In4_1 [get_bd_pins adrv9001_rx2/irq] [get_bd_pins cpu/irq13]
-  connect_bd_net -net adrv9001_irq_1 [get_bd_ports adrv9001_irq] [get_bd_pins cpu/irq0]
+  connect_bd_net -net Net [get_bd_ports adrv9001_dgpio] [get_bd_pins axi_adrv9001_0/dgpio]
+  connect_bd_net -net adrv9001_irq_1 [get_bd_ports adrv9001_irq] [get_bd_pins axi_adrv9001_0/irq]
   connect_bd_net -net adrv9001_rx3_irq [get_bd_pins adrv9001_rx1/irq] [get_bd_pins cpu/irq14]
   connect_bd_net -net adrv9001_spi_miso_1 [get_bd_ports adrv9001_miso] [get_bd_pins cpu/adrv9001_spi_miso]
   connect_bd_net -net adrv9001_tx2_irq [get_bd_pins adrv9001_tx2/irq] [get_bd_pins cpu/irq11]
+  connect_bd_net -net axi_adrv9001_0_rstn [get_bd_ports adrv9001_rstn] [get_bd_pins axi_adrv9001_0/rstn]
+  connect_bd_net -net axi_adrv9001_0_rx1_en [get_bd_ports adrv9001_rx1_en] [get_bd_pins axi_adrv9001_0/rx1_en]
+  connect_bd_net -net axi_adrv9001_0_rx1_rst [get_bd_pins adrv9001_rx1/rst] [get_bd_pins axi_adrv9001_0/rx1_rst]
+  connect_bd_net -net axi_adrv9001_0_rx2_en [get_bd_ports adrv9001_rx2_en] [get_bd_pins axi_adrv9001_0/rx2_en]
+  connect_bd_net -net axi_adrv9001_0_rx2_rst [get_bd_pins adrv9001_rx2/rst] [get_bd_pins axi_adrv9001_0/rx2_rst]
+  connect_bd_net -net axi_adrv9001_0_tx1_en [get_bd_ports adrv9001_tx1_en] [get_bd_pins axi_adrv9001_0/tx1_en]
+  connect_bd_net -net axi_adrv9001_0_tx1_rst [get_bd_pins adrv9001_tx1/rst] [get_bd_pins axi_adrv9001_0/tx1_rst]
+  connect_bd_net -net axi_adrv9001_0_tx2_en [get_bd_ports adrv9001_tx2_en] [get_bd_pins axi_adrv9001_0/tx2_en]
+  connect_bd_net -net axi_adrv9001_0_tx2_rst [get_bd_pins adrv9001_tx2/rst] [get_bd_pins axi_adrv9001_0/tx2_rst]
   connect_bd_net -net axi_adrv9001_tx1_dma_irq [get_bd_pins adrv9001_tx1/irq] [get_bd_pins cpu/irq12]
   connect_bd_net -net cpu_adrv9001_spi_csn [get_bd_ports adrv9001_csn] [get_bd_pins cpu/adrv9001_spi_csn]
   connect_bd_net -net cpu_adrv9001_spi_mosi [get_bd_ports adrv9001_mosi] [get_bd_pins cpu/adrv9001_spi_mosi]
   connect_bd_net -net cpu_adrv9001_spi_sclk [get_bd_ports adrv9001_sclk] [get_bd_pins cpu/adrv9001_spi_sclk]
-  connect_bd_net -net sys_500m_reset [get_bd_pins adrv9001_rx1/rst] [get_bd_pins adrv9001_rx2/rst] [get_bd_pins adrv9001_tx1/rst] [get_bd_pins adrv9001_tx2/rst] [get_bd_pins cpu/pl_rst]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9001_rx1/axi_aclk] [get_bd_pins adrv9001_rx2/axi_aclk] [get_bd_pins adrv9001_tx1/axi_aclk] [get_bd_pins adrv9001_tx2/axi_aclk] [get_bd_pins axi_adrv9001_dgpio/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk]
-  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9001_rx1/axi_rstn] [get_bd_pins adrv9001_rx2/axi_rstn] [get_bd_pins adrv9001_tx1/axi_rstn] [get_bd_pins adrv9001_tx2/axi_rstn] [get_bd_pins axi_adrv9001_dgpio/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9001_rx1/axi_aclk] [get_bd_pins adrv9001_rx2/axi_aclk] [get_bd_pins adrv9001_tx1/axi_aclk] [get_bd_pins adrv9001_tx2/axi_aclk] [get_bd_pins axi_adrv9001_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk]
+  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9001_rx1/axi_rstn] [get_bd_pins adrv9001_rx2/axi_rstn] [get_bd_pins adrv9001_tx1/axi_rstn] [get_bd_pins adrv9001_tx2/axi_rstn] [get_bd_pins axi_adrv9001_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn]
 
   # Create address segments
   create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_rx1/dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
@@ -2277,7 +2281,7 @@ proc create_root_design { parentCell } {
   create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_tx1/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
   create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_tx2/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
   create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_tx2/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
-  create_bd_addr_seg -range 0x00001000 -offset 0x80004000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs axi_adrv9001_dgpio/S_AXI/Reg] SEG_axi_gpio_0_Reg
+  create_bd_addr_seg -range 0x00001000 -offset 0x80004000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs axi_adrv9001_0/s_axi/reg0] SEG_axi_adrv9001_0_reg0
   create_bd_addr_seg -range 0x00001000 -offset 0x80000000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_rx1/dma/s_axi/axi_lite] SEG_dma_axi_lite
   create_bd_addr_seg -range 0x00001000 -offset 0x80001000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_rx2/dma/s_axi/axi_lite] SEG_dma_axi_lite10
   create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_tx1/dma/s_axi/axi_lite] SEG_dma_axi_lite12

@@ -35,6 +35,7 @@ ip:
 	$(MAKE) -C $(wrkDir)/Adi/hdl/library/axi_dmac xilinx || exit $$?;
 	$(MAKE) -C $(srcDir)/../../library/adrv9001_tx || exit $$?;
 	$(MAKE) -C $(srcDir)/../../library/adrv9001_rx || exit $$?;
+	$(MAKE) -C $(srcDir)/../../library/axi_adrv9001 || exit $$?;  
     
 msg:
 	@echo 'Building [$(HL)$(srcDir)$(NC)]'
