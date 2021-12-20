@@ -124,11 +124,9 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
-NGRF:ip:axi_adrv9001:1.0\
+NGRF:ip:adrv9002:1.0\
 xilinx.com:ip:smartconnect:1.0\
-NGRF:ip:adrv9001_rx:1.0\
 analog.com:user:axi_dmac:1.0\
-NGRF:ip:adrv9001_tx:1.0\
 xilinx.com:ip:xlconstant:1.1\
 xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:zynq_ultra_ps_e:3.3\
@@ -1810,341 +1808,6 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   current_bd_instance $oldCurInst
 }
 
-# Hierarchical cell: adrv9001_tx2
-proc create_hier_cell_adrv9001_tx2 { parentCell nameHier } {
-
-  variable script_folder
-
-  if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_adrv9001_tx2() - Empty argument(s)!"}
-     return
-  }
-
-  # Get object for parentCell
-  set parentObj [get_bd_cells $parentCell]
-  if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
-     return
-  }
-
-  # Make sure parentObj is hier blk
-  set parentType [get_property TYPE $parentObj]
-  if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
-     return
-  }
-
-  # Save current instance; Restore later
-  set oldCurInst [current_bd_instance .]
-
-  # Set parent object as current
-  current_bd_instance $parentObj
-
-  # Create cell and set as current instance
-  set hier_obj [create_bd_cell -type hier $nameHier]
-  current_bd_instance $hier_obj
-
-  # Create interface pins
-  create_bd_intf_pin -mode Master -vlnv NextGenRFDesign:adrv9001:adrv9001_tx_rtl:1.0 adrv9001_tx
-
-  create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 m_axi
-
-  create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 s_axi
-
-
-  # Create pins
-  create_bd_pin -dir I -type clk axi_aclk
-  create_bd_pin -dir I -type rst axi_rstn
-  create_bd_pin -dir O -type intr irq
-  create_bd_pin -dir O overflow
-  create_bd_pin -dir I rst
-  create_bd_pin -dir O underflow
-
-  # Create instance: adrv9001_tx, and set properties
-  set adrv9001_tx [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9001_tx:1.0 adrv9001_tx ]
-  set_property -dict [ list \
-   CONFIG.LVDS_OUTPUT {1} \
- ] $adrv9001_tx
-
-  # Create instance: dma, and set properties
-  set dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 dma ]
-  set_property -dict [ list \
-   CONFIG.CYCLIC {true} \
-   CONFIG.DMA_DATA_WIDTH_DEST {32} \
-   CONFIG.DMA_TYPE_DEST {1} \
-   CONFIG.DMA_TYPE_SRC {0} \
- ] $dma
-
-  # Create interface connections
-  connect_bd_intf_net -intf_net adrv9001_tx_adrv9001_tx [get_bd_intf_pins adrv9001_tx] [get_bd_intf_pins adrv9001_tx/adrv9001_tx]
-  connect_bd_intf_net -intf_net axi_dmac_0_m_src_axi [get_bd_intf_pins m_axi] [get_bd_intf_pins dma/m_src_axi]
-  connect_bd_intf_net -intf_net dma_m_axis [get_bd_intf_pins adrv9001_tx/s_axis] [get_bd_intf_pins dma/m_axis]
-  connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins s_axi] [get_bd_intf_pins dma/s_axi]
-
-  # Create port connections
-  connect_bd_net -net adrv9001_tx_overflow [get_bd_pins overflow] [get_bd_pins adrv9001_tx/overflow]
-  connect_bd_net -net adrv9001_tx_s_axis_aclk [get_bd_pins adrv9001_tx/s_axis_aclk] [get_bd_pins dma/m_axis_aclk]
-  connect_bd_net -net adrv9001_tx_underflow [get_bd_pins underflow] [get_bd_pins adrv9001_tx/underflow]
-  connect_bd_net -net axi_aclk_1 [get_bd_pins axi_aclk] [get_bd_pins dma/m_src_axi_aclk] [get_bd_pins dma/s_axi_aclk]
-  connect_bd_net -net axi_dmac_0_irq [get_bd_pins irq] [get_bd_pins dma/irq]
-  connect_bd_net -net axi_rstn_1 [get_bd_pins axi_rstn] [get_bd_pins dma/m_src_axi_aresetn] [get_bd_pins dma/s_axi_aresetn]
-  connect_bd_net -net rst_1 [get_bd_pins rst] [get_bd_pins adrv9001_tx/rst]
-
-  # Restore current instance
-  current_bd_instance $oldCurInst
-}
-
-# Hierarchical cell: adrv9001_tx1
-proc create_hier_cell_adrv9001_tx1 { parentCell nameHier } {
-
-  variable script_folder
-
-  if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_adrv9001_tx1() - Empty argument(s)!"}
-     return
-  }
-
-  # Get object for parentCell
-  set parentObj [get_bd_cells $parentCell]
-  if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
-     return
-  }
-
-  # Make sure parentObj is hier blk
-  set parentType [get_property TYPE $parentObj]
-  if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
-     return
-  }
-
-  # Save current instance; Restore later
-  set oldCurInst [current_bd_instance .]
-
-  # Set parent object as current
-  current_bd_instance $parentObj
-
-  # Create cell and set as current instance
-  set hier_obj [create_bd_cell -type hier $nameHier]
-  current_bd_instance $hier_obj
-
-  # Create interface pins
-  create_bd_intf_pin -mode Master -vlnv NextGenRFDesign:adrv9001:adrv9001_tx_rtl:1.0 adrv9001_tx
-
-  create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 m_axi
-
-  create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 s_axi
-
-
-  # Create pins
-  create_bd_pin -dir I -type clk axi_aclk
-  create_bd_pin -dir I -type rst axi_rstn
-  create_bd_pin -dir O -type intr irq
-  create_bd_pin -dir O overflow
-  create_bd_pin -dir I rst
-  create_bd_pin -dir O underflow
-
-  # Create instance: adrv9001_tx, and set properties
-  set adrv9001_tx [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9001_tx:1.0 adrv9001_tx ]
-  set_property -dict [ list \
-   CONFIG.SWAP_DIFF_DCLK_IN {1} \
-   CONFIG.SWAP_DIFF_DCLK_OUT {1} \
-   CONFIG.SWAP_DIFF_IDATA {1} \
-   CONFIG.SWAP_DIFF_STROBE {1} \
- ] $adrv9001_tx
-
-  # Create instance: dma, and set properties
-  set dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 dma ]
-  set_property -dict [ list \
-   CONFIG.CYCLIC {true} \
-   CONFIG.DMA_DATA_WIDTH_DEST {32} \
-   CONFIG.DMA_TYPE_DEST {1} \
-   CONFIG.DMA_TYPE_SRC {0} \
- ] $dma
-
-  # Create interface connections
-  connect_bd_intf_net -intf_net adrv9001_tx_1_adrv9001_tx [get_bd_intf_pins adrv9001_tx] [get_bd_intf_pins adrv9001_tx/adrv9001_tx]
-  connect_bd_intf_net -intf_net axi_dmac_0_m_src_axi [get_bd_intf_pins m_axi] [get_bd_intf_pins dma/m_src_axi]
-  connect_bd_intf_net -intf_net dma_m_axis [get_bd_intf_pins adrv9001_tx/s_axis] [get_bd_intf_pins dma/m_axis]
-  connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins s_axi] [get_bd_intf_pins dma/s_axi]
-
-  # Create port connections
-  connect_bd_net -net adrv9001_tx_1_s_axis_aclk [get_bd_pins adrv9001_tx/s_axis_aclk] [get_bd_pins dma/m_axis_aclk]
-  connect_bd_net -net adrv9001_tx_overflow [get_bd_pins overflow] [get_bd_pins adrv9001_tx/overflow]
-  connect_bd_net -net adrv9001_tx_underflow [get_bd_pins underflow] [get_bd_pins adrv9001_tx/underflow]
-  connect_bd_net -net axi_aclk_1 [get_bd_pins axi_aclk] [get_bd_pins dma/m_src_axi_aclk] [get_bd_pins dma/s_axi_aclk]
-  connect_bd_net -net axi_dmac_0_irq [get_bd_pins irq] [get_bd_pins dma/irq]
-  connect_bd_net -net axi_rstn_1 [get_bd_pins axi_rstn] [get_bd_pins dma/m_src_axi_aresetn] [get_bd_pins dma/s_axi_aresetn]
-  connect_bd_net -net rst_1 [get_bd_pins rst] [get_bd_pins adrv9001_tx/rst]
-
-  # Restore current instance
-  current_bd_instance $oldCurInst
-}
-
-# Hierarchical cell: adrv9001_rx2
-proc create_hier_cell_adrv9001_rx2 { parentCell nameHier } {
-
-  variable script_folder
-
-  if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_adrv9001_rx2() - Empty argument(s)!"}
-     return
-  }
-
-  # Get object for parentCell
-  set parentObj [get_bd_cells $parentCell]
-  if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
-     return
-  }
-
-  # Make sure parentObj is hier blk
-  set parentType [get_property TYPE $parentObj]
-  if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
-     return
-  }
-
-  # Save current instance; Restore later
-  set oldCurInst [current_bd_instance .]
-
-  # Set parent object as current
-  current_bd_instance $parentObj
-
-  # Create cell and set as current instance
-  set hier_obj [create_bd_cell -type hier $nameHier]
-  current_bd_instance $hier_obj
-
-  # Create interface pins
-  create_bd_intf_pin -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx
-
-  create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 m_axi
-
-  create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 s_axi
-
-
-  # Create pins
-  create_bd_pin -dir I -type clk axi_aclk
-  create_bd_pin -dir I -type rst axi_rstn
-  create_bd_pin -dir O -type intr irq
-  create_bd_pin -dir I rst
-
-  # Create instance: adrv9001_rx_0, and set properties
-  set adrv9001_rx_0 [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9001_rx:1.0 adrv9001_rx_0 ]
-  set_property -dict [ list \
-   CONFIG.SWAP_DIFF_IDATA {1} \
-   CONFIG.SWAP_DIFF_QDATA {1} \
-   CONFIG.SWAP_DIFF_STROBE {1} \
- ] $adrv9001_rx_0
-
-  # Create instance: dma, and set properties
-  set dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 dma ]
-  set_property -dict [ list \
-   CONFIG.CYCLIC {true} \
-   CONFIG.DMA_DATA_WIDTH_DEST {32} \
-   CONFIG.DMA_DATA_WIDTH_SRC {32} \
- ] $dma
-
-  # Create interface connections
-  connect_bd_intf_net -intf_net adrv9001_rx_1 [get_bd_intf_pins adrv9001_rx] [get_bd_intf_pins adrv9001_rx_0/adrv9001_rx]
-  connect_bd_intf_net -intf_net axi_dmac_0_m_dest_axi [get_bd_intf_pins m_axi] [get_bd_intf_pins dma/m_dest_axi]
-  connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins s_axi] [get_bd_intf_pins dma/s_axi]
-
-  # Create port connections
-  connect_bd_net -net adrv9001_rx_0_m_axis_aclk [get_bd_pins adrv9001_rx_0/m_axis_aclk] [get_bd_pins dma/fifo_wr_clk]
-  connect_bd_net -net adrv9001_rx_0_m_axis_tdata [get_bd_pins adrv9001_rx_0/m_axis_tdata] [get_bd_pins dma/fifo_wr_din]
-  connect_bd_net -net adrv9001_rx_0_m_axis_tvalid [get_bd_pins adrv9001_rx_0/m_axis_tvalid] [get_bd_pins dma/fifo_wr_en]
-  connect_bd_net -net axi_dmac_0_irq [get_bd_pins irq] [get_bd_pins dma/irq]
-  connect_bd_net -net m_dest_axi_aclk_1 [get_bd_pins axi_aclk] [get_bd_pins dma/m_dest_axi_aclk] [get_bd_pins dma/s_axi_aclk]
-  connect_bd_net -net m_dest_axi_aresetn_1 [get_bd_pins axi_rstn] [get_bd_pins dma/m_dest_axi_aresetn] [get_bd_pins dma/s_axi_aresetn]
-  connect_bd_net -net rst_1 [get_bd_pins rst] [get_bd_pins adrv9001_rx_0/rst]
-
-  # Restore current instance
-  current_bd_instance $oldCurInst
-}
-
-# Hierarchical cell: adrv9001_rx1
-proc create_hier_cell_adrv9001_rx1 { parentCell nameHier } {
-
-  variable script_folder
-
-  if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_adrv9001_rx1() - Empty argument(s)!"}
-     return
-  }
-
-  # Get object for parentCell
-  set parentObj [get_bd_cells $parentCell]
-  if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
-     return
-  }
-
-  # Make sure parentObj is hier blk
-  set parentType [get_property TYPE $parentObj]
-  if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
-     return
-  }
-
-  # Save current instance; Restore later
-  set oldCurInst [current_bd_instance .]
-
-  # Set parent object as current
-  current_bd_instance $parentObj
-
-  # Create cell and set as current instance
-  set hier_obj [create_bd_cell -type hier $nameHier]
-  current_bd_instance $hier_obj
-
-  # Create interface pins
-  create_bd_intf_pin -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx
-
-  create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 m_axi
-
-  create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 s_axi
-
-
-  # Create pins
-  create_bd_pin -dir I -type clk axi_aclk
-  create_bd_pin -dir I -type rst axi_rstn
-  create_bd_pin -dir O -type intr irq
-  create_bd_pin -dir I rst
-
-  # Create instance: adrv9001_rx, and set properties
-  set adrv9001_rx [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9001_rx:1.0 adrv9001_rx ]
-
-  # Create instance: dma, and set properties
-  set dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 dma ]
-  set_property -dict [ list \
-   CONFIG.AXI_SLICE_DEST {false} \
-   CONFIG.AXI_SLICE_SRC {false} \
-   CONFIG.CYCLIC {true} \
-   CONFIG.DMA_2D_TRANSFER {false} \
-   CONFIG.DMA_DATA_WIDTH_SRC {32} \
-   CONFIG.DMA_TYPE_DEST {0} \
-   CONFIG.DMA_TYPE_SRC {2} \
-   CONFIG.SYNC_TRANSFER_START {false} \
- ] $dma
-
-  # Create interface connections
-  connect_bd_intf_net -intf_net Conn1 [get_bd_intf_pins m_axi] [get_bd_intf_pins dma/m_dest_axi]
-  connect_bd_intf_net -intf_net Conn2 [get_bd_intf_pins s_axi] [get_bd_intf_pins dma/s_axi]
-  connect_bd_intf_net -intf_net adrv9001_rx_1 [get_bd_intf_pins adrv9001_rx] [get_bd_intf_pins adrv9001_rx/adrv9001_rx]
-
-  # Create port connections
-  connect_bd_net -net adrv9001_rx_m_axis_aclk [get_bd_pins adrv9001_rx/m_axis_aclk] [get_bd_pins dma/fifo_wr_clk]
-  connect_bd_net -net adrv9001_rx_m_axis_tdata [get_bd_pins adrv9001_rx/m_axis_tdata] [get_bd_pins dma/fifo_wr_din]
-  connect_bd_net -net adrv9001_rx_m_axis_tvalid [get_bd_pins adrv9001_rx/m_axis_tvalid] [get_bd_pins dma/fifo_wr_en]
-  connect_bd_net -net axi_adrv9001_rx2_dma_irq [get_bd_pins irq] [get_bd_pins dma/irq]
-  connect_bd_net -net m_dest_axi_aclk_1 [get_bd_pins axi_aclk] [get_bd_pins dma/m_dest_axi_aclk] [get_bd_pins dma/s_axi_aclk]
-  connect_bd_net -net m_dest_axi_aresetn_1 [get_bd_pins axi_rstn] [get_bd_pins dma/m_dest_axi_aresetn] [get_bd_pins dma/s_axi_aresetn]
-  connect_bd_net -net rst_1 [get_bd_pins rst] [get_bd_pins adrv9001_rx/rst]
-
-  # Restore current instance
-  current_bd_instance $oldCurInst
-}
-
 
 # Procedure to create entire design; Provide argument to make
 # procedure reusable. If parentCell is "", will use root.
@@ -2179,46 +1842,22 @@ proc create_root_design { parentCell } {
 
 
   # Create interface ports
-  set adrv9001_rx1 [ create_bd_intf_port -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx1 ]
-
-  set adrv9001_rx2 [ create_bd_intf_port -mode Slave -vlnv NextGenRFDesign:adrv9001:adrv9001_rx_rtl:1.0 adrv9001_rx2 ]
-
-  set adrv9001_tx1 [ create_bd_intf_port -mode Master -vlnv NextGenRFDesign:adrv9001:adrv9001_tx_rtl:1.0 adrv9001_tx1 ]
-
-  set adrv9001_tx2 [ create_bd_intf_port -mode Master -vlnv NextGenRFDesign:adrv9001:adrv9001_tx_rtl:1.0 adrv9001_tx2 ]
+  set adrv9001 [ create_bd_intf_port -mode Master -vlnv nextgenrf.com:user:adrv9002_rtl:1.0 adrv9001 ]
 
 
   # Create ports
   set adrv9001_csn [ create_bd_port -dir O adrv9001_csn ]
-  set adrv9001_dgpio [ create_bd_port -dir IO -from 11 -to 0 adrv9001_dgpio ]
-  set adrv9001_irq [ create_bd_port -dir I adrv9001_irq ]
   set adrv9001_miso [ create_bd_port -dir I adrv9001_miso ]
   set adrv9001_mosi [ create_bd_port -dir O adrv9001_mosi ]
-  set adrv9001_rstn [ create_bd_port -dir O -type rst adrv9001_rstn ]
-  set adrv9001_rx1_en [ create_bd_port -dir O adrv9001_rx1_en ]
-  set adrv9001_rx2_en [ create_bd_port -dir O adrv9001_rx2_en ]
   set adrv9001_sclk [ create_bd_port -dir O adrv9001_sclk ]
-  set adrv9001_tx1_en [ create_bd_port -dir O adrv9001_tx1_en ]
-  set adrv9001_tx2_en [ create_bd_port -dir O adrv9001_tx2_en ]
 
-  # Create instance: adrv9001_rx1
-  create_hier_cell_adrv9001_rx1 [current_bd_instance .] adrv9001_rx1
-
-  # Create instance: adrv9001_rx2
-  create_hier_cell_adrv9001_rx2 [current_bd_instance .] adrv9001_rx2
-
-  # Create instance: adrv9001_tx1
-  create_hier_cell_adrv9001_tx1 [current_bd_instance .] adrv9001_tx1
-
-  # Create instance: adrv9001_tx2
-  create_hier_cell_adrv9001_tx2 [current_bd_instance .] adrv9001_tx2
-
-  # Create instance: axi_adrv9001_0, and set properties
-  set axi_adrv9001_0 [ create_bd_cell -type ip -vlnv NGRF:ip:axi_adrv9001:1.0 axi_adrv9001_0 ]
+  # Create instance: adrv9002_0, and set properties
+  set adrv9002_0 [ create_bd_cell -type ip -vlnv NGRF:ip:adrv9002:1.0 adrv9002_0 ]
 
   # Create instance: axi_cpu_interconnect, and set properties
   set axi_cpu_interconnect [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_cpu_interconnect ]
   set_property -dict [ list \
+   CONFIG.ENABLE_ADVANCED_OPTIONS {0} \
    CONFIG.NUM_MI {5} \
  ] $axi_cpu_interconnect
 
@@ -2232,60 +1871,101 @@ proc create_root_design { parentCell } {
   # Create instance: cpu
   create_hier_cell_cpu [current_bd_instance .] cpu
 
+  # Create instance: rx1_dma, and set properties
+  set rx1_dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 rx1_dma ]
+  set_property -dict [ list \
+   CONFIG.CYCLIC {true} \
+   CONFIG.DMA_DATA_WIDTH_DEST {32} \
+   CONFIG.DMA_DATA_WIDTH_SRC {32} \
+   CONFIG.DMA_TYPE_SRC {1} \
+ ] $rx1_dma
+
+  # Create instance: rx2_dma, and set properties
+  set rx2_dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 rx2_dma ]
+  set_property -dict [ list \
+   CONFIG.AXI_SLICE_DEST {false} \
+   CONFIG.AXI_SLICE_SRC {false} \
+   CONFIG.CYCLIC {true} \
+   CONFIG.DMA_2D_TRANSFER {false} \
+   CONFIG.DMA_DATA_WIDTH_SRC {32} \
+   CONFIG.DMA_TYPE_DEST {0} \
+   CONFIG.DMA_TYPE_SRC {1} \
+   CONFIG.SYNC_TRANSFER_START {false} \
+ ] $rx2_dma
+
+  # Create instance: tx1_dma, and set properties
+  set tx1_dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 tx1_dma ]
+  set_property -dict [ list \
+   CONFIG.CYCLIC {true} \
+   CONFIG.DMA_DATA_WIDTH_DEST {32} \
+   CONFIG.DMA_TYPE_DEST {1} \
+   CONFIG.DMA_TYPE_SRC {0} \
+ ] $tx1_dma
+
+  # Create instance: tx2_dma, and set properties
+  set tx2_dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 tx2_dma ]
+  set_property -dict [ list \
+   CONFIG.CYCLIC {true} \
+   CONFIG.DMA_DATA_WIDTH_DEST {32} \
+   CONFIG.DMA_TYPE_DEST {1} \
+   CONFIG.DMA_TYPE_SRC {0} \
+ ] $tx2_dma
+
+  # Create instance: xlconstant_0, and set properties
+  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
+  set_property -dict [ list \
+   CONFIG.CONST_VAL {0} \
+ ] $xlconstant_0
+
   # Create interface connections
   connect_bd_intf_net -intf_net S00_AXI_1 [get_bd_intf_pins axi_cpu_interconnect/S00_AXI] [get_bd_intf_pins cpu/M_AXI_HPM0_LPD]
-  connect_bd_intf_net -intf_net adrv9001_rx3_m_axi [get_bd_intf_pins adrv9001_rx1/m_axi] [get_bd_intf_pins axi_hp1_interconnect/S00_AXI]
-  connect_bd_intf_net -intf_net adrv9001_rx_1 [get_bd_intf_ports adrv9001_rx1] [get_bd_intf_pins adrv9001_rx1/adrv9001_rx]
-  connect_bd_intf_net -intf_net adrv9001_rx_2 [get_bd_intf_ports adrv9001_rx2] [get_bd_intf_pins adrv9001_rx2/adrv9001_rx]
-  connect_bd_intf_net -intf_net adrv9001_tx1_adrv9001_tx [get_bd_intf_ports adrv9001_tx1] [get_bd_intf_pins adrv9001_tx1/adrv9001_tx]
-  connect_bd_intf_net -intf_net adrv9001_tx2_adrv9001_tx [get_bd_intf_ports adrv9001_tx2] [get_bd_intf_pins adrv9001_tx2/adrv9001_tx]
-  connect_bd_intf_net -intf_net adrv9001_tx2_m_axi [get_bd_intf_pins adrv9001_tx2/m_axi] [get_bd_intf_pins axi_hp1_interconnect/S03_AXI]
-  connect_bd_intf_net -intf_net axi_adrv9001_tx1_dma_m_src_axi [get_bd_intf_pins adrv9001_tx1/m_axi] [get_bd_intf_pins axi_hp1_interconnect/S02_AXI]
-  connect_bd_intf_net -intf_net axi_cpu_interconnect_M00_AXI [get_bd_intf_pins adrv9001_rx1/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M00_AXI]
-  connect_bd_intf_net -intf_net axi_cpu_interconnect_M01_AXI [get_bd_intf_pins adrv9001_rx2/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M01_AXI]
-  connect_bd_intf_net -intf_net axi_cpu_interconnect_M03_AXI [get_bd_intf_pins adrv9001_tx2/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M03_AXI]
-  connect_bd_intf_net -intf_net axi_cpu_interconnect_M04_AXI [get_bd_intf_pins axi_adrv9001_0/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M04_AXI]
+  connect_bd_intf_net -intf_net adrv9002_0_adrv9002 [get_bd_intf_ports adrv9001] [get_bd_intf_pins adrv9002_0/adrv9002]
+  connect_bd_intf_net -intf_net adrv9002_0_rx1_axis [get_bd_intf_pins adrv9002_0/rx1_axis] [get_bd_intf_pins rx1_dma/s_axis]
+  connect_bd_intf_net -intf_net adrv9002_0_rx2_axis [get_bd_intf_pins adrv9002_0/rx2_axis] [get_bd_intf_pins rx2_dma/s_axis]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M00_AXI [get_bd_intf_pins axi_cpu_interconnect/M00_AXI] [get_bd_intf_pins rx2_dma/s_axi]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M01_AXI [get_bd_intf_pins axi_cpu_interconnect/M01_AXI] [get_bd_intf_pins rx1_dma/s_axi]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M02_AXI [get_bd_intf_pins axi_cpu_interconnect/M02_AXI] [get_bd_intf_pins tx1_dma/s_axi]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M03_AXI [get_bd_intf_pins axi_cpu_interconnect/M03_AXI] [get_bd_intf_pins tx2_dma/s_axi]
+  connect_bd_intf_net -intf_net axi_cpu_interconnect_M04_AXI [get_bd_intf_pins adrv9002_0/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M04_AXI]
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins axi_hp1_interconnect/M00_AXI] [get_bd_intf_pins cpu/S_AXI_HP1_FPD]
-  connect_bd_intf_net -intf_net rx2_m_dest_axi [get_bd_intf_pins adrv9001_rx2/m_axi] [get_bd_intf_pins axi_hp1_interconnect/S01_AXI]
-  connect_bd_intf_net -intf_net s_axi_1 [get_bd_intf_pins adrv9001_tx1/s_axi] [get_bd_intf_pins axi_cpu_interconnect/M02_AXI]
+  connect_bd_intf_net -intf_net dma_1_m_dest_axi [get_bd_intf_pins axi_hp1_interconnect/S00_AXI] [get_bd_intf_pins rx2_dma/m_dest_axi]
+  connect_bd_intf_net -intf_net dma_2_m_src_axi [get_bd_intf_pins axi_hp1_interconnect/S02_AXI] [get_bd_intf_pins tx1_dma/m_src_axi]
+  connect_bd_intf_net -intf_net dma_3_m_src_axi [get_bd_intf_pins axi_hp1_interconnect/S03_AXI] [get_bd_intf_pins tx2_dma/m_src_axi]
+  connect_bd_intf_net -intf_net dma_m_dest_axi [get_bd_intf_pins axi_hp1_interconnect/S01_AXI] [get_bd_intf_pins rx1_dma/m_dest_axi]
+  connect_bd_intf_net -intf_net tx1_dma_m_axis [get_bd_intf_pins adrv9002_0/tx1_axis] [get_bd_intf_pins tx1_dma/m_axis]
+  connect_bd_intf_net -intf_net tx2_dma_m_axis [get_bd_intf_pins adrv9002_0/tx2_axis] [get_bd_intf_pins tx2_dma/m_axis]
 
   # Create port connections
-  connect_bd_net -net In4_1 [get_bd_pins adrv9001_rx2/irq] [get_bd_pins cpu/irq13]
-  connect_bd_net -net Net [get_bd_ports adrv9001_dgpio] [get_bd_pins axi_adrv9001_0/dgpio]
-  connect_bd_net -net adrv9001_irq_1 [get_bd_ports adrv9001_irq] [get_bd_pins axi_adrv9001_0/irq]
-  connect_bd_net -net adrv9001_rx3_irq [get_bd_pins adrv9001_rx1/irq] [get_bd_pins cpu/irq14]
   connect_bd_net -net adrv9001_spi_miso_1 [get_bd_ports adrv9001_miso] [get_bd_pins cpu/adrv9001_spi_miso]
-  connect_bd_net -net adrv9001_tx2_irq [get_bd_pins adrv9001_tx2/irq] [get_bd_pins cpu/irq11]
-  connect_bd_net -net axi_adrv9001_0_rstn [get_bd_ports adrv9001_rstn] [get_bd_pins axi_adrv9001_0/rstn]
-  connect_bd_net -net axi_adrv9001_0_rx1_en [get_bd_ports adrv9001_rx1_en] [get_bd_pins axi_adrv9001_0/rx1_en]
-  connect_bd_net -net axi_adrv9001_0_rx1_rst [get_bd_pins adrv9001_rx1/rst] [get_bd_pins axi_adrv9001_0/rx1_rst]
-  connect_bd_net -net axi_adrv9001_0_rx2_en [get_bd_ports adrv9001_rx2_en] [get_bd_pins axi_adrv9001_0/rx2_en]
-  connect_bd_net -net axi_adrv9001_0_rx2_rst [get_bd_pins adrv9001_rx2/rst] [get_bd_pins axi_adrv9001_0/rx2_rst]
-  connect_bd_net -net axi_adrv9001_0_tx1_en [get_bd_ports adrv9001_tx1_en] [get_bd_pins axi_adrv9001_0/tx1_en]
-  connect_bd_net -net axi_adrv9001_0_tx1_rst [get_bd_pins adrv9001_tx1/rst] [get_bd_pins axi_adrv9001_0/tx1_rst]
-  connect_bd_net -net axi_adrv9001_0_tx2_en [get_bd_ports adrv9001_tx2_en] [get_bd_pins axi_adrv9001_0/tx2_en]
-  connect_bd_net -net axi_adrv9001_0_tx2_rst [get_bd_pins adrv9001_tx2/rst] [get_bd_pins axi_adrv9001_0/tx2_rst]
-  connect_bd_net -net axi_adrv9001_tx1_dma_irq [get_bd_pins adrv9001_tx1/irq] [get_bd_pins cpu/irq12]
+  connect_bd_net -net adrv9002_0_rx1_axis_aclk [get_bd_pins adrv9002_0/rx1_axis_aclk] [get_bd_pins rx1_dma/s_axis_aclk]
+  connect_bd_net -net adrv9002_0_rx2_axis_aclk [get_bd_pins adrv9002_0/rx2_axis_aclk] [get_bd_pins rx2_dma/s_axis_aclk]
+  connect_bd_net -net adrv9002_0_tx1_axis_aclk [get_bd_pins adrv9002_0/tx1_axis_aclk] [get_bd_pins tx1_dma/m_axis_aclk]
+  connect_bd_net -net adrv9002_0_tx2_axis_aclk [get_bd_pins adrv9002_0/tx2_axis_aclk] [get_bd_pins tx2_dma/m_axis_aclk]
   connect_bd_net -net cpu_adrv9001_spi_csn [get_bd_ports adrv9001_csn] [get_bd_pins cpu/adrv9001_spi_csn]
   connect_bd_net -net cpu_adrv9001_spi_mosi [get_bd_ports adrv9001_mosi] [get_bd_pins cpu/adrv9001_spi_mosi]
   connect_bd_net -net cpu_adrv9001_spi_sclk [get_bd_ports adrv9001_sclk] [get_bd_pins cpu/adrv9001_spi_sclk]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9001_rx1/axi_aclk] [get_bd_pins adrv9001_rx2/axi_aclk] [get_bd_pins adrv9001_tx1/axi_aclk] [get_bd_pins adrv9001_tx2/axi_aclk] [get_bd_pins axi_adrv9001_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk]
-  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9001_rx1/axi_rstn] [get_bd_pins adrv9001_rx2/axi_rstn] [get_bd_pins adrv9001_tx1/axi_rstn] [get_bd_pins adrv9001_tx2/axi_rstn] [get_bd_pins axi_adrv9001_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn]
+  connect_bd_net -net irq11_1 [get_bd_pins cpu/irq11] [get_bd_pins tx2_dma/irq]
+  connect_bd_net -net irq12_1 [get_bd_pins cpu/irq12] [get_bd_pins tx1_dma/irq]
+  connect_bd_net -net irq13_1 [get_bd_pins cpu/irq13] [get_bd_pins rx1_dma/irq]
+  connect_bd_net -net irq14_1 [get_bd_pins cpu/irq14] [get_bd_pins rx2_dma/irq]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9002_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx1_dma/s_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/s_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx1_dma/s_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/s_axi_aclk]
+  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9002_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx1_dma/s_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/s_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx1_dma/s_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/s_axi_aresetn]
+  connect_bd_net -net xlconstant_0_dout [get_bd_pins adrv9002_0/ext_rx1_en] [get_bd_pins adrv9002_0/ext_rx2_en] [get_bd_pins adrv9002_0/ext_tx1_en] [get_bd_pins adrv9002_0/ext_tx2_en] [get_bd_pins xlconstant_0/dout]
 
   # Create address segments
-  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_rx1/dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
-  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_rx1/dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
-  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_rx2/dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
-  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_rx2/dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
-  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_tx1/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
-  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_tx1/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
-  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces adrv9001_tx2/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
-  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces adrv9001_tx2/dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
-  create_bd_addr_seg -range 0x00001000 -offset 0x80004000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs axi_adrv9001_0/s_axi/reg0] SEG_axi_adrv9001_0_reg0
-  create_bd_addr_seg -range 0x00001000 -offset 0x80000000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_rx1/dma/s_axi/axi_lite] SEG_dma_axi_lite
-  create_bd_addr_seg -range 0x00001000 -offset 0x80001000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_rx2/dma/s_axi/axi_lite] SEG_dma_axi_lite10
-  create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_tx1/dma/s_axi/axi_lite] SEG_dma_axi_lite12
-  create_bd_addr_seg -range 0x00001000 -offset 0x80003000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9001_tx2/dma/s_axi/axi_lite] SEG_dma_axi_lite14
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces rx2_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces rx2_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces tx1_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces tx1_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
+  create_bd_addr_seg -range 0x80000000 -offset 0x00000000 [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] SEG_sys_ps8_HP1_DDR_LOW
+  create_bd_addr_seg -range 0x01000000 -offset 0xFF000000 [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] SEG_sys_ps8_HP1_LPS_OCM
+  create_bd_addr_seg -range 0x00001000 -offset 0x80004000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9002_0/s_axi/reg0] SEG_adrv9002_0_reg0
+  create_bd_addr_seg -range 0x00001000 -offset 0x80000000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx2_dma/s_axi/axi_lite] SEG_dma_axi_lite
+  create_bd_addr_seg -range 0x00001000 -offset 0x80001000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx1_dma/s_axi/axi_lite] SEG_dma_axi_lite10
+  create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx1_dma/s_axi/axi_lite] SEG_dma_axi_lite12
+  create_bd_addr_seg -range 0x00001000 -offset 0x80003000 [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx2_dma/s_axi/axi_lite] SEG_dma_axi_lite14
 
 
   # Restore current instance

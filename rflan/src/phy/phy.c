@@ -80,7 +80,7 @@ typedef struct
 static QueueHandle_t            PhyQueue;                       ///< PHY Queue
 static phy_stream_t            *PhyStream[Adrv9001Port_Num];    ///< Stream Data
 static adi_adrv9001_Device_t   *Adrv9001;
-extern XScuGic xInterruptController;
+extern XScuGic                  xInterruptController;
 
 static void Phy_IqStreamRemove( adrv9001_port_t Port )
 {
@@ -106,7 +106,7 @@ static void Phy_IqStreamStop( adrv9001_port_t Port )
       Stream->Status = PhyStatus_RadioStateError;
 
     /* Disable Streaming */
-    if( Adrv9001_IQStream( Stream->Port, Stream->Cyclic, NULL, 0 ) != Adrv9001Status_Success)
+    if( Adrv9001Dma_Transfer( Stream->Port, Stream->Cyclic, NULL, 0 ) != Adrv9001Status_Success)
       Stream->Status = PhyStatus_Adrv9001Error;
   }
 }
@@ -149,7 +149,7 @@ static void Phy_IqStreamStart( phy_stream_t *Stream )
     Phy_IqStreamRemove( Stream->Port );
   }
   /* Enable Streaming */
-  else if(Adrv9001_IQStream( Stream->Port, Stream->Cyclic, (adrv9001_iqdata_t*)Stream->SampleBuf, Stream->SampleCnt ) != Adrv9001Status_Success)
+  else if(Adrv9001Dma_Transfer( Stream->Port, Stream->Cyclic, Stream->SampleBuf, Stream->SampleCnt ) != Adrv9001Status_Success)
   {
     /* Attempt Stop Current Stream */
     Phy_IqStreamStop( Stream->Port );
@@ -198,11 +198,11 @@ static void Phy_Task( void *pvParameters )
 
 static void Phy_Adrv9001Callback( adrv9001_evt_type_t EvtType, adrv9001_evt_data_t EvtData, void *param )
 {
-  if(EvtType == Adrv9001EvtType_StreamDone)
+  if(EvtType == Adrv9001EvtType_DmaDone)
   {
-    PhyStream[EvtData.Stream.Port]->Status = EvtData.Stream.Status;
+    PhyStream[EvtData.dma.Port]->Status = EvtData.dma.Status;
 
-    phy_queue_t qItem = {.Data.Port = EvtData.Stream.Port, .Data.Status = EvtData.Stream.Status};
+    phy_queue_t qItem = {.Data.Port = EvtData.dma.Port, .Data.Status = EvtData.dma.Status};
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     /* Disable Stream */
@@ -330,19 +330,19 @@ phy_status_t Phy_Initialize( void )
 
   adrv9001_dma_cfg_t DmaCfg;
 
-  DmaCfg.BaseAddr[Adrv9001Port_Tx1] = XPAR_ADRV9001_TX1_DMA_BASEADDR;
-  DmaCfg.BaseAddr[Adrv9001Port_Tx2] = XPAR_ADRV9001_TX2_DMA_BASEADDR;
-  DmaCfg.BaseAddr[Adrv9001Port_Rx1] = XPAR_ADRV9001_RX1_DMA_BASEADDR;
-  DmaCfg.BaseAddr[Adrv9001Port_Rx2] = XPAR_ADRV9001_RX2_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Tx1] = XPAR_TX1_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Tx2] = XPAR_TX2_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Rx1] = XPAR_RX1_DMA_BASEADDR;
+  DmaCfg.BaseAddr[Adrv9001Port_Rx2] = XPAR_RX2_DMA_BASEADDR;
 
-  DmaCfg.IrqId[Adrv9001Port_Tx1] = XPAR_FABRIC_ADRV9001_TX1_DMA_IRQ_INTR;
-  DmaCfg.IrqId[Adrv9001Port_Tx2] = XPAR_FABRIC_ADRV9001_TX2_DMA_IRQ_INTR;
-  DmaCfg.IrqId[Adrv9001Port_Rx1] = XPAR_FABRIC_ADRV9001_RX1_DMA_IRQ_INTR;
-  DmaCfg.IrqId[Adrv9001Port_Rx2] = XPAR_FABRIC_ADRV9001_RX2_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Tx1] = XPAR_FABRIC_TX1_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Tx2] = XPAR_FABRIC_TX2_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Rx1] = XPAR_FABRIC_RX1_DMA_IRQ_INTR;
+  DmaCfg.IrqId[Adrv9001Port_Rx2] = XPAR_FABRIC_RX2_DMA_IRQ_INTR;
 
 
   axi_adrv9001_cfg_t AxiAdrv9001Cfg = {
-      .BaseAddr = XPAR_AXI_ADRV9001_0_BASEADDR,
+      .BaseAddr = XPAR_ADRV9002_0_BASEADDR,
       .IrqId = 0,
   };
 

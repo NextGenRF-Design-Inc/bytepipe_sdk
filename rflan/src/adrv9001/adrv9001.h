@@ -50,7 +50,6 @@
 #include <stdbool.h>
 
 
-
 #define ADRV9001_STATUS_OFFSET              (-1000)
 #define ADRV9001_PROFILE_SIZE               (0x80000)
 
@@ -140,7 +139,7 @@ typedef union
   {
     adrv9001_port_t     Port;
     adrv9001_status_t   Status;
-  }Stream;
+  }dma;
   char                 *Message;
 } adrv9001_evt_data_t;
 
@@ -149,8 +148,8 @@ typedef union
  */
 typedef enum
 {
-  Adrv9001EvtType_StreamStart   = 0,
-  Adrv9001EvtType_StreamDone    = 1,
+  Adrv9001EvtType_DmaStart      = 0,
+  Adrv9001EvtType_DmaDone       = 1,
   Adrv9001EvtType_LogWrite      = 2,
 } adrv9001_evt_type_t;
 
@@ -161,6 +160,8 @@ typedef void (*adrv9001_callback_t)( adrv9001_evt_type_t EvtType, adrv9001_evt_d
 
 /**
  **  ADRV9001 DMA Configuration
+ **
+ **  If the DMA is not desired set DmaCfg to NULL.
  */
 typedef struct {
   uint32_t              IrqId[Adrv9001Port_Num];     ///< DMA Processor IRQ ID
@@ -185,6 +186,8 @@ typedef struct {
 
 /**
  **  ADRV9001 Configuration
+ **
+ **  If the DMA is not desired set DmaCfg to NULL.
  */
 typedef struct
 {
@@ -580,46 +583,6 @@ adrv9001_status_t Adrv9001_ToRfCalibrated( adrv9001_port_t Port );
 *
 * \details
 *
-* This function enables continuous streaming of IQ data.  This function enables
-* the appropriate radio state and sets up the appropriate DMA to transfer IQ
-* samples from memory to the SSI or vice versa.  The DMA streams directly from
-* the buffer provided by the caller.  This buffer and its contents must not be
-* modified until the Adrv9001EvtType_StreamDone callback event is received by
-* the caller.
-*
-* If the DMA is setup to stream continuously the IQ samples will be streamed
-* continuously streamed to the SSI looping back to the first IQ sample
-* after a SampleCnt number of samples are reached.  To disable the stream for
-* a particular port call this function with SampleCnt set to zero.
-*
-* \param[in]  Port is the port being requested
-*
-* \param[in]  Buf is a buffer of 32bit IQ data
-*
-* \param[in]  SampleCnt is the number of samples and the length of Buf
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_IQStream( adrv9001_port_t Port, bool Cyclic, adrv9001_iqdata_t *Buf, uint32_t SampleCnt );
-
-/*******************************************************************************
-*
-* \details
-*
-* This function will stop the IQ stream for a specified port.
-*
-* \param[in]  Port is the port being requested
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_IQStreamStop( adrv9001_port_t Port );
-
-/*******************************************************************************
-*
-* \details
-*
 * This function clears any errors within the adi_adrv9001 device driver.
 *
 * \return     none
@@ -670,7 +633,7 @@ adrv9001_status_t Adrv9001_HwReset( void );
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_DmaTransferBlocking(adrv9001_port_t Port, uint32_t *SampleBuf, uint32_t SampleCnt);
+adrv9001_status_t Adrv9001Dma_TransferBlocking(adrv9001_port_t Port, uint32_t *SampleBuf, uint32_t SampleCnt);
 
 /*******************************************************************************
 *
@@ -693,7 +656,7 @@ adrv9001_status_t Adrv9001_DmaTransferBlocking(adrv9001_port_t Port, uint32_t *S
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_DmaTransfer(adrv9001_port_t Port, bool Cyclic, uint32_t *SampleBuf, uint32_t SampleCnt);
+adrv9001_status_t Adrv9001Dma_Transfer(adrv9001_port_t Port, bool Cyclic, uint32_t *SampleBuf, uint32_t SampleCnt);
 
 /*******************************************************************************
 *
@@ -708,7 +671,7 @@ adrv9001_status_t Adrv9001_DmaTransfer(adrv9001_port_t Port, bool Cyclic, uint32
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_DmaInitialize( adrv9001_dma_cfg_t *Cfg, void *IrqInstance );
+adrv9001_status_t Adrv9001Dma_Initialize( adrv9001_dma_cfg_t *Cfg, void *IrqInstance );
 
 /*******************************************************************************
 *

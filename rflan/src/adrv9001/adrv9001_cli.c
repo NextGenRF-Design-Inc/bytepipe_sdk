@@ -615,7 +615,7 @@ static void Adrv9001Cli_ReadDma(Cli_t *CliInstance, const char *cmd, void *userD
 
   uint32_t *Buf = malloc(Length * sizeof(uint32_t));
 
-  if((status = Adrv9001_DmaTransferBlocking(port, Buf, Length)) == Adrv9001Status_Success)
+  if((status = Adrv9001Dma_TransferBlocking(port, Buf, Length)) == Adrv9001Status_Success)
   {
     printf("%s DMA = \r\n",s);
 

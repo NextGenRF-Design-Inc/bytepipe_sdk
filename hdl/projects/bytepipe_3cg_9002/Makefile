@@ -33,9 +33,7 @@ ip:
 	$(MAKE) -C $(wrkDir)/Adi/hdl/library/util_pack/util_upack2 xilinx || exit $$?;
 	$(MAKE) -C $(wrkDir)/Adi/hdl/library/util_pack/util_cpack2 xilinx || exit $$?;
 	$(MAKE) -C $(wrkDir)/Adi/hdl/library/axi_dmac xilinx || exit $$?;
-	$(MAKE) -C $(srcDir)/../../library/adrv9001_tx || exit $$?;
-	$(MAKE) -C $(srcDir)/../../library/adrv9001_rx || exit $$?;
-	$(MAKE) -C $(srcDir)/../../library/axi_adrv9001 || exit $$?;
+	$(MAKE) -C $(srcDir)/../../library/adrv9002 || exit $$?;
     
 msg:
 	@echo 'Building [$(HL)$(srcDir)$(NC)]'
