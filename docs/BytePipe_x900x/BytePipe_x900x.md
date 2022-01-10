@@ -85,34 +85,7 @@ J600 is a board to board connector which provides access to all of the digital s
 
 # J601
 
-J601 is a board to board connector which provides access to power and RF control signals.  The mating connector used on the host board is JAE Electronics WR-40SB-VHF30-N1.  The following table defines the signal connections including connections associated with the ADRV9002.  The SDK function represents the software functionality included in the Software Development Kit. The highlighted signals represent differences between BytePipe_x900x Rev2 and Rev3.
-
-# J601 - Rev3 SOM
-
-|   SDK Function   |       Description             |        Signal         | Pin | Pin |        Signal         |       Description             |   SDK Function   |
-|------------------|-------------------------------|-----------------------|-----|-----|-----------------------|-------------------------------|------------------| 
-|                  | Ground                        | GND                   | 1   | 2   | GND                   | Ground                        |                  |
-|                  | RF External Clock             | RF_CLK_N              | 3   | 4   | MCS_P                 | ADRV9002 MCS+ (D7)            |                  |
-|                  | RF External Clock             | RF_CLK_P              | 5   | 6   | MCS_N                 | ADRV9002 MCS- (D8)            |                  |
-|                  | Ground                        | GND                   | 7   | 8   | GND                   | Ground                        |                  |
-|                  | ADRV9002 AGPIO_2 (E3)         | `AGPIO_2_DAC2`        | 9   | 10  | AUXADC_0              | ADRV9002 AUXADC_0 (H11)       |                  |
-| TX1 Enable       | `ADRV9002 AGPIO_0 (E12)`      | `AGPIO_0_DAC0_TX1EN`  | 11  | 12  | AUXADC_1              | ADRV9002 AUXADC_1 (B8)        |                  |
-| `TX2 Enable`     | `ADRV9002 AGPIO_8 (G9)`       | `AGPIO_8_TX2EN`       | 13  | 14  | GND                   | Ground                        |                  |
-|                  | Ground                        | GND                   | 15  | 16  | `AGPIO_1_DAC1_RX1EN`  | ADRV9002 AGPIO_1 (F10)        | `RX1 Enable`     |
-|                  | Ground                        | GND                   | 17  | 18  | `AGPIO_3_DAC3`        | ADRV9002 AGPIO_3 (F5)         |                  |
-|                  | Ground                        | GND                   | 19  | 20  | `AGPIO_9_RX2EN`       | `ADRV9002 AGPIO_9 (H9)`       | RX2 Enable       |
-|                  | MIO Reference Voltage         | VCCIO                 | 21  | 22  | GND                   | Ground                        |                  |
-|                  | Ground                        | GND                   | 23  | 24  | GND                   | Ground                        |                  |
-|                  | Ground                        | GND                   | 25  | 26  | GND                   | Ground                        |                  |
-|                  | Ground                        | GND                   | 27  | 28  | GND                   | Ground                        |                  |
-|                  | 5V                            | VCC5V0                | 29  | 30  | VCC5V0                | 5V                            |                  |
-|                  | 5V                            | VCC5V0                | 31  | 32  | VCC5V0                | 5V                            |                  |
-|                  | 5V                            | VCC5V0                | 33  | 34  | VCC5V0                | 5V                            |                  |
-|                  | 5V                            | VCC5V0                | 35  | 36  | VCC5V0                | 5V                            |                  |
-|                  | 5V                            | VCC5V0                | 37  | 38  | VCC5V0                | 5V                            |                  |
-|                  | 5V                            | VCC5V0                | 39  | 40  | VCC5V0                | 5V                            |                  |
-
-# J601 - Rev2 SOM
+J601 is a board to board connector which provides access to power and RF control signals.  The mating connector used on the host board is JAE Electronics WR-40SB-VHF30-N1.  The following table defines the signal connections including connections associated with the ADRV9002.  The SDK function represents the software functionality included in the Software Development Kit. 
 
 |   SDK Function   |       Description             |        Signal         | Pin | Pin |        Signal         |       Description             |   SDK Function   |
 |------------------|-------------------------------|-----------------------|-----|-----|-----------------------|-------------------------------|------------------|                 
@@ -120,12 +93,12 @@ J601 is a board to board connector which provides access to power and RF control
 |                  | RF External Clock             | RF_CLK_N              | 3   | 4   | MCS_P                 | ADRV9002 MCS+ (D7)            |                  |
 |                  | RF External Clock             | RF_CLK_P              | 5   | 6   | MCS_N                 | ADRV9002 MCS- (D8)            |                  |
 |                  | Ground                        | GND                   | 7   | 8   | GND                   | Ground                        |                  |
-|                  | ADRV9002 AGPIO_2 (E3)         | `AGPIO_2`             | 9   | 10  | AUXADC_0              | ADRV9002 AUXADC_0 (H11)       |                  |
-| TX1 Enable       | `ADRV9002 AGPIO_4 (F4)`       | `AGPIO_4`             | 11  | 12  | AUXADC_1              | ADRV9002 AUXADC_1 (B8)        |                  |
-| `RX1 Enable`     | `ADRV9002 AGPIO_6 (G6)`       | `AGPIO_6`             | 13  | 14  | GND                   | Ground                        |                  |
-|                  | Ground                        | GND                   | 15  | 16  | `AGPIO_1`             | ADRV9002 AGPIO_1 (F10)        |                  |
-|                  | Ground                        | GND                   | 17  | 18  | `AGPIO_3`             | ADRV9002 AGPIO_3 (F5)         | `TX2 Enable`     |
-|                  | Ground                        | GND                   | 19  | 20  | `AGPIO_5`             | `ADRV9002 AGPIO_5 (G4)`       | RX2 Enable       |
+|                  | ADRV9002 AGPIO_2 (E3)         | AGPIO_2               | 9   | 10  | AUXADC_0              | ADRV9002 AUXADC_0 (H11)       |                  |
+|                  | ADRV9002 AGPIO_4 (F4)         | AGPIO_4               | 11  | 12  | AUXADC_1              | ADRV9002 AUXADC_1 (B8)        |                  |
+| RX1 Enable       | ADRV9002 AGPIO_6 (G6)         | AGPIO_6               | 13  | 14  | GND                   | Ground                        |                  |
+|                  | Ground                        | GND                   | 15  | 16  | AGPIO_1               | ADRV9002 AGPIO_1 (F10)        |                  |
+|                  | Ground                        | GND                   | 17  | 18  | AGPIO_3               | ADRV9002 AGPIO_3 (F5)         |                  |
+|                  | Ground                        | GND                   | 19  | 20  | AGPIO_5               | ADRV9002 AGPIO_5 (G4)         | RX2 Enable       |
 |                  | MIO Reference Voltage         | VCCIO                 | 21  | 22  | GND                   | Ground                        |                  |
 |                  | Ground                        | GND                   | 23  | 24  | GND                   | Ground                        |                  |
 |                  | Ground                        | GND                   | 25  | 26  | GND                   | Ground                        |                  |
