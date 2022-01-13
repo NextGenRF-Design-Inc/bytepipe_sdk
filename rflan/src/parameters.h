@@ -54,6 +54,7 @@ extern "C"
 
 #define FF_LOGICAL_DRIVE_PATH           ("1:/")
 #define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
+#define FF_PHY_FILENAME                 ("sdk_phy_log.txt")
 
 #define INTC_DEVICE_ID			            XPAR_SCUGIC_SINGLE_DEVICE_ID
 

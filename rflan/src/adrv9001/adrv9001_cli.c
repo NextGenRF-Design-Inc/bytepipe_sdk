@@ -644,6 +644,82 @@ static const CliCmd_t Adrv9001CliReadDmaDef =
   NULL
 };
 
+static void Adrv9001Cli_GetAuxDac(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  uint32_t  Id;
+  float     Value;
+  int       status;
+
+  Cli_GetParameter(cmd, 1, CliParamTypeU32,  &Id);
+
+  if((status = Adrv9001_GetDac(Id, &Value)) == Adrv9001Status_Success)
+  {
+    printf("%2.1fV\r\n",Value);
+  }
+  else
+  {
+    printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+  }
+}
+
+static const CliCmd_t Adrv9001CliGetAuxDacDef =
+{
+  "Adrv9001GetAuxDac",
+  "Adrv9001GetAuxDac: Get DAC Voltage from 0 to 1.8V \r\n"
+  "Adrv9001GetAuxDac < id ( 0 = AUXDAC0 ... 3 = AUXDAC3 ) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_GetAuxDac,
+  1,
+  NULL
+};
+
+static void Adrv9001Cli_SetAuxDac(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  uint32_t  Id;
+  float     Value;
+  int       status;
+
+  Cli_GetParameter(cmd, 1, CliParamTypeU32,  &Id);
+  Cli_GetParameter(cmd, 2, CliParamTypeFloat,  &Value);
+
+  status = Adrv9001_SetDac(Id, Value);
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+}
+
+static const CliCmd_t Adrv9001CliSetAuxDacDef =
+{
+  "Adrv9001SetAuxDac",
+  "Adrv9001SetAuxDac: Set DAC Voltage from 0 to 1.8V \r\n"
+  "Adrv9001SetAuxDac < id ( 0 = AUXDAC0 ... 3 = AUXDAC3 ), Voltage >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_SetAuxDac,
+  2,
+  NULL
+};
+
+static void Adrv9001Cli_EnableAuxDac(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  uint32_t  Id;
+  uint32_t  Enable;
+  int       status;
+
+  Cli_GetParameter(cmd, 1, CliParamTypeU32,  &Id);
+  Cli_GetParameter(cmd, 2, CliParamTypeU32,  &Enable);
+
+  status = Adrv9001_EnableDac(Id, Enable > 0);
+
+  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
+}
+
+static const CliCmd_t Adrv9001CliEnableAuxDacDef =
+{
+  "Adrv9001EnableAuxDac",
+  "Adrv9001EnableAuxDac: Enable AUX DAC\r\n"
+  "Adrv9001EnableAuxDac < id ( 0 = AUXDAC0 ... 3 = AUXDAC3 ), Enable (0,1) >\r\n\r\n",
+  (CliCmdFn_t)Adrv9001Cli_EnableAuxDac,
+  2,
+  NULL
+};
+
 int Adrv9001Cli_Initialize( void )
 {
   Cli_t *Instance = AppCli_GetInstance( );
@@ -666,6 +742,9 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliLoadProfileDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliSetLoopBackDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliReadDmaDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliEnableAuxDacDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliSetAuxDacDef);
+  Cli_RegisterCommand(Instance, &Adrv9001CliGetAuxDacDef);
 
 	return Adrv9001Status_Success;
 }

@@ -72,6 +72,7 @@ Right click on the `rflan` project and select properties.  Add the following sym
 
 ```
 ARMR5
+ADI_COMMON_VERBOSE
 CUSTOMER_PLATFORM
 ADI_DYNAMIC_PROFILE_LOAD
 ADI_ADRV9001_ARM_VERBOSE

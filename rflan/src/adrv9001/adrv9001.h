@@ -73,6 +73,7 @@ typedef enum
   Adrv9001Status_PortDisabled                 = (ADRV9001_STATUS_OFFSET - 12),
   Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 13),
   Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 14),
+  Adrv9001Status_DacError                     = (ADRV9001_STATUS_OFFSET - 15),
 } adrv9001_status_t;
 
 /**
@@ -536,6 +537,51 @@ adrv9001_status_t Adrv9001_SetRadioState( adrv9001_port_t Port, adrv9001_radio_s
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_GetRadioState( adrv9001_port_t Port, adrv9001_radio_state_t *State );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function returns corresponding DAC voltage from 0 to 1.8V.
+*
+* \param[in]  ID is the DAC id, 0 = AUXDAC0, 1 = AUXDAC1, ..., 3 = AUXDAC3
+*
+* \param[out] Voltage is the returned voltage from 0 to 1.8V
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_GetDac( uint8_t Id, float *Voltage );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function sets the corresponding DAC voltage from 0 to 1.8V.
+*
+* \param[in]  ID is the DAC id, 0 = AUXDAC0, 1 = AUXDAC1, ..., 3 = AUXDAC3
+*
+* \param[in]  Voltage is the voltage from 0 to 1.8V
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_SetDac( uint8_t Id, float Voltage );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function enables or disables the corresponding DAC.
+*
+* \param[in]  ID is the DAC id, 0 = AUXDAC0, 1 = AUXDAC1, ..., 3 = AUXDAC3
+*
+* \param[in]  Enable disables or enables the DAC
+*
+* \return     Status
+*
+*******************************************************************************/
+adrv9001_status_t Adrv9001_EnableDac( uint8_t Id, bool Enable );
 
 /*******************************************************************************
 *

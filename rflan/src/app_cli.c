@@ -71,6 +71,7 @@ static char             AppCliCmdBuf[ APP_CLI_CMD_BUF_SIZE ];
 static CliCmd_t const  *AppCliCmdList[ APP_CLI_CMD_LIST_SIZE ];
 static XUartPs          AppCliUart;
 
+
 void outbyte(char c)
 {
 	if(AppCliTxCharQueue != NULL)

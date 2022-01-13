@@ -99,7 +99,7 @@ typedef union
     phy_status_t          Status;       ///< Status
     void                 *CallbackRef;  ///< User Data
   }Stream;
-
+  char                   *Message;      ///< Message
 } phy_evt_data_t;
 
 
@@ -111,6 +111,7 @@ typedef enum
   PhyEvtType_StreamDone       = 0,    ///< Indicates stream is done. EvtData = phy_stream_t
   PhyEvtType_StreamStart      = 1,    ///< Indicates stream has started. EvtData = phy_stream_t
   PhyEvtType_ProfileUpdated   = 2,    ///< Indicates profile has been updated. No Evt data
+  PhyEvtType_LogWrite         = 3,    ///< Log Data
 } phy_evt_type_t;
 
 /**
@@ -130,6 +131,14 @@ typedef struct{
   phy_status_t      Status;           ///< Status
   bool              Cyclic;           ///< Flag indicates the stream will continue Indefinitely
 }phy_stream_t;
+
+/**
+**  PHY Configuration
+*/
+typedef struct{
+  phy_callback_t    Callback;         ///< Callback
+  void             *CallbackRef;      ///< User Data
+}phy_cfg_t;
 
 /*******************************************************************************
 *
@@ -208,7 +217,7 @@ phy_status_t Phy_UpdateProfile( profile_t *Profile );
 * \return   int32_t - status
 *
 *******************************************************************************/
-phy_status_t Phy_Initialize( void );
+phy_status_t Phy_Initialize( phy_cfg_t *Cfg );
 
 
 

@@ -62,7 +62,8 @@ static TaskHandle_t 			AppTask;
 static XSysMonPsu         AppSysMon;
 static XResetPs           AppReset;
 static FATFS              AppFatFs;
-
+static char               AppLogFilename[FF_FILENAME_MAX_LEN];
+static FIL                AppFil;
 
 static int32_t App_ResetInitialize( void )
 {
@@ -140,47 +141,113 @@ static int32_t App_SysMonInitialize( void )
   return Status;
 }
 
+static int32_t App_WriteLogFile( const char *str )
+{
+  UINT len = 0;
+  int status;
+
+  if((status = f_write(&AppFil, (const void*)str, strlen(str), (UINT*)&len)) != FR_OK)
+    return status;
+
+  f_sync(&AppFil);
+
+  return FR_OK;
+}
+
+static void App_CloseLogFile( void )
+{
+  f_sync(&AppFil);
+
+  f_close(&AppFil);
+}
+
+static int32_t App_OpenLogFile( void )
+{
+  strcpy(AppLogFilename,FF_LOGICAL_DRIVE_PATH);
+  strcpy(&AppLogFilename[strlen(AppLogFilename)],FF_PHY_FILENAME);
+
+  /* Delete PHY Log file */
+  f_unlink(AppLogFilename);
+
+  int status;
+
+  /* Open File */
+  if( (status = f_open(&AppFil, AppLogFilename, FA_CREATE_NEW | FA_WRITE)) != FR_OK)
+    return status;
+
+  /* Pointer to beginning of file */
+  if((status = f_lseek(&AppFil, 0)) != FR_OK)
+    return status;
+
+  f_sync(&AppFil);
+
+  return FR_OK;
+}
+
+static void App_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, void *param )
+{
+  if( EvtType == PhyEvtType_LogWrite )
+  {
+    App_WriteLogFile( EvtData.Message );
+  }
+}
+
 static int32_t App_Initialize( void )
 {
   int status;
 
   /* Mount File System */
   if(f_mount(&AppFatFs, FF_LOGICAL_DRIVE_PATH, 1) != FR_OK)
-    xil_printf("Failed to initialize file system\r\n");
+    printf("Failed to initialize file system\r\n");
+
+  /* Open Log File */
+  if(App_OpenLogFile( ) != FR_OK)
+    printf("Failed to open log file\r\n");
 
   /* Initialize CLI */
   if((status = AppCli_Initialize()) != 0)
-    xil_printf("CLI Initialize Error %d\r\n",status);
+    printf("CLI Initialize Error %d\r\n",status);
 
   /* Initialize System Monitor */
   if((status = App_SysMonInitialize()) != 0)
-    xil_printf("System Monitor Initialize Error %d\r\n",status);
+    printf("System Monitor Initialize Error %d\r\n",status);
 
   /* Initialize System Reset */
   if((status = App_ResetInitialize()) != 0)
-    xil_printf("System Reset Initialize Error %d\r\n",status);
+    printf("System Reset Initialize Error %d\r\n",status);
 
   /* Initialize ZMODEM */
   if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH, outbyte)) != 0)
-    xil_printf("ZMODEM Initialize Error %d\r\n",status);
+    printf("ZMODEM Initialize Error %d\r\n",status);
 
   /* Initialize Clocks */
   if(VersaClock5_Initialize() != 0)
-    xil_printf("Failed to initialize external clock driver\r\n");
+    printf("Failed to initialize external clock driver\r\n");
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001Cli_Initialize()) != 0)
-    xil_printf("Adrv9001 CLI Initialize Error %d\r\n",status);
+    printf("Adrv9001 CLI Initialize Error %d\r\n",status);
 
-  xil_printf("\r\n\r\n\r\n");
-  xil_printf("************************************************\r\n");
-  xil_printf("        BytePipe_x900x RFLAN - v%d.%d.%d\r\n", APP_FW_VER_MINOR, APP_FW_VER_REV, APP_FW_VER_MAJOR );
-  xil_printf("************************************************\r\n");
+  char *Buf = calloc(1, 1024);
 
-  xil_printf("\r\nType help for a list of commands\r\n\r\n");
+  snprintf( &Buf[strlen(Buf)], 1023, "\r\n\r\n\r\n" );
+  snprintf( &Buf[strlen(Buf)], 1023, "************************************************\r\n");
+  snprintf( &Buf[strlen(Buf)], 1023, "        BytePipe_x900x RFLAN - v%d.%d.%d\r\n", APP_FW_VER_MINOR, APP_FW_VER_REV, APP_FW_VER_MAJOR );
+  snprintf( &Buf[strlen(Buf)], 1023, "************************************************\r\n");
+
+  App_WriteLogFile(Buf);
+  print(Buf);
+  free(Buf);
+
+  printf("\r\nType help for a list of commands\r\n\r\n");
+
+  phy_cfg_t Cfg = {
+    .Callback = App_PhyCallback,
+    .CallbackRef = NULL,
+  };
 
   /* Initialize PHY */
-  if((status = Phy_Initialize( )) != 0)
+  if((status = Phy_Initialize( &Cfg )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
 
   return status;
@@ -211,6 +278,8 @@ int main()
 	vTaskStartScheduler( );
 
 	for( ;; );
+
+	App_CloseLogFile( );
 }
 
 int32_t App_ResetPl( void )

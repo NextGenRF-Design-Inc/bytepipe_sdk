@@ -53,7 +53,6 @@
 #include "adrv9001.h"
 #include "adi_adrv9001_types.h"
 
-
 /**
 **  PHY Queue
 */
@@ -81,6 +80,8 @@ static QueueHandle_t            PhyQueue;                       ///< PHY Queue
 static phy_stream_t            *PhyStream[Adrv9001Port_Num];    ///< Stream Data
 static adi_adrv9001_Device_t   *Adrv9001;
 extern XScuGic                  xInterruptController;
+static phy_callback_t           PhyCallback;
+static void                    *PhyCallbackRef;
 
 static void Phy_IqStreamRemove( adrv9001_port_t Port )
 {
@@ -222,7 +223,13 @@ static void Phy_Adrv9001Callback( adrv9001_evt_type_t EvtType, adrv9001_evt_data
   }
   else if( EvtType == Adrv9001EvtType_LogWrite )
   {
-    printf(EvtData.Message);
+
+    if( PhyCallback != NULL )
+    {
+      phy_evt_data_t PhyEvtData = {.Message = EvtData.Message };
+
+      PhyCallback( PhyEvtType_LogWrite, PhyEvtData, PhyCallbackRef );
+    }
   }
 }
 
@@ -301,7 +308,7 @@ phy_status_t Phy_UpdateProfile( profile_t *Profile )
 //  if((status = Adrv9001_GetVersionInfo( &VerInfo )) != Adrv9001Status_Success)
 //    return status;
 //
-//  printf("%s Successfully Initialized\r\n","ADRV9002");
+//  printf("%s Version Information:\r\n","ADRV9002");
 //  printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
 //  printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
 //  printf("  -API Version: %u.%u.%u\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
@@ -309,9 +316,13 @@ phy_status_t Phy_UpdateProfile( profile_t *Profile )
   return status;
 }
 
-phy_status_t Phy_Initialize( void )
+phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
 {
   int32_t status;
+
+  /* Copy Configuration Items */
+  PhyCallback = Cfg->Callback;
+  PhyCallbackRef = Cfg->CallbackRef;
 
   /* Clear Stream Data */
   for(adrv9001_port_t i = 0; i < Adrv9001Port_Num; i++)
@@ -366,17 +377,33 @@ phy_status_t Phy_Initialize( void )
 
   /* Load ADRV9001 Profile */
   if((status = Adrv9001_LoadProfile( )) != Adrv9001Status_Success)
-    return status;
+    Adrv9001_ClearError( );
 
   /* Get Version Info */
   adrv9001_ver_t VerInfo;
-  if((status = Adrv9001_GetVersionInfo( &VerInfo )) != Adrv9001Status_Success)
-    return status;
+  if( Adrv9001_GetVersionInfo( &VerInfo ) == Adrv9001Status_Success)
+  {
+    char *Buf = calloc(1, 1024);
 
-  printf("%s Successfully Initialized\r\n","ADRV9002");
-  printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
-  printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
-  printf("  -API Version: %lu.%lu.%lu\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
+    snprintf( &Buf[strlen(Buf)], 1023, "%s Version Information:\r\n","ADRV9002" );
+    snprintf( &Buf[strlen(Buf)], 1023, "  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
+    snprintf( &Buf[strlen(Buf)], 1023, "  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
+    snprintf( &Buf[strlen(Buf)], 1023, "  -API Version: %lu.%lu.%lu\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
 
-  return XST_SUCCESS;
+    print(Buf);
+
+    if( PhyCallback != NULL )
+    {
+      phy_evt_data_t EvtData = {.Message = Buf };
+      PhyCallback( PhyEvtType_LogWrite, EvtData, PhyCallbackRef );
+    }
+
+    free(Buf);
+  }
+  else
+  {
+    printf("Unable to Get ADRV9002 Version Information\r\n");
+  }
+
+  return status;
 }
