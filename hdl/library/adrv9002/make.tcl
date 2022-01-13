@@ -59,9 +59,27 @@ set_property company_url $url [ipx::current_core]
 set_property supported_families {zynquplus Beta zynq Beta artix7 Beta kintex7 Beta} [ipx::current_core]
 
 ipx::remove_bus_interface ext [ipx::current_core]
+ipx::remove_bus_interface rx1_axis [ipx::current_core]
+ipx::remove_bus_interface rx2_axis [ipx::current_core]
+ipx::remove_bus_interface tx1_axis [ipx::current_core]
+ipx::remove_bus_interface tx2_axis [ipx::current_core]
 ipx::infer_bus_interface {rx1_en rx2_en tx1_en tx2_en rstn irq dgpio rx1_dclk_p rx1_dclk_n rx1_strobe_p rx1_strobe_n rx1_idata_p rx1_idata_n rx1_qdata_p rx1_qdata_n rx2_dclk_p rx2_dclk_n rx2_strobe_p rx2_strobe_n rx2_idata_p rx2_idata_n rx2_qdata_p rx2_qdata_n tx1_ref_clk_p tx1_ref_clk_n tx1_dclk_p tx1_dclk_n tx1_strobe_p tx1_strobe_n tx1_idata_p tx1_idata_n tx1_qdata_p tx1_qdata_n tx2_ref_clk_p tx2_ref_clk_n tx2_dclk_p tx2_dclk_n tx2_strobe_p tx2_strobe_n tx2_idata_p tx2_idata_n tx2_qdata_p tx2_qdata_n} nextgenrf.com:user:adrv9002_rtl:1.0 [ipx::current_core]
 set_property name adrv9002 [ipx::get_bus_interfaces adrv9002_1 -of_objects [ipx::current_core]]
 set_property display_name adrv9002 [ipx::get_bus_interfaces adrv9002 -of_objects [ipx::current_core]]
+ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {rx2_axis_tdata rx2_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {tx1_axis_tdata tx1_axis_tvalid tx1_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {tx2_axis_tdata tx2_axis_tvalid tx2_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::associate_bus_interfaces -busif rx1_axis -clock rx1_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif rx2_axis -clock rx2_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif tx1_axis -clock tx1_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif tx2_axis -clock tx2_axis_aclk [ipx::current_core]
+ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces rx1_axis_aclk -of_objects [ipx::current_core]]
+ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces rx2_axis_aclk -of_objects [ipx::current_core]]
+ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces tx1_axis_aclk -of_objects [ipx::current_core]]
+ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces tx2_axis_aclk -of_objects [ipx::current_core]]
+
+
 
 set disclaimer {
 
