@@ -109,7 +109,7 @@ typedef enum
                                              ( p == Adrv9001Status_DmaError )?          "ADRV9001 DmaError" :            \
                                              ( p == Adrv9001Status_PortDisabled )?      "ADRV9001 PortDisabled" :        \
                                              ( p == Adrv9001Status_SpiError )?          "ADRV9001 SpiError" :            \
-                                             ( p == Adrv9001Status_GpioError )?         "ADRV9001 GpioError" : "Unknown")
+                                             ( p == Adrv9001Status_GpioError )?         "ADRV9001 GpioError" : "Unknown Error")
 
 /**
  **  ADRV9001 Radio State

@@ -62,8 +62,7 @@ static TaskHandle_t 			AppTask;
 static XSysMonPsu         AppSysMon;
 static XResetPs           AppReset;
 static FATFS              AppFatFs;
-static char               AppLogFilename[FF_FILENAME_MAX_LEN];
-static FIL                AppFil;
+static FIL                AppLogFil;
 
 static int32_t App_ResetInitialize( void )
 {
@@ -146,40 +145,37 @@ static int32_t App_WriteLogFile( const char *str )
   UINT len = 0;
   int status;
 
-  if((status = f_write(&AppFil, (const void*)str, strlen(str), (UINT*)&len)) != FR_OK)
+  if((status = f_write(&AppLogFil, (const void*)str, strlen(str), (UINT*)&len)) != FR_OK)
     return status;
 
-  f_sync(&AppFil);
+  f_sync(&AppLogFil);
 
   return FR_OK;
 }
 
-static void App_CloseLogFile( void )
+static int32_t App_CloseLogFile( void )
 {
-  f_sync(&AppFil);
+  f_sync(&AppLogFil);
 
-  f_close(&AppFil);
+  return f_close(&AppLogFil);
 }
 
 static int32_t App_OpenLogFile( void )
 {
-  strcpy(AppLogFilename,FF_LOGICAL_DRIVE_PATH);
-  strcpy(&AppLogFilename[strlen(AppLogFilename)],FF_PHY_FILENAME);
-
-  /* Delete PHY Log file */
-  f_unlink(AppLogFilename);
-
   int status;
 
+  /* Delete PHY Log file */
+  f_unlink(APP_LOG_FILENAME);
+
   /* Open File */
-  if( (status = f_open(&AppFil, AppLogFilename, FA_CREATE_NEW | FA_WRITE)) != FR_OK)
+  if( (status = f_open(&AppLogFil, APP_LOG_FILENAME, FA_CREATE_NEW | FA_WRITE | FA_READ)) != FR_OK)
     return status;
 
   /* Pointer to beginning of file */
-  if((status = f_lseek(&AppFil, 0)) != FR_OK)
+  if((status = f_lseek(&AppLogFil, 0)) != FR_OK)
     return status;
 
-  f_sync(&AppFil);
+  f_sync(&AppLogFil);
 
   return FR_OK;
 }
@@ -205,7 +201,7 @@ static int32_t App_Initialize( void )
     printf("Failed to open log file\r\n");
 
   /* Initialize CLI */
-  if((status = AppCli_Initialize()) != 0)
+  if((status = AppCli_Initialize( &AppLogFil )) != 0)
     printf("CLI Initialize Error %d\r\n",status);
 
   /* Initialize System Monitor */

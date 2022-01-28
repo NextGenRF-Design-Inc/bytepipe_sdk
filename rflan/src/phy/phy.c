@@ -316,29 +316,13 @@ phy_status_t Phy_UpdateProfile( profile_t *Profile )
   return status;
 }
 
-phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
+phy_status_t Phy_Adrv9001LoadProfile( void )
 {
-  int32_t status;
+  return Adrv9001_LoadProfile( );
+}
 
-  /* Copy Configuration Items */
-  PhyCallback = Cfg->Callback;
-  PhyCallbackRef = Cfg->CallbackRef;
-
-  /* Clear Stream Data */
-  for(adrv9001_port_t i = 0; i < Adrv9001Port_Num; i++)
-    PhyStream[i] = NULL;
-
-  /* Create Queue */
-  PhyQueue = xQueueCreate(PHY_QUEUE_SIZE, sizeof(phy_queue_t));
-
-  /* Create Task */
-  if(xTaskCreate(Phy_Task, PHY_TASK_NAME, PHY_TASK_STACK_SIZE, NULL, PHY_TASK_PRIORITY, NULL) != pdPASS)
-    return PhyStatus_OsError;
-
-  /* Initialize PHY CLI */
-  if((status = PhyCli_Initialize()) != PhyStatus_Success)
-    return status;
-
+phy_status_t Phy_Adrv9001Initialize( void )
+{
   adrv9001_dma_cfg_t DmaCfg;
 
   DmaCfg.BaseAddr[Adrv9001Port_Tx1] = XPAR_TX1_DMA_BASEADDR;
@@ -372,11 +356,38 @@ phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
   };
 
   /* Initialize ADRV9001 */
-  if((status = Adrv9001_Initialize( (void**)&Adrv9001, &Adrv9001Cfg )) != Adrv9001Status_Success)
+  return Adrv9001_Initialize( (void**)&Adrv9001, &Adrv9001Cfg );
+}
+
+phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
+{
+  int32_t status;
+
+  /* Copy Configuration Items */
+  PhyCallback = Cfg->Callback;
+  PhyCallbackRef = Cfg->CallbackRef;
+
+  /* Clear Stream Data */
+  for(adrv9001_port_t i = 0; i < Adrv9001Port_Num; i++)
+    PhyStream[i] = NULL;
+
+  /* Create Queue */
+  PhyQueue = xQueueCreate(PHY_QUEUE_SIZE, sizeof(phy_queue_t));
+
+  /* Create Task */
+  if(xTaskCreate(Phy_Task, PHY_TASK_NAME, PHY_TASK_STACK_SIZE, NULL, PHY_TASK_PRIORITY, NULL) != pdPASS)
+    return PhyStatus_OsError;
+
+  /* Initialize PHY CLI */
+  if((status = PhyCli_Initialize()) != PhyStatus_Success)
+    return status;
+
+  /* Initialize ADRV9001 */
+  if((status = Phy_Adrv9001Initialize( )) != Adrv9001Status_Success)
     return status;
 
   /* Load ADRV9001 Profile */
-  if((status = Adrv9001_LoadProfile( )) != Adrv9001Status_Success)
+  if((status = Phy_Adrv9001LoadProfile( )) != Adrv9001Status_Success)
     Adrv9001_ClearError( );
 
   /* Get Version Info */

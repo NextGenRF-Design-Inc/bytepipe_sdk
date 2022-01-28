@@ -122,14 +122,9 @@ static void PhyCli_UpdateProfile(Cli_t *CliInstance, const char *cmd, void *user
   f_close( &fil );
 
   /* Load Profile */
-  if( Phy_UpdateProfile( Buf ) == PhyStatus_Success)
-  {
-    printf("Success\r\n");
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+  int32_t status = Phy_UpdateProfile( Buf );
+
+  printf("%s\r\n",PHY_STATUS_2_STR(status));
 
   /* Free Memory */
   free( Buf );
@@ -190,6 +185,7 @@ static void PhyCli_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, 
 static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   phy_stream_t Stream = {.Callback = PhyCli_PhyCallback};
+  int32_t status;
 
   /* Parse Port */
   if(PhyCli_ParsePort(cmd, 1, &Stream.Port) == NULL)
@@ -255,9 +251,9 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   }
 
   /* Enable Streaming */
-  if(Phy_IqStreamEnable( &Stream ) != PhyStatus_Success)
+  if((status = Phy_IqStreamEnable( &Stream )) != PhyStatus_Success)
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",PHY_STATUS_2_STR(status));
   }
 }
 
@@ -274,6 +270,7 @@ static const CliCmd_t PhyCliIqFileStreamEnableDef =
 static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t     port;
+  int32_t status;
 
   /* Parse Port */
   if(PhyCli_ParsePort(cmd, 1, &port) == NULL)
@@ -283,9 +280,9 @@ static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void
   }
 
   /* Disable Stream */
-  if( Phy_IqStreamDisable( port ) != PhyStatus_Success )
+  if((status = Phy_IqStreamDisable( port )) != PhyStatus_Success )
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",PHY_STATUS_2_STR(status));
   }
 }
 
@@ -320,11 +317,11 @@ static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userDat
 
   if(status == 0)
   {
-    printf("%s contains %lu samples\r\n", filename, SampleCnt);
+    printf("%lu\r\n", SampleCnt);
   }
   else
   {
-    printf("Failed\r\n");
+    printf("%s\r\n",PHY_STATUS_2_STR(status));
   }
 }
 
@@ -338,6 +335,40 @@ static const CliCmd_t PhyCliIqFileSizeDef =
   NULL
 };
 
+static void PhyCli_Adrv9001Init(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int32_t status = Phy_Adrv9001Initialize( );
+
+  printf("%s\r\n",PHY_STATUS_2_STR(status));
+}
+
+static const CliCmd_t PhyCliAdrv9001InitDef =
+{
+  "PhyAdrv9001Init",
+  "PhyAdrv9001Init:  Initialize ADRV9001 \r\n"
+  "PhyAdrv9001Init <  >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_Adrv9001Init,
+  0,
+  NULL
+};
+
+static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int32_t status = Phy_Adrv9001LoadProfile( );
+
+  printf("%s\r\n",PHY_STATUS_2_STR(status));
+}
+
+static const CliCmd_t PhyCliAdrv9001LoadProfileDef =
+{
+  "PhyAdrv9001LoadProfile",
+  "PhyAdrv9001LoadProfile:  Load current ADRV9001 \r\n"
+  "PhyAdrv9001LoadProfile <  >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_Adrv9001LoadProfile,
+  0,
+  NULL
+};
+
 int PhyCli_Initialize( void )
 {
   Cli_t *Instance = AppCli_GetInstance( );
@@ -346,6 +377,8 @@ int PhyCli_Initialize( void )
   Cli_RegisterCommand(Instance, &PhyCliIqFileStreamDisableDef);
   Cli_RegisterCommand(Instance, &PhyCliIqFileSizeDef);
   Cli_RegisterCommand(Instance, &PhyCliUpdateProfileDef);
+  Cli_RegisterCommand(Instance, &PhyCliAdrv9001InitDef);
+  Cli_RegisterCommand(Instance, &PhyCliAdrv9001LoadProfileDef);
 
 	return PhyStatus_Success;
 }

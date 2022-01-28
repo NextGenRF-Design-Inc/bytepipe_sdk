@@ -54,12 +54,14 @@
 #include "task.h"
 #include "queue.h"
 #include "portmacro.h"
-#include "app.h"
 #include "ff.h"
 #include "xuartps.h"
 #include "zmodem.h"
 #include "adrv9001.h"
 #include "xsysmonpsu.h"
+#include "parameters.h"
+#include "app_cli.h"
+#include "app.h"
 
 static Cli_t            AppCli;
 static QueueHandle_t    AppCliRxCharQueue;
@@ -70,6 +72,7 @@ static char             AppCliHistoryBuf[ APP_CLI_HISTORY_BUF_SIZE ];
 static char             AppCliCmdBuf[ APP_CLI_CMD_BUF_SIZE ];
 static CliCmd_t const  *AppCliCmdList[ APP_CLI_CMD_LIST_SIZE ];
 static XUartPs          AppCliUart;
+static FIL             *AppCliLogFil;
 
 
 void outbyte(char c)
@@ -156,11 +159,6 @@ Cli_t *AppCli_GetInstance( void )
   return &AppCli;
 }
 
-/*******************************************************************************
-*
-* \details List Files
-*
-*******************************************************************************/
 static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int status;
@@ -196,11 +194,6 @@ static const CliCmd_t AppCliLsDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Clear Screen
-*
-*******************************************************************************/
 static void AppCli_CliCls(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   CliInstance->Callback( "\e[1;1H\e[2J", CliInstance->CallbackRef );
@@ -216,11 +209,6 @@ static const CliCmd_t AppCliClsDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Report Task Info
-*
-*******************************************************************************/
 static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   printf( "Name            Stack   Usage\r\n");
@@ -281,11 +269,6 @@ static const CliCmd_t AppCliTaskInfoDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Delete File
-*
-*******************************************************************************/
 static void AppCli_fdelete(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   char *filename = calloc(1, FF_FILENAME_MAX_LEN );
@@ -313,11 +296,6 @@ static const CliCmd_t AppCliDeleteFileDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Read File
-*
-*******************************************************************************/
 static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int32_t offset;
@@ -385,11 +363,6 @@ static const CliCmd_t AppCliReadFileDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Get Temp
-*
-*******************************************************************************/
 static void AppCli_GetTemp(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   int16_t Temp_C;
@@ -416,11 +389,6 @@ static const CliCmd_t AppCliGetTempDef =
   NULL
 };
 
-/*******************************************************************************
-*
-* \details Reboot
-*
-*******************************************************************************/
 static void AppCli_Reboot(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   App_Reboot();
@@ -451,10 +419,98 @@ static const CliCmd_t AppCliResetPlDef =
   NULL
 };
 
+static void AppCli_ClearLog(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int status;
 
-int AppCli_Initialize( void )
+  f_sync(AppCliLogFil);
+
+  f_close(AppCliLogFil);
+
+  /* Delete PHY Log file */
+  f_unlink(APP_LOG_FILENAME);
+
+  do
+  {
+    /* Open File */
+    if( (status = f_open(AppCliLogFil, APP_LOG_FILENAME, FA_CREATE_NEW | FA_WRITE)) != FR_OK)
+      break;
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(AppCliLogFil, 0)) != FR_OK)
+      break;
+
+    f_sync(AppCliLogFil);
+
+  }while(0);
+
+  if( status == 0)
+    printf("Success\r\n");
+  else
+    printf("Failed\r\n");
+
+}
+
+static const CliCmd_t AppCliClearLogDef =
+{
+  "ClearLog",
+  "ClearLog: Clear log file \r\n"
+  "ClearLog <  >\r\n\n",
+  (CliCmdFn_t)AppCli_ClearLog,
+  0,
+  NULL
+};
+
+static void AppCli_ReadLog(Cli_t *CliInstance, const char *cmd, void *userData)
+{
+  int32_t status;
+  UINT len;
+  char c;
+
+  do
+  {
+    f_sync(AppCliLogFil);
+
+    /* Get Size of file */
+    int32_t length = f_size(AppCliLogFil);
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(AppCliLogFil, 0)) != FR_OK) break;
+
+    for(int i = 0; i < length; i++)
+    {
+      /* Read data from file */
+      if((status = f_read(AppCliLogFil, (void*)&c, 1, (UINT*)&len)) != FR_OK) break;
+
+      printf("%c",c);
+    }
+
+  }while(0);
+
+  if( status == 0 )
+    printf("Success\r\n");
+  else
+    printf("Failed\r\n");
+
+}
+
+static const CliCmd_t AppCliReadLogDef =
+{
+  "ReadLog",
+  "ReadLog: Read log file \r\n"
+  "ReadLog <  >\r\n\n",
+  (CliCmdFn_t)AppCli_ReadLog,
+  0,
+  NULL
+};
+
+
+int32_t AppCli_Initialize( FIL *LogFil )
 {
 	XUartPs_Config *Config;
+
+	/* Copy Configuration */
+	AppCliLogFil = LogFil;
 
 	/* Lookup Configuration */
 	if((Config = XUartPs_LookupConfig(APP_CLI_UART_DEVICE_ID)) == NULL) return XST_FAILURE;
@@ -467,7 +523,7 @@ int AppCli_Initialize( void )
 
 	/* Connect UART handler */
 	XScuGic_Connect(&xInterruptController, APP_CLI_UART_INTR_ID,
-			(Xil_ExceptionHandler) XUartPs_InterruptHandler, (void *) &AppCliUart);
+	    (Xil_ExceptionHandler) XUartPs_InterruptHandler, (void *) &AppCliUart);
 
 	/* Set Local Handler */
 	XUartPs_SetHandler(&AppCliUart, (XUartPs_Handler)CLI_UartHandler, &AppCliUart);
@@ -487,8 +543,8 @@ int AppCli_Initialize( void )
 	/* Set Priority */
 	XScuGic_SetPriorityTriggerType(&xInterruptController, APP_CLI_UART_INTR_ID, 0xA0, 0x3);
 
-	  /* Create CLI Configuration */
-	  CliCfg_t CliCfg = {
+	/* Create CLI Configuration */
+	CliCfg_t CliCfg = {
 	    .CmdList          = AppCliCmdList,
 	    .CmdListSize      = APP_CLI_CMD_LIST_SIZE,
 	    .CmdBuf           = AppCliCmdBuf,
@@ -497,34 +553,36 @@ int AppCli_Initialize( void )
 	    .HistoryBufSize   = APP_CLI_HISTORY_BUF_SIZE,
 	    .Callback         = AppCli_Callback,
 	    .CallbackRef      = NULL
-	  };
+	};
 
-	  /* Initialize CLI */
-	  CLi_Init( &AppCli, &CliCfg );
+	/* Initialize CLI */
+	CLi_Init( &AppCli, &CliCfg );
 
-	  /* Create Rx Queue */
-	  AppCliRxCharQueue = xQueueCreate(APP_CLI_RX_QUEUE_SIZE, sizeof(uint8_t));
+	/* Create Rx Queue */
+	AppCliRxCharQueue = xQueueCreate(APP_CLI_RX_QUEUE_SIZE, sizeof(uint8_t));
 
-	  /* Create Tx Queue */
-	  AppCliTxCharQueue = xQueueCreate(APP_CLI_TX_QUEUE_SIZE, sizeof(uint8_t));
+	/* Create Tx Queue */
+	AppCliTxCharQueue = xQueueCreate(APP_CLI_TX_QUEUE_SIZE, sizeof(uint8_t));
 
-	  /* Create CLI Tx Task */
-	  if(xTaskCreate(AppCli_TxTask, APP_CLI_TX_TASK_NAME, APP_CLI_TX_STACK_SIZE, &AppCli, APP_CLI_TX_TASK_PRIORITY, NULL) != pdPASS)
-	    return XST_FAILURE;
+	/* Create CLI Tx Task */
+	if(xTaskCreate(AppCli_TxTask, APP_CLI_TX_TASK_NAME, APP_CLI_TX_STACK_SIZE, &AppCli, APP_CLI_TX_TASK_PRIORITY, NULL) != pdPASS)
+	  return XST_FAILURE;
 
-	  /* Create CLI Rx Task */
-	  if(xTaskCreate(AppCli_RxTask, APP_CLI_RX_TASK_NAME, APP_CLI_RX_STACK_SIZE, &AppCli, APP_CLI_RX_TASK_PRIORITY, NULL) != pdPASS)
-	    return XST_FAILURE;
+	/* Create CLI Rx Task */
+	if(xTaskCreate(AppCli_RxTask, APP_CLI_RX_TASK_NAME, APP_CLI_RX_STACK_SIZE, &AppCli, APP_CLI_RX_TASK_PRIORITY, NULL) != pdPASS)
+	  return XST_FAILURE;
 
-	  /* Register APP Specific */
-	  Cli_RegisterCommand(&AppCli, &AppCliClsDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliLsDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliTaskInfoDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliDeleteFileDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliGetTempDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliRebootDef);
-	  Cli_RegisterCommand(&AppCli, &AppCliResetPlDef);
+	/* Register APP Specific */
+	Cli_RegisterCommand(&AppCli, &AppCliClsDef);
+	Cli_RegisterCommand(&AppCli, &AppCliLsDef);
+	Cli_RegisterCommand(&AppCli, &AppCliTaskInfoDef);
+	Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
+	Cli_RegisterCommand(&AppCli, &AppCliDeleteFileDef);
+	Cli_RegisterCommand(&AppCli, &AppCliGetTempDef);
+	Cli_RegisterCommand(&AppCli, &AppCliRebootDef);
+	Cli_RegisterCommand(&AppCli, &AppCliResetPlDef);
+	Cli_RegisterCommand(&AppCli, &AppCliClearLogDef);
+	Cli_RegisterCommand(&AppCli, &AppCliReadLogDef);
 
-	  return XST_SUCCESS;
+	return XST_SUCCESS;
 }

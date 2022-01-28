@@ -74,11 +74,10 @@ static const char* Adrv9001Cli_ParsePort(const char *cmd, uint16_t pNum, adrv900
 static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  const char         *s = NULL;
   bool                Enable;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -88,7 +87,7 @@ static void Adrv9001Cli_GetTxBoost(Cli_t *CliInstance, const char *cmd, void *us
 
   if((status = Adrv9001_GetTxBoost(port, &Enable)) == Adrv9001Status_Success)
   {
-    printf("%s Boost %s\r\n", s, Enable? "Enabled" : "Disabled");
+    printf("%s\r\n", Enable? "Enabled" : "Disabled");
   }
   else
   {
@@ -170,12 +169,11 @@ static const CliCmd_t Adrv9001CliSetTxAttnDef =
 static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  const char         *s = NULL;
   uint16_t                attn_mdB;
   float                   attn;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -187,7 +185,7 @@ static void Adrv9001Cli_GetTxAttn(Cli_t *CliInstance, const char *cmd, void *use
   {
     attn = (float)attn_mdB;
     attn = attn / 1000;
-    printf("%s Attenuation = %f dB\r\n",s, attn);
+    printf("%f dB\r\n", attn);
   }
   else
   {
@@ -208,11 +206,10 @@ static const CliCmd_t Adrv9001CliGetTxAttnDef =
 static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  const char         *s = NULL;
   uint32_t                freq;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -222,7 +219,7 @@ static void Adrv9001Cli_GetSampleRate(Cli_t *CliInstance, const char *cmd, void 
 
   if((status = Adrv9001_GetSampleRate(port, &freq)) == Adrv9001Status_Success)
   {
-    printf("%s Sample Rate = %lu Hz\r\n",s,freq);
+    printf("%lu Hz\r\n",freq);
   }
   else
   {
@@ -243,11 +240,10 @@ static const CliCmd_t Adrv9001CliGetSampleRateDef =
 static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  const char         *s = NULL;
   uint64_t                freq;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if( Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -257,7 +253,7 @@ static void Adrv9001Cli_GetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
 
   if((status = Adrv9001_GetCarrierFrequency(port, &freq)) == Adrv9001Status_Success)
   {
-    printf("%s Carrier Frequency = %lld Hz\r\n",s,freq);
+    printf("%lld Hz\r\n",freq);
   }
   else
   {
@@ -278,10 +274,9 @@ static const CliCmd_t Adrv9001CliGetCarrierFrequencyDef =
 static void Adrv9001Cli_SetCarrierFrequency(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  const char         *s = NULL;
   uint64_t                freq;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -342,10 +337,9 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
 {
   adrv9001_port_t         port;
   adrv9001_radio_state_t  state;
-  const char         *s = NULL;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -355,7 +349,7 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
 
   if((status = Adrv9001_GetRadioState(port, &state)) == Adrv9001Status_Success)
   {
-    printf("%s = %s\r\n",s, state == Adrv9001RadioState_Standby? "Standby" :
+    printf("%s\r\n", state == Adrv9001RadioState_Standby? "Standby" :
                             state == Adrv9001RadioState_Calibrated? "Calibrated" :
                             state == Adrv9001RadioState_Primed? "Primed" :
                             state == Adrv9001RadioState_Enabled? "Enabled" : "Unknown" );
@@ -517,11 +511,10 @@ static const CliCmd_t Adrv9001CliGetVerInfoDef =
 static void Adrv9001Cli_GetRssi(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  const char         *s = NULL;
   uint32_t                rssi;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -531,7 +524,7 @@ static void Adrv9001Cli_GetRssi(Cli_t *CliInstance, const char *cmd, void *userD
 
   if((status = Adrv9001_GetRssi(port, &rssi)) == Adrv9001Status_Success)
   {
-    printf("RSSI = %2.1fdB\r\n",((float)rssi)/1000);
+    printf("%2.1fdB\r\n",((float)rssi)/1000);
   }
   else
   {
@@ -601,11 +594,10 @@ static const CliCmd_t Adrv9001CliSetLoopBackDef =
 static void Adrv9001Cli_ReadDma(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t     port;
-  const char         *s = NULL;
   uint32_t            Length;
   int status;
 
-  if((s = Adrv9001Cli_ParsePort(cmd, 1, &port)) == NULL)
+  if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -617,8 +609,6 @@ static void Adrv9001Cli_ReadDma(Cli_t *CliInstance, const char *cmd, void *userD
 
   if((status = Adrv9001Dma_TransferBlocking(port, Buf, Length)) == Adrv9001Status_Success)
   {
-    printf("%s DMA = \r\n",s);
-
     uint16_t idata;
     uint16_t qdata;
     for(int i = 0; i < Length; i++)

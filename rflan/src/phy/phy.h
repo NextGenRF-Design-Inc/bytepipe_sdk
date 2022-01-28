@@ -80,7 +80,7 @@ typedef enum
                                ( p == PhyStatus_OsError )?                  "PHY OS Error" :                    \
                                ( p == PhyStatus_Busy )?                     "PHY Busy" :                        \
                                ( p == PhyStatus_Adrv9001Error )?            "PHY ADRV9001 Error" :              \
-                               ( p == PhyStatus_IqStreamAbort )?            "PHY IQ Stream Abort" : "Unknown")
+                               ( p == PhyStatus_IqStreamAbort )?            "PHY IQ Stream Abort" : ADRV9001_STATUS_2_STR( p ))
 /**
 ** PHY Profile
 */
@@ -208,6 +208,28 @@ phy_status_t Phy_IqStreamDisable( adrv9001_port_t Port );
 *
 *******************************************************************************/
 phy_status_t Phy_UpdateProfile( profile_t *Profile );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function loads the current ADRV9001 profile
+*
+* \return     Status
+*
+*******************************************************************************/
+phy_status_t Phy_Adrv9001LoadProfile( void );
+
+/*******************************************************************************
+*
+* \details
+*
+* This function initializes the ADRV9001
+*
+* \return     Status
+*
+*******************************************************************************/
+phy_status_t Phy_Adrv9001Initialize( void );
 
 /*******************************************************************************
 *
