@@ -36,9 +36,12 @@ bp.Adrv9001ToRfEnabled(bp.Rx1);
 bp.Adrv9001ReadDma(bp.Rx1, 40);
 
 
-%% Tx1 Stream
+%% Tx2 Stream
 
-bp.PhyIqFileStreamEnable(bp.Tx1, 'TETRA1_sample_rate_144K_bw_25K.csv', -1);
+bp.PhyIqFileStreamEnable(bp.Tx2, 'TETRA1_sample_rate_144K_bw_25K.csv', -1);
+
+%% Tx1 Stream
+bp.PhyIqFileStreamEnable(bp.Tx1, 'CFR_sample_rate_15p36M_bw_10M.csv', -1);
 
 %% RSSI
 

@@ -383,7 +383,7 @@ static const CliCmd_t AppCliGetTempDef =
 {
   "GetTemp",
   "GetTemp: Read temperature \r\n"
-  "GetTemp < filename, offset, length >\r\n\n",
+  "GetTemp < >\r\n\n",
   (CliCmdFn_t)AppCli_GetTemp,
   0,
   NULL
@@ -503,7 +503,6 @@ static const CliCmd_t AppCliReadLogDef =
   0,
   NULL
 };
-
 
 int32_t AppCli_Initialize( FIL *LogFil )
 {

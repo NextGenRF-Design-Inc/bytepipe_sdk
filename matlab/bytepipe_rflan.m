@@ -157,7 +157,7 @@ methods
     end  
     
     function ls(obj)
-        owriteline(obj.s,'ls');   
+        writeline(obj.s,'ls');   
     end     
     
     function help(obj,varargin)
