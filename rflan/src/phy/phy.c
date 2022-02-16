@@ -192,7 +192,13 @@ static phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const 
   char *ProfileBuf = NULL;
   uint8_t *StreamImageBuf = NULL;
 
-  char *path = calloc(1, FF_FILENAME_MAX_LEN );
+  char *path;
+
+  if((path = calloc(1, FF_FILENAME_MAX_LEN )) == NULL)
+  {
+    return PhyStatus_MemoryError;
+  }
+
   strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
   strncpy(&path[strlen(path)], ProfileFilename, FF_FILENAME_MAX_LEN);
 
@@ -204,7 +210,7 @@ static phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const 
     /* Allocate Buffer */
     if((ProfileBuf = malloc(f_size(&fil))) == NULL)
     {
-      status = XST_FAILURE;
+      status = PhyStatus_MemoryError;
       break;
     }
 
@@ -226,7 +232,7 @@ static phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const 
     /* Allocate Buffer */
     if((StreamImageBuf = malloc(f_size(&fil))) == NULL)
     {
-      status = XST_FAILURE;
+      status = PhyStatus_MemoryError;
       break;
     }
 
@@ -243,7 +249,14 @@ static phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const 
   free(path);
 
   if(status == 0)
-    status = Adrv9001_LoadProfile( ProfileBuf, ProfileBufLength, StreamImageBuf, StreamBufLength );
+  {
+    /* Initialize ADRV9001 */
+    if((status = Phy_Adrv9001Initialize( )) == Adrv9001Status_Success)
+    {
+      /* Load Profile */
+      status = Adrv9001_LoadProfile( ProfileBuf, ProfileBufLength, StreamImageBuf, StreamBufLength );
+    }
+  }
 
   if( ProfileBuf != NULL )
     free(ProfileBuf);
@@ -390,7 +403,10 @@ phy_status_t Phy_Adrv9001LoadProfileReq( const char *ProfileFilename, const char
 
   /* Create Memory for StreamImageName */
   if((qItem.Data.StreamImageName = calloc(1, FF_FILENAME_MAX_LEN)) == NULL)
+  {
+    free(qItem.Data.ProfileName);
     return PhyStatus_MemoryError;
+  }
 
   /* Copy Profile Name */
   memcpy((uint8_t*)qItem.Data.ProfileName, (uint8_t*)ProfileFilename, strlen(ProfileFilename));

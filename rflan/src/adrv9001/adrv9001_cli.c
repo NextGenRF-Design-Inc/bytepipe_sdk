@@ -284,7 +284,7 @@ static void Adrv9001Cli_SetCarrierFrequency(Cli_t *CliInstance, const char *cmd,
     return;
   }
 
-  Cli_GetParameter(cmd, 2, CliParamTypeU64,  &freq);
+  if(Cli_GetParameter(cmd, 2, CliParamTypeU64,  &freq) != 0)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -300,7 +300,7 @@ static const CliCmd_t Adrv9001CliSetCarrierFrequencyDef =
 {
   "Adrv9001SetCarrierFrequency",
   "Adrv9001SetCarrierFrequency: Set Carrier Frequency \r\n"
-  "Adrv9001SetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2) >\r\n\r\n",
+  "Adrv9001SetCarrierFrequency < port ( Rx1,Rx2,Tx1,Tx2), frequency (Hz) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_SetCarrierFrequency,
   2,
   NULL
@@ -607,7 +607,13 @@ static void Adrv9001Cli_ReadDma(Cli_t *CliInstance, const char *cmd, void *userD
 
   Cli_GetParameter(cmd, 2, CliParamTypeU32,  &Length);
 
-  uint32_t *Buf = malloc(Length * sizeof(uint32_t));
+  uint32_t *Buf;
+
+  if((Buf = malloc(Length * sizeof(uint32_t))) == NULL)
+  {
+    printf("Memory Error\r\n");
+    return;
+  }
 
   if((status = Adrv9001Dma_TransferBlocking(port, Buf, Length)) == Adrv9001Status_Success)
   {
@@ -624,6 +630,8 @@ static void Adrv9001Cli_ReadDma(Cli_t *CliInstance, const char *cmd, void *userD
   {
     printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
+
+  free(Buf);
 }
 
 static const CliCmd_t Adrv9001CliReadDmaDef =

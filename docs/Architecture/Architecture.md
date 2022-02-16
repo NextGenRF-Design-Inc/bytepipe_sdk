@@ -50,61 +50,6 @@ Users interested in specific adrv9001 functionality or additional adrv9001 infor
 
 The RFLAN application supports a custom command line interface (CLI) allowing users to interact with the RFLAN through a serial port and terminal program.  Additional information on using the RFLAN CLI can be found [here](../RflanCli/RflanCli.md).
 
-The core CLI functionality is implemented in `app_cli.c`.  This module instantiates the CLI library located at `lib/cli.c`.  The `app_cli.c` module also instantiates the UART HAL driver and OS tasks for processing received and transmitted characters.  As characters are received from the UART HAL they are pushed to a receive queue for processing by the `App_CliRxTask`.  The `App_CliRxTask` processes each character using the `cli.c` library.  If the library matches a string of characters with CLI commands that have been registered with the `cli.c` library it will call the function that was registered with the original command.  This callback function is responsible for parsing the CLI input parameters and processing the command.  Any module within the RFLAN can register a CLI command as long as it has access to the application CLI instance `Cli_t AppCli`.  If `app_cli.h` is included in any of the RFLAN modules it has access to the CLI instance by calling `Cli_t *AppCli_GetInstance( void );` which will return the application CLI instance.      
-
-The following shows how to initialize the application CLI module.
-
-```c
-/* Initialize CLI */
-if((status = AppCli_Initialize()) != 0)
-  xil_printf("CLI Initialize Error %d\r\n",status);
-```
-
-The following shows an example for adding a CLI command to a custom module.
-
-```c
-/* Get Application CLI Instance */
-Cli_t *Instance = AppCli_GetInstance( );
-
-/* Create CLI Command Definition to get Parameter */
-static const CliCmd_t MyModuleCliGetParamDef =
-{
-  "MyModuleGetParam",
-  "MyModuleGetParam: Get radio state \r\n"
-  "MyModuleGetParam < paramid ( ie 0 = param a, 1 = param b) >\r\n\r\n",
-  (CliCmdFn_t)MyModuleCli_GetParam,
-  1,
-  NULL
-};
-
-/* Create Function to process command */
-static void MyModuleCli_GetParam( Cli_t *CliInstance, const char *cmd, void *userData )
-{
-  uint32_t          myparamid;
-  uint32_t          myparamvalue;
-  
-  /* Get CLI user parameter */
-  Cli_GetParameter(cmd, 1, CliParamTypeU32, &myparamid);
-
-  /* Process Command and respond */
-  if(MyModule_GetParam(myparamid, &myparamvalue) == 0)
-  {
-    printf("Parameter ID %d = %d\r\n", myparamid, myparamvalue);
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
-}
-
-/* Register CLI definition */
-Cli_RegisterCommand(Instance, &MyModuleCliGetParamDef);
-
-```
-
-Users can create their own modules with CLI commands.  Currently the RFLAN supports a few basic CLI commands defined in `app_cli.c` and the bulk of commands defined in `mac_cli.c`, `phy_cli.c`, and `adrv9001_cli.c`.
-
-
 # Programmable Logic Overview
 
 The programmable logic provided in the BytePipe SDK includes the ADRV900x SSI interface, transmit and receive IQ DMAs, and a MathWorks OFDM transmit and receive example.

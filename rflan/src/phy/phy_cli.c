@@ -116,6 +116,7 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
 {
   phy_stream_t Stream = {.Callback = PhyCli_PhyCallback};
   int32_t status;
+  char *filename;
 
   /* Parse Port */
   if(PhyCli_ParsePort(cmd, 1, &Stream.Port) == NULL)
@@ -125,7 +126,12 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   }
 
   /* Get Filename */
-  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  if((filename = calloc(1, FF_FILENAME_MAX_LEN )) == NULL)
+  {
+    printf("Memory Error\r\n");
+    return;
+  }
+
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
   Cli_GetParameter(cmd, 2, CliParamTypeStr, &filename[strlen(filename)]);
 
@@ -144,9 +150,12 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   {
     if(IqFile_Read( filename, &Stream.SampleBuf, &Stream.SampleCnt ) != XST_SUCCESS)
     {
+      free(filename);
       printf("Invalid Parameter\r\n");
       return;
     }
+
+    free(filename);
 
     if( SampleCnt > 0 )
       Stream.SampleCnt = SampleCnt;
@@ -161,18 +170,20 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
 
     Stream.SampleCnt = SampleCnt;
 
-    /* Store Filename for future reference */
+    /* Store Filename for future reference.  This is freed in callback when stream done */
     if((Stream.CallbackRef = malloc(strlen(filename))) == NULL)
     {
+      free(filename);
       printf("Memory Error\r\n");
       return;
     }
     else
     {
       strcpy((char*)Stream.CallbackRef, filename);
+      free(filename);
     }
 
-    /* Allocate Buffer */
+    /* Allocate Buffer.  This is freed in callback when stream done */
     if((Stream.SampleBuf = calloc(1, SampleCnt * sizeof(uint32_t))) == NULL)
     {
       printf("Memory Error\r\n");
@@ -231,7 +242,14 @@ static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userDat
   int32_t status;
 
   /* Get Filename */
-  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  char *filename;
+
+  if((filename = calloc(1, FF_FILENAME_MAX_LEN )) == NULL)
+  {
+    printf("Memory Error\r\n");
+    return;
+  }
+
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
   Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
 
@@ -244,6 +262,7 @@ static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userDat
   }
 
   f_close(&fil);
+  free(filename);
 
   if(status == 0)
   {
@@ -284,6 +303,8 @@ static const CliCmd_t PhyCliAdrv9001InitDef =
 
 static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
+  int32_t status = PhyStatus_MemoryError;
+
   /* Get Filename */
   char *ProfileName = calloc(1, FF_FILENAME_MAX_LEN );
   Cli_GetParameter(cmd, 1, CliParamTypeStr, ProfileName);
@@ -292,12 +313,16 @@ static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void
   Cli_GetParameter(cmd, 2, CliParamTypeStr, StreamImageName);
 
   /* Load Profile */
-  int32_t status = Phy_Adrv9001LoadProfileReq( ProfileName, StreamImageName);
+  if((ProfileName != NULL) && (StreamImageName != NULL))
+  {
+    status = Phy_Adrv9001LoadProfileReq( ProfileName, StreamImageName);
+  }
 
   free(StreamImageName);
   free(ProfileName);
 
-  printf("%s\r\n",PHY_STATUS_2_STR(status));
+  if( status != 0 )
+    printf("%s\r\n",PHY_STATUS_2_STR(status));
 }
 
 static const CliCmd_t PhyCliAdrv9001LoadProfileDef =

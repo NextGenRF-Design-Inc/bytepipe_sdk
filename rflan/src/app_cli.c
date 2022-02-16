@@ -257,6 +257,13 @@ static void AppCli_TaskInfo(Cli_t *CliInstance, const char *cmd, void *userData)
     vPortFree( TaskStatus );
   }
 
+  size_t remainingHeap = xPortGetFreeHeapSize( );
+
+  size_t minHeap = xPortGetMinimumEverFreeHeapSize( );
+
+  printf("Remaining Heap = %d bytes\r\n",remainingHeap);
+  printf("Minimum Heap = %d bytes\r\n",minHeap);
+
 }
 
 static const CliCmd_t AppCliTaskInfoDef =
@@ -271,7 +278,14 @@ static const CliCmd_t AppCliTaskInfoDef =
 
 static void AppCli_fdelete(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  char *filename;
+
+  if((filename = calloc(1, FF_FILENAME_MAX_LEN )) == NULL)
+  {
+    printf("Memory Error\r\n");
+    return;
+  }
+
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
 
   Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
@@ -284,6 +298,8 @@ static void AppCli_fdelete(Cli_t *CliInstance, const char *cmd, void *userData)
   {
     printf("Success\r\n");
   }
+
+  free(filename);
 }
 
 static const CliCmd_t AppCliDeleteFileDef =
@@ -306,7 +322,14 @@ static void AppCli_fread(Cli_t *CliInstance, const char *cmd, void *userData)
   uint32_t size;
   char c;
 
-  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
+  char *filename;
+
+  if((filename = calloc(1, FF_FILENAME_MAX_LEN )) == NULL)
+  {
+    printf("Memory Error\r\n");
+    return;
+  }
+
   strcpy(filename,FF_LOGICAL_DRIVE_PATH);
 
   Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
