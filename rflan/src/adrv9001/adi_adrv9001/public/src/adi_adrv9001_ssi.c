@@ -194,6 +194,9 @@ static __maybe_unused int32_t adi_adrv9001_Ssi_Tx_CssiClearErrorFlags(adi_adrv90
     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x0);
+	ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x1);
+	ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x0);
     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugStartRamp_Set, device, baseAddress, 0x1);
     ADI_API_RETURN(device);
 }
@@ -250,11 +253,17 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Configure(adi_adrv9001_Device_t *device,
         else
         {
             ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugMode_Set, device, baseAddress, 0x1);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugAfterFifoErrorClear_Set, device, baseAddress, 0x0);
             ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugAfterFifoErrorClear_Set, device, baseAddress, 0x1);
             ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugAfterFifoErrorClear_Set, device, baseAddress, 0x0);
-            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
-            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
-            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxFifoClear_Set, device, baseAddress, 0x1);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearEarlyStrobeDetectedFlag_Set, device, baseAddress, 0x0);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearEarlyStrobeDetectedFlag_Set, device, baseAddress, 0x1);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearEarlyStrobeDetectedFlag_Set, device, baseAddress, 0x0);
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxFifoClear_Set, device, baseAddress, 0x0); 
+	        ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxFifoClear_Set, device, baseAddress, 0x1);
             ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxFifoClear_Set, device, baseAddress, 0x0);
             if (ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT == ssiTestModeConfig->testData)
             {
@@ -278,7 +287,9 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Configure(adi_adrv9001_Device_t *device,
             else if (ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS7 == ssiTestModeConfig->testData)
             {
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs7Enable_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs7ErrorClear_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs7ErrorClear_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs7ErrorClear_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs7Restart_Set, device, baseAddress, 0x1);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugStartErrorCheck_Set, device, baseAddress, 0x1);
                 recoveryAction = adi_common_hal_Wait_us(&device->common, 1000);
@@ -297,7 +308,9 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Configure(adi_adrv9001_Device_t *device,
             else if (ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15 == ssiTestModeConfig->testData)
             {
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs15Enable_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugAfterFifoErrorClear_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugAfterFifoErrorClear_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugAfterFifoErrorClear_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugPrbs15Restart_Set, device, baseAddress, 0x1);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugStartErrorCheck_Set, device, baseAddress, 0x1);
                 recoveryAction = adi_common_hal_Wait_us(&device->common, 1000);
@@ -399,6 +412,7 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect(adi_adrv9001_Device_t *devic
     uint8_t captureComplete = 0;
     uint32_t timeout_us = ADI_ADRV9001_SSI_DEBUG_TIMEOUT_US;
     adrv9001_BfNvsRegmapTx_e baseAddress = ADRV9001_BF_TX1_CORE;
+	uint8_t ddrSet = 0;
 
     waitInterval_us = (ADI_ADRV9001_SSI_DEBUG_INTERVAL_US > timeout_us) ?
     timeout_us : ADI_ADRV9001_SSI_DEBUG_INTERVAL_US;
@@ -421,9 +435,12 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect(adi_adrv9001_Device_t *devic
                 ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugStartRamp_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugQSel_Set, device, baseAddress, 0);   // 0: I_data; 1: Q_data
                 ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugNibbleSel_Set, device, baseAddress, nibSel);
-                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
-                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
-                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x0);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugStartCapture_Set, device, baseAddress, 0x1);
                 /* Wait for capture to complete */
                 for (eventCheck = 0; eventCheck <= numEventChecks; eventCheck++)
@@ -473,9 +490,12 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect(adi_adrv9001_Device_t *devic
                     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugStartRamp_Set, device, baseAddress, 0x0);
                     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugQSel_Set, device, baseAddress, 1);     // 0: I_data; 1: Q_data
                     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugNibbleSel_Set, device, baseAddress, nibSel);
-                    ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
                     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
-                    ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x0);
+	                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x1);
+	                ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxClearDdrStrobeAlignError_Set, device, baseAddress, 0x0);
                     ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugStartCapture_Set, device, baseAddress, 0x1);
                     /* Wait for capture to complete */
                     for (eventCheck = 0; eventCheck <= numEventChecks; eventCheck++)
@@ -559,7 +579,15 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect(adi_adrv9001_Device_t *devic
             ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDebugRampShiftError_Get, device, baseAddress, &ssiTestModeStatus->dataError);
         }
 
-        ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxStrobeAlignError_Get, device, baseAddress, &ssiTestModeStatus->strobeAlignError);
+	    ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDdrSel_Get, device, baseAddress, &ddrSet);
+	    if (ddrSet == 0)
+	    {
+		    ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxStrobeAlignError_Get, device, baseAddress, &ssiTestModeStatus->strobeAlignError);
+	    }
+	    else
+	    {
+		    ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxDdrStrobeAlignError_Get, device, baseAddress, &ssiTestModeStatus->strobeAlignError);
+	    }
 
         ADI_EXPECT(adrv9001_NvsRegmapTx_CssiTxFifoFull_Get, device, baseAddress, &ssiTestModeStatus->fifoFull);
 
@@ -583,7 +611,12 @@ int32_t adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect(adi_adrv9001_Device_t *devic
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugMode_Set, device, baseAddress, 0x1);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugStartRamp_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugQSel_Set, device, baseAddress, i);   // 0: I_data; 1: Q_data
-                ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
+                ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearStrobeAlignError_Set, device, baseAddress, 0x0);
+                ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearEarlyStrobeDetectedFlag_Set, device, baseAddress, 0x0);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearEarlyStrobeDetectedFlag_Set, device, baseAddress, 0x1);
+	            ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxClearEarlyStrobeDetectedFlag_Set, device, baseAddress, 0x0);
                 ADI_EXPECT(adrv9001_NvsRegmapTx_LssiTxDebugStartCapture_Set, device, baseAddress, 0x1);
                 /* Wait for capture to complete */
                 for (eventCheck = 0; eventCheck <= numEventChecks; eventCheck++)

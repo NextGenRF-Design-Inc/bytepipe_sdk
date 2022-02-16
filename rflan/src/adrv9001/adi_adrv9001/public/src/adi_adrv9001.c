@@ -11,7 +11,7 @@
 * Released under the ADRV9001 API license, for more information
 * see the "LICENSE.txt" file in this zip file.
 */
-#include <string.h>
+
 #include "adi_adrv9001_user.h"
 #include "adi_adrv9001.h"
 #include "adi_adrv9001_hal.h"
@@ -24,7 +24,6 @@
 #include "adrv9001_reg_addr_macros.h"
 #include "adrv9001_arm_macros.h"
 #include "object_ids.h"
-
 
 int32_t adi_adrv9001_HwOpen(adi_adrv9001_Device_t *device, adi_adrv9001_SpiSettings_t *spiSettings)
 {

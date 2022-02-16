@@ -462,7 +462,6 @@ static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_Gain_Set_Validate(a
                                                                  uint8_t gainIndex,
                                                                  adi_adrv9001_RxGainControlMode_e *gainCtrlMode)
 {
-    adi_adrv9001_ChannelState_e state = ADI_ADRV9001_CHANNEL_STANDBY;
     static const uint32_t RX_CHANNELS[] = { ADI_ADRV9001_RX1, ADI_ADRV9001_RX2 };
     uint8_t chan_idx = 0;
     uint8_t minGainIndex = 0;
@@ -496,7 +495,7 @@ static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_Gain_Set_Validate(a
     
     /* Save the current gain control mode and set to the required mode */
     ADI_EXPECT(adi_adrv9001_Rx_GainControl_Mode_Get, device, channel, gainCtrlMode);
-    if (ADI_ADRV9001_RX_GAIN_CONTROL_MODE_AUTO == *gainCtrlMode)
+    if (ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI != *gainCtrlMode)
     {
         ADI_ERROR_REPORT(&device->common,
             ADI_COMMON_ERRSRC_API,
@@ -504,25 +503,6 @@ static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_Gain_Set_Validate(a
             ADI_COMMON_ACT_ERR_CHECK_PARAM,
             channel,
             "Invalid Rx gain control mode to set Rx Gain");
-    }
-    else if (ADI_ADRV9001_RX_GAIN_CONTROL_MODE_PIN == *gainCtrlMode)
-    {
-        ADI_EXPECT(adi_adrv9001_Channel_Validate, device, channel);
-
-        ADI_EXPECT(adi_adrv9001_Radio_Channel_State_Get, device, ADI_RX, channel, &state);
-        if (ADI_ADRV9001_CHANNEL_STANDBY == state)
-        {
-            ADI_ERROR_REPORT(&device->common,
-                ADI_COMMON_ERRSRC_API,
-                ADI_COMMON_ERR_INV_PARAM,
-                ADI_COMMON_ACT_ERR_CHECK_PARAM,
-                state,
-                "Invalid channel state to set gain index in ADI_ADRV9001_RX_GAIN_CONTROL_MODE_PIN mode.");
-        }
-    }
-    else /* ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI */
-    {
-        /* No action taken */
     }
 
     ADI_API_RETURN(device)
@@ -541,18 +521,7 @@ int32_t adi_adrv9001_Rx_Gain_Set(adi_adrv9001_Device_t *device,
         baseAddr = ADRV9001_BF_RXB2_CORE;
     }
 
-    if (ADI_ADRV9001_RX_GAIN_CONTROL_MODE_PIN == gainCtrlMode)
-    {
-        ADI_EXPECT(adi_adrv9001_Rx_GainControl_Mode_Set, device, channel, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI);
-    }
-
     ADI_EXPECT(adrv9001_NvsRegmapRxb_AgcManualGainIndex_Set, device, baseAddr, gainIndex);
-
-    /* Restore the gain control mode */
-    if (ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI != gainCtrlMode)
-    {
-        ADI_EXPECT(adi_adrv9001_Rx_GainControl_Mode_Set, device, channel, gainCtrlMode);
-    }
 
     ADI_API_RETURN(device)
 }
@@ -761,6 +730,16 @@ static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_InterfaceGain_Confi
                channel,
                device->devStateInfo.gainTableType[channel - 1],
                rxInterfaceGainCtrl->gain);
+
+    ADI_RANGE_CHECK(device,
+                    rxInterfaceGainCtrl->rssiDuration,
+                    64,
+                    255);
+
+    ADI_RANGE_CHECK(device,
+                    rxInterfaceGainCtrl->rssiMovingAverageDuration,
+                    1,
+                    10);
     
     ADI_EXPECT(adi_adrv9001_Radio_Channel_State_Get, device, ADI_RX, channel, &state);
     if (ADI_ADRV9001_CHANNEL_CALIBRATED != state)
@@ -780,7 +759,7 @@ int32_t adi_adrv9001_Rx_InterfaceGain_Configure(adi_adrv9001_Device_t *device,
                                                 adi_common_ChannelNumber_e channel,
                                                 adi_adrv9001_RxInterfaceGainCtrl_t *rxInterfaceGainCtrl)
 {
-    uint8_t armData[4] = { 0 };
+    uint8_t armData[8] = { 0 };
     uint8_t extData[5] = { 0 };
 
     ADI_PERFORM_VALIDATION(adi_adrv9001_Rx_InterfaceGain_Configure_Validate, device, channel, rxInterfaceGainCtrl);
@@ -789,6 +768,10 @@ int32_t adi_adrv9001_Rx_InterfaceGain_Configure(adi_adrv9001_Device_t *device,
     armData[1] = (uint8_t)(rxInterfaceGainCtrl->controlMode);
     armData[2] = (uint8_t)(device->devStateInfo.gainTableType[channel - 1]);
     armData[3] = (uint8_t)(rxInterfaceGainCtrl->gain);
+    armData[4] = (uint8_t)(rxInterfaceGainCtrl->rssiDuration);
+    armData[5] = (uint8_t)(rxInterfaceGainCtrl->rssiMovingAverageDuration);
+    armData[6] = (uint8_t)(rxInterfaceGainCtrl->reserved1);
+    armData[7] = (uint8_t)(rxInterfaceGainCtrl->reserved2);
 
     /* Write RX interface gain control parameters to ARM mailbox */
     ADI_EXPECT(adi_adrv9001_arm_Memory_Write, device, ADRV9001_ADDR_ARM_MAILBOX_SET, &armData[0], sizeof(armData), ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_4);
@@ -926,7 +909,7 @@ int32_t adi_adrv9001_Rx_InterfaceGain_Inspect(adi_adrv9001_Device_t *device,
                                               adi_adrv9001_RxInterfaceGainCtrl_t *rxInterfaceGainCtrl,
                                               adi_adrv9001_RxGainTableType_e *gainTableType)
 {
-    uint8_t armReadBack[4] = { 0 };
+    uint8_t armReadBack[8] = { 0 };
     uint8_t extData[5] = { 0 };
 
     ADI_PERFORM_VALIDATION(adi_adrv9001_Rx_InterfaceGain_Inspect_Validate, device, channel, rxInterfaceGainCtrl, gainTableType);
@@ -953,10 +936,12 @@ int32_t adi_adrv9001_Rx_InterfaceGain_Inspect(adi_adrv9001_Device_t *device,
                sizeof(armReadBack),
                ADRV9001_ARM_MEM_READ_AUTOINCR)
 
-    rxInterfaceGainCtrl->updateInstance = (adi_adrv9001_RxInterfaceGainUpdateTiming_e)armReadBack[0];
-    rxInterfaceGainCtrl->controlMode    = (adi_adrv9001_RxInterfaceGainCtrlMode_e)armReadBack[1];
-    *gainTableType                      = (adi_adrv9001_RxGainTableType_e)armReadBack[2];
-    rxInterfaceGainCtrl->gain           = (adi_adrv9001_RxInterfaceGain_e)armReadBack[3];
+    rxInterfaceGainCtrl->updateInstance             = (adi_adrv9001_RxInterfaceGainUpdateTiming_e)armReadBack[0];
+    rxInterfaceGainCtrl->controlMode                = (adi_adrv9001_RxInterfaceGainCtrlMode_e)armReadBack[1];
+    *gainTableType                                  = (adi_adrv9001_RxGainTableType_e)armReadBack[2];
+    rxInterfaceGainCtrl->gain                       = (adi_adrv9001_RxInterfaceGain_e)armReadBack[3];
+    rxInterfaceGainCtrl->rssiDuration               = armReadBack[4];
+    rxInterfaceGainCtrl->rssiMovingAverageDuration  = armReadBack[5];
 
     ADI_API_RETURN(device);
 }
@@ -1501,7 +1486,7 @@ static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_PortSwitch_Configur
 int32_t adi_adrv9001_Rx_PortSwitch_Configure(adi_adrv9001_Device_t *device,
                                              adi_adrv9001_RxPortSwitchCfg_t *switchConfig)
 {
-    uint8_t armData[41] = { 0 };
+    uint8_t armData[42] = { 0 };
     uint8_t extData[3] = { 0 };
     uint32_t offset = 0u; 
 
@@ -1515,8 +1500,9 @@ int32_t adi_adrv9001_Rx_PortSwitch_Configure(adi_adrv9001_Device_t *device,
     adrv9001_LoadEightBytes(&offset, armData, switchConfig->maxFreqPortA_Hz);
     adrv9001_LoadEightBytes(&offset, armData, switchConfig->minFreqPortB_Hz);
     adrv9001_LoadEightBytes(&offset, armData, switchConfig->maxFreqPortB_Hz);
-    armData[offset] = switchConfig->enable;
-    
+    armData[offset++] = switchConfig->enable;
+    armData[offset++] = switchConfig->manualRxPortSwitch;
+
     ADI_EXPECT(adi_adrv9001_arm_Memory_Write,
                device,
                (uint32_t)ADRV9001_ADDR_ARM_MAILBOX_SET,
@@ -1779,4 +1765,109 @@ int32_t adi_adrv9001_Rx_ExternalLna_DigitalGainDelay_Get(adi_adrv9001_Device_t *
 
     ADI_EXPECT(adrv9001_NvsRegmapRx_ExtLnaDigitalGainDelay_Get, device, rxAddr, lnaDigitalGainDelay);
     ADI_API_RETURN(device);
+}
+
+static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_Loid_Configure_Validate(adi_adrv9001_Device_t *adrv9001,
+                                adi_common_ChannelNumber_e channel,
+                                adi_adrv9001_RxrfdcLoidCfg_t *loidConfig)
+{
+    adi_adrv9001_RadioState_t state = { 0 };
+    uint8_t port_index = 0;
+    uint8_t chan_index = 0;
+    
+    ADI_RANGE_CHECK(adrv9001, channel, ADI_CHANNEL_1, ADI_CHANNEL_2);
+
+    ADI_NULL_PTR_RETURN(&adrv9001->common, loidConfig);
+    
+    /* Validate state is STANDBY or CALIBRATED*/
+    ADI_EXPECT(adi_adrv9001_Radio_State_Get, adrv9001, &state);
+    adi_common_port_to_index(ADI_RX, &port_index);
+    adi_common_channel_to_index(channel, &chan_index);
+    if ((ADI_ADRV9001_CHANNEL_STANDBY != state.channelStates[port_index][chan_index]) &&
+        (ADI_ADRV9001_CHANNEL_CALIBRATED != state.channelStates[port_index][chan_index]))
+    {
+        ADI_ERROR_REPORT(&adrv9001->common,
+            ADI_COMMON_ERRSRC_API,
+            ADI_COMMON_ERR_INV_PARAM,
+            ADI_COMMON_ACT_ERR_CHECK_PARAM,
+            channel,
+            "Invalid channel state. Channel must be in CALIBRATED or STANDBY state");
+    }
+
+    ADI_API_RETURN(adrv9001);
+}
+
+int32_t adi_adrv9001_Rx_Loid_Configure(adi_adrv9001_Device_t *adrv9001,
+                                       adi_common_ChannelNumber_e channel,
+                                       adi_adrv9001_RxrfdcLoidCfg_t *loidConfig)
+{
+    uint8_t armData[4] = { 0 };
+    uint8_t extData[2] = { 0 };
+
+    ADI_PERFORM_VALIDATION(adi_adrv9001_Rx_Loid_Configure_Validate, adrv9001, channel, loidConfig);
+
+	armData[0] = loidConfig->loidEnable;
+	armData[1] = 1;
+	armData[2] = loidConfig->loidThreshold_negdBFS - 6;
+	armData[3] = loidConfig->loidThreshold_negdBFS - 6;
+
+    /* Write LOID config to ARM mailbox */
+    ADI_EXPECT(adi_adrv9001_arm_Memory_Write, adrv9001, ADRV9001_ADDR_ARM_MAILBOX_SET, &armData[0], sizeof(armData), ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_4);
+    
+    extData[0] = adi_adrv9001_Radio_MailboxChannel_Get(ADI_RX, channel);
+    extData[1] = OBJID_GS_LOID;
+
+    ADI_EXPECT(adi_adrv9001_arm_Cmd_Write, adrv9001, (uint8_t)ADRV9001_ARM_SET_OPCODE, &extData[0], sizeof(extData));
+
+    /* Wait for command to finish executing */
+    ADRV9001_ARM_CMD_STATUS_WAIT_EXPECT(adrv9001,
+        (uint8_t)ADRV9001_ARM_SET_OPCODE,
+        extData[1],
+        (uint32_t)ADI_ADRV9001_RX_INTERFACE_CONTROL_TIMEOUT_US,
+        (uint32_t)ADI_ADRV9001_RX_INTERFACE_CONTROL_INTERVAL_US);
+    
+    ADI_API_RETURN(adrv9001);
+}
+
+static __maybe_unused int32_t __maybe_unused adi_adrv9001_Rx_Loid_Inspect_Validate(adi_adrv9001_Device_t *adrv9001,
+                              adi_common_ChannelNumber_e channel,
+                              adi_adrv9001_RxrfdcLoidCfg_t *loidConfig)
+{	
+    ADI_RANGE_CHECK(adrv9001, channel, ADI_CHANNEL_1, ADI_CHANNEL_2);
+
+    ADI_NULL_PTR_RETURN(&adrv9001->common, loidConfig);
+
+    ADI_API_RETURN(adrv9001);
+}
+
+int32_t adi_adrv9001_Rx_Loid_Inspect(adi_adrv9001_Device_t *adrv9001,
+                                     adi_common_ChannelNumber_e channel,
+                                     adi_adrv9001_RxrfdcLoidCfg_t *loidConfig)
+{
+    uint8_t armReadBack[4] = { 0 };	
+    uint8_t extData[2] = { 0 };
+    
+    extData[0] = adi_adrv9001_Radio_MailboxChannel_Get(ADI_RX, channel);
+    extData[1] = OBJID_GS_LOID;
+
+    ADI_EXPECT(adi_adrv9001_arm_Cmd_Write, adrv9001, (uint8_t)ADRV9001_ARM_GET_OPCODE, &extData[0], sizeof(extData));
+
+    ADRV9001_ARM_CMD_STATUS_WAIT_EXPECT(adrv9001,
+        (uint8_t)ADRV9001_ARM_GET_OPCODE,
+        extData[1],
+        (uint32_t)ADI_ADRV9001_RX_INTERFACE_CONTROL_TIMEOUT_US,
+        (uint32_t)ADI_ADRV9001_RX_INTERFACE_CONTROL_INTERVAL_US);
+
+	/* read the ARM memory to get LOID config */
+	ADI_EXPECT(adi_adrv9001_arm_Memory_Read,
+		adrv9001,
+		ADRV9001_ADDR_ARM_MAILBOX_GET,
+		&armReadBack[0],
+		sizeof(armReadBack),
+		ADRV9001_ARM_MEM_READ_AUTOINCR)
+		
+	loidConfig->loidEnable = armReadBack[0];
+	loidConfig->loidThreshold_negdBFS = armReadBack[2] + 6;
+
+    ADI_API_RETURN(adrv9001);
 }

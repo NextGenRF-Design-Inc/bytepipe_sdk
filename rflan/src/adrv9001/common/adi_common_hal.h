@@ -65,7 +65,7 @@ extern int32_t(*adi_common_hal_LogWrite)(void *devHalCfg, uint32_t logLevel, con
  * Log level events to be compiled into the device driver. Less severe logging calls will not be included, reducing
  * code size
  */
-#define ADI_COMPILED_LOGLEVEL ADI_LOGLEVEL_INFO
+#define ADI_COMPILED_LOGLEVEL ADI_LOGLEVEL_WARN
 #endif // !ADI_COMPILED_LOGLEVEL
 
 

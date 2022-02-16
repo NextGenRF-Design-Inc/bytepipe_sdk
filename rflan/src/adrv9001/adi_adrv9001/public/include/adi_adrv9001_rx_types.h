@@ -128,8 +128,13 @@ typedef enum adi_adrv9001_rxManualGainPeakPowerSignalSel
 typedef struct adi_adrv9001_RxInterfaceGainCtrl
 {
     adi_adrv9001_RxInterfaceGainUpdateTiming_e  updateInstance;
-    adi_adrv9001_RxInterfaceGainCtrlMode_e controlMode;
-    adi_adrv9001_RxInterfaceGain_e         gain;
+    adi_adrv9001_RxInterfaceGainCtrlMode_e      controlMode;
+    adi_adrv9001_RxInterfaceGain_e              gain;
+    uint8_t rssiDuration;                                           /* Duration of RSSI measurement (unit = 1ms/255 ) */
+    uint8_t rssiMovingAverageDuration;                              /* Number of measurements in RSSI Moving-Average window */
+    uint8_t reserved1;
+    uint8_t reserved2;
+
 } adi_adrv9001_RxInterfaceGainCtrl_t;
 
 typedef enum adi_adrv9001_AdcTypeSwitchMode
@@ -170,8 +175,18 @@ typedef struct adi_adrv9001_RxPortSwitchCfg
     uint64_t  minFreqPortB_Hz;
     uint64_t  maxFreqPortB_Hz;
     bool      enable;
+    bool      manualRxPortSwitch;
 } adi_adrv9001_RxPortSwitchCfg_t;
-
+    
+/**
+ * \brief Structure which holds the LOID configuration parameters
+ */
+typedef struct adi_adrv9001_RxrfdcLoidCfg
+{
+	bool loidEnable;								/* LOID enable flag for RX1 and RX2 */
+	uint8_t loidThreshold_negdBFS;				    /* Threshold for LO detection (in -dBFS) */  
+} adi_adrv9001_RxrfdcLoidCfg_t ;	
+    
 #ifdef __cplusplus
 }
 #endif

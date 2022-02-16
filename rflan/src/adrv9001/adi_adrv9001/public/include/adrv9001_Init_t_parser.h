@@ -1,6 +1,6 @@
 /* Auto-generated file - DO NOT MANUALLY EDIT */
 /* Filename: C:\Jenkins\workspace\vice-driver_profile-types_master\include\adrv9001_Init_t_parser.h */
-/* Created on: 6/29/2021 4:03:53 PM */
+/* Created on: 1/26/2022 1:23:20 PM */
 
 /**
  * Contains auto-generated C macros for loading fields from a JSON file
@@ -9,7 +9,7 @@
  */
 
 /** 
- * Copyright 2021 Analog Devices Inc.
+ * Copyright 2022 Analog Devices Inc.
  */
 
 #include "adi_pmag_macros.h"
@@ -26,25 +26,6 @@ ADI_PROCESS_STRUCT_X(ADRV9001_PFIRMAG13BUFFER_T(tokenArray, tokenIndex, jsonBuff
 ADI_PROCESS_ARRAY_STRUCT_X(ADRV9001_PFIRMAG13BUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirMag13Buffer_tInstance[ARRAY_STRUCT_INDEXER(adrv9001_PfirMag13Buffer_t)]), \
                            tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirMag13Buffer_tName, ARRAY_STRUCT_INDEXER(adrv9001_PfirMag13Buffer_t));
 
-/* ---- ADRV9001_CARRIER_T ---- */
-#define ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance) \
-ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance.loGenOptimization,                     "loGenOptimization"); \
-ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance.carrierFrequency_Hz,                   "carrierFrequency_Hz"); \
-ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance.intermediateFrequency_Hz,               "intermediateFrequency_Hz"); \
-
-#define ADI_PROCESS_STRUCT_ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance, adrv9001_Carrier_tName) \
-ADI_PROCESS_STRUCT_X(ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tName);
-
-/* ---- ADRV9001_CUSTOMCONFIG_T ---- */
-#define ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance) \
-ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.initCalMask,             "initCalMask"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.deviceClockDivisor,      "deviceClockDivisor"); \
-ADI_PROCESS_ARRAY_LONG                (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.carrierFreq,             "carrierFreq"); \
-ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.txAtten,                 "txAtten"); \
-ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.rxGain,                  "rxGain"); \
-
-#define ADI_PROCESS_STRUCT_ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance, adrv9001_CustomConfig_tName) \
-ADI_PROCESS_STRUCT_X(ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tName);
 
 
 /* ---- ADRV9001_PFIRMAG21BUFFER_T ---- */
@@ -89,8 +70,9 @@ ADI_PROCESS_ARRAY_INT(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv900
 #define ADI_PROCESS_STRUCT_ADRV9001_PFIRWBNBBUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tInstance, adrv9001_PfirWbNbBuffer_tName) \
 ADI_PROCESS_STRUCT_X(ADRV9001_PFIRWBNBBUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tName);
 
-#define ADI_PROCESS_ARRAY_ADRV9001_PFIRWBNBBUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tInstance) \
-ADI_PROCESS_ARRAY_INT(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tInstance.coefficients,                  "StreamBuffer"); \
+#define ADI_PROCESS_ARRAY_ADRV9001_PFIRWBNBBUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tInstance, adrv9001_PfirWbNbBuffer_tName) \
+ADI_PROCESS_ARRAY_STRUCT_X(ADRV9001_PFIRWBNBBUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tInstance[ARRAY_STRUCT_INDEXER(adrv9001_PfirWbNbBuffer_t)]), \
+                           tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirWbNbBuffer_tName, ARRAY_STRUCT_INDEXER(adrv9001_PfirWbNbBuffer_t));
 
 
 
@@ -123,6 +105,8 @@ ADI_PROCESS_STRUCT_X(ADRV9001_PFIRBUFFER_T(tokenArray, tokenIndex, jsonBuffer, p
 ADI_PROCESS_ARRAY_STRUCT_X(ADRV9001_PFIRBUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirBuffer_tInstance[ARRAY_STRUCT_INDEXER(adrv9001_PfirBuffer_t)]), \
                            tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirBuffer_tName, ARRAY_STRUCT_INDEXER(adrv9001_PfirBuffer_t));
 
+
+
 /* ---- ADRV9001_PLLMODULUS_T ---- */
 #define ADRV9001_PLLMODULUS_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_pllModulus_tInstance) \
 ADI_PROCESS_ARRAY_INT(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_pllModulus_tInstance.modulus,                           "modulus"); \
@@ -148,6 +132,7 @@ ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv900
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tInstance.pllLockTime_us,               "pllLockTime_us"); \
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tInstance.pllPhaseSyncWait_us,          "pllPhaseSyncWait_us"); \
 ADI_PROCESS_STRUCT_ADRV9001_PLLMODULUS_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tInstance.pllModulus,                   "pllModulus"); \
+ADI_PROCESS_BOOL     (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tInstance.warmBootEnable,               "warmBootEnable"); \
 
 #define ADI_PROCESS_STRUCT_ADRV9001_DEVICESYSCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tInstance, adrv9001_DeviceSysConfig_tName) \
 ADI_PROCESS_STRUCT_X(ADRV9001_DEVICESYSCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_DeviceSysConfig_tName);
@@ -574,7 +559,7 @@ ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv900
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.rxOutputRate_Hz,                    "rxOutputRate_Hz"); \
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.rxInterfaceSampleRate_Hz,           "rxInterfaceSampleRate_Hz"); \
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.rxOffsetLo_kHz,                     "rxOffsetLo_kHz"); \
-ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.rxSignalOnLo,                       "rxSignalOnLo"); \
+ADI_PROCESS_BOOL     (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.rxNcoEnable,                        "rxNcoEnable"); \
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.outputSignaling,                    "outputSignaling"); \
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.filterOrder,                        "filterOrder"); \
 ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_RxProfile_tInstance.filterOrderLp,                      "filterOrderLp"); \
@@ -680,7 +665,6 @@ ADI_PROCESS_STRUCT_ADRV9001_RXSETTINGS_T                           (tokenArray, 
 ADI_PROCESS_STRUCT_ADRV9001_TXSETTINGS_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.tx,                                      "tx"); \
 ADI_PROCESS_STRUCT_ADRV9001_DEVICESYSCONFIG_T                      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.sysConfig,                               "sysConfig"); \
 ADI_PROCESS_STRUCT_ADRV9001_PFIRBUFFER_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.pfirBuffer,                              "pfirBuffer"); \
-ADI_PROCESS_STRUCT_ADRV9001_CUSTOMCONFIG_T                         (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.customConfig,                            "customConfig"); \
 
 #define ADI_PROCESS_STRUCT_ADRV9001_INIT_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance, adrv9001_Init_tName) \
 ADI_PROCESS_STRUCT_X(ADRV9001_INIT_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tName);
