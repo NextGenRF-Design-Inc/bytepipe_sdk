@@ -35,20 +35,16 @@ ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv900
 #define ADI_PROCESS_STRUCT_ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance, adrv9001_Carrier_tName) \
 ADI_PROCESS_STRUCT_X(ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tName);
 
-/* ---- ADRV9001_C99SYSCONFIG_T ---- */
-#define ADRV9001_C99SYSCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance) \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.calMask0,                "calMask0"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.calMask1,                "calMask1"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.deviceClockDivisor,      "deviceClockDivisor"); \
-ADI_PROCESS_LONG                      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.carrier0,                "carrier0"); \
-ADI_PROCESS_LONG                      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.carrier1,                "carrier1"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.txAtten0,                "txAtten0"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.txAtten1,                "txAtten1"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.rxGain0,                 "rxGain0"); \
-ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance.rxGain1,                 "rxGain1"); \
+/* ---- ADRV9001_CUSTOMCONFIG_T ---- */
+#define ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance) \
+ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.initCalMask,             "initCalMask"); \
+ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.deviceClockDivisor,      "deviceClockDivisor"); \
+ADI_PROCESS_ARRAY_LONG                (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.carrierFreq,             "carrierFreq"); \
+ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.txAtten,                 "txAtten"); \
+ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.rxGain,                  "rxGain"); \
 
-#define ADI_PROCESS_STRUCT_ADRV9001_C99SYSCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance, adrv9001_C99Config_tName) \
-ADI_PROCESS_STRUCT_X(ADRV9001_C99SYSCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_C99Config_tName);
+#define ADI_PROCESS_STRUCT_ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance, adrv9001_CustomConfig_tName) \
+ADI_PROCESS_STRUCT_X(ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tName);
 
 
 /* ---- ADRV9001_PFIRMAG21BUFFER_T ---- */
@@ -684,7 +680,7 @@ ADI_PROCESS_STRUCT_ADRV9001_RXSETTINGS_T                           (tokenArray, 
 ADI_PROCESS_STRUCT_ADRV9001_TXSETTINGS_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.tx,                                      "tx"); \
 ADI_PROCESS_STRUCT_ADRV9001_DEVICESYSCONFIG_T                      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.sysConfig,                               "sysConfig"); \
 ADI_PROCESS_STRUCT_ADRV9001_PFIRBUFFER_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.pfirBuffer,                              "pfirBuffer"); \
-ADI_PROCESS_STRUCT_ADRV9001_C99SYSCONFIG_T                         (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.c99Config,                               "c99Config"); \
+ADI_PROCESS_STRUCT_ADRV9001_CUSTOMCONFIG_T                         (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.customConfig,                            "customConfig"); \
 
 #define ADI_PROCESS_STRUCT_ADRV9001_INIT_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance, adrv9001_Init_tName) \
 ADI_PROCESS_STRUCT_X(ADRV9001_INIT_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tName);

@@ -64,6 +64,7 @@ typedef struct
     PhyQEvt_StreamStop      = 1,
     PhyQEvt_StreamRemove    = 2,
     PhyQEvt_StreamDone      = 3,
+    PhyQEvt_LoadProfile     = 4,
   }Evt;
   union
   {
@@ -72,6 +73,11 @@ typedef struct
     {
       adrv9001_port_t     Port;
       adrv9001_status_t   Status;
+    };
+    struct
+    {
+      char *StreamImageName;
+      char *ProfileName;
     };
   }Data;
 } phy_queue_t;
@@ -177,9 +183,81 @@ static void Phy_IqStreamStart( phy_stream_t *Stream )
   }
 }
 
+static phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const char *StreamImageFilename )
+{
+  FIL fil;
+  int32_t status;
+  UINT ProfileBufLength;
+  UINT StreamBufLength;
+  char *ProfileBuf = NULL;
+  uint8_t *StreamImageBuf = NULL;
+
+  char *path = calloc(1, FF_FILENAME_MAX_LEN );
+  strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
+  strncpy(&path[strlen(path)], ProfileFilename, FF_FILENAME_MAX_LEN);
+
+  do
+  {
+    /* Open File */
+    if((status = f_open(&fil, path, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
+
+    /* Allocate Buffer */
+    if((ProfileBuf = malloc(f_size(&fil))) == NULL)
+    {
+      status = XST_FAILURE;
+      break;
+    }
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, 0)) != FR_OK)
+      break;
+
+    if((status = f_read(&fil, ProfileBuf, f_size(&fil), &ProfileBufLength)) != FR_OK)
+      break;
+
+    f_close(&fil);
+
+    strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
+    strncpy(&path[strlen(path)], StreamImageFilename, FF_FILENAME_MAX_LEN);
+
+    /* Open File */
+    if((status = f_open(&fil, path, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
+
+    /* Allocate Buffer */
+    if((StreamImageBuf = malloc(f_size(&fil))) == NULL)
+    {
+      status = XST_FAILURE;
+      break;
+    }
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, 0)) != FR_OK)
+      break;
+
+    if((status = f_read(&fil, StreamImageBuf, f_size(&fil), &StreamBufLength)) != FR_OK)
+      break;
+
+  }while(0);
+
+  f_close(&fil);
+  free(path);
+
+  if(status == 0)
+    status = Adrv9001_LoadProfile( ProfileBuf, ProfileBufLength, StreamImageBuf, StreamBufLength );
+
+  if( ProfileBuf != NULL )
+    free(ProfileBuf);
+
+  if( StreamImageBuf != NULL )
+    free(StreamImageBuf);
+
+  return status;
+}
+
 static void Phy_Task( void *pvParameters )
 {
   phy_queue_t qItem;
+  int32_t status;
 
   for( ;; )
   {
@@ -193,6 +271,14 @@ static void Phy_Task( void *pvParameters )
       case PhyQEvt_StreamStop:      Phy_IqStreamStop( qItem.Data.Port );                      break;
       case PhyQEvt_StreamRemove:    Phy_IqStreamRemove( qItem.Data.Port );                    break;
       case PhyQEvt_StreamDone:      Phy_IqStreamDone( qItem.Data.Port, qItem.Data.Status );   break;
+      case PhyQEvt_LoadProfile:
+        printf("Updating ADRV9001 Profile...\r\n");
+        vTaskDelay(10);
+        status = Phy_Adrv9001LoadProfile( qItem.Data.ProfileName, qItem.Data.StreamImageName);
+        printf("%s\r\n",PHY_STATUS_2_STR(status));
+        free(qItem.Data.ProfileName);
+        free(qItem.Data.StreamImageName);
+        break;
     }
   }
 }
@@ -293,75 +379,34 @@ phy_status_t Phy_IqStreamEnable( phy_stream_t *Stream )
   return PhyStatus_Success;
 }
 
-phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const char *StreamImageFilename )
+phy_status_t Phy_Adrv9001LoadProfileReq( const char *ProfileFilename, const char *StreamImageFilename )
 {
-  FIL fil;
-  int32_t status;
-  UINT ProfileBufLength;
-  UINT StreamBufLength;
-  char *ProfileBuf = NULL;
-  uint8_t *StreamImageBuf = NULL;
+  /* Create Queue Item */
+  phy_queue_t qItem = { .Evt = PhyQEvt_LoadProfile };
 
-  char *path = calloc(1, FF_FILENAME_MAX_LEN );
-  strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
-  strncpy(&path[strlen(path)], ProfileFilename, FF_FILENAME_MAX_LEN);
+  /* Create Memory for ProfileName */
+  if((qItem.Data.ProfileName = calloc(1, FF_FILENAME_MAX_LEN)) == NULL)
+    return PhyStatus_MemoryError;
 
-  do
+  /* Create Memory for StreamImageName */
+  if((qItem.Data.StreamImageName = calloc(1, FF_FILENAME_MAX_LEN)) == NULL)
+    return PhyStatus_MemoryError;
+
+  /* Copy Profile Name */
+  memcpy((uint8_t*)qItem.Data.ProfileName, (uint8_t*)ProfileFilename, strlen(ProfileFilename));
+
+  /* Copy Stream Image Name */
+  memcpy((uint8_t*)qItem.Data.StreamImageName, (uint8_t*)StreamImageFilename, strlen(StreamImageFilename));
+
+  /* Send to PHY Task */
+  if( xQueueSend( PhyQueue, &qItem, 1) != pdPASS )
   {
-    /* Open File */
-    if((status = f_open(&fil, path, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
+    free(qItem.Data.ProfileName);
+    free(qItem.Data.StreamImageName);
+    return PhyStatus_Busy;
+  }
 
-    /* Allocate Buffer */
-    if((ProfileBuf = malloc(f_size(&fil))) == NULL)
-    {
-      status = XST_FAILURE;
-      break;
-    }
-
-    /* Pointer to beginning of file */
-    if((status = f_lseek(&fil, 0)) != FR_OK)
-      break;
-
-    if((status = f_read(&fil, ProfileBuf, f_size(&fil), &ProfileBufLength)) != FR_OK)
-      break;
-
-    f_close(&fil);
-
-    strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
-    strncpy(&path[strlen(path)], StreamImageFilename, FF_FILENAME_MAX_LEN);
-
-    /* Open File */
-    if((status = f_open(&fil, path, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
-
-    /* Allocate Buffer */
-    if((StreamImageBuf = malloc(f_size(&fil))) == NULL)
-    {
-      status = XST_FAILURE;
-      break;
-    }
-
-    /* Pointer to beginning of file */
-    if((status = f_lseek(&fil, 0)) != FR_OK)
-      break;
-
-    if((status = f_read(&fil, StreamImageBuf, f_size(&fil), &StreamBufLength)) != FR_OK)
-      break;
-
-  }while(0);
-
-  f_close(&fil);
-  free(path);
-
-  if(status == 0)
-    status = Adrv9001_LoadProfile( ProfileBuf, ProfileBufLength, StreamImageBuf, StreamBufLength );
-
-  if( ProfileBuf != NULL )
-    free(ProfileBuf);
-
-  if( StreamImageBuf != NULL )
-    free(StreamImageBuf);
-
-  return status;
+  return PhyStatus_Success;
 }
 
 phy_status_t Phy_Adrv9001Initialize( void )
@@ -451,7 +496,7 @@ phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
   /* Get Version Info */
   adi_common_ApiVersion_t ApiVer;
 
-  if((status = adi_adrv9001_ApiVersion_Get( Adrv9001, &ApiVer )) != Adrv9001Status_Success)
+  if(adi_adrv9001_ApiVersion_Get( Adrv9001, &ApiVer) != Adrv9001Status_Success)
     return status;
 
   printf("  -API Version: %lu.%lu.%lu\r\n\r\n", ApiVer.major,  ApiVer.minor, ApiVer.patch);

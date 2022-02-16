@@ -168,8 +168,9 @@ end
 % Private CLI Interface
 methods
     
-    function GetSsiDelay(obj, Port)        
-        obj.Write(['GetSsiDelay ' Port]);   
+    function v = GetSsiDelay(obj, Port)                
+        v = struct('Clk',nan,'RefClk',nan,'Strb',nan,'Idata',nan,'Qdata',nan);        
+        v = obj.ReadStruct(['GetSsiDelay ' Port],v);  
     end 
 
     function status = SetSsiDelay(obj, Port, ClkDelay, DataDelay)
@@ -182,23 +183,23 @@ methods
     end
 
     function GetSsiCfg(obj, Port)        
-        obj.Write(['GetSsiCfg ' Port]);   
+        writeline(obj.s, ['GetSsiCfg ' Port]);   
     end   
     
-    function status = LoadDmaConstant(obj, Port, Value)        
-        status = obj.ReadStatus(['LoadDmaConstant ' Port ' ' num2str(Value)]);   
+    function status = DmaLoadConstant(obj, Port, Value)        
+        status = obj.ReadStatus(['DmaLoadConstant ' Port ' ' num2str(Value)]);   
     end       
 
-    function status = LoadDmaRamp(obj, Port)        
-        status = obj.ReadStatus(['LoadDmaRamp ' Port]);   
+    function status = DmaLoadRamp(obj, Port)        
+        status = obj.ReadStatus(['DmaLoadRamp ' Port]);   
     end
     
-    function status = LoadDmaPrbs7(obj, Port)        
-        status = obj.ReadStatus(['LoadDmaPrbs7 ' Port]);   
+    function status = DmaLoadPrbs7(obj, Port)        
+        status = obj.ReadStatus(['DmaLoadPrbs7 ' Port]);   
     end 
     
-    function status = LoadDmaPrbs15(obj, Port)        
-        status = obj.ReadStatus(['LoadDmaPrbs15 ' Port]);   
+    function status = DmaLoadPrbs15(obj, Port)        
+        status = obj.ReadStatus(['DmaLoadPrbs15 ' Port]);   
     end
     
     function GetTestModeStatus(obj, Port)        
@@ -285,26 +286,21 @@ methods
         v = obj.ReadValue('Adrv9001GetTemp', '%d');        
     end    
 
-    function v = Adrv9001GetVerInfo(obj)
-        
-        v = struct('Silicon',nan,'Firmware',nan,'API',nan);
-        
-        v = obj.ReadStruct('Adrv9001GetVerInfo',v);                        
-        
+    function v = Adrv9001GetVerInfo(obj)        
+        v = struct('Silicon',nan,'Firmware',nan,'API',nan);        
+        v = obj.ReadStruct('Adrv9001GetVerInfo',v);       
     end  
     
     function status = Adrv9001LoadProfile(obj)        
         status = obj.ReadStatus('Adrv9001LoadProfile');   
     end     
     
-	function status = Adrv9001SetLoopBack(obj, Port, Enabled)      
-        
-        status = obj.ReadStatus(['Adrv9001SetLoopBack ' Port, ' ', num2str(Enabled)]);
-         
+	function status = Adrv9001SetLoopBack(obj, Port, Enabled)        
+        status = obj.ReadStatus(['Adrv9001SetLoopBack ' Port, ' ', num2str(Enabled)]);         
     end  
     
     function Adrv9001ReadDma(obj, Port, Length)        
-        obj.Write(['Adrv9001ReadDma ' Port, ' ', num2str(Length)]);   
+        obj.ReadStatus(['Adrv9001ReadDma ' Port, ' ', num2str(Length)]);   
     end  
     
     function status = Adrv9001EnableAuxDac(obj, Id, Enable)        

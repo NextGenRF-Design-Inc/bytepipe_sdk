@@ -26,16 +26,12 @@
 */
 typedef struct
 {
-  uint32_t                      calMask0;
-  uint32_t                      calMask1;
+  uint32_t                      initCalMask[2];
   uint32_t                      deviceClockDivisor;
-  uint64_t                      carrier0;
-  uint64_t                      carrier1;
-  uint32_t                      txAtten0;
-  uint32_t                      txAtten1;
-  uint32_t                      rxGain0;
-  uint32_t                      rxGain1;
-} adi_adrv9001_C99Config_t;
+  uint64_t                      carrierFreq[2];
+  uint32_t                      txAtten[2];
+  uint32_t                      rxGain[2];
+} adrv9001_CustomConfig_t;
 
 /**
  * \brief Data structure to hold ADRV9001 device instance initialization settings
@@ -49,7 +45,7 @@ typedef struct adi_adrv9001_Init
     adi_adrv9001_TxSettings_t tx;             /*!< Tx settings data structure */
     adi_adrv9001_DeviceSysConfig_t sysConfig; /*!< Device system config struct */
     adi_adrv9001_PfirBuffer_t pfirBuffer;     /*!< Holds the Data Interface CSSI/LSSI data link settings */
-    adi_adrv9001_C99Config_t c99Config;
+    adrv9001_CustomConfig_t customConfig;
 } adi_adrv9001_Init_t;
 
 #endif /* _ADI_ADRV9001_PROFILE_TYPES_H_ */

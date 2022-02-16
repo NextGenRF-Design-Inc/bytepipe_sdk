@@ -92,6 +92,9 @@ ADI_IF_JSON_EQ(jsonBuffer, tokenArray[tokenIndex], arrayName) { \
 #define ADI_PROCESS_ARRAY_INT(tokenArray, tokenIndex, jsonBuffer, intParsingBuffer, intArrayDestination, intArrayName) \
 ADI_PROCESS_ARRAY_X(ADI_STORE_INT(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, intArrayDestination[k]), tokenArray, tokenIndex, jsonBuffer, intParsingBuffer, intArrayName)
 
+#define ADI_PROCESS_ARRAY_LONG(tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longArrayDestination, longArrayName) \
+ADI_PROCESS_ARRAY_X(ADI_STORE_LONG(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, longArrayDestination[k]), tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longArrayName)
+
 #define ADI_PROCESS_STRUCT_X(X, tokenArray, tokenIndex, jsonBuffer, parsingBuffer, structName) \
 ADI_IF_JSON_EQ(jsonBuffer, tokenArray[tokenIndex], structName) { \
     int16_t size = tokenArray[++tokenIndex].size; \

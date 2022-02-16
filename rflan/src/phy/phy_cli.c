@@ -284,13 +284,18 @@ static const CliCmd_t PhyCliAdrv9001InitDef =
 
 static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  uint16_t            len;
+  /* Get Filename */
+  char *ProfileName = calloc(1, FF_FILENAME_MAX_LEN );
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, ProfileName);
 
-  const char *ProfileName = Cli_FindParameter( cmd, 1, &len );
-  const char *StreamImageName = Cli_FindParameter( cmd, 2, &len );
+  char *StreamImageName = calloc(1, FF_FILENAME_MAX_LEN );
+  Cli_GetParameter(cmd, 2, CliParamTypeStr, StreamImageName);
 
   /* Load Profile */
-  int32_t status = Phy_Adrv9001LoadProfile( ProfileName, StreamImageName);
+  int32_t status = Phy_Adrv9001LoadProfileReq( ProfileName, StreamImageName);
+
+  free(StreamImageName);
+  free(ProfileName);
 
   printf("%s\r\n",PHY_STATUS_2_STR(status));
 }

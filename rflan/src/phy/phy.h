@@ -213,7 +213,7 @@ phy_status_t Phy_UpdateProfile( const char *filename );
 * \return     Status
 *
 *******************************************************************************/
-phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const char *StreamImageFilename );
+phy_status_t Phy_Adrv9001LoadProfileReq( const char *ProfileFilename, const char *StreamImageFilename );
 
 /*******************************************************************************
 *
