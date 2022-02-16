@@ -48,10 +48,12 @@
 *******************************************************************************/
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "adi_adrv9001_radio_types.h"
+#include "adi_adrv9001.h"
+#include "adi_adrv9001_arm.h"
 
 #define ADRV9001_STATUS_OFFSET              (-1000)
-#define ADRV9001_PROFILE_SIZE               (0x80000)
+#define ADRV9001_C99_MAX_FILE_SIZE          (0x200000)
 
 /**
 **  ADRV9001 Status
@@ -74,6 +76,29 @@ typedef enum
   Adrv9001Status_SpiError                     = (ADRV9001_STATUS_OFFSET - 13),
   Adrv9001Status_GpioError                    = (ADRV9001_STATUS_OFFSET - 14),
   Adrv9001Status_DacError                     = (ADRV9001_STATUS_OFFSET - 15),
+  Adrv9001Status_FileError                    = (ADRV9001_STATUS_OFFSET - 16),
+  Adrv9001Status_HardwareOpenFailed           = (ADRV9001_STATUS_OFFSET - 17),
+  Adrv9001Status_InitAnalogFailed             = (ADRV9001_STATUS_OFFSET - 18),
+  Adrv9001Status_StreamImageWriteFailed       = (ADRV9001_STATUS_OFFSET - 19),
+  Adrv9001Status_ArmImageWriteFailed          = (ADRV9001_STATUS_OFFSET - 20),
+  Adrv9001Status_GainTableWriteFailed         = (ADRV9001_STATUS_OFFSET - 21),
+  Adrv9001Status_AttnTableWriteFailed         = (ADRV9001_STATUS_OFFSET - 22),
+  Adrv9001Status_PowerManagementFailure       = (ADRV9001_STATUS_OFFSET - 23),
+  Adrv9001Status_ArmFailure                   = (ADRV9001_STATUS_OFFSET - 24),
+  Adrv9001Status_PowerBoostFailure            = (ADRV9001_STATUS_OFFSET - 25),
+  Adrv9001Status_SsiFailure                   = (ADRV9001_STATUS_OFFSET - 26),
+  Adrv9001Status_PllFailure                   = (ADRV9001_STATUS_OFFSET - 27),
+  Adrv9001Status_MonitorModeFailure           = (ADRV9001_STATUS_OFFSET - 28),
+  Adrv9001Status_RxPortSwitchFailure          = (ADRV9001_STATUS_OFFSET - 29),
+  Adrv9001Status_CarrierFailure               = (ADRV9001_STATUS_OFFSET - 30),
+  Adrv9001Status_EnablementDelayFailure       = (ADRV9001_STATUS_OFFSET - 31),
+  Adrv9001Status_AdcSwitchFailure             = (ADRV9001_STATUS_OFFSET - 32),
+  Adrv9001Status_ExternalPathDelayFailure     = (ADRV9001_STATUS_OFFSET - 33),
+  Adrv9001Status_TxSlewRateFailure            = (ADRV9001_STATUS_OFFSET - 34),
+  Adrv9001Status_McsFailure                   = (ADRV9001_STATUS_OFFSET - 35),
+  Adrv9001Status_AgcFailure                   = (ADRV9001_STATUS_OFFSET - 36),
+  Adrv9001Status_TxAttnFailure                = (ADRV9001_STATUS_OFFSET - 37),
+  Adrv9001Status_BbdcFailure                  = (ADRV9001_STATUS_OFFSET - 38),
 } adrv9001_status_t;
 
 /**
@@ -109,27 +134,7 @@ typedef enum
                                              ( p == Adrv9001Status_DmaError )?          "ADRV9001 DmaError" :            \
                                              ( p == Adrv9001Status_PortDisabled )?      "ADRV9001 PortDisabled" :        \
                                              ( p == Adrv9001Status_SpiError )?          "ADRV9001 SpiError" :            \
-                                             ( p == Adrv9001Status_GpioError )?         "ADRV9001 GpioError" : "Unknown Error")
-
-/**
- **  ADRV9001 Radio State
- */
-typedef enum
-{
-  Adrv9001RadioState_Standby          = 0,
-  Adrv9001RadioState_Calibrated       = 1,
-  Adrv9001RadioState_Primed           = 2,
-  Adrv9001RadioState_Enabled          = 3,
-} adrv9001_radio_state_t;
-
-/**
- **  ADRV9001 IQ Data Sample
- */
-typedef struct
-{
-  uint16_t    idata;
-  uint16_t    qdata;
-} adrv9001_iqdata_t;
+                                             ( p == Adrv9001Status_GpioError )?         "ADRV9001 GpioError" : "Unknown")
 
 /**
  **  ADRV9001 Event Data
@@ -199,31 +204,6 @@ typedef struct
   adrv9001_spi_cfg_t   *SpiCfg;             ///< SPI Configuration
   void                 *IrqInstance;        ///< Processor Interrupt Instance
 } adrv9001_cfg_t;
-
-/**
- **  ADRV9001 Version Info
- */
-typedef struct
-{
-  struct
-  {
-    uint32_t major;                         ///< API Major Version number
-    uint32_t minor;                         ///< API Minor Version number
-    uint32_t patch;                         ///< API Patch Version number
-  }Api;                                     ///< adi_adrv9001 API Version
-  struct
-  {
-    uint8_t major;                          ///< ARM Major Version number
-    uint8_t minor;                          ///< ARM Minor Version number
-    uint8_t maint;                          ///< ARM Maintenance Version number
-    uint8_t rcVer;                          ///< ARM RC Version number
-  }Arm;
-  struct
-  {
-    uint8_t major;                          ///< Major silicon version (0xA, 0xB, etc)
-    uint8_t minor;                          ///< Minor silicon version
-  }Silicon;
-} adrv9001_ver_t;
 
 /*******************************************************************************
 *
@@ -336,19 +316,6 @@ adrv9001_status_t Adrv9001_Rx2EnablePinSet( uint8_t PinLevel );
 *
 *******************************************************************************/
 adrv9001_status_t Adrv9001_Tx2EnablePinSet( uint8_t PinLevel );
-
-/*******************************************************************************
-*
-* \details
-*
-* This function gets the adrv9001 version information
-*
-* \param[out] Version Information
-*
-* \return     Status
-*
-*******************************************************************************/
-adrv9001_status_t Adrv9001_GetVersionInfo( adrv9001_ver_t *VerInfo );
 
 /*******************************************************************************
 *
@@ -521,7 +488,7 @@ adrv9001_status_t Adrv9001_SetInternalLoopBack( adrv9001_port_t Port, bool Enabl
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_SetRadioState( adrv9001_port_t Port, adrv9001_radio_state_t State );
+adrv9001_status_t Adrv9001_SetRadioState( adrv9001_port_t Port, adi_adrv9001_ChannelState_e State );
 
 /*******************************************************************************
 *
@@ -536,7 +503,7 @@ adrv9001_status_t Adrv9001_SetRadioState( adrv9001_port_t Port, adrv9001_radio_s
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_GetRadioState( adrv9001_port_t Port, adrv9001_radio_state_t *State );
+adrv9001_status_t Adrv9001_GetRadioState( adrv9001_port_t Port, adi_adrv9001_ChannelState_e *State );
 
 /*******************************************************************************
 *
@@ -645,7 +612,7 @@ adrv9001_status_t Adrv9001_ClearError( void );
 * \return     Status
 *
 *******************************************************************************/
-adrv9001_status_t Adrv9001_LoadProfile( void );
+adrv9001_status_t Adrv9001_LoadProfile( char *ProfileBuf, uint32_t ProfileBufLength, uint8_t *StreamImage, uint32_t StreamBufLength );
 
 /*******************************************************************************
 *

@@ -49,6 +49,8 @@
 #include "adrv9001.h"
 #include "app_cli.h"
 
+extern adi_adrv9001_Device_t          *Adrv9001;
+
 static const char* Adrv9001Cli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_port_t *port)
 {
   const char         *s = NULL;
@@ -336,7 +338,7 @@ static const CliCmd_t Adrv9001CliSetRadioStateDef =
 static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void *userData)
 {
   adrv9001_port_t         port;
-  adrv9001_radio_state_t  state;
+  adi_adrv9001_ChannelState_e  state;
   int status;
 
   if(Adrv9001Cli_ParsePort(cmd, 1, &port) == NULL)
@@ -349,10 +351,10 @@ static void Adrv9001Cli_GetRadioState(Cli_t *CliInstance, const char *cmd, void 
 
   if((status = Adrv9001_GetRadioState(port, &state)) == Adrv9001Status_Success)
   {
-    printf("%s\r\n", state == Adrv9001RadioState_Standby? "Standby" :
-                            state == Adrv9001RadioState_Calibrated? "Calibrated" :
-                            state == Adrv9001RadioState_Primed? "Primed" :
-                            state == Adrv9001RadioState_Enabled? "Enabled" : "Unknown" );
+    printf("%s\r\n", state == ADI_ADRV9001_CHANNEL_STANDBY? "Standby" :
+                            state == ADI_ADRV9001_CHANNEL_CALIBRATED? "Calibrated" :
+                            state == ADI_ADRV9001_CHANNEL_PRIMED? "Primed" :
+                            state == ADI_ADRV9001_CHANNEL_RF_ENABLED? "Enabled" : "Unknown" );
   }
   else
   {
@@ -481,18 +483,37 @@ static const CliCmd_t Adrv9001CliGetTempDef =
 
 static void Adrv9001Cli_GetVerInfo(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  adrv9001_ver_t VerInfo;
   int status;
   Adrv9001_ClearError( );
 
-  if((status = Adrv9001_GetVersionInfo( &VerInfo )) == Adrv9001Status_Success)
+  printf("%s Version Information:\r\n","ADRV9002" );
+
+  do
   {
-    printf("%s Version Information:\r\n","ADRV9002");
-    printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
-    printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
-    printf("  -API Version: %lu.%lu.%lu\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
-  }
-  else
+    adi_adrv9001_SiliconVersion_t SiliconVer;
+    if((status = adi_adrv9001_SiliconVersion_Get( Adrv9001, &SiliconVer )) != 0)
+      break;
+
+    printf("  -Silicon Version: %X%X\r\n", SiliconVer.major, SiliconVer.minor);
+
+    adi_adrv9001_ArmVersion_t ArmVer;
+
+    if((status = adi_adrv9001_arm_Version( Adrv9001, &ArmVer )) != 0)
+      break;
+
+    printf("  -Firmware Version: %u.%u.%u.%u\r\n",ArmVer.majorVer, ArmVer.minorVer, ArmVer.maintVer, ArmVer.rcVer);
+
+    /* Get Version Info */
+    adi_common_ApiVersion_t ApiVer;
+
+    if((status = adi_adrv9001_ApiVersion_Get( Adrv9001, &ApiVer )) != 0)
+      break;
+
+    printf("  -API Version: %lu.%lu.%lu\r\n\r\n", ApiVer.major,  ApiVer.minor, ApiVer.patch);
+
+  }while(0);
+
+  if(status != Adrv9001Status_Success)
   {
     printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
   }
@@ -539,25 +560,6 @@ static const CliCmd_t Adrv9001CliGetRssiDef =
   "Adrv9001GetRssi < port ( Rx1,Rx2) >\r\n\r\n",
   (CliCmdFn_t)Adrv9001Cli_GetRssi,
   1,
-  NULL
-};
-
-static void Adrv9001Cli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
-{
-  Adrv9001_ClearError( );
-
-  int status = Adrv9001_LoadProfile( );
-
-  printf("%s\r\n",ADRV9001_STATUS_2_STR(status));
-}
-
-static const CliCmd_t Adrv9001CliLoadProfileDef =
-{
-  "Adrv9001LoadProfile",
-  "Adrv9001LoadProfile: Load profile settings into ADRV9002 \r\n"
-  "Adrv9001LoadProfile < >\r\n\r\n",
-  (CliCmdFn_t)Adrv9001Cli_LoadProfile,
-  0,
   NULL
 };
 
@@ -729,7 +731,6 @@ int Adrv9001Cli_Initialize( void )
   Cli_RegisterCommand(Instance, &Adrv9001CliGetRssiDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetTempDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliGetVerInfoDef);
-  Cli_RegisterCommand(Instance, &Adrv9001CliLoadProfileDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliSetLoopBackDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliReadDmaDef);
   Cli_RegisterCommand(Instance, &Adrv9001CliEnableAuxDacDef);

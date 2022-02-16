@@ -49,6 +49,7 @@
 #include "adrv9001.h"
 
 
+
 #define PHY_STATUS_OFFSET           (-2000)
 
 #define PHY_IS_PORT_TX(p)           ADRV9001_IS_PORT_TX(p)
@@ -81,10 +82,6 @@ typedef enum
                                ( p == PhyStatus_Busy )?                     "PHY Busy" :                        \
                                ( p == PhyStatus_Adrv9001Error )?            "PHY ADRV9001 Error" :              \
                                ( p == PhyStatus_IqStreamAbort )?            "PHY IQ Stream Abort" : ADRV9001_STATUS_2_STR( p ))
-/**
-** PHY Profile
-*/
-typedef uint8_t profile_t[ADRV9001_PROFILE_SIZE];
 
 /**
  **  PHY Event Data
@@ -200,14 +197,12 @@ phy_status_t Phy_IqStreamDisable( adrv9001_port_t Port );
 *
 * This function loads a new ADRV9001 profile from the file system
 *
-* \param[in]  Buf is a buffer containing the profile
-*
-* \param[in]  Length is the length of the buffer in bytes
+* \param[in]  filename is the name of the folder containing the C99 code
 *
 * \return     Status
 *
 *******************************************************************************/
-phy_status_t Phy_UpdateProfile( profile_t *Profile );
+phy_status_t Phy_UpdateProfile( const char *filename );
 
 /*******************************************************************************
 *
@@ -218,7 +213,7 @@ phy_status_t Phy_UpdateProfile( profile_t *Profile );
 * \return     Status
 *
 *******************************************************************************/
-phy_status_t Phy_Adrv9001LoadProfile( void );
+phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const char *StreamImageFilename );
 
 /*******************************************************************************
 *

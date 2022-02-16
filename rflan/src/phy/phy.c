@@ -78,7 +78,7 @@ typedef struct
 
 static QueueHandle_t            PhyQueue;                       ///< PHY Queue
 static phy_stream_t            *PhyStream[Adrv9001Port_Num];    ///< Stream Data
-static adi_adrv9001_Device_t   *Adrv9001;
+adi_adrv9001_Device_t          *Adrv9001;
 extern XScuGic                  xInterruptController;
 static phy_callback_t           PhyCallback;
 static void                    *PhyCallbackRef;
@@ -293,32 +293,75 @@ phy_status_t Phy_IqStreamEnable( phy_stream_t *Stream )
   return PhyStatus_Success;
 }
 
-phy_status_t Phy_UpdateProfile( profile_t *Profile )
+phy_status_t Phy_Adrv9001LoadProfile( const char *ProfileFilename, const char *StreamImageFilename )
 {
-  int32_t status = PhyStatus_NotSupported;
+  FIL fil;
+  int32_t status;
+  UINT ProfileBufLength;
+  UINT StreamBufLength;
+  char *ProfileBuf = NULL;
+  uint8_t *StreamImageBuf = NULL;
 
+  char *path = calloc(1, FF_FILENAME_MAX_LEN );
+  strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
+  strncpy(&path[strlen(path)], ProfileFilename, FF_FILENAME_MAX_LEN);
 
+  do
+  {
+    /* Open File */
+    if((status = f_open(&fil, path, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
 
-//  /* Load ADRV9001 Profile */
-//  if((status = Adrv9001_LoadProfile( )) != Adrv9001Status_Success)
-//    return status;
-//
-//  /* Get Version Info */
-//  adrv9001_ver_t VerInfo;
-//  if((status = Adrv9001_GetVersionInfo( &VerInfo )) != Adrv9001Status_Success)
-//    return status;
-//
-//  printf("%s Version Information:\r\n","ADRV9002");
-//  printf("  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
-//  printf("  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
-//  printf("  -API Version: %u.%u.%u\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
+    /* Allocate Buffer */
+    if((ProfileBuf = malloc(f_size(&fil))) == NULL)
+    {
+      status = XST_FAILURE;
+      break;
+    }
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, 0)) != FR_OK)
+      break;
+
+    if((status = f_read(&fil, ProfileBuf, f_size(&fil), &ProfileBufLength)) != FR_OK)
+      break;
+
+    f_close(&fil);
+
+    strncpy(path, FF_LOGICAL_DRIVE_PATH, FF_FILENAME_MAX_LEN);
+    strncpy(&path[strlen(path)], StreamImageFilename, FF_FILENAME_MAX_LEN);
+
+    /* Open File */
+    if((status = f_open(&fil, path, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
+
+    /* Allocate Buffer */
+    if((StreamImageBuf = malloc(f_size(&fil))) == NULL)
+    {
+      status = XST_FAILURE;
+      break;
+    }
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, 0)) != FR_OK)
+      break;
+
+    if((status = f_read(&fil, StreamImageBuf, f_size(&fil), &StreamBufLength)) != FR_OK)
+      break;
+
+  }while(0);
+
+  f_close(&fil);
+  free(path);
+
+  if(status == 0)
+    status = Adrv9001_LoadProfile( ProfileBuf, ProfileBufLength, StreamImageBuf, StreamBufLength );
+
+  if( ProfileBuf != NULL )
+    free(ProfileBuf);
+
+  if( StreamImageBuf != NULL )
+    free(StreamImageBuf);
 
   return status;
-}
-
-phy_status_t Phy_Adrv9001LoadProfile( void )
-{
-  return Adrv9001_LoadProfile( );
 }
 
 phy_status_t Phy_Adrv9001Initialize( void )
@@ -387,34 +430,31 @@ phy_status_t Phy_Initialize( phy_cfg_t *Cfg )
     return status;
 
   /* Load ADRV9001 Profile */
-  if((status = Phy_Adrv9001LoadProfile( )) != Adrv9001Status_Success)
+  if((status = Phy_Adrv9001LoadProfile( "default.json", "default.bin" )) != Adrv9001Status_Success)
     Adrv9001_ClearError( );
 
+  printf("%s Version Information:\r\n","ADRV9002" );
+
+  adi_adrv9001_SiliconVersion_t SiliconVer;
+  if( adi_adrv9001_SiliconVersion_Get( Adrv9001, &SiliconVer ) != Adrv9001Status_Success)
+    return status;
+
+  printf("  -Silicon Version: %X%X\r\n", SiliconVer.major, SiliconVer.minor);
+
+  adi_adrv9001_ArmVersion_t ArmVer;
+
+  if( adi_adrv9001_arm_Version( Adrv9001, &ArmVer ) != Adrv9001Status_Success)
+    return status;
+
+  printf("  -Firmware Version: %u.%u.%u.%u\r\n",ArmVer.majorVer, ArmVer.minorVer, ArmVer.maintVer, ArmVer.rcVer);
+
   /* Get Version Info */
-  adrv9001_ver_t VerInfo;
-  if( Adrv9001_GetVersionInfo( &VerInfo ) == Adrv9001Status_Success)
-  {
-    char *Buf = calloc(1, 1024);
+  adi_common_ApiVersion_t ApiVer;
 
-    snprintf( &Buf[strlen(Buf)], 1023, "%s Version Information:\r\n","ADRV9002" );
-    snprintf( &Buf[strlen(Buf)], 1023, "  -Silicon Version: %X%X\r\n",VerInfo.Silicon.major, VerInfo.Silicon.minor);
-    snprintf( &Buf[strlen(Buf)], 1023, "  -Firmware Version: %u.%u.%u.%u\r\n",VerInfo.Arm.major, VerInfo.Arm.minor, VerInfo.Arm.maint, VerInfo.Arm.rcVer);
-    snprintf( &Buf[strlen(Buf)], 1023, "  -API Version: %lu.%lu.%lu\r\n\r\n", VerInfo.Api.major,  VerInfo.Api.minor, VerInfo.Api.patch);
+  if((status = adi_adrv9001_ApiVersion_Get( Adrv9001, &ApiVer )) != Adrv9001Status_Success)
+    return status;
 
-    print(Buf);
-
-    if( PhyCallback != NULL )
-    {
-      phy_evt_data_t EvtData = {.Message = Buf };
-      PhyCallback( PhyEvtType_LogWrite, EvtData, PhyCallbackRef );
-    }
-
-    free(Buf);
-  }
-  else
-  {
-    printf("Unable to Get ADRV9002 Version Information\r\n");
-  }
+  printf("  -API Version: %lu.%lu.%lu\r\n\r\n", ApiVer.major,  ApiVer.minor, ApiVer.patch);
 
   return status;
 }

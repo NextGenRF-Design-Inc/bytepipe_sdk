@@ -249,6 +249,31 @@ static int32_t App_Initialize( void )
   return status;
 }
 
+int32_t App_fread( char *filename, char *Buf, int32_t *BufSize, int32_t offset )
+{
+  FIL fil;
+  int32_t length = 0;
+  int32_t status;
+
+  do
+  {
+    /* Open File */
+    if((status = f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ)) != FR_OK) break;
+
+    /* Pointer to beginning of file */
+    if((status = f_lseek(&fil, offset)) != FR_OK) break;
+
+    /* Read data from file */
+    if((status = f_read(&fil, (void*)Buf, *BufSize, (UINT*)&length)) != FR_OK) break;
+
+  }while(0);
+
+  f_close(&fil);
+  *BufSize = length;
+
+  return status;
+}
+
 static void App_Task( void *pvParameters )
 {
   /* Initialize Application Routines */

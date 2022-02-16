@@ -71,76 +71,6 @@ static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_por
   return s;
 }
 
-static void PhyCli_UpdateProfile(Cli_t *CliInstance, const char *cmd, void *userData)
-{
-  char *filename = calloc(1, FF_FILENAME_MAX_LEN );
-  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
-  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
-
-  FIL fil;
-  profile_t *Buf = NULL;
-
-  /* Open File */
-  if(f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ) != FR_OK)
-  {
-    printf("Invalid Filename\r\n");
-    return;
-  }
-
-  /* Get Size */
-  uint32_t length = f_size(&fil);
-
-  /* Check Size */
-  if( length > ADRV9001_PROFILE_SIZE )
-  {
-    printf("Invalid File Size\r\n");
-    f_close( &fil );
-    return;
-  }
-
-  /* Allocate Memory */
-  if((Buf = malloc( ADRV9001_PROFILE_SIZE )) == NULL)
-  {
-    printf("Insufficient Memory\r\n");
-    f_close( &fil );
-    return;
-  }
-
-  /* Set Pointer to beginning of file */
-  f_lseek(&fil, 0);
-
-  /* Read data from file */
-  if(f_read(&fil, Buf, length, (UINT*)&length) != FR_OK)
-  {
-    printf("Read File Error\r\n");
-    free( Buf );
-    f_close( &fil );
-    return;
-  }
-
-  /* Close File */
-  f_close( &fil );
-
-  /* Load Profile */
-  int32_t status = Phy_UpdateProfile( Buf );
-
-  printf("%s\r\n",PHY_STATUS_2_STR(status));
-
-  /* Free Memory */
-  free( Buf );
-
-}
-
-static const CliCmd_t PhyCliUpdateProfileDef =
-{
-  "PhyUpdateProfile",
-  "PhyUpdateProfile: Update ADRV9001 Profile \r\n"
-  "PhyUpdateProfile < profile ( name of profile on file system) >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_UpdateProfile,
-  1,
-  NULL
-};
-
 static void PhyCli_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, void *param)
 {
   if( EvtType == PhyEvtType_StreamDone )
@@ -354,7 +284,13 @@ static const CliCmd_t PhyCliAdrv9001InitDef =
 
 static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  int32_t status = Phy_Adrv9001LoadProfile( );
+  uint16_t            len;
+
+  const char *ProfileName = Cli_FindParameter( cmd, 1, &len );
+  const char *StreamImageName = Cli_FindParameter( cmd, 2, &len );
+
+  /* Load Profile */
+  int32_t status = Phy_Adrv9001LoadProfile( ProfileName, StreamImageName);
 
   printf("%s\r\n",PHY_STATUS_2_STR(status));
 }
@@ -362,10 +298,10 @@ static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void
 static const CliCmd_t PhyCliAdrv9001LoadProfileDef =
 {
   "PhyAdrv9001LoadProfile",
-  "PhyAdrv9001LoadProfile:  Load current ADRV9001 \r\n"
-  "PhyAdrv9001LoadProfile <  >\r\n\r\n",
+  "PhyAdrv9001LoadProfile:  Load ADRV9001 Profile \r\n"
+  "PhyAdrv9001LoadProfile < ProfileName, StreamImageName >\r\n\r\n",
   (CliCmdFn_t)PhyCli_Adrv9001LoadProfile,
-  0,
+  2,
   NULL
 };
 
@@ -376,7 +312,6 @@ int PhyCli_Initialize( void )
   Cli_RegisterCommand(Instance, &PhyCliIqFileStreamEnableDef);
   Cli_RegisterCommand(Instance, &PhyCliIqFileStreamDisableDef);
   Cli_RegisterCommand(Instance, &PhyCliIqFileSizeDef);
-  Cli_RegisterCommand(Instance, &PhyCliUpdateProfileDef);
   Cli_RegisterCommand(Instance, &PhyCliAdrv9001InitDef);
   Cli_RegisterCommand(Instance, &PhyCliAdrv9001LoadProfileDef);
 
