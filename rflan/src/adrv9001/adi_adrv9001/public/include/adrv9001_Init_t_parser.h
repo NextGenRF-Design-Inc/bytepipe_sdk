@@ -26,6 +26,25 @@ ADI_PROCESS_STRUCT_X(ADRV9001_PFIRMAG13BUFFER_T(tokenArray, tokenIndex, jsonBuff
 ADI_PROCESS_ARRAY_STRUCT_X(ADRV9001_PFIRMAG13BUFFER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirMag13Buffer_tInstance[ARRAY_STRUCT_INDEXER(adrv9001_PfirMag13Buffer_t)]), \
                            tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_PfirMag13Buffer_tName, ARRAY_STRUCT_INDEXER(adrv9001_PfirMag13Buffer_t));
 
+/* ---- ADRV9001_CARRIER_T ---- */
+#define ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance) \
+ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance.loGenOptimization,                     "loGenOptimization"); \
+ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance.carrierFrequency_Hz,                   "carrierFrequency_Hz"); \
+ADI_PROCESS_INT      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance.intermediateFrequency_Hz,               "intermediateFrequency_Hz"); \
+
+#define ADI_PROCESS_STRUCT_ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance, adrv9001_Carrier_tName) \
+ADI_PROCESS_STRUCT_X(ADRV9001_CARRIER_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Carrier_tName);
+
+/* ---- ADRV9001_CUSTOMCONFIG_T ---- */
+#define ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance) \
+ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.initCalMask,             "initCalMask"); \
+ADI_PROCESS_INT                       (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.deviceClockDivisor,      "deviceClockDivisor"); \
+ADI_PROCESS_ARRAY_LONG                (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.carrierFreq,             "carrierFreq"); \
+ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.txAtten,                 "txAtten"); \
+ADI_PROCESS_ARRAY_INT                 (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance.rxGain,                  "rxGain"); \
+
+#define ADI_PROCESS_STRUCT_ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance, adrv9001_CustomConfig_tName) \
+ADI_PROCESS_STRUCT_X(ADRV9001_CUSTOMCONFIG_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_CustomConfig_tName);
 
 
 /* ---- ADRV9001_PFIRMAG21BUFFER_T ---- */
@@ -665,6 +684,7 @@ ADI_PROCESS_STRUCT_ADRV9001_RXSETTINGS_T                           (tokenArray, 
 ADI_PROCESS_STRUCT_ADRV9001_TXSETTINGS_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.tx,                                      "tx"); \
 ADI_PROCESS_STRUCT_ADRV9001_DEVICESYSCONFIG_T                      (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.sysConfig,                               "sysConfig"); \
 ADI_PROCESS_STRUCT_ADRV9001_PFIRBUFFER_T                           (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.pfirBuffer,                              "pfirBuffer"); \
+ADI_PROCESS_STRUCT_ADRV9001_CUSTOMCONFIG_T                         (tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance.customConfig,                            "customConfig"); \
 
 #define ADI_PROCESS_STRUCT_ADRV9001_INIT_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance, adrv9001_Init_tName) \
 ADI_PROCESS_STRUCT_X(ADRV9001_INIT_T(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tInstance), tokenArray, tokenIndex, jsonBuffer, parsingBuffer, adrv9001_Init_tName);
