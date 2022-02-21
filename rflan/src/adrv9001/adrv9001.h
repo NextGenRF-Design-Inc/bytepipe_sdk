@@ -99,6 +99,9 @@ typedef enum
   Adrv9001Status_AgcFailure                   = (ADRV9001_STATUS_OFFSET - 36),
   Adrv9001Status_TxAttnFailure                = (ADRV9001_STATUS_OFFSET - 37),
   Adrv9001Status_BbdcFailure                  = (ADRV9001_STATUS_OFFSET - 38),
+  Adrv9001Status_LoidFailure                  = (ADRV9001_STATUS_OFFSET - 39),
+  Adrv9001Status_AuxAdcFailure                = (ADRV9001_STATUS_OFFSET - 40),
+  Adrv9001Status_TestModeFailure              = (ADRV9001_STATUS_OFFSET - 41),
 } adrv9001_status_t;
 
 /**
