@@ -56,14 +56,13 @@
 #include "portmacro.h"
 #include "ff.h"
 #include "xuartps.h"
-#include "zmodem.h"
 #include "adrv9001.h"
 #include "xsysmonpsu.h"
 #include "parameters.h"
 #include "app_cli.h"
 #include "app.h"
 
-static Cli_t            AppCli;
+
 static QueueHandle_t    AppCliRxCharQueue;
 static QueueHandle_t  	AppCliTxCharQueue;
 static volatile u8 		  cliRxChar;
@@ -132,8 +131,7 @@ static void AppCli_RxTask( void *param )
 	{
 		xQueueReceive( AppCliRxCharQueue, (void *)&c, portMAX_DELAY );
 
-		if (ZModem_Parse(c))
-			Cli_ProcessChar((Cli_t*)param, c);
+  	Cli_ProcessChar((Cli_t*)param, c);
 	}
 }
 
@@ -152,11 +150,6 @@ static void AppCli_Callback( const char *s, void *param )
       len--;
     }
   }
-}
-
-Cli_t *AppCli_GetInstance( void )
-{
-  return &AppCli;
 }
 
 static void AppCli_CliLs(Cli_t *CliInstance, const char *cmd, void *userData)
@@ -391,15 +384,15 @@ static void AppCli_GetTemp(Cli_t *CliInstance, const char *cmd, void *userData)
   int16_t Temp_C;
   float cpuTemp;
 
-  if(Adrv9001_GetTemperature( &Temp_C ) == Adrv9001Status_Success)
-  {
-    App_GetCpuTemp( &cpuTemp );
-    printf("Adrv9001 = %dC; CPU = %dC\r\n", Temp_C,(int)cpuTemp);
-  }
-  else
-  {
-    printf("Failed\r\n");
-  }
+//  if(PhyAdrv9001_GetTemperature( &Temp_C ) == Adrv9001Status_Success)
+//  {
+//    App_GetCpuTemp( &cpuTemp );
+//    printf("Adrv9001 = %dC; CPU = %dC\r\n", Temp_C,(int)cpuTemp);
+//  }
+//  else
+//  {
+//    printf("Failed\r\n");
+//  }
 }
 
 static const CliCmd_t AppCliGetTempDef =
@@ -527,7 +520,7 @@ static const CliCmd_t AppCliReadLogDef =
   NULL
 };
 
-int32_t AppCli_Initialize( FIL *LogFil )
+int32_t AppCli_Initialize( FIL *LogFil, Cli_t *Cli )
 {
 	XUartPs_Config *Config;
 
@@ -578,7 +571,7 @@ int32_t AppCli_Initialize( FIL *LogFil )
 	};
 
 	/* Initialize CLI */
-	CLi_Init( &AppCli, &CliCfg );
+	CLi_Init( Cli, &CliCfg );
 
 	/* Create Rx Queue */
 	AppCliRxCharQueue = xQueueCreate(APP_CLI_RX_QUEUE_SIZE, sizeof(uint8_t));
@@ -587,24 +580,24 @@ int32_t AppCli_Initialize( FIL *LogFil )
 	AppCliTxCharQueue = xQueueCreate(APP_CLI_TX_QUEUE_SIZE, sizeof(uint8_t));
 
 	/* Create CLI Tx Task */
-	if(xTaskCreate(AppCli_TxTask, APP_CLI_TX_TASK_NAME, APP_CLI_TX_STACK_SIZE, &AppCli, APP_CLI_TX_TASK_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(AppCli_TxTask, APP_CLI_TX_TASK_NAME, APP_CLI_TX_STACK_SIZE, Cli, APP_CLI_TX_TASK_PRIORITY, NULL) != pdPASS)
 	  return XST_FAILURE;
 
 	/* Create CLI Rx Task */
-	if(xTaskCreate(AppCli_RxTask, APP_CLI_RX_TASK_NAME, APP_CLI_RX_STACK_SIZE, &AppCli, APP_CLI_RX_TASK_PRIORITY, NULL) != pdPASS)
+	if(xTaskCreate(AppCli_RxTask, APP_CLI_RX_TASK_NAME, APP_CLI_RX_STACK_SIZE, Cli, APP_CLI_RX_TASK_PRIORITY, NULL) != pdPASS)
 	  return XST_FAILURE;
 
 	/* Register APP Specific */
-	Cli_RegisterCommand(&AppCli, &AppCliClsDef);
-	Cli_RegisterCommand(&AppCli, &AppCliLsDef);
-	Cli_RegisterCommand(&AppCli, &AppCliTaskInfoDef);
-	Cli_RegisterCommand(&AppCli, &AppCliReadFileDef);
-	Cli_RegisterCommand(&AppCli, &AppCliDeleteFileDef);
-	Cli_RegisterCommand(&AppCli, &AppCliGetTempDef);
-	Cli_RegisterCommand(&AppCli, &AppCliRebootDef);
-	Cli_RegisterCommand(&AppCli, &AppCliResetPlDef);
-	Cli_RegisterCommand(&AppCli, &AppCliClearLogDef);
-	Cli_RegisterCommand(&AppCli, &AppCliReadLogDef);
+	Cli_RegisterCommand(Cli, &AppCliClsDef);
+	Cli_RegisterCommand(Cli, &AppCliLsDef);
+	Cli_RegisterCommand(Cli, &AppCliTaskInfoDef);
+	Cli_RegisterCommand(Cli, &AppCliReadFileDef);
+	Cli_RegisterCommand(Cli, &AppCliDeleteFileDef);
+	Cli_RegisterCommand(Cli, &AppCliGetTempDef);
+	Cli_RegisterCommand(Cli, &AppCliRebootDef);
+	Cli_RegisterCommand(Cli, &AppCliResetPlDef);
+	Cli_RegisterCommand(Cli, &AppCliClearLogDef);
+	Cli_RegisterCommand(Cli, &AppCliReadLogDef);
 
 	return XST_SUCCESS;
 }

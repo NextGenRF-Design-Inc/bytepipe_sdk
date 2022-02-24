@@ -63,19 +63,7 @@ extern "C"
 * \return     Status
 *
 *******************************************************************************/
-int32_t AppCli_Initialize( FIL *LogFil );
-
-/******************************************************************************/
-/**
-* \details
-*
-* This function returns the CLI instance allowing other application modules to
-* add CLI commands.
-*
-* \return     Cli_t is the CLI instance.
-*
-*******************************************************************************/
-Cli_t *AppCli_GetInstance( void );
+int32_t AppCli_Initialize( FIL *LogFil, Cli_t *Cli );
 
 /******************************************************************************/
 /**

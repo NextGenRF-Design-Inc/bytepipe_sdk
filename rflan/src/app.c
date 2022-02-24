@@ -50,19 +50,20 @@
 #include "app_cli.h"
 #include "adrv9001_cli.h"
 #include "phy.h"
+#include "phy_cli.h"
 #include "ff.h"
-#include "zmodem.h"
 #include "xdppsu.h"
 #include "versa_clock5.h"
 #include "xsysmonpsu.h"
 #include "xresetps.h"
 
-
+static Cli_t              AppCli;
 static TaskHandle_t 			AppTask;
 static XSysMonPsu         AppSysMon;
 static XResetPs           AppReset;
 static FATFS              AppFatFs;
 static FIL                AppLogFil;
+static phy_t              AppPhy;
 
 static int32_t App_ResetInitialize( void )
 {
@@ -180,11 +181,11 @@ static int32_t App_OpenLogFile( void )
   return FR_OK;
 }
 
-static void App_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, void *param )
+static void App_PhyCallback( phy_evt_type_t EvtType, void *EvtData, void *param )
 {
   if( EvtType == PhyEvtType_LogWrite )
   {
-    App_WriteLogFile( EvtData.Message );
+    App_WriteLogFile( (char*)EvtData );
   }
 }
 
@@ -201,7 +202,7 @@ static int32_t App_Initialize( void )
     printf("Failed to open log file\r\n");
 
   /* Initialize CLI */
-  if((status = AppCli_Initialize( &AppLogFil )) != 0)
+  if((status = AppCli_Initialize( &AppLogFil, &AppCli )) != 0)
     printf("CLI Initialize Error %d\r\n",status);
 
   /* Initialize System Monitor */
@@ -212,17 +213,13 @@ static int32_t App_Initialize( void )
   if((status = App_ResetInitialize()) != 0)
     printf("System Reset Initialize Error %d\r\n",status);
 
-  /* Initialize ZMODEM */
-  if((status = ZModem_Initialize(FF_LOGICAL_DRIVE_PATH, outbyte)) != 0)
-    printf("ZMODEM Initialize Error %d\r\n",status);
-
   /* Initialize Clocks */
   if(VersaClock5_Initialize() != 0)
     printf("Failed to initialize external clock driver\r\n");
 
-  /* Initialize ADRV9001 CLI */
-  if((status = Adrv9001Cli_Initialize()) != 0)
-    printf("Adrv9001 CLI Initialize Error %d\r\n",status);
+//  /* Initialize ADRV9001 CLI */
+//  if((status = Adrv9001Cli_Initialize()) != 0)
+//    printf("Adrv9001 CLI Initialize Error %d\r\n",status);
 
   char *Buf = calloc(1, 1024);
 
@@ -237,14 +234,13 @@ static int32_t App_Initialize( void )
 
   printf("\r\nType help for a list of commands\r\n\r\n");
 
-  phy_cfg_t Cfg = {
-    .Callback = App_PhyCallback,
-    .CallbackRef = NULL,
-  };
-
   /* Initialize PHY */
-  if((status = Phy_Initialize( &Cfg )) != 0)
+  if((status = Phy_Initialize( &AppPhy, NULL )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
+
+  /* Initialize PHY CLI */
+  if((status = PhyCli_Initialize( &AppPhy, &AppCli )) != PhyStatus_Success)
+    return status;
 
   return status;
 }

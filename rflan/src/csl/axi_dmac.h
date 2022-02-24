@@ -110,7 +110,6 @@ typedef struct {
   void                         *CallbackRef;
   uint32_t                      base;
   uint32_t                      irqId;
-  void                         *irqInstance;
   axi_dmac_direction_t          direction;
   uint32_t                      flags;
 }axi_dmac_init_t;
@@ -126,5 +125,6 @@ int32_t axi_dmac_is_transfer_ready(axi_dmac_t *dmac, bool *rdy);
 int32_t axi_dmac_transfer(axi_dmac_t *dmac, uint32_t address, uint32_t size);
 int32_t axi_dmac_init(axi_dmac_t **adc_core, axi_dmac_init_t *init);
 int32_t axi_dmac_remove(axi_dmac_t *dmac);
+int32_t axi_dmac_stop(axi_dmac_t *dmac );
 
 #endif

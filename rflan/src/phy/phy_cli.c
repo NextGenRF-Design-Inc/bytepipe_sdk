@@ -43,16 +43,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "adrv9001.h"
+
 #include "phy_cli.h"
 #include "app_cli.h"
 #include "phy.h"
-#include "parameters.h"
 #include "iq_file.h"
 
-#define PHY_STREAM_RX_SAMPLE_CNT          (16384)
+static phy_t *PhyCliInstance = NULL;
 
-static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_port_t *port)
+static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, phy_port_t *port)
 {
   const char         *s = NULL;
   uint16_t            len;
@@ -60,45 +59,51 @@ static const char* PhyCli_ParsePort(const char *cmd, uint16_t pNum, adrv9001_por
   s = Cli_FindParameter( cmd, pNum, &len );
 
   if(!strncmp(s, "Rx1",len))
-    *port = Adrv9001Port_Rx1;
+    *port = PhyPort_Rx1;
   else if(!strncmp(s, "Rx2",len))
-    *port = Adrv9001Port_Rx2;
+    *port = PhyPort_Rx2;
   else if(!strncmp(s, "Tx1",len))
-    *port = Adrv9001Port_Tx1;
+    *port = PhyPort_Tx1;
   else if(!strncmp(s, "Tx2",len))
-    *port = Adrv9001Port_Tx2;
+    *port = PhyPort_Tx2;
 
   return s;
 }
 
-static void PhyCli_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, void *param)
+static void PhyCli_Callback( phy_evt_type_t EvtType, void *EvtData, void *param)
 {
-  if( EvtType == PhyEvtType_StreamDone )
+  if( EvtType == PhyEvtType_StreamInd )
   {
-    /* Indicate Event to User */
-    printf("%s stream done\r\n", ADRV9001_PORT_2_STR( EvtData.Stream.Port ));
+    phy_stream_ind_t *Stream = (phy_stream_ind_t*)EvtData;
+    char *Filename = (char*)param;
 
-    /* Process Rx Stream */
-    if( PHY_IS_PORT_RX( EvtData.Stream.Port ) )
+    if( Stream->Status == PhyStatus_StreamDone )
     {
-      /* Delete Existing File */
-      f_unlink(EvtData.Stream.CallbackRef);
+      /* Indicate Event to User */
+      printf("%s stream done\r\n", PHY_PORT_2_STR( Stream->Port ));
 
-      /* Write To File */
-      if( IqFile_Write(EvtData.Stream.CallbackRef, EvtData.Stream.SampleBuf, EvtData.Stream.SampleCnt) != XST_SUCCESS)
-        printf("%s stream file write error\r\n", ADRV9001_PORT_2_STR( EvtData.Stream.Port ));
+      /* Process Rx Stream */
+      if( PHY_IS_PORT_RX( Stream->Port ) )
+      {
+        /* Delete Existing File */
+        f_unlink(Filename);
 
-      /* Free Filename */
-      free(EvtData.Stream.CallbackRef);
+        /* Write To File */
+        if( IqFile_Write(Filename, Stream->SampleBuf, Stream->SampleCnt) != 0)
+          printf("%s stream file write error\r\n", PHY_PORT_2_STR( Stream->Port ));
+
+        /* Free Filename */
+        free(Filename);
+      }
+
+      /* Free Sample Buffer */
+      free(Stream->SampleBuf);
     }
-
-    /* Free Sample Buffer */
-    free(EvtData.Stream.SampleBuf);
-  }
-  else if( EvtType == PhyEvtType_StreamStart )
-  {
-    /* Indicate Event to User */
-    printf("%s stream start\r\n", ADRV9001_PORT_2_STR( EvtData.Stream.Port ));
+    else if(  Stream->Status == PhyStatus_StreamStart )
+    {
+      /* Indicate Event to User */
+      printf("%s stream start\r\n", PHY_PORT_2_STR( Stream->Port ));
+    }
   }
   else if( EvtType == PhyEvtType_ProfileUpdated )
   {
@@ -112,14 +117,15 @@ static void PhyCli_PhyCallback( phy_evt_type_t EvtType, phy_evt_data_t EvtData, 
   }
 }
 
-static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void *userData)
+
+void PhyCli_StreamEnable(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  phy_stream_t Stream = {.Callback = PhyCli_PhyCallback};
+  phy_stream_req_t StreamReq = {.Callback = PhyCli_Callback};
   int32_t status;
   char *filename;
 
   /* Parse Port */
-  if(PhyCli_ParsePort(cmd, 1, &Stream.Port) == NULL)
+  if(PhyCli_ParsePort(cmd, 1, &StreamReq.Port) == NULL)
   {
     printf("Invalid Parameter\r\n");
     return;
@@ -138,17 +144,15 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   int32_t SampleCnt;
   Cli_GetParameter(cmd, 3, CliParamTypeS32, &SampleCnt);
 
-  Adrv9001_ClearError( );
-
   if( SampleCnt == -1 )
-    Stream.Cyclic = true;
+    StreamReq.Cyclic = true;
   else
-    Stream.Cyclic = false;
+    StreamReq.Cyclic = false;
 
 
-  if( (Stream.Port == Adrv9001Port_Tx1) || (Stream.Port == Adrv9001Port_Tx2) )
+  if( PHY_IS_PORT_TX(StreamReq.Port) )
   {
-    if(IqFile_Read( filename, &Stream.SampleBuf, &Stream.SampleCnt ) != XST_SUCCESS)
+    if(IqFile_Read( filename, &StreamReq.SampleBuf, &StreamReq.SampleCnt ) != 0)
     {
       free(filename);
       printf("Invalid Parameter\r\n");
@@ -158,9 +162,9 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
     free(filename);
 
     if( SampleCnt > 0 )
-      Stream.SampleCnt = SampleCnt;
+      StreamReq.SampleCnt = SampleCnt;
   }
-  else if( (Stream.Port == Adrv9001Port_Rx1) || (Stream.Port == Adrv9001Port_Rx2) )
+  else if( PHY_IS_PORT_RX(StreamReq.Port) )
   {
     if( SampleCnt <= 0 )
     {
@@ -168,10 +172,10 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
       return;
     }
 
-    Stream.SampleCnt = SampleCnt;
+    StreamReq.SampleCnt = SampleCnt;
 
     /* Store Filename for future reference.  This is freed in callback when stream done */
-    if((Stream.CallbackRef = malloc(strlen(filename))) == NULL)
+    if((StreamReq.CallbackRef = malloc(strlen(filename))) == NULL)
     {
       free(filename);
       printf("Memory Error\r\n");
@@ -179,12 +183,12 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
     }
     else
     {
-      strcpy((char*)Stream.CallbackRef, filename);
+      strcpy((char*)StreamReq.CallbackRef, filename);
       free(filename);
     }
 
     /* Allocate Buffer.  This is freed in callback when stream done */
-    if((Stream.SampleBuf = calloc(1, SampleCnt * sizeof(uint32_t))) == NULL)
+    if((StreamReq.SampleBuf = calloc(1, SampleCnt * sizeof(uint32_t))) == NULL)
     {
       printf("Memory Error\r\n");
       return;
@@ -192,25 +196,15 @@ static void PhyCli_IqFileStreamEnable(Cli_t *CliInstance, const char *cmd, void 
   }
 
   /* Enable Streaming */
-  if((status = Phy_IqStreamEnable( &Stream )) != PhyStatus_Success)
+  if((status = Phy_StreamEnable( PhyCliInstance, &StreamReq )) != PhyStatus_Success)
   {
     printf("%s\r\n",PHY_STATUS_2_STR(status));
   }
 }
 
-static const CliCmd_t PhyCliIqFileStreamEnableDef =
+void PhyCli_StreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  "PhyIqFileStreamEnable",
-  "PhyIqFileStreamEnable:  Enable IQ stream to or from a file. \r\n"
-  "PhyIqFileStreamEnable <port (Rx1,Rx2,Tx1,Tx2), filename, SampleCnt (-1=cyclic, 0=file size)>\r\n\r\n",
-  (CliCmdFn_t)PhyCli_IqFileStreamEnable,
-  3,
-  NULL
-};
-
-static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
-{
-  adrv9001_port_t     port;
+  phy_port_t     port;
   int32_t status;
 
   /* Parse Port */
@@ -221,129 +215,40 @@ static void PhyCli_IqFileStreamDisable(Cli_t *CliInstance, const char *cmd, void
   }
 
   /* Disable Stream */
-  if((status = Phy_IqStreamDisable( port )) != PhyStatus_Success )
+  if((status = Phy_StreamDisable( PhyCliInstance, port )) != PhyStatus_Success )
   {
     printf("%s\r\n",PHY_STATUS_2_STR(status));
   }
 }
 
-static const CliCmd_t PhyCliIqFileStreamDisableDef =
+void PhyCli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  "PhyIqFileStreamDisable",
-  "PhyIqFileStreamDisable:  Disable IQ stream. \r\n"
-  "PhyIqFileStreamDisable < port ( Rx1,Rx2,Tx1,Tx2 ) >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_IqFileStreamDisable,
-  1,
-  NULL
-};
+  phy_profile_t PhyProfile = {
+      .JsonFilename = FF_LOGICAL_DRIVE_PATH,
+      .StreamFilename = FF_LOGICAL_DRIVE_PATH
+  };
 
-static void PhyCli_IqFileSize(Cli_t *CliInstance, const char *cmd, void *userData)
-{
-  int32_t status;
 
   /* Get Filename */
-  char *filename;
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, (void*)&PhyProfile.JsonFilename[strlen(FF_LOGICAL_DRIVE_PATH)]);
 
-  if((filename = calloc(1, FF_FILENAME_MAX_LEN )) == NULL)
-  {
-    printf("Memory Error\r\n");
-    return;
-  }
-
-  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
-  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
-
-  uint32_t SampleCnt;
-  FIL fil;
-
-  if((status = f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ)) == FR_OK)
-  {
-    status = IqFile_GetSampleCnt( &fil, &SampleCnt);
-  }
-
-  f_close(&fil);
-  free(filename);
-
-  if(status == 0)
-  {
-    printf("%lu\r\n", SampleCnt);
-  }
-  else
-  {
-    printf("%s\r\n",PHY_STATUS_2_STR(status));
-  }
-}
-
-static const CliCmd_t PhyCliIqFileSizeDef =
-{
-  "PhyIqFileSize",
-  "PhyIqFileSize:  Returns number of IQ samples in file \r\n"
-  "PhyIqFileSize < filename >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_IqFileSize,
-  1,
-  NULL
-};
-
-static void PhyCli_Adrv9001Init(Cli_t *CliInstance, const char *cmd, void *userData)
-{
-  int32_t status = Phy_Adrv9001Initialize( );
-
-  printf("%s\r\n",PHY_STATUS_2_STR(status));
-}
-
-static const CliCmd_t PhyCliAdrv9001InitDef =
-{
-  "PhyAdrv9001Init",
-  "PhyAdrv9001Init:  Initialize ADRV9001 \r\n"
-  "PhyAdrv9001Init <  >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_Adrv9001Init,
-  0,
-  NULL
-};
-
-static void PhyCli_Adrv9001LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
-{
-  int32_t status = PhyStatus_MemoryError;
-
-  /* Get Filename */
-  char *ProfileName = calloc(1, FF_FILENAME_MAX_LEN );
-  Cli_GetParameter(cmd, 1, CliParamTypeStr, ProfileName);
-
-  char *StreamImageName = calloc(1, FF_FILENAME_MAX_LEN );
-  Cli_GetParameter(cmd, 2, CliParamTypeStr, StreamImageName);
+  Cli_GetParameter(cmd, 2, CliParamTypeStr, (void*)&PhyProfile.StreamFilename[strlen(FF_LOGICAL_DRIVE_PATH)]);
 
   /* Load Profile */
-  if((ProfileName != NULL) && (StreamImageName != NULL))
-  {
-    status = Phy_Adrv9001LoadProfileReq( ProfileName, StreamImageName);
-  }
-
-  free(StreamImageName);
-  free(ProfileName);
+  int32_t status = Phy_LoadProfile( PhyCliInstance, &PhyProfile );
 
   if( status != 0 )
     printf("%s\r\n",PHY_STATUS_2_STR(status));
 }
 
-static const CliCmd_t PhyCliAdrv9001LoadProfileDef =
-{
-  "PhyAdrv9001LoadProfile",
-  "PhyAdrv9001LoadProfile:  Load ADRV9001 Profile \r\n"
-  "PhyAdrv9001LoadProfile < ProfileName, StreamImageName >\r\n\r\n",
-  (CliCmdFn_t)PhyCli_Adrv9001LoadProfile,
-  2,
-  NULL
-};
 
-int PhyCli_Initialize( void )
+int PhyCli_Initialize( phy_t *Instance, Cli_t *Cli )
 {
-  Cli_t *Instance = AppCli_GetInstance( );
+  PhyCliInstance = Instance;
 
-  Cli_RegisterCommand(Instance, &PhyCliIqFileStreamEnableDef);
-  Cli_RegisterCommand(Instance, &PhyCliIqFileStreamDisableDef);
-  Cli_RegisterCommand(Instance, &PhyCliIqFileSizeDef);
-  Cli_RegisterCommand(Instance, &PhyCliAdrv9001InitDef);
-  Cli_RegisterCommand(Instance, &PhyCliAdrv9001LoadProfileDef);
+  Cli_RegisterCommand(Cli, &PhyCliStreamEnableDef);
+  Cli_RegisterCommand(Cli, &PhyCliStreamDisableDef);
+  Cli_RegisterCommand(Cli, &PhyCliLoadProfileDef);
 
 	return PhyStatus_Success;
 }

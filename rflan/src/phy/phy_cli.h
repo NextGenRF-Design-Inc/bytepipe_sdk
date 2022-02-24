@@ -49,14 +49,45 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include "phy_types.h"
+#include "cli.h"
+
+void PhyCli_StreamEnable(Cli_t *CliInstance, const char *cmd, void *userData);
+void PhyCli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData);
+void PhyCli_StreamDisable(Cli_t *CliInstance, const char *cmd, void *userData);
+
+static const CliCmd_t PhyCliStreamEnableDef =
+{
+  "PhyStreamEnable",
+  "PhyStreamEnable:  Enable PHY stream to or from a file. \r\n"
+  "PhyStreamEnable <port (Rx1,Rx2,Tx1,Tx2), filename, SampleCnt (-1=cyclic, 0=file size)>\r\n\r\n",
+  (CliCmdFn_t)PhyCli_StreamEnable,
+  3,
+  NULL
+};
+
+static const CliCmd_t PhyCliLoadProfileDef =
+{
+  "PhyLoadProfile",
+  "PhyLoadProfile:  Load PHY Profile \r\n"
+  "PhyLoadProfile < ProfileName, StreamImageName >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_LoadProfile,
+  2,
+  NULL
+};
+
+static const CliCmd_t PhyCliStreamDisableDef =
+{
+  "PhyStreamDisable",
+  "PhyStreamDisable:  Disable PHY stream. \r\n"
+  "PhyStreamDisable < port ( Rx1,Rx2,Tx1,Tx2 ) >\r\n\r\n",
+  (CliCmdFn_t)PhyCli_StreamDisable,
+  1,
+  NULL
+};
 
 
-/******************************************************************************/
-/**
-*  \details   Initialize PHY CLI
-*
-*  \return    status
-*******************************************************************************/
-int PhyCli_Initialize( void );
+int PhyCli_Initialize( phy_t *Instance, Cli_t *Cli );
+
 
 #endif /* PHY_CLI_H_ */

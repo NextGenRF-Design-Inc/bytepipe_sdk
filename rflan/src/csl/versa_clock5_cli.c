@@ -223,15 +223,13 @@ static const CliCmd_t AppCliSetVersaClock5FreqDef =
 };
 
 
-int VersaClock5Cli_Initialize( void )
+int VersaClock5Cli_Initialize( Cli_t *Cli )
 {
-  Cli_t *Instance = AppCli_GetInstance( );
-
   /* Register APP Specific */
-  Cli_RegisterCommand(Instance, &AppCliReadVersaClock5Def);
-  Cli_RegisterCommand(Instance, &AppCliWriteVersaClock5Def);
-  Cli_RegisterCommand(Instance, &AppCliGetVersaClock5FreqDef);
-  Cli_RegisterCommand(Instance, &AppCliSetVersaClock5FreqDef);
+  Cli_RegisterCommand(Cli, &AppCliReadVersaClock5Def);
+  Cli_RegisterCommand(Cli, &AppCliWriteVersaClock5Def);
+  Cli_RegisterCommand(Cli, &AppCliGetVersaClock5FreqDef);
+  Cli_RegisterCommand(Cli, &AppCliSetVersaClock5FreqDef);
 
 	return XST_SUCCESS;
 }

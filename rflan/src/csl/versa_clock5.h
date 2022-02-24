@@ -46,7 +46,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
-
+#include "cli.h"
 
 int32_t VersaClock5_Initialize( void );
 int32_t VersaClock5_ReadRegister( uint16_t Address, uint8_t *Value);
@@ -55,7 +55,7 @@ int32_t VersaClock5_Write( uint8_t *Buf, uint16_t Length);
 int32_t VersaClock5_Read( uint8_t *Buf, uint16_t Length);
 int32_t VersaClock5_GetClockFreq( uint8_t Port, uint32_t *FreqHz);
 int32_t VersaClock5_SetClockFreq( uint8_t Port, uint32_t FreqHz );
-int VersaClock5Cli_Initialize( void );
+int VersaClock5Cli_Initialize( Cli_t *Cli );
 int32_t VersaClock5_GlobalReset( void );
 
 #endif

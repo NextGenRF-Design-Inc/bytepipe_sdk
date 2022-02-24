@@ -271,8 +271,5 @@ int32_t VersaClock5_Initialize( void )
   /* Write Registers */
   VersaClock5_Write( VersaClock5Cfg, sizeof(VersaClock5Cfg));
 
-  /* Initialize CLI */
-  VersaClock5Cli_Initialize();
-
 	return 0;
 }

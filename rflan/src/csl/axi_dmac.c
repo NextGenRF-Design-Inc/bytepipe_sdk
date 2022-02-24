@@ -50,6 +50,8 @@
 #include "util.h"
 #include "xscugic.h"
 
+extern XScuGic          xInterruptController;
+
 /***************************************************************************//**
  * @brief dma_isr
 *******************************************************************************/
@@ -133,6 +135,12 @@ int32_t axi_dmac_write(axi_dmac_t *dmac, uint32_t reg_addr, uint32_t reg_data)
 	axi_io_write(dmac->base, reg_addr, reg_data);
 
 	return SUCCESS;
+}
+
+int32_t axi_dmac_stop(axi_dmac_t *dmac )
+{
+  axi_dmac_write(dmac, AXI_DMAC_REG_CTRL, 0x0);
+  return SUCCESS;
 }
 
 /***************************************************************************//**
@@ -251,6 +259,8 @@ int32_t axi_dmac_transfer(axi_dmac_t *dmac, uint32_t address, uint32_t size)
 		return FAILURE; // Other directions are not supported yet
 	}
 
+	dmac->big_transfer.transfer_done = false;
+
 	if ((size - 1) > dmac->transfer_max_size)
 	{
 		dmac->big_transfer.address = address;
@@ -300,7 +310,7 @@ int32_t axi_dmac_transfer(axi_dmac_t *dmac, uint32_t address, uint32_t size)
 		axi_dmac_read(dmac, AXI_DMAC_REG_IRQ_PENDING, &reg_val);
 		if (reg_val == (AXI_DMAC_IRQ_SOT | AXI_DMAC_IRQ_EOT))
 			break;
-	} while(!dmac->big_transfer.transfer_done);
+	} while(dmac->big_transfer.transfer_done == false);
 
 	if (reg_val != (AXI_DMAC_IRQ_SOT | AXI_DMAC_IRQ_EOT))
 		axi_dmac_write(dmac, AXI_DMAC_REG_IRQ_PENDING, reg_val);
@@ -340,11 +350,9 @@ int32_t axi_dmac_init(axi_dmac_t **dmac_core, axi_dmac_init_t *init)
 
 	*dmac_core = dmac;
 
-	if( init->irqInstance != NULL )
-	{
-	  XScuGic_Connect((XScuGic*)init->irqInstance, init->irqId, (XInterruptHandler)axi_dmac_default_isr, dmac );
-	  XScuGic_Enable((XScuGic*)init->irqInstance, init->irqId);
-	}
+  XScuGic_Connect(&xInterruptController, init->irqId, (XInterruptHandler)axi_dmac_default_isr, dmac );
+	XScuGic_Enable(&xInterruptController, init->irqId);
+
 
 	return SUCCESS;
 }
