@@ -19,15 +19,19 @@ To get started with evaluation of the BytePipe and the software development kit 
 
 # Development Quick Start
 
-To begin development using the BytePipe SDK, start by reviewing the [BytePipe SDK Software Architecture](docs/Architecture/Architecture.md).  This document details the overall software architecture along with the Linux, RFLAN, and programmable logic components.
+To begin development using the BytePipe SDK, start by reviewing the [BytePipe SDK Software Architecture](docs/Architecture/Architecture.md).  This document details the overall software architecture along with the Linux, RFLAN, and programmable logic components.  
 
 The environment and design tools required for building the BytePipe SDK components are detailed in [Build Environment](docs/BuildEnv/BuildEnv.md).
 
-Build instructions for each component are documented in [Building RFLAN](docs/RflanBuild/RflanBuild.md), [Building HDL](docs/HdlBuild/HdlBuild.md), and [Building Linux](docs/LinuxBuild/LinuxBuild.md).  The HDL must be built before the RFLAN and Linux components can be built.  However, if the user is only interested in the RFLAN or Linux component, the latest HDL release can be downloaded and used for building these components.  
+There are several binaries that have to be built for the BytePipe to successfully boot.  From a high level there are three build:  programmable logic, C99 bare-metal or RTOS RFLAN, and Linux.  Each process can be built from source as described below.  A combination of previously known good images can also be used while building only the interested components from source.  Build instructions for each component are documented in [Building RFLAN](docs/RflanBuild/RflanBuild.md), [Building HDL](docs/HdlBuild/HdlBuild.md), and [Building Linux](docs/LinuxBuild/LinuxBuild.md).  The HDL must be built before the RFLAN and Linux components can be built.  However, if the user is only interested in the RFLAN or Linux component, the latest HDL release can be downloaded and used for building these components.  
+
+![build_components](docs/Architecture/build_components.png)
 
 # User Interface
 
-The BytePipe SDK supports several different user interface tools.  For interfacing to the RFLAN directly refer to [RFLAN CLI](docs/RflanCli/RflanCli.md) and [BytePipe Terminal](docs/BytePipeTerminal/BytePipeTerminal.md).  For interfacing to the Linux framework refer to [BytePipe Terminal](docs/BytePipeTerminal/BytePipeTerminal.md), [Industrial I/O](docs/IIO/IIO.md), and [Ubuntu Desktop](docs/Ubuntu/Ubuntu.md).
+The BytePipe SDK supports several user interfaces.  The primary user interface is through the Linux bash command line by connecting to the serial port or via SSH.   
+
+For interfacing to the RFLAN directly refer to [RFLAN CLI](docs/RflanCli/RflanCli.md).  For interfacing to the Linux framework refer to [Industrial I/O](docs/IIO/IIO.md) and [Ubuntu Desktop](docs/Ubuntu/Ubuntu.md).
 
 The [Industrial I/O](docs/IIO/IIO.md) Linux kernel driver supports several off the shelf programs including [MATLAB](docs/Matlab/Matlab.md), [GNU Radio](docs/GnuRadio/GnuRadio.md), [IIO-Oscilloscope](docs/IIO-Oscilloscope/IIO-Oscilloscope.md), and many other tools that support the [Industrial I/O Driver](https://www.kernel.org/doc/html/v5.0/driver-api/iio/index.html).
 
