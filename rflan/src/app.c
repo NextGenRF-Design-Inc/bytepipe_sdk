@@ -48,7 +48,6 @@
 #include "task.h"
 #include "app.h"
 #include "app_cli.h"
-#include "adrv9001_cli.h"
 #include "phy.h"
 #include "phy_cli.h"
 #include "ff.h"
@@ -235,7 +234,9 @@ static int32_t App_Initialize( void )
   printf("\r\nType help for a list of commands\r\n\r\n");
 
   /* Initialize PHY */
-  if((status = Phy_Initialize( &AppPhy, NULL )) != 0)
+  phy_cfg_t PhyCfg = {.ProfilePaths = "1:/profile_0.json"};
+
+  if((status = Phy_Initialize( &AppPhy, &PhyCfg )) != 0)
     printf("Phy Initialize Error %d\r\n",status);
 
   /* Initialize PHY CLI */

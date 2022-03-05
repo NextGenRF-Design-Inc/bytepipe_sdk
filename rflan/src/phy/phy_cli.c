@@ -223,24 +223,17 @@ void PhyCli_StreamDisable(Cli_t *CliInstance, const char *cmd, void *userData)
 
 void PhyCli_LoadProfile(Cli_t *CliInstance, const char *cmd, void *userData)
 {
-  phy_profile_t PhyProfile = {
-      .JsonFilename = FF_LOGICAL_DRIVE_PATH,
-      .StreamFilename = FF_LOGICAL_DRIVE_PATH
-  };
+  uint32_t Idx;
 
-
-  /* Get Filename */
-  Cli_GetParameter(cmd, 1, CliParamTypeStr, (void*)&PhyProfile.JsonFilename[strlen(FF_LOGICAL_DRIVE_PATH)]);
-
-  Cli_GetParameter(cmd, 2, CliParamTypeStr, (void*)&PhyProfile.StreamFilename[strlen(FF_LOGICAL_DRIVE_PATH)]);
+  /* Get Profile Index */
+  Cli_GetParameter(cmd, 1, CliParamTypeU32, (void*)&Idx);
 
   /* Load Profile */
-  int32_t status = Phy_LoadProfile( PhyCliInstance, &PhyProfile );
+  int32_t status = Phy_LoadProfile( PhyCliInstance, Idx );
 
   if( status != 0 )
     printf("%s\r\n",PHY_STATUS_2_STR(status));
 }
-
 
 int PhyCli_Initialize( phy_t *Instance, Cli_t *Cli )
 {

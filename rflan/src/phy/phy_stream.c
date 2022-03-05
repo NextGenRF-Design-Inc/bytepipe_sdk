@@ -54,29 +54,39 @@ phy_status_t PhyStream_Disable(phy_t *Instance, phy_port_t Port )
 {
   int32_t status;
 
-  if( Port >= PhyPort_Num )
+  if( (Port >= PhyPort_Num) && (Port != PhyPort_All) )
     return PhyStatus_InvalidPort;
 
-  phy_stream_t *Stream = &Instance->Stream[Port];
+  phy_stream_t *Stream;
 
-  status = PhyStream_TransferStop( Instance, Port );
+  phy_port_t p = (Port == PhyPort_All)? PhyPort_Rx1 : Port;
 
-  if( Stream->Status != PhyStatus_StreamDone )
+  do
   {
-    Stream->Status = (status == PhyStatus_Success)? PhyStatus_StreamDone : PhyStatus_DmaError;
+    Stream = &Instance->Stream[p];
 
-    if( Stream->Callback != NULL )
+    status = PhyStream_TransferStop( Instance, p );
+
+    if( Stream->Status != PhyStatus_StreamDone )
     {
-      phy_stream_ind_t ind = {
-          .Port = Stream->Port,
-          .SampleBuf = Stream->SampleBuf,
-          .SampleCnt = Stream->SampleCnt,
-          .Status = Stream->Status
-      };
+      Stream->Status = (status == PhyStatus_Success)? PhyStatus_StreamDone : PhyStatus_DmaError;
 
-      Stream->Callback( PhyEvtType_StreamInd, &ind, Stream->CallbackRef );
+      if( Stream->Callback != NULL )
+      {
+        phy_stream_ind_t ind = {
+            .Port = Stream->Port,
+            .SampleBuf = Stream->SampleBuf,
+            .SampleCnt = Stream->SampleCnt,
+            .Status = Stream->Status
+        };
+
+        Stream->Callback( PhyEvtType_StreamInd, &ind, Stream->CallbackRef );
+      }
     }
-  }
+
+    p++;
+
+  }while( (p < PhyPort_Num) && (Port == PhyPort_All) );
 
   return status;
 }
@@ -155,7 +165,7 @@ phy_status_t PhyStream_Enable(phy_t *Instance, phy_stream_req_t *Req )
   return Stream->Status == PhyStatus_DmaError? PhyStatus_DmaError : PhyStatus_Success;
 }
 
-phy_status_t PhyStream_Initialize( phy_t *Instance, phy_stream_cfg_t *Cfg )
+phy_status_t PhyStream_Initialize( phy_t *Instance )
 {
 
   Instance->Stream[0].DmaBufAddr = PHY_STREAM_DMA_RX1_BUF_ADDR;

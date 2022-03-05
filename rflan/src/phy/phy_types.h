@@ -54,29 +54,32 @@
 #include "axi_dmac.h"
 
 /**
-**  ADRV9001 Status
+**  PHY Status
 */
 typedef enum
 {
-  PhyStatus_Success             = (0),
-  PhyStatus_InvalidPort         = (PHY_STATUS_OFFSET - 1),
-  PhyStatus_MemoryError         = (PHY_STATUS_OFFSET - 2),
-  PhyStatus_NotSupported        = (PHY_STATUS_OFFSET - 3),
-  PhyStatus_OsError             = (PHY_STATUS_OFFSET - 4),
-  PhyStatus_Busy                = (PHY_STATUS_OFFSET - 5),
-  PhyStatus_InvalidParameter    = (PHY_STATUS_OFFSET - 6),
-  PhyStatus_Adrv9001Error       = (PHY_STATUS_OFFSET - 7),
-  PhyStatus_RadioStateError     = (PHY_STATUS_OFFSET - 8),
-  PhyStatus_IqStreamAbort       = (PHY_STATUS_OFFSET - 9),
-  PhyStatus_DmaError            = (PHY_STATUS_OFFSET - 10),
-  PhyStatus_StreamStart         = (PHY_STATUS_OFFSET - 11),
-  PhyStatus_StreamDone          = (PHY_STATUS_OFFSET - 12),
-  PhyStatus_StreamError         = (PHY_STATUS_OFFSET - 13),
-  PhyStatus_InvalidRadioState   = (PHY_STATUS_OFFSET - 14),
-  PhyStatus_GpioError           = (PHY_STATUS_OFFSET - 15),
-  PhyStatus_DacError            = (PHY_STATUS_OFFSET - 16),
-  PhyStatus_TestModeFailure     = (PHY_STATUS_OFFSET - 17),
-  PhyStatus_SsiFailure          = (PHY_STATUS_OFFSET - 18),
+  PhyStatus_Success               = (0),
+  PhyStatus_InvalidPort           = (PHY_STATUS_OFFSET - 1),
+  PhyStatus_MemoryError           = (PHY_STATUS_OFFSET - 2),
+  PhyStatus_NotSupported          = (PHY_STATUS_OFFSET - 3),
+  PhyStatus_OsError               = (PHY_STATUS_OFFSET - 4),
+  PhyStatus_Busy                  = (PHY_STATUS_OFFSET - 5),
+  PhyStatus_InvalidParameter      = (PHY_STATUS_OFFSET - 6),
+  PhyStatus_Adrv9001Error         = (PHY_STATUS_OFFSET - 7),
+  PhyStatus_RadioStateError       = (PHY_STATUS_OFFSET - 8),
+  PhyStatus_IqStreamAbort         = (PHY_STATUS_OFFSET - 9),
+  PhyStatus_DmaError              = (PHY_STATUS_OFFSET - 10),
+  PhyStatus_StreamStart           = (PHY_STATUS_OFFSET - 11),
+  PhyStatus_StreamDone            = (PHY_STATUS_OFFSET - 12),
+  PhyStatus_StreamError           = (PHY_STATUS_OFFSET - 13),
+  PhyStatus_InvalidRadioState     = (PHY_STATUS_OFFSET - 14),
+  PhyStatus_GpioError             = (PHY_STATUS_OFFSET - 15),
+  PhyStatus_DacError              = (PHY_STATUS_OFFSET - 16),
+  PhyStatus_TestModeFailure       = (PHY_STATUS_OFFSET - 17),
+  PhyStatus_SsiFailure            = (PHY_STATUS_OFFSET - 18),
+  PhyStatus_InvalidAdrv9001Init   = (PHY_STATUS_OFFSET - 19),
+  PhyStatus_InvalidAdrv9001Stream = (PHY_STATUS_OFFSET - 20),
+  PhyStatus_InvalidProfile        = (PHY_STATUS_OFFSET - 21),
 } phy_status_t;
 
 
@@ -90,6 +93,7 @@ typedef enum
   PhyPort_Tx1    = (2),
   PhyPort_Tx2    = (3),
   PhyPort_Num    = (4),
+  PhyPort_All    = (5),
 } phy_port_t;
 
 /**
@@ -148,41 +152,57 @@ typedef struct{
 }phy_stream_t;
 
 /**
-**  PHY Configuration
+**  PHY LO Parameters
 */
 typedef struct{
-}phy_cfg_t;
+  uint64_t              Frequency;
+}phy_lo_params_t;
 
 /**
-**  PHY Stream Configuration
+**  PHY Rx Parameters
 */
 typedef struct{
-}phy_stream_cfg_t;
+  uint32_t              Gain;
+}phy_rx_params_t;
 
 /**
-**  PHY Stream Configuration
+**  PHY Tx Parameters
 */
 typedef struct{
-}phy_adrv9001_cfg_t;
-
-
-/**
-**  PHY Instance
-*/
-typedef struct{
-  void             *Queue;                 ///< PHY Queue
-  adrv9001_t        Adrv9001;              ///< ADRV9001 Instance
-  adrv9001_hal_t    Adrv9001Hal;           ///< ADRV9001 Instance
-  phy_stream_t      Stream[PhyPort_Num];   ///< Stream Data
-}phy_t;
+  uint32_t              Attn;
+  uint8_t               Boost;
+}phy_tx_params_t;
 
 /**
 **  PHY Profile
 */
 typedef struct{
-  const char        JsonFilename[FF_FILENAME_MAX_LEN];
-  const char        StreamFilename[FF_FILENAME_MAX_LEN];
+  phy_lo_params_t       Lo[PHY_LO_CNT];
+  phy_tx_params_t       Tx[PHY_TX_CNT];
+  phy_rx_params_t       Rx[PHY_RX_CNT];
+  adi_adrv9001_Init_t   AdrvInit;
+  char                  Path[PHY_PROFILE_NAME_MAX_LEN];
 }phy_profile_t;
+
+/**
+**  PHY Configuration
+*/
+typedef struct{
+  char                  *ProfilePaths;
+}phy_cfg_t;
+
+/**
+**  PHY Instance
+*/
+typedef struct{
+  void                   *Queue;                ///< PHY Queue
+  adi_adrv9001_Device_t  *Adrv9001;             ///< ADRV9001 device
+  adrv9001_hal_t          Adrv9001Hal;          ///< ADRV9001 Instance
+  phy_stream_t            Stream[PhyPort_Num];  ///< Stream Data
+  uint32_t                ProfileCnt;           ///< Number of Profiles
+  phy_profile_t          *Profile;              ///< Indicates Active Profile
+  phy_profile_t          *ProfileList;          ///< Array of Profile Pointers
+}phy_t;
 
 typedef union{
   void             *p;

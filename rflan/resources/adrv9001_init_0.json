@@ -1315,12 +1315,5 @@
         "numCoeff": 13,
         "coefficients": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
       } ]
-  },
-  "customConfig": {
-    "initCalMask": [ 2097151, 2097151 ],
-    "deviceClockDivisor": 1,
-    "carrierFreq": [ 2450000000, 900000000 ],
-    "txAtten": [ 10000, 10000 ],
-    "rxGain": [ 247, 247 ]
   }
 }

@@ -49,9 +49,9 @@
 #include <stdbool.h>
 #include "phy_types.h"
 
-phy_status_t PhyStream_Disable(phy_t *Instance, phy_port_t Port );
-phy_status_t PhyStream_Enable(phy_t *Instance, phy_stream_req_t *Req );
-phy_status_t PhyStream_Initialize( phy_t *Instance, phy_stream_cfg_t *Cfg );
+phy_status_t PhyStream_Disable    (phy_t *Instance, phy_port_t Port );
+phy_status_t PhyStream_Enable     (phy_t *Instance, phy_stream_req_t *Req );
+phy_status_t PhyStream_Initialize ( phy_t *Instance );
 
 
 

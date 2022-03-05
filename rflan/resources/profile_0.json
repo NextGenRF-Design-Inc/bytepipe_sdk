@@ -1,0 +1,18 @@
+{
+  "Tx": [ {
+    "CarrierFreq": 2450000000,
+    "TxAtten": 10000,
+    "TxBoost": 0
+  }, {
+    "CarrierFreq": 900000000,
+    "TxAtten": 10000,
+    "TxBoost": 0
+  } ],
+  "Rx": [ {
+    "CarrierFreq": 2450000000
+  }, {
+    "CarrierFreq": 900000000
+  } ],  
+  "Adrv9001JsonFilename": "1:/adrv9001_init_0.json",
+  "Adrv9001StreamFilename": "1:/adrv9001_stream_0.bin"
+}

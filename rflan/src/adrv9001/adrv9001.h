@@ -52,26 +52,14 @@
 #include "adi_adrv9001.h"
 
 /**
- **  ADRV9001 Profile
- */
-typedef struct{
-  char           *JsonBuf;
-  uint32_t        JsonSize;
-  uint8_t        *StreamImage;
-  uint32_t        StreamSize;
-}adrv9001_profile_t;
-
-/**
- **  ADRV9001 Instance
+ **  Custom Config
  */
 typedef struct
 {
-  adi_adrv9001_Device_t   *Device;            ///< ADRV9001 Device
-  adi_adrv9001_Init_t     *Init;              ///< Initialization Parameters
-} adrv9001_t;
+  adi_adrv9001_Init_t    *Init;
+  uint32_t                CarrierFreq[2];
+} adrv9001_cfg_t;
 
-
-int32_t Adrv9001_UpdateProfile( adrv9001_t *Instance, adrv9001_profile_t *Profile );
-
+int32_t Adrv9001_Initialize( adi_adrv9001_Device_t *adrv9001Device_0, adrv9001_cfg_t *Cfg );
 
 #endif

@@ -82,8 +82,8 @@ phy_status_t PhyAdrv9001_SetCarrierFrequency  ( phy_t *Instance, phy_port_t Port
 phy_status_t PhyAdrv9001_SetInternalLoopBack  ( phy_t *Instance, phy_port_t Port, bool Enabled );
 
 phy_status_t PhyAdrv9001_ConfigureGpio        ( phy_t *Instance );
-phy_status_t PhyAdrv9001_LoadProfile          ( phy_t *Instance, phy_profile_t *Profile );
+phy_status_t PhyAdrv9001_LoadProfile          ( phy_t *Instance );
 phy_status_t PhyAdrv9001_ClearError           ( phy_t *Instance );
-phy_status_t PhyAdrv9001_Initialize           ( phy_t *Instance, phy_adrv9001_cfg_t *Cfg );
+phy_status_t PhyAdrv9001_Initialize           ( phy_t *Instance );
 
 #endif

@@ -46,10 +46,11 @@
 #include "phy_stream.h"
 #include "phy_adrv9001.h"
 #include "phy_task.h"
+#include "phy_profile.h"
 
 phy_status_t Phy_ToRfEnabled( phy_t *Instance, phy_port_t Port )
 {
-  if( Port >= PhyPort_Num )
+  if( (Port >= PhyPort_Num) && (Port != PhyPort_All) )
     return PhyStatus_InvalidPort;
 
   /* Create Request */
@@ -60,7 +61,7 @@ phy_status_t Phy_ToRfEnabled( phy_t *Instance, phy_port_t Port )
 
 phy_status_t Phy_ToRfPrimied( phy_t *Instance, phy_port_t Port )
 {
-  if( Port >= PhyPort_Num )
+  if( (Port >= PhyPort_Num) && (Port != PhyPort_All) )
     return PhyStatus_InvalidPort;
 
   /* Create Request */
@@ -71,7 +72,7 @@ phy_status_t Phy_ToRfPrimied( phy_t *Instance, phy_port_t Port )
 
 phy_status_t Phy_ToRfCalibrated( phy_t *Instance, phy_port_t Port )
 {
-  if( Port >= PhyPort_Num )
+  if( (Port >= PhyPort_Num) && (Port != PhyPort_All) )
     return PhyStatus_InvalidPort;
 
   /* Create Request */
@@ -82,7 +83,7 @@ phy_status_t Phy_ToRfCalibrated( phy_t *Instance, phy_port_t Port )
 
 phy_status_t Phy_StreamDisable( phy_t *Instance, phy_port_t Port )
 {
-  if( Port >= PhyPort_Num )
+  if( (Port >= PhyPort_Num) && (Port != PhyPort_All) )
     return PhyStatus_InvalidPort;
 
   int32_t status;
@@ -127,51 +128,81 @@ phy_status_t Phy_StreamEnable( phy_t *Instance, phy_stream_req_t *Stream )
   return status;
 }
 
-phy_status_t Phy_LoadProfile( phy_t *Instance, phy_profile_t *Profile )
+phy_status_t Phy_LoadProfile( phy_t *Instance, uint32_t Index )
 {
-  int32_t status;
+  /* Disable Streams */
+  Phy_StreamDisable( Instance, PhyPort_All );
 
-  for( int i = 0; i < PhyPort_Num; i++ )
-  {
-    /* Disable Potential Stream */
-    if(( status = Phy_StreamDisable( Instance, Instance->Stream[i].Port )) != 0)
-      return status;
-  }
+  /* Goto Calibrated State */
+  Phy_ToRfCalibrated( Instance, PhyPort_All );
 
-  phy_task_req_t req;
+  if( Index >= Instance->ProfileCnt )
+    return PhyStatus_InvalidParameter;
 
-  /* Create Memory for Profile */
-  if((req.p = calloc(1, sizeof(phy_profile_t))) == NULL)
-    return PhyStatus_MemoryError;
+  /* Create Request */
+  phy_task_req_t req = {.v = Index};
 
-  memcpy((void*)req.p, (void*)Profile, sizeof(phy_profile_t));
-
-  if((status = PhyTask_Send( Instance, (phy_task_t)PhyAdrv9001_LoadProfile, req )) != 0)
-  {
-    free(req.p);
-  }
-
-  return status;
+  return PhyTask_Send( Instance, (phy_task_t)PhyProfile_Load, req );
 }
 
 phy_status_t Phy_Initialize( phy_t *Instance, phy_cfg_t *Cfg )
 {
   int32_t status;
 
+  Instance->ProfileCnt = 1;
+
+  /* Determine Number of Profiles */
+  for(int i = 0; i < strlen(Cfg->ProfilePaths); i++)
+  {
+    if( strcmp(&Cfg->ProfilePaths[i], PHY_PROFILE_NAME_LIST_DELIMITER) == 0 )
+    {
+      Instance->ProfileCnt++;
+    }
+  }
+
+  /* Allocate Profile List */
+  Instance->ProfileList = calloc(Instance->ProfileCnt, sizeof(phy_profile_t));
+
+  /* Initialize Active Profile from list */
+  Instance->Profile = &Instance->ProfileList[0];
+
+  /* Get first Profile Name */
+  char *ProfilePath = strtok( Cfg->ProfilePaths, PHY_PROFILE_NAME_LIST_DELIMITER);
+
+  /* Initialize Each Profile */
+  while( ProfilePath != NULL )
+  {
+    /* Copy Profile Path */
+    strncpy(Instance->Profile->Path, ProfilePath, PHY_PROFILE_NAME_MAX_LEN );
+
+    /* Initialize Profile */
+    if((status = PhyProfile_Initialize( Instance, Instance->Profile )) != 0)
+    {
+      free(Instance->ProfileList);
+      return status;
+    }
+
+    /* Get Next Profile Path */
+    ProfilePath = strtok( NULL, PHY_PROFILE_NAME_LIST_DELIMITER);
+
+    /* Goto Next Profile */
+    Instance->Profile++;
+  }
+
+  /* Default to first Profile */
+  Instance->Profile = &Instance->ProfileList[0];
+
   /* Initialize Task */
   if((status = PhyTask_Initialize( Instance )) != PhyStatus_Success)
     return status;
 
-  phy_task_req_t req = { .p = NULL };
-
-  /* Schedule Stream Initialize */
-  if((status = PhyTask_Send( Instance, (phy_task_t)PhyStream_Initialize, req )) != PhyStatus_Success)
+  /* Initialize Stream */
+  if((status = PhyStream_Initialize( Instance )) != PhyStatus_Success)
     return status;
 
-  /* Schedule ADRV9001 Initialize */
-  if((status = PhyTask_Send( Instance, (phy_task_t)PhyAdrv9001_Initialize, req )) != PhyStatus_Success)
+  /* Initialize ADRV9001 */
+  if((status = PhyAdrv9001_Initialize( Instance )) != 0)
     return status;
-
 
   return PhyStatus_Success;
 }

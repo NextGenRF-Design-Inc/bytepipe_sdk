@@ -353,7 +353,6 @@ int32_t axi_dmac_init(axi_dmac_t **dmac_core, axi_dmac_init_t *init)
   XScuGic_Connect(&xInterruptController, init->irqId, (XInterruptHandler)axi_dmac_default_isr, dmac );
 	XScuGic_Enable(&xInterruptController, init->irqId);
 
-
 	return SUCCESS;
 }
 

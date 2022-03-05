@@ -66,13 +66,13 @@
                                ( p == PhyStatus_Adrv9001Error )?            "PHY ADRV9001 Error" :              \
                                ( p == PhyStatus_IqStreamAbort )?            "PHY IQ Stream Abort" : "Unknown")
 
-phy_status_t Phy_ToRfEnabled    ( phy_t *Instance, phy_port_t Port );
-phy_status_t Phy_ToRfPrimied    ( phy_t *Instance, phy_port_t Port );
-phy_status_t Phy_ToRfCalibrated ( phy_t *Instance, phy_port_t Port );
-phy_status_t Phy_StreamDisable  ( phy_t *Instance, phy_port_t Port );
-phy_status_t Phy_StreamEnable   ( phy_t *Instance, phy_stream_req_t *Stream );
-phy_status_t Phy_LoadProfile    ( phy_t *Instance, phy_profile_t *Profile );
-phy_status_t Phy_Initialize     ( phy_t *Instance, phy_cfg_t *Cfg );
+phy_status_t Phy_ToRfEnabled        ( phy_t *Instance, phy_port_t Port );
+phy_status_t Phy_ToRfPrimied        ( phy_t *Instance, phy_port_t Port );
+phy_status_t Phy_ToRfCalibrated     ( phy_t *Instance, phy_port_t Port );
+phy_status_t Phy_StreamDisable      ( phy_t *Instance, phy_port_t Port );
+phy_status_t Phy_StreamEnable       ( phy_t *Instance, phy_stream_req_t *Stream );
+phy_status_t Phy_LoadProfile        ( phy_t *Instance, uint32_t Index );
+phy_status_t Phy_Initialize         ( phy_t *Instance, phy_cfg_t *Cfg );
 
 
 

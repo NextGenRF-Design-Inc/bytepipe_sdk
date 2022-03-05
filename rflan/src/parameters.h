@@ -119,6 +119,14 @@ extern "C"
 #define AXI_ADRV9001_CTRL_RSTN_MASK     (0x00000100)
 
 #define PHY_STATUS_OFFSET               (-2000)
+#define PIB_STATUS_OFFSET               (-3000)
+
+#define PHY_PROFILE_NAME_MAX_LEN        (64)
+#define PHY_PROFILE_NAME_LIST_DELIMITER (",")
+#define PHY_PROFILE_MAX_CNT             (4)
+#define PHY_RX_CNT                      (2)
+#define PHY_TX_CNT                      (2)
+#define PHY_LO_CNT                      (2)
 
 #define PHY_STREAM_DMA_TX1_BASEADDR     (XPAR_TX1_DMA_BASEADDR)
 #define PHY_STREAM_DMA_TX2_BASEADDR     (XPAR_TX2_DMA_BASEADDR)

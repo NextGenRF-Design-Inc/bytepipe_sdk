@@ -70,9 +70,9 @@ static const CliCmd_t PhyCliLoadProfileDef =
 {
   "PhyLoadProfile",
   "PhyLoadProfile:  Load PHY Profile \r\n"
-  "PhyLoadProfile < ProfileName, StreamImageName >\r\n\r\n",
+  "PhyLoadProfile < Index >\r\n\r\n",
   (CliCmdFn_t)PhyCli_LoadProfile,
-  2,
+  1,
   NULL
 };
 

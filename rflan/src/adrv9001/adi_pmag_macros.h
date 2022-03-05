@@ -46,10 +46,6 @@ snprintf(copyBuffer, \
 COPY_TOKEN_TO_BUFFER(tokenArray, tokenIndex, jsonBuffer, intParsingBuffer) \
 intDestination = atoi(intParsingBuffer);
 
-#define ADI_STORE_LONG(tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longDestination) \
-COPY_TOKEN_TO_BUFFER(tokenArray, tokenIndex, jsonBuffer, longParsingBuffer) \
-longDestination = atoll(longParsingBuffer);
-
 #define ADI_STORE_BOOL(tokenArray, tokenIndex, jsonBuffer, boolParsingBuffer, boolDestination) \
 COPY_TOKEN_TO_BUFFER(tokenArray, tokenIndex, jsonBuffer, boolParsingBuffer) \
 boolDestination = ('0' != boolParsingBuffer[0]) && ('f' != boolParsingBuffer[0]) && ('F' != boolParsingBuffer[0]);
@@ -66,9 +62,6 @@ ADI_IF_JSON_EQ(jsonBuffer, tokenArray[tokenIndex], varName) { \
 
 #define ADI_PROCESS_INT(tokenArray, tokenIndex, jsonBuffer, intParsingBuffer, intDestination, intName) \
 ADI_PROCESS_X(ADI_STORE_INT, tokenArray, tokenIndex, jsonBuffer, intParsingBuffer, intDestination, intName)
-
-#define ADI_PROCESS_LONG(tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longDestination, longName) \
-ADI_PROCESS_X(ADI_STORE_LONG, tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longDestination, longName)
 
 #define ADI_PROCESS_BOOL(tokenArray, tokenIndex, jsonBuffer, boolParsingBuffer, boolDestination, boolName) \
 ADI_PROCESS_X(ADI_STORE_BOOL, tokenArray, tokenIndex, jsonBuffer, boolParsingBuffer, boolDestination, boolName)
@@ -91,9 +84,6 @@ ADI_IF_JSON_EQ(jsonBuffer, tokenArray[tokenIndex], arrayName) { \
 
 #define ADI_PROCESS_ARRAY_INT(tokenArray, tokenIndex, jsonBuffer, intParsingBuffer, intArrayDestination, intArrayName) \
 ADI_PROCESS_ARRAY_X(ADI_STORE_INT(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, intArrayDestination[k]), tokenArray, tokenIndex, jsonBuffer, intParsingBuffer, intArrayName)
-
-#define ADI_PROCESS_ARRAY_LONG(tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longArrayDestination, longArrayName) \
-ADI_PROCESS_ARRAY_X(ADI_STORE_LONG(tokenArray, tokenIndex, jsonBuffer, parsingBuffer, longArrayDestination[k]), tokenArray, tokenIndex, jsonBuffer, longParsingBuffer, longArrayName)
 
 #define ADI_PROCESS_STRUCT_X(X, tokenArray, tokenIndex, jsonBuffer, parsingBuffer, structName) \
 ADI_IF_JSON_EQ(jsonBuffer, tokenArray[tokenIndex], structName) { \
