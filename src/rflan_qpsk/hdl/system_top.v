@@ -1,0 +1,113 @@
+`timescale 1ns/100ps
+
+module system_top (
+  inout  wire             adrv9001_sclk,
+  inout  wire             adrv9001_mosi,
+  inout  wire             adrv9001_miso,
+  inout  wire             adrv9001_csn,
+
+  output wire             adrv9001_rstn,
+  output wire             adrv9001_tx1_en,
+  output wire             adrv9001_tx2_en,
+  output wire             adrv9001_rx1_en,
+  output wire             adrv9001_rx2_en,
+  input  wire             adrv9001_irq,
+  inout  wire [11:0]      adrv9001_dgpio,  
+  
+  input  wire             adrv9001_rx1_dclk_n,
+  input  wire             adrv9001_rx1_dclk_p,
+  input  wire             adrv9001_rx1_idata_n,
+  input  wire             adrv9001_rx1_idata_p,
+  input  wire             adrv9001_rx1_qdata_n,
+  input  wire             adrv9001_rx1_qdata_p,
+  input  wire             adrv9001_rx1_strobe_n,
+  input  wire             adrv9001_rx1_strobe_p,
+
+  input  wire             adrv9001_rx2_dclk_n,
+  input  wire             adrv9001_rx2_dclk_p,
+  input  wire             adrv9001_rx2_idata_n,
+  input  wire             adrv9001_rx2_idata_p,
+  input  wire             adrv9001_rx2_qdata_n,
+  input  wire             adrv9001_rx2_qdata_p,
+  input  wire             adrv9001_rx2_strobe_n,
+  input  wire             adrv9001_rx2_strobe_p,
+
+  output wire             adrv9001_tx1_dclk_n,
+  output wire             adrv9001_tx1_dclk_p,
+  input  wire             adrv9001_tx1_ref_clk_n,
+  input  wire             adrv9001_tx1_ref_clk_p,
+  output wire             adrv9001_tx1_idata_n,
+  output wire             adrv9001_tx1_idata_p,
+  output wire             adrv9001_tx1_qdata_n,
+  output wire             adrv9001_tx1_qdata_p,
+  output wire             adrv9001_tx1_strobe_n,
+  output wire             adrv9001_tx1_strobe_p,
+  
+  output wire             adrv9001_tx2_dclk_n,
+  output wire             adrv9001_tx2_dclk_p,
+  input  wire             adrv9001_tx2_ref_clk_n,
+  input  wire             adrv9001_tx2_ref_clk_p,
+  output wire             adrv9001_tx2_idata_n,
+  output wire             adrv9001_tx2_idata_p,
+  output wire             adrv9001_tx2_qdata_n,
+  output wire             adrv9001_tx2_qdata_p,
+  output wire             adrv9001_tx2_strobe_n,
+  output wire             adrv9001_tx2_strobe_p
+    
+);       
+          
+system system_i
+   (.adrv9001_csn(adrv9001_csn),
+    .adrv9001_dgpio(adrv9001_dgpio),
+    .adrv9001_irq(adrv9001_irq),
+    .adrv9001_miso(adrv9001_miso),
+    .adrv9001_mosi(adrv9001_mosi),
+    .adrv9001_rstn(adrv9001_rstn),
+    .adrv9001_rx1_dclk_n(adrv9001_rx1_dclk_n),
+    .adrv9001_rx1_dclk_p(adrv9001_rx1_dclk_p),
+    .adrv9001_rx1_en(adrv9001_rx1_en),
+    .adrv9001_rx1_idata_n(adrv9001_rx1_idata_n),
+    .adrv9001_rx1_idata_p(adrv9001_rx1_idata_p),
+    .adrv9001_rx1_qdata_n(adrv9001_rx1_qdata_n),
+    .adrv9001_rx1_qdata_p(adrv9001_rx1_qdata_p),
+    .adrv9001_rx1_strobe_n(adrv9001_rx1_strobe_n),
+    .adrv9001_rx1_strobe_p(adrv9001_rx1_strobe_p),
+    .adrv9001_rx2_dclk_n(adrv9001_rx2_dclk_n),
+    .adrv9001_rx2_dclk_p(adrv9001_rx2_dclk_p),
+    .adrv9001_rx2_en(adrv9001_rx2_en),
+    .adrv9001_rx2_idata_n(adrv9001_rx2_idata_n),
+    .adrv9001_rx2_idata_p(adrv9001_rx2_idata_p),
+    .adrv9001_rx2_qdata_n(adrv9001_rx2_qdata_n),
+    .adrv9001_rx2_qdata_p(adrv9001_rx2_qdata_p),
+    .adrv9001_rx2_strobe_n(adrv9001_rx2_strobe_n),
+    .adrv9001_rx2_strobe_p(adrv9001_rx2_strobe_p),
+    .adrv9001_sclk(adrv9001_sclk),
+    .adrv9001_tx1_dclk_n(adrv9001_tx1_dclk_n),
+    .adrv9001_tx1_dclk_p(adrv9001_tx1_dclk_p),
+    .adrv9001_tx1_en(adrv9001_tx1_en),
+    .adrv9001_tx1_idata_n(adrv9001_tx1_idata_n),
+    .adrv9001_tx1_idata_p(adrv9001_tx1_idata_p),
+    .adrv9001_tx1_qdata_n(adrv9001_tx1_qdata_n),
+    .adrv9001_tx1_qdata_p(adrv9001_tx1_qdata_p),
+    .adrv9001_tx1_ref_clk_n(adrv9001_tx1_ref_clk_n),
+    .adrv9001_tx1_ref_clk_p(adrv9001_tx1_ref_clk_p),
+    .adrv9001_tx1_strobe_n(adrv9001_tx1_strobe_n),
+    .adrv9001_tx1_strobe_p(adrv9001_tx1_strobe_p),
+    .adrv9001_tx2_dclk_n(adrv9001_tx2_dclk_n),
+    .adrv9001_tx2_dclk_p(adrv9001_tx2_dclk_p),
+    .adrv9001_tx2_en(adrv9001_tx2_en),
+    .adrv9001_tx2_idata_n(adrv9001_tx2_idata_n),
+    .adrv9001_tx2_idata_p(adrv9001_tx2_idata_p),
+    .adrv9001_tx2_qdata_n(adrv9001_tx2_qdata_n),
+    .adrv9001_tx2_qdata_p(adrv9001_tx2_qdata_p),
+    .adrv9001_tx2_ref_clk_n(adrv9001_tx2_ref_clk_n),
+    .adrv9001_tx2_ref_clk_p(adrv9001_tx2_ref_clk_p),
+    .adrv9001_tx2_strobe_n(adrv9001_tx2_strobe_n),
+    .adrv9001_tx2_strobe_p(adrv9001_tx2_strobe_p)
+ );
+        
+
+endmodule
+
+// ***************************************************************************
+// ***************************************************************************

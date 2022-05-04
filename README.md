@@ -8,33 +8,25 @@ The BytePipe_x9002 SOM is a Software Defined Radio (SDR) System on Module (SOM) 
 
 The BytePipe Software Development Kit (SDK) provides a framework for quickly evaluating the BytePipe hardware platform.  It also serves as a starting point for users to create custom applications.  Below is a high level block diagram of the software.  The software includes Linux Desktop running on one of the Cortex A53 application processors and the RFLAN FreeRTOS application running on one of the Cortex R5 DSP processors.  The programmable logic can be used to support a wide variety of RF communication protocols and includes MathWorks examples.  
 
-![sdk_01](docs/Architecture/sdk_01.png)
+![sdk_01](docs/architecture/sdk_01.png)
 
 ---
 
-# Evaluation Quick Start
+# Software Overview
 
-To get started with evaluation of the BytePipe and the software development kit users can load the latest pre-compiled release and immediately start interacting with the BytePipe hardware.  Detailed instructions can be found in the [Quick Start Guide](docs/QuickStart/QuickStart.md).
+The BytePipe SDK software is broken into several source folders as shown below.    
 
+![src_overview](docs/architecture/src_overview.png)
 
-# Development Quick Start
+The following provides links to each source folder documentation.
 
-To begin development using the BytePipe SDK, start by reviewing the [BytePipe SDK Software Architecture](docs/Architecture/Architecture.md).  This document details the overall software architecture along with the Linux, RFLAN, and programmable logic components.  
-
-The environment and design tools required for building the BytePipe SDK components are detailed in [Build Environment](docs/BuildEnv/BuildEnv.md).
-
-There are several binaries that have to be built for the BytePipe to successfully boot.  From a high level there are three build:  programmable logic, C99 bare-metal or RTOS RFLAN, and Linux.  Each process can be built from source as described below.  A combination of previously known good images can also be used while building only the interested components from source.  Build instructions for each component are documented in [Building RFLAN](docs/RflanBuild/RflanBuild.md), [Building HDL](docs/HdlBuild/HdlBuild.md), and [Building Linux](docs/LinuxBuild/LinuxBuild.md).  The HDL must be built before the RFLAN and Linux components can be built.  However, if the user is only interested in the RFLAN or Linux component, the latest HDL release can be downloaded and used for building these components.  
-
-![build_components](docs/Architecture/build_components.png)
-
-# User Interface
-
-The BytePipe SDK supports several user interfaces.  The primary user interface is through the Linux bash command line by connecting to the serial port or via SSH.   
-
-For interfacing to the RFLAN directly refer to [RFLAN CLI](docs/RflanCli/RflanCli.md).  For interfacing to the Linux framework refer to [Industrial I/O](docs/IIO/IIO.md) and [Ubuntu Desktop](docs/Ubuntu/Ubuntu.md).
-
-The [Industrial I/O](docs/IIO/IIO.md) Linux kernel driver supports several off the shelf programs including [MATLAB](docs/Matlab/Matlab.md), [GNU Radio](docs/GnuRadio/GnuRadio.md), [IIO-Oscilloscope](docs/IIO-Oscilloscope/IIO-Oscilloscope.md), and many other tools that support the [Industrial I/O Driver](https://www.kernel.org/doc/html/v5.0/driver-api/iio/index.html).
-
+|  Document                                                         | Description                                                   |
+|-------------------------------------------------------------------|---------------------------------------------------------------|
+| [adrv9001-sdk](src/adrv9001-sdk/README.md)                        | Source files for duplicating ADRV9001-SDK Evaluation Software on the BytePipe_x9002 | 
+| [axi_adrv9001](src/axi_adrv9001/README.md)                        | Production optimized ADRV9001 interface for BytePipe | 
+| [bpToolbox](src/bpToolbox/README.md)                              | Matlab toolbox for interfacing to BytePipe | 
+| [rflan_iqdma](src/rflan_iqdma/README.md)                          | Production example streaming IQ data to RPU | 
+| [rflan_qpsk](src/axi_dma/README.md)                               | QPSK modem example using RPU and Mathworks HDL Coder | 
 
 # Hardware Overview
 
@@ -42,9 +34,9 @@ The following hardware platforms are supported by the BytePipe_SDK.
 
 |  Document                                                 | Description                           |                                                      |
 |-----------------------------------------------------------|---------------------------------------|------------------------------------------------------|
-| [BytePipe_x900x](docs/BytePipe_x900x/BytePipe_x900x.md)   | BytePipe ZynqMP / ADRV900x SOM        | ![pic](docs/BytePipe_x900x/bytepipe_x900x.png)       |
-| [BytePipe HDK](docs/hdk/hdk.md)                           | BytePipe Hardware Development Kit     | ![pic](docs/hdk/platform.png)                        |
-| [Radio Carbon Frontend](docs/RadioCarbon/RadioCarbon.md)  | Richardson RFPD Radio Carbon Frontend | ![pic](docs/RadioCarbon/radio_carbon.png)            |
+| [BytePipe_x900x](docs/hardware/BytePipe_x900x/BytePipe_x900x.md)   | BytePipe ZynqMP / ADRV900x SOM        | ![pic](docs/hardware/BytePipe_x900x/bytepipe_x900x.png)       |
+| [BytePipe HDK](docs/hardware/hdk/hdk.md)                           | BytePipe Hardware Development Kit     | ![pic](docs/hardware/hdk/platform.png)                        |
+
 
 
 # DISCLAIMER
