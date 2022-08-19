@@ -1,0 +1,486 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdio.h>
+#include "adrv9001_pib.h"
+
+#define ADRV9001_PIB_FLAG_REBOOT    (0x08)
+#define ADRV9001_PIB_FLAG_VIRTUAL   (0x10)
+
+/* PIB Definition */
+static pib_def_t Adrv9001PibDef[] =
+{
+//  Name                                                      Address                                          Storage Type                       Flags
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+  { "HwVer",                                offsetof(adrv9001_params_t, HwVer),                                                       PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "LogPath",                              offsetof(adrv9001_params_t, LogPath),                                                     PibTypeStr,       PIB_FLAGS_DEFAULT  },
+  { "Tx1Attn",                              offsetof(adrv9001_params_t, Tx1Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT  },
+  { "Tx2Attn",                              offsetof(adrv9001_params_t, Tx2Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT  },
+  { "Tx1Boost",                             offsetof(adrv9001_params_t, Tx1Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT  },
+  { "Tx2Boost",                             offsetof(adrv9001_params_t, Tx1Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT  },
+  { "Tx1DpdEnable",                         offsetof(adrv9001_params_t, Tx1DpdInitCfg.enable),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdAmplifierType",                  offsetof(adrv9001_params_t, Tx1DpdInitCfg.amplifierType),                                 PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdLutSize",                        offsetof(adrv9001_params_t, Tx1DpdInitCfg.lutSize),                                       PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdModel",                          offsetof(adrv9001_params_t, Tx1DpdInitCfg.model),                                         PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdChangeModelTapOrders",           offsetof(adrv9001_params_t, Tx1DpdInitCfg.changeModelTapOrders),                          PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdClgcEnable",                     offsetof(adrv9001_params_t, Tx1DpdInitCfg.clgcEnable),                                    PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdPreLutScale",                    offsetof(adrv9001_params_t, Tx1DpdInitCfg.preLutScale),                                   PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdNumberofSamples",                offsetof(adrv9001_params_t, Tx1DpdCfg.numberOfSamples),                                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdAdditionalPowerScale",           offsetof(adrv9001_params_t, Tx1DpdCfg.additionalPowerScale),                              PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdCountsLessThanPowerThreshold",   offsetof(adrv9001_params_t, Tx1DpdCfg.countsLessThanPowerThreshold),                      PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdCountsGreaterThanPeakThreshold", offsetof(adrv9001_params_t, Tx1DpdCfg.countsGreaterThanPeakThreshold),                    PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdImmediateLutSwitching",          offsetof(adrv9001_params_t, Tx1DpdCfg.immediateLutSwitching),                             PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdUseSpecialFrame",                offsetof(adrv9001_params_t, Tx1DpdCfg.useSpecialFrame),                                   PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdResetLuts",                      offsetof(adrv9001_params_t, Tx1DpdCfg.resetLuts),                                         PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdSamplingRate_Hz",                offsetof(adrv9001_params_t, Tx1DpdCfg.dpdSamplingRate_Hz),                                PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdRxTxNormalizationLowerThreshold",offsetof(adrv9001_params_t, Tx1DpdCfg.rxTxNormalizationLowerThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdRxTxNormalizationUpperThreshold",offsetof(adrv9001_params_t, Tx1DpdCfg.rxTxNormalizationUpperThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdDetectionPowerThreshold",        offsetof(adrv9001_params_t, Tx1DpdCfg.detectionPowerThreshold),                           PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdDetectionPeakThreshold",         offsetof(adrv9001_params_t, Tx1DpdCfg.detectionPeakThreshold),                            PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdTimeFilterCoefficient",          offsetof(adrv9001_params_t, Tx1DpdCfg.timeFilterCoefficient),                             PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdClgcLoopOpen",                   offsetof(adrv9001_params_t, Tx1DpdCfg.clgcLoopOpen),                                      PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdClgcFilterAlpha",                offsetof(adrv9001_params_t, Tx1DpdCfg.clgcFilterAlpha),                                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdClgcGainTarget_dB",              offsetof(adrv9001_params_t, Tx1DpdCfg.clgcGainTarget_HundredthdB),                        PibTypeS32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdClgcLastGain_HundredthdB",       offsetof(adrv9001_params_t, Tx1DpdCfg.clgcLastGain_HundredthdB),                          PibTypeS32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1DpdClgcFilteredGain_HundredthdB",   offsetof(adrv9001_params_t, Tx1DpdCfg.clgcFilteredGain_HundredthdB),                      PibTypeS32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdEnable",                         offsetof(adrv9001_params_t, Tx2DpdInitCfg.enable),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdAmplifierType",                  offsetof(adrv9001_params_t, Tx2DpdInitCfg.amplifierType),                                 PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdLutSize",                        offsetof(adrv9001_params_t, Tx2DpdInitCfg.lutSize),                                       PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdModel",                          offsetof(adrv9001_params_t, Tx2DpdInitCfg.model),                                         PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdChangeModelTapOrders",           offsetof(adrv9001_params_t, Tx2DpdInitCfg.changeModelTapOrders),                          PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdClgcEnable",                     offsetof(adrv9001_params_t, Tx2DpdInitCfg.clgcEnable),                                    PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdPreLutScale",                    offsetof(adrv9001_params_t, Tx2DpdInitCfg.preLutScale),                                   PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdNumberofSamples",                offsetof(adrv9001_params_t, Tx2DpdCfg.numberOfSamples),                                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdAdditionalPowerScale",           offsetof(adrv9001_params_t, Tx2DpdCfg.additionalPowerScale),                              PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdCountsLessThanPowerThreshold",   offsetof(adrv9001_params_t, Tx2DpdCfg.countsLessThanPowerThreshold),                      PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdCountsGreaterThanPeakThreshold", offsetof(adrv9001_params_t, Tx2DpdCfg.countsGreaterThanPeakThreshold),                    PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdImmediateLutSwitching",          offsetof(adrv9001_params_t, Tx2DpdCfg.immediateLutSwitching),                             PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdUseSpecialFrame",                offsetof(adrv9001_params_t, Tx2DpdCfg.useSpecialFrame),                                   PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdResetLuts",                      offsetof(adrv9001_params_t, Tx2DpdCfg.resetLuts),                                         PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdSamplingRate_Hz",                offsetof(adrv9001_params_t, Tx2DpdCfg.dpdSamplingRate_Hz),                                PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdRxTxNormalizationLowerThreshold",offsetof(adrv9001_params_t, Tx2DpdCfg.rxTxNormalizationLowerThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdRxTxNormalizationUpperThreshold",offsetof(adrv9001_params_t, Tx2DpdCfg.rxTxNormalizationUpperThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdDetectionPowerThreshold",        offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPowerThreshold),                           PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdDetectionPeakThreshold",         offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPeakThreshold),                            PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdTimeFilterCoefficient",          offsetof(adrv9001_params_t, Tx2DpdCfg.timeFilterCoefficient),                             PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdClgcLoopOpen",                   offsetof(adrv9001_params_t, Tx2DpdCfg.clgcLoopOpen),                                      PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdClgcFilterAlpha",                offsetof(adrv9001_params_t, Tx2DpdCfg.clgcFilterAlpha),                                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdClgcGainTarget_dB",              offsetof(adrv9001_params_t, Tx2DpdCfg.clgcGainTarget_HundredthdB),                        PibTypeS32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdClgcLastGain_HundredthdB",       offsetof(adrv9001_params_t, Tx2DpdCfg.clgcLastGain_HundredthdB),                          PibTypeS32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdClgcFilteredGain_HundredthdB",   offsetof(adrv9001_params_t, Tx2DpdCfg.clgcFilteredGain_HundredthdB),                      PibTypeS32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1ExternalLoopbackPower",             offsetof(adrv9001_params_t, tx.txProfile[0].txPeakLoopBackPower),                         PibTypeS16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1ExternalPathDelay",                 offsetof(adrv9001_params_t, Tx1ExternalPathDelay),                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2ExternalLoopbackPower",             offsetof(adrv9001_params_t, tx.txProfile[1].txPeakLoopBackPower),                         PibTypeS16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2ExternalPathDelay",                 offsetof(adrv9001_params_t, Tx2ExternalPathDelay),                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx1CarrierFrequency",                  0,                                                                                        PibTypeU64,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2CarrierFrequency",                  0,                                                                                        PibTypeU64,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx1CarrierFrequency",                  0,                                                                                        PibTypeU64,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx2CarrierFrequency",                  0,                                                                                        PibTypeU64,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx1IqData",                            0,                                                                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2IqData",                            0,                                                                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx1IqData",                            0,                                                                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx2IqData",                            0,                                                                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx1IqDataPath",                        0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2IqDataPath",                        0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Dgpio",                                0,                                                                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "DgpioDir",                             0,                                                                                        PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "VcTcxo",                               0,                                                                                        PibTypeFloat,     PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx1RadioState",                        0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2RadioState",                        0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx1RadioState",                        0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx2RadioState",                        0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "TxRx1SsiLoopBack",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "TxRx2SsiLoopBack",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "FirmwareVersion",                      0,                                                                                        PibTypeStr,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "APIVersion",                           0,                                                                                        PibTypeStr,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "SiliconVersion",                       0,                                                                                        PibTypeStr,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "Temp",                                 0,                                                                                        PibTypeS16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "Rx1Rssi",                              0,                                                                                        PibTypeFloat,     PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "Rx2Rssi",                              0,                                                                                        PibTypeFloat,     PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "Rx1CurGainIndex",                      0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "Rx2CurGainIndex",                      0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL | PIB_FLAG_READ_ONLY },
+  { "DeviceClock_kHz",                      offsetof(adrv9001_params_t, clocks.deviceClock_kHz),                                      PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ClkPllVcoFreq_daHz",                   offsetof(adrv9001_params_t, clocks.clkPllVcoFreq_daHz),                                   PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ClkPllHsDiv",                          offsetof(adrv9001_params_t, clocks.clkPllHsDiv),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ClkPllMode",                           offsetof(adrv9001_params_t, clocks.clkPllMode),                                           PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Clk1105Div",                           offsetof(adrv9001_params_t, clocks.clk1105Div),                                           PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ArmClkDiv",                            offsetof(adrv9001_params_t, clocks.armClkDiv),                                            PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ArmPowerSavingClkDiv",                 offsetof(adrv9001_params_t, clocks.armPowerSavingClkDiv),                                 PibTypeU16,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "RefClockOutEnable",                    offsetof(adrv9001_params_t, clocks.refClockOutEnable),                                    PibTypeU8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "AuxPllPower",                          offsetof(adrv9001_params_t, clocks.auxPllPower),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ClkPllPower",                          offsetof(adrv9001_params_t, clocks.clkPllPower),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "PadRefClkDrv",                         offsetof(adrv9001_params_t, clocks.padRefClkDrv),                                         PibTypeU8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ExtLo1OutFreq_kHz",                    offsetof(adrv9001_params_t, clocks.extLo1OutFreq_kHz),                                    PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ExtLo2OutFreq_kHz",                    offsetof(adrv9001_params_t, clocks.extLo2OutFreq_kHz),                                    PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "RfPll1LoMode",                         offsetof(adrv9001_params_t, clocks.rfPll1LoMode),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "RfPll2LoMode",                         offsetof(adrv9001_params_t, clocks.rfPll2LoMode),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Ext1LoType",                           offsetof(adrv9001_params_t, clocks.ext1LoType),                                           PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Ext2LoType",                           offsetof(adrv9001_params_t, clocks.ext2LoType),                                           PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx1RfInputSel",                        offsetof(adrv9001_params_t, clocks.rx1RfInputSel),                                        PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx2RfInputSel",                        offsetof(adrv9001_params_t, clocks.rx2RfInputSel),                                        PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ExtLo1Divider",                        offsetof(adrv9001_params_t, clocks.extLo1Divider),                                        PibTypeU16,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "ExtLo2Divider",                        offsetof(adrv9001_params_t, clocks.extLo2Divider),                                        PibTypeU16,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "RfPllPhaseSyncMode",                   offsetof(adrv9001_params_t, clocks.rfPllPhaseSyncMode),                                   PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx1LoSelect",                          offsetof(adrv9001_params_t, clocks.rx1LoSelect),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx2LoSelect",                          offsetof(adrv9001_params_t, clocks.rx2LoSelect),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx1LoSelect",                          offsetof(adrv9001_params_t, clocks.tx1LoSelect),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx2LoSelect",                          offsetof(adrv9001_params_t, clocks.tx2LoSelect),                                          PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx1LoDivMode",                         offsetof(adrv9001_params_t, clocks.rx1LoDivMode),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx2LoDivMode",                         offsetof(adrv9001_params_t, clocks.rx2LoDivMode),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx1LoDivMode",                         offsetof(adrv9001_params_t, clocks.tx1LoDivMode),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx2LoDivMode",                         offsetof(adrv9001_params_t, clocks.tx2LoDivMode),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "LoGen1Select",                         offsetof(adrv9001_params_t, clocks.loGen1Select),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "LoGen2Select",                         offsetof(adrv9001_params_t, clocks.loGen2Select),                                         PibTypeS8,        PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx1SampleRate",                        offsetof(adrv9001_params_t, tx.txProfile[0].txInterfaceSampleRate_Hz),                    PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx2SampleRate",                        offsetof(adrv9001_params_t, tx.txProfile[1].txInterfaceSampleRate_Hz),                    PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx1SampleRate",                        offsetof(adrv9001_params_t, rx.rxChannelCfg[0].profile.rxInterfaceSampleRate_Hz),         PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Rx2SampleRate",                        offsetof(adrv9001_params_t, rx.rxChannelCfg[1].profile.rxInterfaceSampleRate_Hz),         PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+};
+
+static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char *name, char *str )
+{
+  int32_t status = 0;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+  int32_t id;
+
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if(strncmp(name, "Tx1", 3) == 0 )
+  {
+    Port = ADI_TX;
+    Channel = ADI_CHANNEL_1;
+  }
+  else if(strncmp(name, "Tx2", 3) == 0 )
+  {
+    Port = ADI_TX;
+    Channel = ADI_CHANNEL_2;
+  }
+  else if(strncmp(name, "Rx1", 3) == 0 )
+  {
+    Port = ADI_RX;
+    Channel = ADI_CHANNEL_1;
+  }
+  else if(strncmp(name, "Rx2", 3) == 0 )
+  {
+    Port = ADI_RX;
+    Channel = ADI_CHANNEL_2;
+  }
+
+  status = Adrv9001Status_InvalidParameter;
+
+  if( strcmp( &name[3], "CarrierFrequency") == 0 )
+  {
+    adi_adrv9001_Carrier_t *tmp;
+
+    if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+      if( Instance->Params->clocks.tx1LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Params->Lo1Carrier;
+      else
+        tmp = &Instance->Params->Lo2Carrier;
+    else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+      if( Instance->Params->clocks.tx2LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Params->Lo1Carrier;
+      else
+        tmp = &Instance->Params->Lo2Carrier;
+    else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+      if( Instance->Params->clocks.rx1LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Params->Lo1Carrier;
+      else
+        tmp = &Instance->Params->Lo2Carrier;
+    else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+      if( Instance->Params->clocks.rx2LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Params->Lo1Carrier;
+      else
+        tmp = &Instance->Params->Lo2Carrier;
+    else
+      return Adrv9001Status_InvalidParameter;
+
+    if((status = adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, tmp )) == 0)
+    {
+      adi_adrv9001_ChannelState_e State;
+
+      Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp->carrierFrequency_Hz);
+
+      if((status = adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &State )) == 0)
+      {
+        if( State == ADI_ADRV9001_CHANNEL_CALIBRATED )
+          status = adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, Port, Channel, tmp);
+        else
+          status = Adrv9001Status_InvalidState;
+      }
+    }
+  }
+
+  else if( strcmp( &name[3], "IqData") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    AxiAdrv9001_SetData(Instance->CtrlBase, Port, Channel, tmp);
+  }
+
+  else if( strcmp( &name[3], "IqDataPath") == 0 )
+  {
+    axi_adrv9001_data_path_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    AxiAdrv9001_SetDataPath(Instance->CtrlBase, Port, Channel, tmp);
+  }
+
+  else if( strcmp( name, "Dgpio") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    AxiAdrv9001_SetDgpio(Instance->CtrlBase, tmp);
+  }
+
+  else if( strcmp( name, "DgpioDir") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    AxiAdrv9001_SetDgpioDir(Instance->CtrlBase, tmp);
+  }
+
+  else if( strcmp( name, "VcTcxo") == 0 )
+  {
+    float tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = Adrv9001_SetVcTcxo(Instance, tmp);
+  }
+
+  else if( strcmp( &name[3], "RadioState") == 0 )
+  {
+    adi_adrv9001_ChannelState_e State;
+
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &State);
+
+    if( State == ADI_ADRV9001_CHANNEL_CALIBRATED )
+      status = Adrv9001_ToCalibrated(Instance, Port, Channel);
+    else if( State == ADI_ADRV9001_CHANNEL_PRIMED )
+      status = Adrv9001_ToPrimed(Instance, Port, Channel);
+    else if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+      status = Adrv9001_ToRfEnabled(Instance, Port, Channel);
+    else
+      status = Adrv9001Status_InvalidParameter;
+  }
+
+  else if( strcmp( name, "TxRx1SsiLoopBack") == 0 )
+  {
+    uint8_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, tmp);
+  }
+
+  else if( strcmp( name, "TxRx2SsiLoopBack") == 0 )
+  {
+    uint8_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, tmp);
+  }
+
+
+
+  return status;
+}
+
+static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *name, char *str )
+{
+  int32_t status = 0;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+  int32_t id;
+
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if(strncmp(name, "Tx1", 3) == 0 )
+  {
+    Port = ADI_TX;
+    Channel = ADI_CHANNEL_1;
+  }
+  else if(strncmp(name, "Tx2", 3) == 0 )
+  {
+    Port = ADI_TX;
+    Channel = ADI_CHANNEL_2;
+  }
+  else if(strncmp(name, "Rx1", 3) == 0 )
+  {
+    Port = ADI_RX;
+    Channel = ADI_CHANNEL_1;
+  }
+  else if(strncmp(name, "Rx2", 3) == 0 )
+  {
+    Port = ADI_RX;
+    Channel = ADI_CHANNEL_2;
+  }
+
+  status = Adrv9001Status_InvalidParameter;
+
+  if( strcmp( &name[3], "CarrierFrequency") == 0 )
+  {
+    adi_adrv9001_Carrier_t AdiCarrier;
+    status = adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, &AdiCarrier );
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&AdiCarrier.carrierFrequency_Hz, str );
+  }
+
+  else if( strcmp( &name[3], "IqData") == 0 )
+  {
+    uint32_t tmp;
+    AxiAdrv9001_GetData(Instance->CtrlBase, Port, Channel, &tmp );
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( &name[3], "IqDataPath") == 0 )
+  {
+    axi_adrv9001_data_path_t tmp;
+    AxiAdrv9001_GetDataPath(Instance->CtrlBase, Port, Channel, &tmp );
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "Dgpio") == 0 )
+  {
+    uint32_t tmp;
+    AxiAdrv9001_GetDgpio(Instance->CtrlBase, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "DgpioDir") == 0 )
+  {
+    uint32_t tmp;
+    AxiAdrv9001_GetDgpioDir(Instance->CtrlBase, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( &name[3], "RadioState") == 0 )
+  {
+    adi_adrv9001_ChannelState_e tmp;
+    status = adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &tmp );
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "SiliconVersion") == 0 )
+  {
+    adi_adrv9001_SiliconVersion_t tmp;
+    status = adi_adrv9001_SiliconVersion_Get( &Instance->Device, &tmp );
+    sprintf(str, "%X%X", tmp.major, tmp.minor);
+  }
+
+  else if( strcmp( name, "FirmwareVersion") == 0 )
+  {
+    adi_adrv9001_ArmVersion_t tmp;
+    status = adi_adrv9001_arm_Version( &Instance->Device, &tmp );
+    sprintf(str,"%u.%u.%u.%u", tmp.majorVer, tmp.minorVer, tmp.maintVer, tmp.rcVer );
+  }
+
+  else if( strcmp( name, "APIVersion") == 0 )
+  {
+    adi_common_ApiVersion_t tmp;
+    status = adi_adrv9001_ApiVersion_Get( &Instance->Device, &tmp );
+    sprintf(str,"%lu.%lu.%lu\r\n\r\n", tmp.major, tmp.minor, tmp.patch);
+  }
+
+  else if( strcmp( name, "Temp") == 0 )
+  {
+    int16_t tmp;
+    adi_adrv9001_Temperature_Get(&Instance->Device, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( &name[3], "Rssi") == 0 )
+  {
+    uint32_t tmp;
+    status = adi_adrv9001_Rx_Rssi_Read( &Instance->Device, Channel, &tmp );
+    float tmpf = ((float)tmp) / 1000;
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmpf, str );
+  }
+
+  else if( strcmp( name, "VcTcxo") == 0 )
+  {
+    float tmp;
+    status = Adrv9001_GetVcTcxo(Instance, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( &name[3], "CurGainIndex") == 0 )
+  {
+    uint8_t tmp;
+    status = adi_adrv9001_Rx_Gain_Get(&Instance->Device, Channel, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  return status;
+}
+
+int32_t Adrv9001Pib_GetStringByName( adrv9001_t *Instance, char *name, char *str )
+{
+  int32_t id;
+  int32_t status;
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if( ( Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_VIRTUAL ) == ADRV9001_PIB_FLAG_VIRTUAL )
+  {
+    status = Adrv9001Pib_GetVirtualStringByName( Instance, name, str );
+  }
+  else
+  {
+    status = Pib_GetStringByName( &Instance->Pib, name, str );
+  }
+
+  return status;
+}
+
+int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *str )
+{
+  int32_t id;
+  int32_t status;
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if( ( Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_VIRTUAL ) == ADRV9001_PIB_FLAG_VIRTUAL )
+  {
+    status = Adrv9001Pib_SetVirtualByNameByString( Instance, name, str );
+  }
+  else
+  {
+    status = Pib_SetByNameByString( &Instance->Pib, name, str );
+  }
+
+  return status;
+}
+
+int32_t Adrv9001Pib_Initialize( adrv9001_t *Instance )
+{
+  int32_t status;
+
+  /* Create PIB Config */
+  pib_init_t PibInit = {
+    .Params             = &Adrv9001Params,
+    .Defaults           = NULL,
+    .PibLen             = sizeof(Adrv9001PibDef) / sizeof(pib_def_t),
+    .ParamsSize         = sizeof(adrv9001_params_t),
+    .Def                = Adrv9001PibDef,
+  };
+
+  /* Initialize PIB Instance */
+  if((status = Pib_Init( &Instance->Pib, &PibInit )) != 0)
+    return status;
+
+  return status;
+}
+
+
+
+
+
+/** @} */

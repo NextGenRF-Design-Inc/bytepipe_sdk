@@ -42,6 +42,7 @@ make
 php
 ruby
 git
+wget
 ```
 
 # Vivado Design Suite

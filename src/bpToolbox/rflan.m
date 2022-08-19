@@ -1,485 +1,903 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
+% BytePipe_x9002 RFLAN Interface Class
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef rflan < handle
-   
-%Read/Write Properties  
-properties
-
-end
-
-% Read Only Properties 
-properties (GetAccess = 'public', SetAccess = 'private')    
-    AvailablePorts = [];
-    ActivePort = []; 
-    Tx1 = 'Tx1';
-    Tx2 = 'Tx2';
-    Rx1 = 'Rx1';   
-    Rx2 = 'Rx2';   
     
-    
-    adi_adrv9001_init_cal = struct(...
-        'ADI_ADRV9001_INIT_CAL_TX_QEC',             hex2dec('00000001'),...
-        'ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE',      hex2dec('00000002'),...        
-        'ADI_ADRV9001_INIT_CAL_TX_LB_PD',           hex2dec('00000004'),... % Tx Loopback path delay
-        'ADI_ADRV9001_INIT_CAL_TX_DCC',             hex2dec('00000008'),... % Tx Duty Cycle Correction
-        'ADI_ADRV9001_INIT_CAL_TX_BBAF',            hex2dec('00000010'),... % Tx Baseband Analog Filter
-        'ADI_ADRV9001_INIT_CAL_TX_BBAF_GD',         hex2dec('00000020'),... % Tx Baseband Analog Filter Group Delay
-        'ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY',     hex2dec('00000040'),... % Tx Attenuation Delay
-        'ADI_ADRV9001_INIT_CAL_TX_DAC',             hex2dec('00000080'),... % Tx DAC
-        'ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY',      hex2dec('00000100'),... % Tx Path Delay
-        'ADI_ADRV9001_INIT_CAL_RX_HPADC_RC',        hex2dec('00000200'),... % Rx HP ADC Resistance and Capacitance
-        'ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH',     hex2dec('00000400'),... % Rx HP ADC Flash
-        'ADI_ADRV9001_INIT_CAL_RX_HPADC_DAC',       hex2dec('00000800'),... % Rx HP ADC DAC
-        'ADI_ADRV9001_INIT_CAL_RX_DCC',             hex2dec('00001000'),... % Rx Duty Cycle Correction
-        'ADI_ADRV9001_INIT_CAL_RX_LPADC',           hex2dec('00002000'),... % Rx LP ADC
-        'ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF',      hex2dec('00004000'),... % Rx Trans-Impedance Amplifier Cutoff
-        'ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY',     hex2dec('00008000'),... % Rx Trans-Impedance Amplifier Group Delay
-        'ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL',        hex2dec('00010000'),... % Rx QEC Tone Calibration
-        'ADI_ADRV9001_INIT_CAL_RX_QEC_FIC',         hex2dec('00020000'),... % Rx QEC Frequency-Independent
-        'ADI_ADRV9001_INIT_CAL_RX_QEC_ILB_LO_DELAY',hex2dec('00040000'),... % Rx Internal Loopback LO Delay
-        'ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET',    hex2dec('00080000'),... % Rx RF DC Offset
-        'ADI_ADRV9001_INIT_LO_RETUNE',              hex2dec('000B902B'),... % Minimium Subset of InitCals that must be run for LO Retune    
-        'ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY', hex2dec('00100000'),... % Rx Gain Path Delay
-        'ADI_ADRV9001_INIT_CAL_RX_DMR_PATH_DELAY',  hex2dec('00200000'),... % Rx DMR Path Delay    
-        'ADI_ADRV9001_INIT_CAL_PLL',                hex2dec('00400000'),... % PLL
-        'ADI_ADRV9001_INIT_CAL_AUX_PLL',            hex2dec('00800000'),... % AUX PLL
-        'ADI_ADRV9001_INIT_CAL_TX_ALL',             hex2dec('000001FF'),... % Tx all Init Cals
-        'ADI_ADRV9001_INIT_CAL_RX_ALL',             hex2dec('001FFE00'),... % Rx all Init Cals
-        'ADI_ADRV9001_INIT_CAL_RX_TX_ALL',          hex2dec('001FFFFF'),... % Rx / Tx all Init Cals
-        'ADI_ADRV9001_INIT_CAL_SYSTEM_ALL',         hex2dec('00C00000'));   % All system Init Cals
-
-              
-end
-
-% Private Properties 
-properties (GetAccess = 'private', SetAccess = 'private') 
-       
-s;    
-
-end
-
-    
-% Public Functions
-methods
-    
-    function obj = rflan(varargin)
+    % Read/Write 
+    properties
         
-        %Set Optional Properties
-        SetProperties(obj,varargin);    
+        %         Temp = 0;
+        %         AdrvSiliconVersion = '';
+        %         AdrvFirmwareVersion = '';
+        %         AdrvAPIVersion = '';
+        %         VcTcxo;
+        %
+        %         DeviceClock_kHz;
+        %         DlkPllVcoFreq_daHz;
+        %         DlkPllHsDiv;
+        %         ClkPllMode;
+        %         Clk1105Div;
+        %         ArmClkDiv;
+        %         ArmPowerSavingClkDiv;
+        %         RefClockOutEnable;
+        %         AuxPllPower;
+        %         ClkPllPower;
+        %         PadRefClkDrv;
+        %         ExtLo1OutFreq_kHz;
+        %         ExtLo2OutFreq_kHz;
+        %         RfPll1LoMode;
+        %         RfPll2LoMode;
+        %         Ext1LoType;
+        %         Ext2LoType;
+        %         Rx1RfInputSel;
+        %         Rx2RfInputSel;
+        %         ExtLo1Divider;
+        %         ExtLo2Divider;
+        %         RfPllPhaseSyncMode;
+        %         Rx1LoSelect;
+        %         Rx2LoSelect;
+        %         Tx1LoSelect;
+        %         Tx2LoSelect;
+        %         Rx1LoDivMode;
+        %         Rx2LoDivMode;
+        %         Tx1LoDivMode;
+        %         Tx2LoDivMode;
+        %         LoGen1Select;
+        %         LoGen2Select;
+        %
+        %
+        %         Tx1DpdEnable;
+        %         Tx1DpdAmplifierType;
+        %         Tx1DpdLutSize;
+        %         Tx1DpdModel;
+        %         Tx1DpdChangeModelTapOrders;
+        %         Tx1DpdClgcEnable;
+        %         Tx1DpdPreLutScale;
+        %         Tx1DpdNumberofSamples;
+        %         Tx1DpdAdditionalPowerScale;
+        %         Tx1DpdCountsLessThanPowerThreshold;
+        %         Tx1DpdCountsGreaterThanPeakThreshold;
+        %         Tx1DpdImmediateLutSwitching;
+        %         Tx1DpdUseSpecialFrame;
+        %         Tx1DpdResetLuts;
+        %         Tx1DpdSamplingRate_Hz;
+        %         Tx1DpdRxTxNormalizationLowerThreshold;
+        %         Tx1DpdRxTxNormalizationUpperThreshold;
+        %         Tx1DpdDetectionPowerThreshold;
+        %         Tx1DpdDetectionPeakThreshold;
+        %         Tx1DpdTimeFilterCoefficient;
+        %         Tx1DpdClgcLoopOpen;
+        %         Tx1DpdClgcFilterAlpha;
+        %         Tx1DpdClgcGainTarget_HundredthdB;
+        %         Tx1DpdClgcLastGain_HundredthdB;
+        %         Tx1DpdClgcFilteredGain_HundredthdB;
+        %
+        %         Tx2DpdEnable;
+        %         Tx2DpdAmplifierType;
+        %         Tx2DpdLutSize;
+        %         Tx2DpdModel;
+        %         Tx2DpdChangeModelTapOrders;
+        %         Tx2DpdClgcEnable;
+        %         Tx2DpdPreLutScale;
+        %         Tx2DpdNumberofSamples;
+        %         Tx2DpdAdditionalPowerScale;
+        %         Tx2DpdCountsLessThanPowerThreshold;
+        %         Tx2DpdCountsGreaterThanPeakThreshold;
+        %         Tx2DpdImmediateLutSwitching;
+        %         Tx2DpdUseSpecialFrame;
+        %         Tx2DpdResetLuts;
+        %         Tx2DpdSamplingRate_Hz;
+        %         Tx2DpdRxTxNormalizationLowerThreshold;
+        %         Tx2DpdRxTxNormalizationUpperThreshold;
+        %         Tx2DpdDetectionPowerThreshold;
+        %         Tx2DpdDetectionPeakThreshold;
+        %         Tx2DpdTimeFilterCoefficient;
+        %         Tx2DpdClgcLoopOpen;
+        %         Tx2DpdClgcFilterAlpha;
+        %         Tx2DpdClgcGainTarget_HundredthdB;
+        %         Tx2DpdClgcLastGain_HundredthdB;
+        %         Tx2DpdClgcFilteredGain_HundredthdB;
+        %
+        %         Tx1SampleRate;
+        %         Tx2SampleRate;
+        %         Rx1SampleRate;
+        %         Rx2SampleRate;
+        %
+        %         Tx1CarrierFrequency;
+        %         Tx2CarrierFrequency;
+        %         Rx1CarrierFrequency;
+        %         Rx2CarrierFrequency;
+        %
+        %         Tx1Attn;
+        %         Tx2Attn;
+        %
+        %         Tx1Boost;
+        %         Tx2Boost;
         
-        %Get COM Ports
-        obj.AvailablePorts = GetAvailablePorts();
         
     end
-     
-    function Open(obj,Port)
+    
+    % Read Only
+    properties (GetAccess = 'public', SetAccess = 'private')
+        SerialPort = [];
+        Tx1 = 'Tx1';
+        Tx2 = 'Tx2';
+        Rx1 = 'Rx1';
+        Rx2 = 'Rx2';
         
-        obj.ActivePort = Port;
+        Calibrated = 'Calibrated';
+        Primed = 'Primed';
+        Enabled = 'Enabled';
+        Standby = 'Standby';
         
-        Close(obj);
-               
-        obj.s = serialport(obj.ActivePort,115200);        
-        configureTerminator(obj.s,"CR/LF"); 
-        configureCallback(obj.s,"terminator",@obj.cliCallbackFcn);
-        set(obj.s, 'Timeout', 1);
+        s;
+        
+        UserCallback = [];
+        
+        AdrvVerInfo = struct(...
+            'SiliconVer','unknown',...
+            'FirmwareVer','unknown',...
+            'ApiVer','unknown');
+        
+        adi_adrv9001_init_cal = struct(...
+            'ADI_ADRV9001_INIT_CAL_TX_QEC',             hex2dec('00000001'),...
+            'ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE',      hex2dec('00000002'),...
+            'ADI_ADRV9001_INIT_CAL_TX_LB_PD',           hex2dec('00000004'),... % Tx Loopback path delay
+            'ADI_ADRV9001_INIT_CAL_TX_DCC',             hex2dec('00000008'),... % Tx Duty Cycle Correction
+            'ADI_ADRV9001_INIT_CAL_TX_BBAF',            hex2dec('00000010'),... % Tx Baseband Analog Filter
+            'ADI_ADRV9001_INIT_CAL_TX_BBAF_GD',         hex2dec('00000020'),... % Tx Baseband Analog Filter Group Delay
+            'ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY',     hex2dec('00000040'),... % Tx Attenuation Delay
+            'ADI_ADRV9001_INIT_CAL_TX_DAC',             hex2dec('00000080'),... % Tx DAC
+            'ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY',      hex2dec('00000100'),... % Tx Path Delay
+            'ADI_ADRV9001_INIT_CAL_RX_HPADC_RC',        hex2dec('00000200'),... % Rx HP ADC Resistance and Capacitance
+            'ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH',     hex2dec('00000400'),... % Rx HP ADC Flash
+            'ADI_ADRV9001_INIT_CAL_RX_HPADC_DAC',       hex2dec('00000800'),... % Rx HP ADC DAC
+            'ADI_ADRV9001_INIT_CAL_RX_DCC',             hex2dec('00001000'),... % Rx Duty Cycle Correction
+            'ADI_ADRV9001_INIT_CAL_RX_LPADC',           hex2dec('00002000'),... % Rx LP ADC
+            'ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF',      hex2dec('00004000'),... % Rx Trans-Impedance Amplifier Cutoff
+            'ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY',     hex2dec('00008000'),... % Rx Trans-Impedance Amplifier Group Delay
+            'ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL',        hex2dec('00010000'),... % Rx QEC Tone Calibration
+            'ADI_ADRV9001_INIT_CAL_RX_QEC_FIC',         hex2dec('00020000'),... % Rx QEC Frequency-Independent
+            'ADI_ADRV9001_INIT_CAL_RX_QEC_ILB_LO_DELAY',hex2dec('00040000'),... % Rx Internal Loopback LO Delay
+            'ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET',    hex2dec('00080000'),... % Rx RF DC Offset
+            'ADI_ADRV9001_INIT_LO_RETUNE',              hex2dec('000B902B'),... % Minimium Subset of InitCals that must be run for LO Retune
+            'ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY', hex2dec('00100000'),... % Rx Gain Path Delay
+            'ADI_ADRV9001_INIT_CAL_RX_DMR_PATH_DELAY',  hex2dec('00200000'),... % Rx DMR Path Delay
+            'ADI_ADRV9001_INIT_CAL_PLL',                hex2dec('00400000'),... % PLL
+            'ADI_ADRV9001_INIT_CAL_AUX_PLL',            hex2dec('00800000'),... % AUX PLL
+            'ADI_ADRV9001_INIT_CAL_TX_ALL',             hex2dec('000001FF'),... % Tx all Init Cals
+            'ADI_ADRV9001_INIT_CAL_RX_ALL',             hex2dec('001FFE00'),... % Rx all Init Cals
+            'ADI_ADRV9001_INIT_CAL_RX_TX_ALL',          hex2dec('001FFFFF'),... % Rx / Tx all Init Cals
+            'ADI_ADRV9001_INIT_CAL_SYSTEM_ALL',         hex2dec('00C00000'));   % All system Init Cals
+        
+        
+        
+        
     end
-       
-    function Close(obj)
-               
-        p = instrfind('Port',obj.ActivePort);
-        if(~isempty(p))
-            fclose(p);
-            delete(p);
+    
+    % Application 
+    methods
+        
+        function obj = rflan(varargin)
+            
+            %Set Optional Properties
+            SetProperties(obj,varargin);
+            
         end
-        
-    end    
-
-    function s = Status2String( ~,v )
-        if( v == 0)
-            s = 'Passed';
-        else
-            s = 'Failed';
-        end
-    end
-    
-    function status = CalStatus(obj, CalMask0, CalMask1)
-        
-        status = 1;
-        
-        if( obj.PhyAdrv9001Init() == 0)            
-            if( obj.Adrv9001InitProfile() == 0)
-                status = obj.Adrv9001InitCalsRun(CalMask0, CalMask1, 0);                
-            end
-        end   
-    end
-    
-    function t = SweepCalStatus(obj, path)
-        
-        CalMask = convertCharsToStrings(fieldnames(obj.adi_adrv9001_init_cal));
-        Status = strings(length(CalMask),1);
-        
-        for i = 1:length(CalMask)
-            if( obj.PhyAdrv9001Init() ~= 0)
-                Status = nan;
-                break;
-            end            
-            
-            if( obj.Adrv9001InitProfile() ~= 0)
-                Status = nan;
-                break;
-            end
-            
-            if(path == 0)
-                Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0, 0));
-            elseif(path == 3)
-                Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(getfield(obj.adi_adrv9001_init_cal,CalMask(i)), getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0));
-            else
-                Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(0, getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0));
-            end
-            
-            disp(strjoin([CalMask{i} repmat(' ',1,max(strlength(CalMask))-length(CalMask{i})) Status(i)]));
-            
-        end
-        
-        t = table(CalMask,Status);
-        
-    end        
-        
-    
-end
-
-% Application CLI Interface
-methods
-    
-    function Reboot(obj)
-        writeline(obj.s,'Reboot');   
-    end  
-    
-    function ls(obj)
-        writeline(obj.s,'ls');   
-    end     
-    
-    function help(obj,varargin)
-        writeline(obj.s,['help ' varargin{:}]);   
-    end      
-end
-
-% Private CLI Interface
-methods
-    
-    function v = GetSsiDelay(obj, Port)                
-        v = struct('Clk',nan,'RefClk',nan,'Strb',nan,'Idata',nan,'Qdata',nan);        
-        v = obj.ReadStruct(['GetSsiDelay ' Port],v);  
-    end 
-
-    function status = SetSsiDelay(obj, Port, ClkDelay, DataDelay)
-        status = obj.ReadStatus(['SetSsiDelay ' Port, ' ',...
-            num2str(ClkDelay), ' ',...
-            num2str(0), ' ',...
-            num2str(DataDelay), ' ',...
-            num2str(DataDelay), ' ',...
-            num2str(DataDelay)]);
-    end
-
-    function GetSsiCfg(obj, Port)        
-        writeline(obj.s, ['GetSsiCfg ' Port]);   
-    end   
-    
-    function status = DmaLoadConstant(obj, Port, Value)        
-        status = obj.ReadStatus(['DmaLoadConstant ' Port ' ' num2str(Value)]);   
-    end       
-
-    function status = DmaLoadRamp(obj, Port)        
-        status = obj.ReadStatus(['DmaLoadRamp ' Port]);   
-    end
-    
-    function status = DmaLoadPrbs7(obj, Port)        
-        status = obj.ReadStatus(['DmaLoadPrbs7 ' Port]);   
-    end 
-    
-    function status = DmaLoadPrbs15(obj, Port)        
-        status = obj.ReadStatus(['DmaLoadPrbs15 ' Port]);   
-    end
-    
-    function GetTestModeStatus(obj, Port)        
-        obj.Write(['GetTestModeStatus ' Port]);   
-    end 
-    
-    function status = PerformSsiSweepTest(obj, Port)        
-        status = obj.ReadStatus(['PerformSsiSweepTest ' Port]);   
-    end
-    
-    function status = PerformSsiTestMode(obj, Port)        
-        status = obj.ReadStatus(['PerformSsiTestMode ' Port]);   
-    end  
-    
-    function status = Adrv9001InitCalsRun(obj, Mask0, Mask1, CalMode)        
-        set(obj.s, 'Timeout', 130);        
-        status = obj.ReadStatus(['Adrv9001InitCalsRun ' num2str(Mask0) ' ' num2str(Mask1) ' ' num2str(CalMode)]);        
-        set(obj.s, 'Timeout', 1);
-    end  
-    
-    function status = Adrv9001InitProfile(obj)  
-        set(obj.s, 'Timeout', 10);
-        status = obj.ReadStatus('Adrv9001InitProfile');  
-        set(obj.s, 'Timeout', 1);
-    end      
-end
-
-% ADRV9001 CLI Interface
-methods
-    
-    function status = Adrv9001SetRadioState(obj, Port, State)        
-        status = obj.ReadStatus(['Adrv9001SetRadioState ' Port, ' ', num2str(State)]);   
-    end   
-    
-    function Adrv9001GetRadioState(obj, Port)        
-        writeline(obj.s,['Adrv9001GetRadioState ' Port]);   
-    end       
-    
-    function v = Adrv9001GetCarrierFrequency(obj, Port)        
-        v = obj.ReadValue(['Adrv9001GetCarrierFrequency ' Port],'%d');   
-    end   
-
-    function status = Adrv9001SetCarrierFrequency(obj, Port, Freq)        
-        status = obj.ReadStatus(['Adrv9001SetCarrierFrequency ' Port, ' ', num2str(Freq)]);   
-    end
-    
-    function v = Adrv9001GetSampleRate(obj, Port)        
-        v = obj.ReadValue(['Adrv9001GetSampleRate ' Port], '%d');   
-    end       
-    
-    function v = Adrv9001GetTxAttn(obj, Port)        
-        v = obj.ReadValue(['Adrv9001GetTxAttn ' Port], '%d');   
-    end   
-
-    function status = Adrv9001SetTxAttn(obj, Port, Attn)        
-        status = obj.ReadStatus(['Adrv9001SetTxAttn ' Port, ' ', num2str(Attn)]);   
-    end
-    
-    function v = Adrv9001GetTxBoost(obj, Port)        
-        v = obj.ReadValue(['Adrv9001GetTxBoost ' Port],'%d');   
-    end   
-
-    function status = Adrv9001SetTxBoost(obj, Port, Enabled)        
-        status = obj.ReadStatus(['Adrv9001SetTxBoost ' Port, ' ', num2str(Enabled)]);   
-    end       
-    
-    function status = Adrv9001ToRfPrimed(obj, Port)        
-        status = obj.ReadStatus(['Adrv9001ToRfPrimed ' Port]);   
-    end
-    
-    function status = Adrv9001ToRfCalibrated(obj, Port)        
-        status = obj.ReadStatus(['Adrv9001ToRfCalibrated ' Port]);   
-    end 
-    
-    function status = Adrv9001ToRfEnabled(obj, Port)        
-        status = obj.ReadStatus(['Adrv9001ToRfEnabled ' Port]);   
-    end       
-    
-    function v = Adrv9001GetRssi(obj, Port)        
-        v = obj.ReadValue(['Adrv9001GetRssi ' Port],'%d');   
-    end   
-
-    function v = Adrv9001GetTemp(obj)                    
-        v = obj.ReadValue('Adrv9001GetTemp', '%d');        
-    end    
-
-    function v = Adrv9001GetVerInfo(obj)        
-        v = struct('Silicon',nan,'Firmware',nan,'API',nan);        
-        v = obj.ReadStruct('Adrv9001GetVerInfo',v);       
-    end  
-    
-    function status = Adrv9001LoadProfile(obj)        
-        status = obj.ReadStatus('Adrv9001LoadProfile');   
-    end     
-    
-	function status = Adrv9001SetLoopBack(obj, Port, Enabled)        
-        status = obj.ReadStatus(['Adrv9001SetLoopBack ' Port, ' ', num2str(Enabled)]);         
-    end  
-    
-    function Adrv9001ReadDma(obj, Port, Length)        
-        obj.ReadStatus(['Adrv9001ReadDma ' Port, ' ', num2str(Length)]);   
-    end  
-    
-    function status = Adrv9001EnableAuxDac(obj, Id, Enable)        
-        status = obj.ReadStatus(['Adrv9001EnableAuxDac ' num2str(Id), ' ', num2str(Enable)]);   
-    end    
-    
-    function status = Adrv9001SetAuxDac(obj, Id, Voltage)        
-        status = obj.ReadStatus(['Adrv9001SetAuxDac ' num2str(Id), ' ', num2str(Voltage)]);   
-    end   
-
-	function v = Adrv9001GetAuxDac(obj, Id)        
-        v = obj.ReadValue(['Adrv9001GetAuxDac ' num2str(Id)],'%2.1f');   
-    end   
-    
-end
-
-% PHY CLI Interface
-methods
-    
-    function status = PhyIqFileStreamEnable(obj, Port, Filename, SampleCnt)        
-        status = obj.ReadStatus(['PhyIqFileStreamEnable ' Port, ' ', Filename, ' ', num2str(SampleCnt)]);   
-    end  
-    
-    function status = PhyIqFileStreamDisable(obj, Port)        
-        status = obj.ReadStatus(['PhyIqFileStreamDisable ' Port]);   
-    end   
-
-    function v = PhyIqFileSize(obj, Filename)        
-        v = obj.ReadValue(['PhyIqFileSize ', Filename],'%d');   
-    end   
-
-    function status = PhyUpdateProfile(obj)        
-        status = obj.ReadStatus('PhyUpdateProfile');   
-    end
-    
-    function status = PhyAdrv9001Init(obj)        
-        status = obj.ReadStatus('PhyAdrv9001Init');   
-    end   
-    
-    function status = PhyAdrv9001LoadProfile(obj)        
-        status = obj.ReadStatus('PhyAdrv9001LoadProfile');   
-    end    
-          
-end
-    
-%Private Functions
-methods(Access = 'private')     
-  
-    function v = ReadValue(obj,s,format)        
-                    
-        v = [];
-        configureCallback(obj.s, "off");
-        flush(obj.s);
-        
-        writeline(obj.s,s);
-        
-        for i = 1:5
-            line = readline(obj.s);
-            
-            if(isempty(line))
-                break;
-            end
-            
-            v = sscanf(line,format);
-            
-            if(~isempty(v))
-                break;
-            end
-        end
-        
-        configureCallback(obj.s,"terminator",@obj.cliCallbackFcn);
-                   
-    end
-    
-    function status = ReadStatus(obj,s)
-            
-        status = 1;
-        configureCallback(obj.s, "off");
-        flush(obj.s);
-        
-        writeline(obj.s,s);
-        
-        for i = 1:5
-            line = deblank(readline(obj.s));
-            
-            if(isempty(line))
-                break;
-            end
-            
-            if(contains(line,'Success'))
-                status = 0;
-                break;
-            elseif(contains(line,'Failed'))
-                status = 1;
-                break;
-            end            
-        end
-        
-        configureCallback(obj.s,"terminator",@obj.cliCallbackFcn);        
-    end
-        
-    function s = ReadStruct(obj,str,s)
-        
-        configureCallback(obj.s, "off");
-        flush(obj.s);
-        
-        writeline(obj.s,str);
-        
-        f = fieldnames(s);
-        for i = 1:length(f)+5
-            
-            line = cell2mat(deblank(readline(obj.s)));
-            
-            if(isempty(line))
-                break;
-            end
-            
-            for fidx = 1:length(f)
                 
-                if(contains(line,f(fidx)))
-                    s = setfield(s,f{fidx},line(strfind(line,':')+2:end));
+        function SetCallback( obj, cb )
+            obj.UserCallback = cb;            
+        end
+        
+        function AdrvClearError( obj )
+            obj.Write('AdrvClearError');
+        end
+                              
+        function SetProperties(obj,vars)
+            
+            for i = 1:2:length(vars)
+                f = strsplit(vars{i},'.');
+                
+                if(sum(strcmp(fieldnames(obj),f{1})))
+                    if(length(f) == 1)
+                        obj = setfield(obj,f{1},vars{i+1});
+                    else
+                        obj_tmp = getfield(obj,f{1});
+                        obj_tmp = SetProperties(obj_tmp,[{strjoin(f(2:end),'.')},vars(i+1)]);
+                        obj = setfield(obj,f{1},obj_tmp);
+                    end
+                end
+            end
+            
+        end
+        
+        function status = CalStatus(obj, CalMask0, CalMask1)
+            
+            status = 1;
+            
+            if( obj.PhyAdrv9001Init() == 0)
+                if( obj.Adrv9001InitProfile() == 0)
+                    status = obj.Adrv9001InitCalsRun(CalMask0, CalMask1, 0);
                 end
             end
         end
         
-        configureCallback(obj.s,"terminator",@obj.cliCallbackFcn);
+        function t = SweepCalStatus(obj, path)
+            
+            CalMask = convertCharsToStrings(fieldnames(obj.adi_adrv9001_init_cal));
+            Status = strings(length(CalMask),1);
+            
+            for i = 1:length(CalMask)
+                if( obj.PhyAdrv9001Init() ~= 0)
+                    Status = nan;
+                    break;
+                end
+                
+                if( obj.Adrv9001InitProfile() ~= 0)
+                    Status = nan;
+                    break;
+                end
+                
+                if(path == 0)
+                    Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0, 0));
+                elseif(path == 3)
+                    Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(getfield(obj.adi_adrv9001_init_cal,CalMask(i)), getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0));
+                else
+                    Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(0, getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0));
+                end
+                
+                disp(strjoin([CalMask{i} repmat(' ',1,max(strlength(CalMask))-length(CalMask{i})) Status(i)]));
+                
+            end
+            
+            t = table(CalMask,Status);
+            
+        end
+        
+        function Adrv9001ToRfCalibrated( obj, Port )
+            obj.Write(['Adrv9001ToRfCalibrated ' char(Port)]);
+        end
+        
+        function Adrv9001ToRfPrimed( obj, Port )
+            obj.Write(['Adrv9001ToRfPrimed ' char(Port)]);
+        end
+        
+        function Adrv9001ToRfEnabled( obj, Port )
+            obj.Write(['Adrv9001ToRfEnabled ' char(Port)]);
+        end
+        
+        function FormatC99( obj )
+            tesDir = uigetdir; 
+            tesFiles = dir(fullfile(tesDir,'*.c'));
+            tesFiles = [tesFiles;dir(fullfile(tesDir,'*.h'))];
+            
+            %rmdir([tesDir '\output'],'s');
+            mkdir([tesDir '\output']);
+            
+            for k = 1:length(tesFiles)
+                if(~strcmp(tesFiles(k).name,'main.c') && ...
+                    ~contains(tesFiles(k).name,'Transmitting') && ...
+                    ~contains(tesFiles(k).name,'Receiving') && ...
+                    ~contains(tesFiles(k).name,'dataCapture'))
+                    fid  = fopen([tesDir '\' tesFiles(k).name],'r');
+                    f=fread(fid,'*char')';
+                    fclose(fid);
+                    f = erase(f,', adi_fpga9001_Device_t * fpga9001Device_0');                    
+                    f = strsplit(f,newline);
+                    f = f(~contains(f,'printf'));
+                    f = f(~contains(f,'getchar'));    
+                    f = f(~contains(f,'#include "linux_uio_init.h"'));                       
+                    f = f(~contains(f,'#include "adi_fpga9001'));   
+                    f = f(~contains(f,'fpga9001Device_0')); 
+                    
+                    a = contains(f,'adi_fpga9001_Version_t');
+                    if( sum(a) > 0) 
+                        a(find(a>0):find(a>0) +3) = 1;
+                        f = f(~a);
+                    end
+                    
+                    a = contains(f,'adi_fpga9001_ClockStatus_t');
+                    if( sum(a) > 0) 
+                        a(find(a>0):find(a>0)+5) = 1;
+                        f = f(~a);
+                    end  
+                    
+                    a = contains(f,'adi_fpga9001_SsiCalibrationCfg_t');
+                    if( sum(a) > 0) 
+                        a(find(a>0):find(a>0)+8) = 1;
+                        f = f(~a);
+                    end              
+                    
+                  
+                    f = cell2mat(f);
+                    fid  = fopen([tesDir '\output\' tesFiles(k).name],'w+');
+                    fprintf(fid,'%s',f);
+                    fclose(fid);
+                end
+            end                       
+        end        
+                
+    end
+    
+    % Stream
+    methods
+        function RflanStreamStart(obj, Port, Cyclic, SampleCnt)
+            obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
+        end
+        
+        function RflanStreamStop(obj, Port )
+            obj.Write(['RflanStreamStop ' char(Port)]);
+        end
+        
+        function RflanStreamBufPut(obj, Port, SampleOffset, iq)
+            iq = [real(iq),imag(iq)]';
+            iq = iq(:);            
+            obj.Write(['RflanStreamBufPut ' char(Port) ' ' char(num2str(SampleOffset)) ' ' char(strjoin(compose("%d",int16(iq*2^15)),","))]);
+        end        
+        
+        function RflanStreamBufLoad(obj, Port, filename, iq)                   
+            obj.Write(['RflanStreamBufLoad ' char(Port) ' ' char(filename)]);
+        end        
+                
+        function v = RflanStreamBufGet(obj, Port, SampleOffset, SampleCnt)
+            v = [];
+            
+            configureCallback(obj.s, "off");
+            obj.s.flush();
+            
+            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset)) ' ' char(num2str(SampleCnt))]);
+            
+            tic;
+            str = '';
+            v = [];
+            
+            while( ~contains(str,[Port ' Stream Buffer:']) && (toc < 3))
+                str = obj.Read();
+                disp(str);
+                
+                if( ~isempty(str))
+                    
+                    if( contains(str,[Port ' Stream Buffer:']) )
+                        str2 = strsplit(str,':');
+                        v = strtrim(str2{2});
+                        v = strsplit(v,',');
+                        
+                        v = str2double(v);
+                        %v = typecast(uint16(v),'int16');
+                        v = double(v) / 2^15;
+                        v = v(1:2:end) + 1i*v(2:2:end);
+                        v = v';
+                    end
+                end
+            end
+            
+            obj.s.flush();
+            
+            configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
+        end        
+    end
+    
+    % Interface
+    methods
+        
+        function Open(obj,Port)
+            
+            obj.SerialPort = Port;
+            
+            Close(obj);
+            
+            obj.s = serialport(obj.SerialPort,115200);
+            configureTerminator(obj.s,"CR/LF");
+            configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
+            set(obj.s, 'Timeout', 3);
+        end
+        
+        function Close(obj)
+            
+            obj.s = [];
+            
+            p = instrfind('Port',obj.SerialPort);
+            if(~isempty(p))
+                fclose(p);
+                delete(p);
+            end
+            
+        end
+        
+        function Write( obj, str )
+            obj.s.writeline(char(str));
+        end
+        
+        function str = Read( obj )
+            str = char(obj.s.readline());
+        end
+        
+        function ConnectionCallback(obj,ser,~)
+            str = char(readline(ser));
+                           
+            if( contains(str,'=') )
+                str2 = strsplit(str,'=');
+                
+                p = strtrim(str2{1});
+                v = strtrim(str2{2});
+                                    
+                if(~isnan(str2double(v)))
+                    v = str2double(v);
+                end
+                
+                obj.SetProperties({p,v});
+            end
+            
+            if( ~isempty(obj.UserCallback) )
+                obj.UserCallback( str );
+            end
+            
+            disp(strtrim(str));
+        end
         
     end
-        
     
-    function cliCallbackFcn(~,ser,~)
-        data = readline(ser); 
-        data = erase(data,newline);
-        data = erase(data,'\r\n');
-        disp(strtrim(data));     
-    end     
-     
-    function SetProperties(obj,vars)
-
-      for i = 1:2:length(vars)
-        f = strsplit(vars{i},'.');
+    % Get Parameters
+    methods
         
-        if(sum(strcmp(fieldnames(obj),f{1})))
-            if(length(f) == 1)
-                obj = setfield(obj,f{1},vars{i+1});
+        function v = RflanGetParam( obj, p )
+            configureCallback(obj.s, "off");
+            obj.s.flush();
+            
+            obj.Write(['RflanGetParam ' p]);
+            
+            tic;
+            str = '';
+            v = [];
+            
+            while( ~contains(str,[ p ' = ']) && (toc < 3))
+                str = obj.Read();
+                disp(str);
+                
+                if( contains(str,'=') )
+                    str2 = strsplit(str,'=');
+                    
+                    p = strtrim(str2{1});
+                    v = strtrim(str2{2});
+                    
+                    if(~isnan(str2double(v)))
+                        v = str2double(v);
+                    end
+                    
+                    obj.SetProperties({p,v});
+                end
+            end
+            
+            obj.s.flush();
+            
+            configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
+            
+        end
+        
+        function v = Adrv9001GetParam( obj, p )
+            configureCallback(obj.s, "off");
+            obj.s.flush();
+            
+            obj.Write(['Adrv9001GetParam ' p]);
+            
+            tic;
+            str = '';
+            v = [];
+            
+            while( ~contains(str,[ p ' = ']) && (toc < 3))
+                str = obj.Read();
+                disp(str);
+                
+                if( contains(str,'=') )
+                    str2 = strsplit(str,'=');
+                    
+                    p = strtrim(str2{1});
+                    v = strtrim(str2{2});
+                    
+                    if(~isnan(str2double(v)))
+                        v = str2double(v);
+                    end
+                    
+                    obj.SetProperties({p,v});
+                end
+            end
+            
+            obj.s.flush();
+            
+            configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
+            
+        end
+                
+        function v = GetTemp( obj )
+            v = obj.Adrv9001GetParam('Temp');
+        end
+        
+        function v = GetVcTcxo( obj )
+            v = obj.Adrv9001GetParam('VcTcxo');
+        end
+        
+        function v = GetAdrvSiliconVersion( obj )
+            v = obj.Adrv9001GetParam('SiliconVersion');
+        end
+        
+        function v = GetAdrvFirmwareVersion( obj )
+            v = obj.Adrv9001GetParam('FirmwareVersion');
+        end
+        
+        function v = GetAdrvAPIVersion( obj )
+            v = obj.Adrv9001GetParam('APIVersion');
+        end
+        
+        function v = GetDpdEnable( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdEnable']);
+        end
+        
+        function v = GetDpdAmplifierType( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdAmplifierType']);
+        end
+        
+        function v = GetDpdLutSize( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdLutSize']);
+        end
+        
+        function v = GetDpdModel( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdModel']);
+        end
+        
+        function v = GetDpdChangeModelTapOrders( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdChangeModelTapOrders']);
+        end
+        
+        function v = GetDpdClgcEnable( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcEnable']);
+        end
+        
+        function v = GetDpdPreLutScale( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdPreLutScale']);
+        end
+        
+        function v = GetDpdNumberofSamples( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdNumberofSamples']);
+        end
+        
+        function v = GetDpdAdditionalPowerScale( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdAdditionalPowerScale']);
+        end
+        
+        function v = GetDpdCountsLessThanPowerThreshold( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdCountsLessThanPowerThreshold']);
+        end
+        
+        function v = GetDpdCountsGreaterThanPeakThreshold( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdCountsGreaterThanPeakThreshold']);
+        end
+        
+        function v = GetDpdImmediateLutSwitching( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdImmediateLutSwitching']);
+        end
+        
+        function v = GetDpdUseSpecialFrame( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdUseSpecialFrame']);
+        end
+        
+        function v = GetDpdResetLuts( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdResetLuts']);
+        end
+        
+        function v = GetDpdSamplingRate_Hz( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdSamplingRate_Hz']);
+        end
+        
+        function v = GetDpdRxTxNormalizationLowerThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdRxTxNormalizationLowerThreshold']);
+            v = 10*log10(v / 2^30);
+        end
+        
+        function v = GetDpdRxTxNormalizationUpperThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdRxTxNormalizationUpperThreshold']);
+            v = 10*log10(v / 2^30);
+        end
+        
+        function v = GetDpdDetectionPowerThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdDetectionPowerThreshold']);
+            v = 10*log10(v / 2^31);
+        end
+        
+        function v = GetDpdDetectionPeakThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdDetectionPeakThreshold']);
+            v = 10*log10(v / 2^31);
+        end
+        
+        function v = GetDpdTimeFilterCoefficient( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdTimeFilterCoefficient']);
+            v = v / 2^31;
+        end
+        
+        function v = GetDpdClgcLoopOpen( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcLoopOpen']);
+        end
+        
+        function v = GetDpdClgcFilterAlpha( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcFilterAlpha']);
+            v = v / 2^31;
+        end
+        
+        function v = GetDpdClgcGainTarget_dB( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcGainTarget_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetDpdClgcLastGain_dB( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcLastGain_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetDpdClgcFilteredGain_dB( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcFilteredGain_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetDpdCoefficients( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcFilteredGain_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetSampleRate( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'SampleRate']);
+        end
+        
+        function v = GetTxAttn( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'Attn'])/1000;
+        end
+        
+        function v = GetTxBoost( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'Boost']);
+        end
+        
+        function v = GetCarrierFrequency( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'CarrierFrequency']);
+        end
+        
+        function v = GetRssi( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'Rssi']);
+        end
+        
+        function v = GetRxGain( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'Rssi']);
+        end
+        
+        function v = GetExternalLoopbackPower(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackPower']);
+            v = v /10;
+        end
+        
+        function v = GetExternalLoopbackDelay(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'Gain']);
+            v = v * 100;
+        end
+        
+        function v = GetRadioState( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'RadioState']);
+            
+            if( v == 1 )
+                v = obj.Calibrated;
+            elseif( v == 2 )
+                v = obj.Primed;
+            elseif( v == 3)
+                v = obj.Enabled;
             else
-                obj_tmp = getfield(obj,f{1});
-                obj_tmp = SetProperties(obj_tmp,[{strjoin(f(2:end),'.')},vars(i+1)]);
-                obj = setfield(obj,f{1},obj_tmp);
+                v = obj.Standby;
             end
         end
-      end
         
-    end        
+        function v = GetSsiClockDelay( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'SsiClockDelay']);            
+        end
+        
+        function v = GetSsiDataDelay( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'SsiDataDelay']);            
+        end        
+        
+        function v = GetFileList( obj, filter)
+            configureCallback(obj.s, "off");
+            obj.s.flush();
             
-end
+            obj.Write('ls');
+            
+            tic;
+            str = '';
+            v = {};
+            
+            while( toc < 2 )
+                str = obj.Read();
+                disp(str);
+                
+                if(isempty(filter))
+                    v = [v; {strtrim(str(1:strfind(str,'.csv')+3))}];
+                elseif( contains(str,filter) )
+                    v = [v; {strtrim(str(1:strfind(str,'.csv')+3))}];
+                end
+            end
+            
+            obj.s.flush();
+            
+            configureCallback(obj.s,"terminator",@obj.ConnectionCallback);            
+        end
+    end
     
+    % Set Parameters
+    methods
+        
+        function RflanSetParam( obj, p, v )
+            obj.Write(['RflanSetParam ' p ' ' num2str(v)]);
+        end
+        
+        function Adrv9001SetParam( obj, p, v )
+            obj.Write(['Adrv9001SetParam ' p ' ' num2str(v)]);
+        end        
+        
+        function SetVcTcxo( obj, v )
+            obj.Adrv9001SetParam('VcTcxo', num2str(v,"%.2f"));
+        end
+        
+        function SetDpdEnable( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdEnable'], num2str(v));
+        end
+        
+        function SetDpdAmplifierType( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdAmplifierType'], num2str(v));
+        end
+        
+        function SetDpdLutSize( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdLutSize'], num2str(v));
+        end
+        
+        function SetDpdModel( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdModel'], num2str(v));
+        end
+        
+        function SetDpdChangeModelTapOrders( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdChangeModelTapOrders'], num2str(v));
+        end
+        
+        function SetDpdClgcEnable( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcEnable'], num2str(v));
+        end
+        
+        function SetDpdPreLutScale( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdPreLutScale'], num2str(v));
+        end
+        
+        function SetDpdNumberofSamples( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdNumberofSamples'], num2str(v));
+        end
+        
+        function SetDpdAdditionalPowerScale( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdAdditionalPowerScale'], num2str(v));
+        end
+        
+        function SetDpdCountsLessThanPowerThreshold( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdCountsLessThanPowerThreshold'], num2str(v));
+        end
+        
+        function SetDpdCountsGreaterThanPeakThreshold( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdCountsGreaterThanPeakThreshold'], num2str(v));
+        end
+        
+        function SetDpdImmediateLutSwitching( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdImmediateLutSwitching'], num2str(v));
+        end
+        
+        function SetDpdUseSpecialFrame( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdUseSpecialFrame'], num2str(v));
+        end
+        
+        function SetDpdResetLuts( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdResetLuts'], num2str(v));
+        end
+        
+        function SetDpdSamplingRate_Hz( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdSamplingRate_Hz'], num2str(v));
+        end
+        
+        function SetDpdRxTxNormalizationLowerThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationLowerThreshold ' num2str(10^(v/10)*2^30)]);
+        end
+        
+        function SetDpdRxTxNormalizationUpperThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationUpperThreshold ' num2str(10^(v/10)*2^30)]);
+        end
+        
+        function SetDpdDetectionPowerThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdDetectionPowerThreshold ' num2str(10^(v/10)*2^31)]);
+        end
+        
+        function SetDpdDetectionPeakThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdDetectionPeakThreshold ' num2str(10^(v/10)*2^31)]);
+        end
+        
+        function SetDpdTimeFilterCoefficient( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdTimeFilterCoefficient'], num2str(v));
+        end
+        
+        function SetDpdClgcLoopOpen( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcLoopOpen'], num2str(v));
+        end
+        
+        function SetDpdClgcFilterAlpha( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcFilterAlpha'], num2str(v));
+        end
+        
+        function SetDpdClgcGainTarget_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcGainTarget_HundredthdB ' num2str(v * 100)]);
+        end
+        
+        function SetDpdClgcLastGain_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcLastGain_HundredthdB ' num2str(v * 100)]);
+        end
+        
+        function SetDpdClgcFilteredGain_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcFilteredGain_HundredthdB ' num2str(v * 100)]);
+        end
+        
+        function SetTxAttn( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'Attn'], num2str(v*1000));
+        end
+        
+        function SetTxBoost( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'Boost'], num2str(v));
+        end
+        
+        function SetCarrierFrequency( obj, Port, v )
+            obj.Adrv9001ToRfCalibrated( Port );
+            obj.Adrv9001SetParam([Port 'CarrierFrequency'], num2str(v));
+        end
+        
+        function SetRadioState( obj, Port, v )
+            if( strcmp(v, obj.Calibrated ))
+                obj.Adrv9001SetParam([Port 'RadioState'], '1');
+            elseif( strcmp(v, obj.Primed) )
+                obj.Adrv9001SetParam([Port 'RadioState'], '2');
+            elseif( strcmp(v, obj.Enabled) )
+                obj.Adrv9001SetParam([Port 'RadioState'], '3');
+            end
+        end
+        
+        function v = SetExternalLoopbackPower(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackPower']);
+            obj.Adrv9001SetParam([Port 'ExternalLoopbackPower ' num2str(v *10)]);
+        end
+        
+        function v = SetExternalLoopbackDelay(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackDelay']);
+        end
+        
+        function SetSsiClockDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'SsiClockDelay'], num2str(v));            
+        end
+        
+        function SetSsiDataDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'SsiDataDelay'], num2str(v));            
+        end
+           
+        function SetTxRx1SsiLoopBack( obj, v )
+            obj.Adrv9001SetParam('TxRx1SsiLoopBack', num2str(v));            
+        end 
+
+        function SetTxRx2SsiLoopBack( obj, v )
+            obj.Adrv9001SetParam('TxRx2SsiLoopBack', num2str(v));            
+        end    
+        
+        function SetTxIqConstant( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'IqData'], num2str(v));            
+        end   
+
+        function SetTxIqDataPath( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'IqDataPath'], num2str(v));            
+        end           
+    end
+        
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Gets Available COM Ports
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-function ports = GetAvailablePorts()
-
-   devices = winqueryreg('name', 'HKEY_LOCAL_MACHINE', 'HARDWARE\DEVICEMAP\SERIALCOMM');
-
-   %Still need to filter out for Suter USB Descriptor
-   if(isempty(devices))
-       ports = [];
-   else
-      ports = cell(1,length(devices));
-
-      for i = 1:length(devices)
-          ports{i} = winqueryreg('HKEY_LOCAL_MACHINE', 'HARDWARE\DEVICEMAP\SERIALCOMM', devices{i});
-      end
-
-   end
-end
-    

@@ -1,8 +1,12 @@
 workspace
 Packages
 Debug
-.cproject
-.project
+*.cproject
+*.project
 bootimage
-.settings
+*.settings
 vivado
+slprj
+*.autosave
+*.asv
+.vscode
