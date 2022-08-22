@@ -44,6 +44,8 @@ update_compile_order -fileset sources_1
 set_property top system_top [current_fileset]
 update_compile_order -fileset sources_1
 
+exit 
+
 # Generate Targets
 generate_target all [get_files  $proj_name/vivado/${proj_name}.srcs/sources_1/bd/system/system.bd]
 

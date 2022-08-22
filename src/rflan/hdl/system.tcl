@@ -1004,10 +1004,10 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__CRL_APB__PCAP_CTRL__DIVISOR0 {8} \
    CONFIG.PSU__CRL_APB__PCAP_CTRL__FREQMHZ {200} \
    CONFIG.PSU__CRL_APB__PCAP_CTRL__SRCSEL {IOPLL} \
-   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ {99.999001} \
-   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__DIVISOR0 {15} \
+   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ {249.997498} \
+   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__DIVISOR0 {6} \
    CONFIG.PSU__CRL_APB__PL0_REF_CTRL__DIVISOR1 {1} \
-   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {100} \
+   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {250} \
    CONFIG.PSU__CRL_APB__PL0_REF_CTRL__SRCSEL {IOPLL} \
    CONFIG.PSU__CRL_APB__PL1_REF_CTRL__ACT_FREQMHZ {299.997009} \
    CONFIG.PSU__CRL_APB__PL1_REF_CTRL__DIVISOR0 {4} \
@@ -1823,9 +1823,9 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   # Create port connections
   connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc_0/In0] [get_bd_pins sys_concat_intc_0/In1] [get_bd_pins sys_concat_intc_0/In2] [get_bd_pins sys_concat_intc_0/In3] [get_bd_pins sys_concat_intc_0/In4] [get_bd_pins sys_concat_intc_0/In5] [get_bd_pins sys_concat_intc_0/In6] [get_bd_pins sys_concat_intc_0/In7] [get_bd_pins sys_concat_intc_1/In0] [get_bd_pins sys_concat_intc_1/In1] [get_bd_pins sys_concat_intc_1/In6] [get_bd_pins sys_concat_intc_1/In7]
   connect_bd_net -net GND_2_dout [get_bd_pins GND_2/dout] [get_bd_pins sys_ps8/emio_spi0_s_i] [get_bd_pins sys_ps8/emio_spi0_sclk_i] [get_bd_pins sys_ps8/emio_spi0_ss_i_n]
-  connect_bd_net -net adrv9001_spi_miso_1 [get_bd_pins adrv9001_spi_miso] [get_bd_pins sys_ps8/emio_spi0_m_i]
   connect_bd_net -net adrv9001_rx1_dma_irq [get_bd_pins irq14] [get_bd_pins sys_concat_intc_1/In5]
   connect_bd_net -net adrv9001_rx2_dma_irq [get_bd_pins irq13] [get_bd_pins sys_concat_intc_1/In4]
+  connect_bd_net -net adrv9001_spi_miso_1 [get_bd_pins adrv9001_spi_miso] [get_bd_pins sys_ps8/emio_spi0_m_i]
   connect_bd_net -net adrv9001_tx1_dma_irq [get_bd_pins irq12] [get_bd_pins sys_concat_intc_1/In3]
   connect_bd_net -net adrv9001_tx2_dma_irq [get_bd_pins irq11] [get_bd_pins sys_concat_intc_1/In2]
   connect_bd_net -net sys_concat_intc_0_dout [get_bd_pins sys_concat_intc_0/dout] [get_bd_pins sys_ps8/pl_ps_irq0]
@@ -1989,8 +1989,8 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
   assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
   assign_bd_address -offset 0x80004000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9002_0/s_axi/reg0] -force
-  assign_bd_address -offset 0x80000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx2_dma/s_axi/axi_lite] -force
   assign_bd_address -offset 0x80001000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx1_dma/s_axi/axi_lite] -force
+  assign_bd_address -offset 0x80000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx2_dma/s_axi/axi_lite] -force
   assign_bd_address -offset 0x80002000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx1_dma/s_axi/axi_lite] -force
   assign_bd_address -offset 0x80003000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx2_dma/s_axi/axi_lite] -force
 
@@ -1998,6 +1998,7 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -2009,6 +2010,4 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
-
-common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
