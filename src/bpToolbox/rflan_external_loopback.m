@@ -25,18 +25,17 @@ h.SetTxAttn(TxPort, 20);
 h.SetTxBoost(TxPort, 0);
 
 % Load Transmit buffer with IQ data from file on SD card
-h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_61p44M_bw_20M.csv');
-%h.RflanStreamBufLoad(TxPort,'sample_rate_24K_Tone_3K.csv');
+%h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_61p44M_bw_20M.csv');
+h.RflanStreamBufLoad(TxPort,'sample_rate_24K_Tone_3K.csv');
 
 % Enable continuous transmit stream
 h.RflanStreamStart(TxPort, 1, RxBufLength);
 
 % Read Carrier Frequency
-fc = h.GetCarrierFrequency(RxPort);
 fs = h.GetSampleRate(RxPort);
 
 figure();
-for i = 1:20    
+for i = 1:2    
     
 % Start DMA Burst
 h.RflanStreamStart(RxPort, 0, RxBufLength);
@@ -51,7 +50,7 @@ spec = msspectrum(h2,iq,...
         'SpectrumType','twosided',...
         'CenterDC',true);    
     
-f = spec.Frequencies/1e6 + fc/1e6;
+f = spec.Frequencies/1e6;
 a = 10*log10(spec.Data);    
 
 plot(f,a);

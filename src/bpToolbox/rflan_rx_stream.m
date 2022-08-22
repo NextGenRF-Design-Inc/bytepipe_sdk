@@ -12,7 +12,6 @@ RxPort = h.Rx2;
 RxBufLength = 4096;
 
 % Read Carrier Frequency
-fc = h.GetCarrierFrequency(RxPort);
 fs = h.GetSampleRate(RxPort);
 
 figure();
@@ -31,7 +30,7 @@ spec = msspectrum(h2,iq,...
         'SpectrumType','twosided',...
         'CenterDC',true);    
     
-f = spec.Frequencies/1e6 + fc/1e6;
+f = spec.Frequencies/1e6;
 a = 10*log10(spec.Data);    
 
 plot(f,a);
