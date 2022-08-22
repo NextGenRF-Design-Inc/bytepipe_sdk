@@ -1,6 +1,6 @@
 ![logo](../../docs/BytePipe_Logo.png)
 
-# Overview
+# RFLAN
 
 The rflan application is an embedded C real-time application running on the Cortex R5 real-time processing unit (RPU).  The programmable logic includes the [adrv9001](../adrv9001/README.md) synchrounous serial interface along with DMAs for streaming IQ data or modem data to and from shared memory.  The RFLAN firmware configures and controls the ADRV9001.  It also directs DMA data to and from shared memory to one of the following external interfaces:  
 
@@ -25,11 +25,19 @@ To evaluate the rflan application the latest executables can be downloaded from 
 
 # CLI Interface
 
-[![cli](docs/cli.png)](https://youtu.be/SnfJFECi2Po)
+
 
 # Building Source
 
-Building the source files is straightforward using the supplied build scripts and video tutorials.  The first step in building the rflan source files is to build the HDL.  An alternative to building the HDL from source is to download the latest released version.  To build the HDL from source see the [Building HDL](#building-hdl) section below.  To use the latest pre-built HDL release follow instructions for [Building RPU Software](#building-rpu-software).  The source files can be built anywhere on the host machine.  It is good to build them in a seperate folder from the source files so they can be deleted without effecting the source.  The following example assumes the bytepipe_sdk repository is cloned or downloaded to the users `C:` drive.  
+Building the source files is straightforward using the supplied build scripts and video tutorials.  The first step in building the rflan source files is to build the HDL.  An alternative to building the HDL from source is to download the latest released version.  To build the HDL from source see the [Building HDL](#building-hdl) section below.  To use the latest pre-built HDL release follow instructions for [Building RPU Software](#building-rpu-software).  The folloiwng video shown below and found [here](https://youtu.be/a_KpZ9lYxiE) shows the process of building the RFLAN HDL and software.
+
+[![building_hdl](docs/building_rflan.png)](https://youtu.be/a_KpZ9lYxiE)
+
+
+
+
+
+The source files can be built anywhere on the host machine.  It is good to build them in a seperate folder from the source files so they can be deleted without effecting the source.  The following example assumes the bytepipe_sdk repository is cloned or downloaded to the users `C:` drive.  
 
 
 ```
@@ -51,10 +59,7 @@ export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
 make -f ../src/rflan/Makefile hdl
 ```
 
-This will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opended using Vivado.
-
-[![building_hdl](docs/building_hdl.png)](https://youtu.be/a_KpZ9lYxiE)
-
+This will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opended using Vivado.  
 
 # Building RPU Software
 
@@ -65,7 +70,9 @@ export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
 make -f ../src/rflan/Makefile sw
 ```
 
-The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan_iqdma`.
+The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan`. 
 
+# Programming BytePipe RFLAN
 
-[![building_rpu](docs/building_rpu.png)](https://youtu.be/C1oRql9CMOM)
+To program the BytePipe with the RFLAN application simply copy the contents of the 
+

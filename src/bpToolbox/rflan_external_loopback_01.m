@@ -1,8 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This script will load the transmiter DMA stream buffer from the specified 
-% pre-generated iq file on the sd card and begin transmitting. This is 
-% followed by a receiver DMA stream enable and several receiver DMA buffer 
-% reads.  Each produces a spectral plot of the received buffer.
+% This script will load the transmiter DMA stream buffer based on the 
+% matlab generated waveform and begin transmitting. This is followed by a 
+% receiver DMA stream enable and several receiver DMA buffer reads.  Each 
+% produces a spectral plot of the received buffer.
 %
 % Externally connect transmit and receiver ports together using a coaxial
 % cable.  
@@ -21,11 +21,15 @@ RxBufLength = 4096;
 h.SetTxAttn(TxPort, 40);
 h.SetTxBoost(TxPort, 0);
 
-% Load Transmit buffer with IQ data from file on SD card
-h.RflanStreamBufLoad(TxPort,'sample_rate_24K_Tone_3K.csv');
+% Generate Transmit CW tone
+fs = h.GetSampleRate(TxPort);
+f_tone = fs/8;
+t = (0:fs/f_tone-1)/fs;
+iq = sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t);
+h.RflanStreamBufPut(TxPort,0,reshape(iq,[],1));
 
-% Enable continuous transmit of firt 4096 points of the file
-h.RflanStreamStart(TxPort, 1, 4096);
+% Enable continuous transmit of the iq data
+h.RflanStreamStart(TxPort, 1, length(iq));
 
 % Read Carrier Frequency
 fs = h.GetSampleRate(RxPort);
