@@ -126,6 +126,10 @@ classdef rflan < handle
         Rx1 = 'Rx1';
         Rx2 = 'Rx2';
         
+        Adrv9001TxDataPath_DMA = 0;
+        ADRV9001TxDataPath_Constant = 1;
+        ADRV9001TxDataPath_Incrementing = 2;
+        
         Calibrated = 'Calibrated';
         Primed = 'Primed';
         Enabled = 'Enabled';

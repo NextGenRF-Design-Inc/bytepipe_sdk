@@ -36,7 +36,7 @@ fc = h.GetCarrierFrequency(RxPort);
 fs = h.GetSampleRate(RxPort);
 
 figure();
-for i = 1:5    
+for i = 1:20    
     
 % Start DMA Burst
 h.RflanStreamStart(RxPort, 0, RxBufLength);

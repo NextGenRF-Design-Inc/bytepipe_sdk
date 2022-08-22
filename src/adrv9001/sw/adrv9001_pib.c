@@ -180,8 +180,6 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     Channel = ADI_CHANNEL_2;
   }
 
-  status = Adrv9001Status_InvalidParameter;
-
   if( strcmp( &name[3], "CarrierFrequency") == 0 )
   {
     adi_adrv9001_Carrier_t *tmp;
@@ -315,6 +313,11 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
       if((status = adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg )) != 0)
         return status;
     }
+  }
+
+  else
+  {
+	  status = Adrv9001Status_InvalidParameter;
   }
 
   return status;
