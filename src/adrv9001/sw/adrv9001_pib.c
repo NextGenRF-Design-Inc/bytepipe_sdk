@@ -137,6 +137,14 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2SampleRate",                        offsetof(adrv9001_params_t, tx.txProfile[1].txInterfaceSampleRate_Hz),                    PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
   { "Rx1SampleRate",                        offsetof(adrv9001_params_t, rx.rxChannelCfg[0].profile.rxInterfaceSampleRate_Hz),         PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
   { "Rx2SampleRate",                        offsetof(adrv9001_params_t, rx.rxChannelCfg[1].profile.rxInterfaceSampleRate_Hz),         PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
+  { "Tx1TestMode",                          0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2TestMode",                          0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx1TestMode",                          0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx2TestMode",                          0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx1TestData",                          offsetof(adrv9001_params_t, Tx1TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Tx2TestData",                          offsetof(adrv9001_params_t, Tx2TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Rx1TestData",                          offsetof(adrv9001_params_t, Rx1TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Rx2TestData",                          offsetof(adrv9001_params_t, Rx2TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
 };
 
 static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char *name, char *str )
@@ -282,7 +290,32 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     status = adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, tmp);
   }
 
+  else if( strcmp( &name[3], "TestMode") == 0 )
+  {
+    uint32_t tmp;
 
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+
+    if( Port == ADI_TX )
+    {
+      adi_adrv9001_TxSsiTestModeCfg_t Cfg = {
+          .fixedDataPatternToCheck = (Channel == ADI_CHANNEL_1) ? Instance->Params->Tx1TestModeData : Instance->Params->Tx2TestModeData,
+          .testData = tmp };
+
+      if((status = adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg )) != 0)
+        return status;
+    }
+    else
+    {
+      adi_adrv9001_RxSsiTestModeCfg_t Cfg = {
+          .fixedDataPatternToTransmit = (Channel == ADI_CHANNEL_1) ? Instance->Params->Rx1TestModeData : Instance->Params->Rx2TestModeData,
+          .testData = tmp
+      };
+
+      if((status = adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg )) != 0)
+        return status;
+    }
+  }
 
   return status;
 }

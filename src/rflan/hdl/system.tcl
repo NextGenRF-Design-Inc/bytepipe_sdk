@@ -205,6 +205,8 @@ proc create_hier_cell_cpu { parentCell nameHier } {
   create_bd_pin -dir I adrv9001_spi_miso
   create_bd_pin -dir O adrv9001_spi_mosi
   create_bd_pin -dir O adrv9001_spi_sclk
+  create_bd_pin -dir O clk250m
+  create_bd_pin -dir O -from 0 -to 0 clk250m_aresetn
   create_bd_pin -dir I -from 0 -to 0 irq11
   create_bd_pin -dir I -from 0 -to 0 irq12
   create_bd_pin -dir I -from 0 -to 0 irq13
@@ -842,13 +844,13 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__CRF_APB__DPLL_FRAC_CFG__ENABLED {0} \
    CONFIG.PSU__CRF_APB__DPLL_TO_LPD_CTRL__DIVISOR0 {3} \
    CONFIG.PSU__CRF_APB__DP_AUDIO_REF_CTRL__ACT_FREQMHZ {24.999750} \
-   CONFIG.PSU__CRF_APB__DP_AUDIO_REF_CTRL__DIVISOR0 {16} \
+   CONFIG.PSU__CRF_APB__DP_AUDIO_REF_CTRL__DIVISOR0 {20} \
    CONFIG.PSU__CRF_APB__DP_AUDIO_REF_CTRL__DIVISOR1 {1} \
    CONFIG.PSU__CRF_APB__DP_AUDIO_REF_CTRL__FREQMHZ {25} \
    CONFIG.PSU__CRF_APB__DP_AUDIO_REF_CTRL__SRCSEL {RPLL} \
    CONFIG.PSU__CRF_APB__DP_AUDIO__FRAC_ENABLED {0} \
-   CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__ACT_FREQMHZ {26.666401} \
-   CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__DIVISOR0 {15} \
+   CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__ACT_FREQMHZ {26.315527} \
+   CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__DIVISOR0 {19} \
    CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__DIVISOR1 {1} \
    CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__FREQMHZ {27} \
    CONFIG.PSU__CRF_APB__DP_STC_REF_CTRL__SRCSEL {RPLL} \
@@ -1004,15 +1006,15 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__CRL_APB__PCAP_CTRL__DIVISOR0 {8} \
    CONFIG.PSU__CRL_APB__PCAP_CTRL__FREQMHZ {200} \
    CONFIG.PSU__CRL_APB__PCAP_CTRL__SRCSEL {IOPLL} \
-   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ {249.997498} \
-   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__DIVISOR0 {6} \
+   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ {99.999001} \
+   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__DIVISOR0 {15} \
    CONFIG.PSU__CRL_APB__PL0_REF_CTRL__DIVISOR1 {1} \
-   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {250} \
+   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {100} \
    CONFIG.PSU__CRL_APB__PL0_REF_CTRL__SRCSEL {IOPLL} \
-   CONFIG.PSU__CRL_APB__PL1_REF_CTRL__ACT_FREQMHZ {299.997009} \
+   CONFIG.PSU__CRL_APB__PL1_REF_CTRL__ACT_FREQMHZ {249.997498} \
    CONFIG.PSU__CRL_APB__PL1_REF_CTRL__DIVISOR0 {4} \
    CONFIG.PSU__CRL_APB__PL1_REF_CTRL__DIVISOR1 {1} \
-   CONFIG.PSU__CRL_APB__PL1_REF_CTRL__FREQMHZ {100} \
+   CONFIG.PSU__CRL_APB__PL1_REF_CTRL__FREQMHZ {250} \
    CONFIG.PSU__CRL_APB__PL1_REF_CTRL__SRCSEL {RPLL} \
    CONFIG.PSU__CRL_APB__PL2_REF_CTRL__ACT_FREQMHZ {49.999500} \
    CONFIG.PSU__CRL_APB__PL2_REF_CTRL__DIVISOR0 {4} \
@@ -1030,24 +1032,24 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__CRL_APB__QSPI_REF_CTRL__FREQMHZ {125} \
    CONFIG.PSU__CRL_APB__QSPI_REF_CTRL__SRCSEL {IOPLL} \
    CONFIG.PSU__CRL_APB__RPLL_CTRL__DIV2 {1} \
-   CONFIG.PSU__CRL_APB__RPLL_CTRL__FBDIV {72} \
+   CONFIG.PSU__CRL_APB__RPLL_CTRL__FBDIV {60} \
    CONFIG.PSU__CRL_APB__RPLL_CTRL__FRACDATA {0.000000} \
    CONFIG.PSU__CRL_APB__RPLL_CTRL__FRACFREQ {27.138} \
    CONFIG.PSU__CRL_APB__RPLL_CTRL__SRCSEL {PSS_REF_CLK} \
    CONFIG.PSU__CRL_APB__RPLL_FRAC_CFG__ENABLED {0} \
-   CONFIG.PSU__CRL_APB__RPLL_TO_FPD_CTRL__DIVISOR0 {3} \
+   CONFIG.PSU__CRL_APB__RPLL_TO_FPD_CTRL__DIVISOR0 {2} \
    CONFIG.PSU__CRL_APB__SDIO0_REF_CTRL__ACT_FREQMHZ {199.998001} \
-   CONFIG.PSU__CRL_APB__SDIO0_REF_CTRL__DIVISOR0 {6} \
+   CONFIG.PSU__CRL_APB__SDIO0_REF_CTRL__DIVISOR0 {5} \
    CONFIG.PSU__CRL_APB__SDIO0_REF_CTRL__DIVISOR1 {1} \
    CONFIG.PSU__CRL_APB__SDIO0_REF_CTRL__FREQMHZ {200} \
    CONFIG.PSU__CRL_APB__SDIO0_REF_CTRL__SRCSEL {RPLL} \
    CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__ACT_FREQMHZ {199.998001} \
-   CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__DIVISOR0 {6} \
+   CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__DIVISOR0 {5} \
    CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__DIVISOR1 {1} \
    CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__FREQMHZ {200} \
    CONFIG.PSU__CRL_APB__SDIO1_REF_CTRL__SRCSEL {RPLL} \
    CONFIG.PSU__CRL_APB__SPI0_REF_CTRL__ACT_FREQMHZ {99.999001} \
-   CONFIG.PSU__CRL_APB__SPI0_REF_CTRL__DIVISOR0 {12} \
+   CONFIG.PSU__CRL_APB__SPI0_REF_CTRL__DIVISOR0 {10} \
    CONFIG.PSU__CRL_APB__SPI0_REF_CTRL__DIVISOR1 {1} \
    CONFIG.PSU__CRL_APB__SPI0_REF_CTRL__FREQMHZ {100} \
    CONFIG.PSU__CRL_APB__SPI0_REF_CTRL__SRCSEL {RPLL} \
@@ -1274,7 +1276,7 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__FPD_SLCR__WDT1__FREQMHZ {99.999001} \
    CONFIG.PSU__FPD_SLCR__WDT_CLK_SEL__SELECT {APB} \
    CONFIG.PSU__FPGA_PL0_ENABLE {1} \
-   CONFIG.PSU__FPGA_PL1_ENABLE {0} \
+   CONFIG.PSU__FPGA_PL1_ENABLE {1} \
    CONFIG.PSU__FPGA_PL2_ENABLE {0} \
    CONFIG.PSU__FPGA_PL3_ENABLE {0} \
    CONFIG.PSU__FP__POWER__ON {1} \
@@ -1546,7 +1548,7 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__PCIE__VENDOR_ID {} \
    CONFIG.PSU__PJTAG__PERIPHERAL__ENABLE {0} \
    CONFIG.PSU__PL_CLK0_BUF {TRUE} \
-   CONFIG.PSU__PL_CLK1_BUF {FALSE} \
+   CONFIG.PSU__PL_CLK1_BUF {TRUE} \
    CONFIG.PSU__PL_CLK2_BUF {FALSE} \
    CONFIG.PSU__PL_CLK3_BUF {FALSE} \
    CONFIG.PSU__PL__POWER__ON {1} \
@@ -1808,6 +1810,12 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.C_EXT_RST_WIDTH {1} \
  ] $sys_rstgen
 
+  # Create instance: sys_rstgen1, and set properties
+  set sys_rstgen1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 sys_rstgen1 ]
+  set_property -dict [ list \
+   CONFIG.C_EXT_RST_WIDTH {1} \
+ ] $sys_rstgen1
+
   # Create instance: util_vector_logic_1, and set properties
   set util_vector_logic_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_1 ]
   set_property -dict [ list \
@@ -1830,12 +1838,14 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net adrv9001_tx2_dma_irq [get_bd_pins irq11] [get_bd_pins sys_concat_intc_1/In2]
   connect_bd_net -net sys_concat_intc_0_dout [get_bd_pins sys_concat_intc_0/dout] [get_bd_pins sys_ps8/pl_ps_irq0]
   connect_bd_net -net sys_concat_intc_1_dout [get_bd_pins sys_concat_intc_1/dout] [get_bd_pins sys_ps8/pl_ps_irq1]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins m_axi_aclk] [get_bd_pins sys_ps8/maxihpm0_lpd_aclk] [get_bd_pins sys_ps8/pl_clk0] [get_bd_pins sys_ps8/saxihp1_fpd_aclk] [get_bd_pins sys_rstgen/slowest_sync_clk]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins m_axi_aclk] [get_bd_pins sys_ps8/maxihpm0_lpd_aclk] [get_bd_pins sys_ps8/pl_clk0] [get_bd_pins sys_rstgen/slowest_sync_clk]
   connect_bd_net -net sys_cpu_resetn [get_bd_pins m_axi_rstn] [get_bd_pins sys_rstgen/peripheral_aresetn]
   connect_bd_net -net sys_ps8_emio_spi0_m_o [get_bd_pins adrv9001_spi_mosi] [get_bd_pins sys_ps8/emio_spi0_m_o]
   connect_bd_net -net sys_ps8_emio_spi0_sclk_o [get_bd_pins adrv9001_spi_sclk] [get_bd_pins sys_ps8/emio_spi0_sclk_o]
   connect_bd_net -net sys_ps8_emio_spi0_ss_o_n [get_bd_pins adrv9001_spi_csn] [get_bd_pins sys_ps8/emio_spi0_ss_o_n]
-  connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins util_vector_logic_1/Op1]
+  connect_bd_net -net sys_ps8_pl_clk1 [get_bd_pins clk250m] [get_bd_pins sys_ps8/pl_clk1] [get_bd_pins sys_ps8/saxihp1_fpd_aclk] [get_bd_pins sys_rstgen1/slowest_sync_clk]
+  connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins sys_rstgen1/ext_reset_in] [get_bd_pins util_vector_logic_1/Op1]
+  connect_bd_net -net sys_rstgen1_peripheral_aresetn [get_bd_pins clk250m_aresetn] [get_bd_pins sys_rstgen1/peripheral_aresetn]
   connect_bd_net -net util_vector_logic_1_Res [get_bd_pins pl_rst] [get_bd_pins util_vector_logic_1/Res]
 
   # Restore current instance
@@ -1972,12 +1982,14 @@ proc create_root_design { parentCell } {
   connect_bd_net -net cpu_adrv9001_spi_csn [get_bd_ports adrv9001_csn] [get_bd_pins cpu/adrv9001_spi_csn]
   connect_bd_net -net cpu_adrv9001_spi_mosi [get_bd_ports adrv9001_mosi] [get_bd_pins cpu/adrv9001_spi_mosi]
   connect_bd_net -net cpu_adrv9001_spi_sclk [get_bd_ports adrv9001_sclk] [get_bd_pins cpu/adrv9001_spi_sclk]
+  connect_bd_net -net cpu_clk250m [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/clk250m] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk]
+  connect_bd_net -net cpu_clk250m_aresetn [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/clk250m_aresetn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn]
   connect_bd_net -net irq11_1 [get_bd_pins cpu/irq11] [get_bd_pins tx2_dma/irq]
   connect_bd_net -net irq12_1 [get_bd_pins cpu/irq12] [get_bd_pins tx1_dma/irq]
   connect_bd_net -net irq13_1 [get_bd_pins cpu/irq13] [get_bd_pins rx1_dma/irq]
   connect_bd_net -net irq14_1 [get_bd_pins cpu/irq14] [get_bd_pins rx2_dma/irq]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9002_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/m_axi_aclk] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx1_dma/s_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/s_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx1_dma/s_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/s_axi_aclk]
-  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9002_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/m_axi_rstn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx1_dma/s_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/s_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx1_dma/s_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/s_axi_aresetn]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9002_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins cpu/m_axi_aclk] [get_bd_pins rx1_dma/s_axi_aclk] [get_bd_pins rx2_dma/s_axi_aclk] [get_bd_pins tx1_dma/s_axi_aclk] [get_bd_pins tx2_dma/s_axi_aclk]
+  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9002_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins cpu/m_axi_rstn] [get_bd_pins rx1_dma/s_axi_aresetn] [get_bd_pins rx2_dma/s_axi_aresetn] [get_bd_pins tx1_dma/s_axi_aresetn] [get_bd_pins tx2_dma/s_axi_aresetn]
 
   # Create address segments
   assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force

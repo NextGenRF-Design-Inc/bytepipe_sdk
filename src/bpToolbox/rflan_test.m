@@ -118,7 +118,21 @@ end
 h.GetRssi(h.Rx1);
 
 
-%% Tx Stream Start
+%% Tx Stream from File
+
+% Load Transmit buffer with IQ data from file on SD card
+% type "ls" to see files on sd card
+h.RflanStreamBufLoad(h.Tx1,'CFR_sample_rate_15p36M_bw_10M.csv');
+
+% Enable transmit stream of nSamp number of samples.  Optionally repeat
+% this pattern if Cyclic is set to 1.  If Cyclic equals 0 then the IQ data
+% is transmitted once and then turned off.
+Cyclic = 1;
+nSamp = 2e3;
+h.RflanStreamStart(h.Tx1, Cyclic, nSamp);
+
+
+%% Tx Stream from Matlab
 
 % Load Transmit buffer with IQ data from file on SD card
 % type "ls" to see files on sd card

@@ -51,7 +51,7 @@ export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
 make -f ../src/rflan/Makefile hdl
 ```
 
-This will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan_iqdma/rflan_iqdma.xsa`.  Once the build is completed the project can be opended using Vivado.
+This will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opended using Vivado.
 
 [![building_hdl](docs/building_hdl.png)](https://youtu.be/a_KpZ9lYxiE)
 
@@ -62,10 +62,10 @@ The software is built using the Xilinx Vitis IDE.  The build script will automat
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
-make -f ../src/rflan_iqdma/Makefile sw
+make -f ../src/rflan/Makefile sw
 ```
 
-The script will generate the hardware platform, board support package, and rflan_iqdma application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan_iqdma`.
+The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan_iqdma`.
 
 
 [![building_rpu](docs/building_rpu.png)](https://youtu.be/C1oRql9CMOM)

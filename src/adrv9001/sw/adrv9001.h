@@ -145,6 +145,10 @@ typedef struct {
   adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
   adi_adrv9001_RxInterfaceGainCtrl_t    Rx1InterfaceGain;
   adi_adrv9001_RxInterfaceGainCtrl_t    Rx2InterfaceGain;
+  uint32_t                              Tx1TestModeData;
+  uint32_t                              Tx2TestModeData;
+  uint32_t                              Rx1TestModeData;
+  uint32_t                              Rx2TestModeData;
   uint32_t                              HwVer;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
 } adrv9001_params_t;

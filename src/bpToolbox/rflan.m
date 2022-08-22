@@ -212,47 +212,8 @@ classdef rflan < handle
             
         end
         
-        function status = CalStatus(obj, CalMask0, CalMask1)
-            
-            status = 1;
-            
-            if( obj.PhyAdrv9001Init() == 0)
-                if( obj.Adrv9001InitProfile() == 0)
-                    status = obj.Adrv9001InitCalsRun(CalMask0, CalMask1, 0);
-                end
-            end
-        end
-        
-        function t = SweepCalStatus(obj, path)
-            
-            CalMask = convertCharsToStrings(fieldnames(obj.adi_adrv9001_init_cal));
-            Status = strings(length(CalMask),1);
-            
-            for i = 1:length(CalMask)
-                if( obj.PhyAdrv9001Init() ~= 0)
-                    Status = nan;
-                    break;
-                end
-                
-                if( obj.Adrv9001InitProfile() ~= 0)
-                    Status = nan;
-                    break;
-                end
-                
-                if(path == 0)
-                    Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0, 0));
-                elseif(path == 3)
-                    Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(getfield(obj.adi_adrv9001_init_cal,CalMask(i)), getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0));
-                else
-                    Status(i) = obj.Status2String(obj.Adrv9001InitCalsRun(0, getfield(obj.adi_adrv9001_init_cal,CalMask(i)), 0));
-                end
-                
-                disp(strjoin([CalMask{i} repmat(' ',1,max(strlength(CalMask))-length(CalMask{i})) Status(i)]));
-                
-            end
-            
-            t = table(CalMask,Status);
-            
+        function TaskInfo( obj )
+            obj.Write('TaskInfo');            
         end
         
         function Adrv9001ToRfCalibrated( obj, Port )
@@ -266,58 +227,15 @@ classdef rflan < handle
         function Adrv9001ToRfEnabled( obj, Port )
             obj.Write(['Adrv9001ToRfEnabled ' char(Port)]);
         end
+            
+        function Adrv9001CalibrateSsi( obj, Port )
+            obj.Write(['Adrv9001CalibrateSsi ' char(Port)]);
+        end
         
-        function FormatC99( obj )
-            tesDir = uigetdir; 
-            tesFiles = dir(fullfile(tesDir,'*.c'));
-            tesFiles = [tesFiles;dir(fullfile(tesDir,'*.h'))];
-            
-            %rmdir([tesDir '\output'],'s');
-            mkdir([tesDir '\output']);
-            
-            for k = 1:length(tesFiles)
-                if(~strcmp(tesFiles(k).name,'main.c') && ...
-                    ~contains(tesFiles(k).name,'Transmitting') && ...
-                    ~contains(tesFiles(k).name,'Receiving') && ...
-                    ~contains(tesFiles(k).name,'dataCapture'))
-                    fid  = fopen([tesDir '\' tesFiles(k).name],'r');
-                    f=fread(fid,'*char')';
-                    fclose(fid);
-                    f = erase(f,', adi_fpga9001_Device_t * fpga9001Device_0');                    
-                    f = strsplit(f,newline);
-                    f = f(~contains(f,'printf'));
-                    f = f(~contains(f,'getchar'));    
-                    f = f(~contains(f,'#include "linux_uio_init.h"'));                       
-                    f = f(~contains(f,'#include "adi_fpga9001'));   
-                    f = f(~contains(f,'fpga9001Device_0')); 
-                    
-                    a = contains(f,'adi_fpga9001_Version_t');
-                    if( sum(a) > 0) 
-                        a(find(a>0):find(a>0) +3) = 1;
-                        f = f(~a);
-                    end
-                    
-                    a = contains(f,'adi_fpga9001_ClockStatus_t');
-                    if( sum(a) > 0) 
-                        a(find(a>0):find(a>0)+5) = 1;
-                        f = f(~a);
-                    end  
-                    
-                    a = contains(f,'adi_fpga9001_SsiCalibrationCfg_t');
-                    if( sum(a) > 0) 
-                        a(find(a>0):find(a>0)+8) = 1;
-                        f = f(~a);
-                    end              
-                    
-                  
-                    f = cell2mat(f);
-                    fid  = fopen([tesDir '\output\' tesFiles(k).name],'w+');
-                    fprintf(fid,'%s',f);
-                    fclose(fid);
-                end
-            end                       
+        function Adrv9001SweepSsi( obj, Port )
+            obj.Write(['Adrv9001SweepSsi ' char(Port)]);
         end        
-                
+           
     end
     
     % Stream
@@ -352,7 +270,7 @@ classdef rflan < handle
             str = '';
             v = [];
             
-            while( ~contains(str,[Port ' Stream Buffer:']) && (toc < 3))
+            while( ~contains(str,[Port ' Stream Buffer:']) && (toc < 10))
                 str = obj.Read();
                 disp(str);
                 
@@ -366,8 +284,8 @@ classdef rflan < handle
                         v = str2double(v);
                         %v = typecast(uint16(v),'int16');
                         v = double(v) / 2^15;
-                        v = v(1:2:end) + 1i*v(2:2:end);
-                        v = v';
+                        v = complex(v(1:2:end),v(2:2:end));
+                        reshape(v,[],1);
                     end
                 end
             end
@@ -390,7 +308,7 @@ classdef rflan < handle
             obj.s = serialport(obj.SerialPort,115200);
             configureTerminator(obj.s,"CR/LF");
             configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
-            set(obj.s, 'Timeout', 3);
+            set(obj.s, 'Timeout', 10);
         end
         
         function Close(obj)
@@ -739,6 +657,10 @@ classdef rflan < handle
         
         function SetVcTcxo( obj, v )
             obj.Adrv9001SetParam('VcTcxo', num2str(v,"%.2f"));
+        end
+
+        function SetTestMode( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'TestMode'], num2str(v));
         end
         
         function SetDpdEnable( obj, Port, v )

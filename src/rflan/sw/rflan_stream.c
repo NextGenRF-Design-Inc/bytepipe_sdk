@@ -106,9 +106,6 @@ int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t 
   adi_common_Port_e AdiPort;
   adi_common_ChannelNumber_e AdiChannel;
 
-  if( WordCnt < 0 )
-    return RflanStreamStatus_InvalidParameter;
-
   axi_dma_t *Dma = RflanStream_GetDma(Instance, Channel);
 
   if((status = RflanStream_ChannelToAdrvPortChannel( Channel, &AdiPort, &AdiChannel )) != 0)
@@ -120,7 +117,7 @@ int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t 
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-  if((status = AxiDma_Transfer( Dma, Addr, WordCnt )) != 0)
+  if((status = AxiDma_Transfer( Dma, Addr, (WordCnt << 2) )) != 0)
     return status;
 
   if((status = Adrv9001_ToPrimed( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
@@ -173,7 +170,7 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-  if((status = AxiDma_StartTransfer( Dma, Addr, WordCnt, Cyclic )) != 0)
+  if((status = AxiDma_StartTransfer( Dma, Addr, (WordCnt << 2), Cyclic )) != 0)
     return status;
 
 #endif

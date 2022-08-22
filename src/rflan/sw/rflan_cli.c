@@ -545,11 +545,11 @@ static void RflanCli_StreamBufGet(cli_t *CliInstance, const char *cmd, rflan_str
 
     BufAddr += 4;
 
-    Cli_Printf(CliInstance,"%d, %d,",(int16_t)(sample >> 16), (int16_t)(sample));
+    Cli_Printf(CliInstance,"%d,%d,",(int16_t)(sample >> 16), (int16_t)(sample));
   }
 
   sample = Xil_In32(BufAddr);
-  Cli_Printf(CliInstance,"%d, %d\r\n",(int16_t)(sample >> 16), (int16_t)(sample));
+  Cli_Printf(CliInstance,"%d,%d\r\n",(int16_t)(sample >> 16), (int16_t)(sample));
 
 }
 

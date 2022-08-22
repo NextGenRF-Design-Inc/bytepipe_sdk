@@ -226,30 +226,72 @@ static void Adrv9001Cli_ToRfEnabled(cli_t *CliInstance, const char *cmd, adrv900
   Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
 }
 
-//static void Adrv9001Cli_CalibrateSsi(cli_t *CliInstance, const char *cmd, adrv9001_t *Adrv9001)
-//{
-//  int32_t status = 0;
-//  adi_common_ChannelNumber_e Channel;
-//  adi_common_Port_e Port;
-//
-//  Adrv9001_ClearError( Adrv9001 );
-//
-//  Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
-//
-//  status = Adrv9001_CalibrateSsiDelay( Adrv9001, Port, Channel );
-//
-//  Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
-//}
-//
-//cli_cmd_t Adrv9001CliCalibrateSsiDef =
-//{
-//    "Adrv9001CalibrateSsi",
-//    "Adrv9001CalibrateSsi:  Calibrate ADRV9001 SSI Delay\r\n"
-//    "Adrv9001CalibrateSsi < Port (Tx1, Tx2, Rx1, Rx2) >\r\n\r\n",
-//    (CliCmdFn_t)Adrv9001Cli_CalibrateSsi,
-//    1,
-//    NULL
-//};
+static void Adrv9001Cli_CalibrateSsi(cli_t *CliInstance, const char *cmd, adrv9001_t *Adrv9001)
+{
+  int32_t status = 0;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+
+  Adrv9001_ClearError( Adrv9001 );
+
+  Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
+
+  status = Adrv9001_CalibrateSsiDelay( Adrv9001, Port, Channel );
+
+  Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
+}
+
+static void Adrv9001Cli_SweepSsi(cli_t *CliInstance, const char *cmd, adrv9001_t *Adrv9001)
+{
+  int32_t status = 0;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+
+  Adrv9001_ClearError( Adrv9001 );
+
+  Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
+
+  uint16_t results[8][8];
+  if((status = Adrv9001_PerformSsiSweep( Adrv9001, Port, Channel, results )) == 0)
+  {
+    printf("SSI Sweep Test Results:\r\n");
+
+    for(uint8_t clkDelay = 0; clkDelay < 8; clkDelay++)
+    {
+      printf("  ClkDelay %u: ",clkDelay);
+
+      for(uint8_t dataDelay = 0; dataDelay < 8; dataDelay++)
+      {
+        printf("  %u ",results[clkDelay][dataDelay]);
+      }
+      printf("%s","\r\n");
+    }
+  }
+  else
+  {
+    Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
+  }
+}
+
+cli_cmd_t Adrv9001CliSweepSsiDef =
+{
+    "Adrv9001SweepSsi",
+    "Adrv9001SweepSsi:  Sweep ADRV9001 SSI Delay\r\n"
+    "Adrv9001SweepSsi < Port (Tx1, Tx2, Rx1, Rx2) >\r\n\r\n",
+    (CliCmdFn_t)Adrv9001Cli_SweepSsi,
+    1,
+    NULL
+};
+
+cli_cmd_t Adrv9001CliCalibrateSsiDef =
+{
+    "Adrv9001CalibrateSsi",
+    "Adrv9001CalibrateSsi:  Calibrate ADRV9001 SSI Delay\r\n"
+    "Adrv9001CalibrateSsi < Port (Tx1, Tx2, Rx1, Rx2) >\r\n\r\n",
+    (CliCmdFn_t)Adrv9001Cli_CalibrateSsi,
+    1,
+    NULL
+};
 
 cli_cmd_t Adrv9001CliToRfCalibratedDef =
 {
@@ -321,7 +363,8 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001 )
   Adrv9001CliToRfCalibratedDef.userData = Adrv9001;
   Adrv9001CliToRfPrimedDef.userData = Adrv9001;
   Adrv9001CliToRfEnabledDef.userData = Adrv9001;
-//  Adrv9001CliCalibrateSsiDef.userData = Adrv9001;
+  Adrv9001CliCalibrateSsiDef.userData = Adrv9001;
+  Adrv9001CliSweepSsiDef.userData = Adrv9001;
 
   Cli_RegisterCommand(Cli, &Adrv9001CliGetParamDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliSetParamDef);
@@ -329,7 +372,8 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001 )
   Cli_RegisterCommand(Cli, &Adrv9001CliToRfCalibratedDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliToRfPrimedDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliToRfEnabledDef);
-//  Cli_RegisterCommand(Cli, &Adrv9001CliCalibrateSsiDef);
+  Cli_RegisterCommand(Cli, &Adrv9001CliCalibrateSsiDef);
+  Cli_RegisterCommand(Cli, &Adrv9001CliSweepSsiDef);
 
   return Adrv9001Status_Success;
 }
