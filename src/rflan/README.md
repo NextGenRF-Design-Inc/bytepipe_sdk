@@ -29,13 +29,9 @@ To evaluate the rflan application the latest executables can be downloaded from 
 
 # Building Source
 
-Building the source files is straightforward using the supplied build scripts and video tutorials.  The first step in building the rflan source files is to build the HDL.  An alternative to building the HDL from source is to download the latest released version.  To build the HDL from source see the [Building HDL](#building-hdl) section below.  To use the latest pre-built HDL release follow instructions for [Building RPU Software](#building-rpu-software).  The folloiwng video shown below and found [here](https://youtu.be/a_KpZ9lYxiE) shows the process of building the RFLAN HDL and software.
+Building the source files is straightforward using the supplied build scripts and video tutorials.  The first step in building the rflan source files is to build the HDL.  An alternative to building the HDL from source is to download the latest released version.  To build the HDL from source see the [Building HDL](#building-hdl) section below.  To use the latest pre-built HDL release follow instructions for [Building RPU Software](#building-rpu-software).  The folloiwng video shown below and found [here](https://youtu.be/HQFz_zlbABc) shows the process of building the RFLAN HDL and software.
 
-[![building_hdl](docs/building_rflan.png)](https://youtu.be/a_KpZ9lYxiE)
-
-
-
-
+[![building_hdl](docs/building_rflan.png)](https://youtu.be/HQFz_zlbABc)
 
 The source files can be built anywhere on the host machine.  It is good to build them in a seperate folder from the source files so they can be deleted without effecting the source.  The following example assumes the bytepipe_sdk repository is cloned or downloaded to the users `C:` drive.  
 
