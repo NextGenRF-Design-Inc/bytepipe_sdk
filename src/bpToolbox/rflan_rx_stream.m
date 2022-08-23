@@ -8,14 +8,18 @@ clear all; close all; clc;
 h = rflan();
 h.Open('COM16');
 
+% Select Receive Port
 RxPort = h.Rx2;
+
+% Select Capture Length of DMA
 RxBufLength = 4096;
 
 % Read Carrier Frequency
 fs = h.GetSampleRate(RxPort);
 
+% Read DMA buffer and plot data several times
 figure();
-for i = 1:10
+for i = 1:20
     
 % Start DMA Burst
 h.RflanStreamStart(RxPort, 0, RxBufLength);
@@ -33,10 +37,26 @@ spec = msspectrum(h2,iq,...
 f = spec.Frequencies/1e6;
 a = 10*log10(spec.Data);    
 
+hold off;
+subplot(2,2,1);
 plot(f,a);
-title([RxPort ' Spectrum ']);
+title('Spectrum');
 xlabel('Frequency(MHz)');
 ylabel('Power (dBm)');
+subplot(2,2,2);
+plot(real(iq),imag(iq));
+xlabel('In-Phase');
+ylabel('Quadrature-Phase');
+title('Constillation');
+
+subplot(2,2,[3 4]);
+t = (1:length(iq))/(fs/1e6);
+plot(t,real(iq));
+hold on;
+plot(t,imag(iq));
+xlabel('time(us)');
+ylabel('Magnitude');
+title('Time Domain');
 
 end
 

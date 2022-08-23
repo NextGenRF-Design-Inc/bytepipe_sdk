@@ -13,23 +13,30 @@ clear all; close all; clc;
 h = rflan();
 h.Open('COM16');
 
+% Select Transmit and Receive Ports
 TxPort = h.Tx2;
 RxPort = h.Rx2;
+
+% Select Capture Length of DMA
 RxBufLength = 4096;
 
 % Set Tx Output Power
-h.SetTxAttn(TxPort, 40);
+h.SetTxAttn(TxPort, 20);
 h.SetTxBoost(TxPort, 0);
 
-% Generate Transmit CW tone
+% Get Sample Rate 
 fs = h.GetSampleRate(TxPort);
-f_tone = fs/8;
-t = (0:fs/f_tone-1)/fs;
-iq = sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t);
-h.RflanStreamBufPut(TxPort,0,reshape(iq,[],1));
+
+% Generate transmit tone as a factor of sample rate
+f_tone = fs/32;
+t = (0:8*fs/f_tone-1)'/fs;
+txiq = 1/2 * (sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t));
+
+% Load Transmit Buffer with signal
+h.RflanStreamBufPut(TxPort,0,txiq);
 
 % Enable continuous transmit of the iq data
-h.RflanStreamStart(TxPort, 1, length(iq));
+h.RflanStreamStart(TxPort, 1, length(txiq));
 
 % Read Carrier Frequency
 fs = h.GetSampleRate(RxPort);

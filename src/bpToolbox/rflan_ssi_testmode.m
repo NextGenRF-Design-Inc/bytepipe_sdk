@@ -10,14 +10,17 @@ h = rflan();
 h.Open('COM16');
 RxPort = h.Rx2;
 
+% Select Capture Length of DMA
+RxBufLength = 256;
+
 % Set Test Mode to Incrementing
 h.SetTestMode(RxPort,3);
 
 % Enable DMA Burst
-h.RflanStreamStart(RxPort, 0, 200);
+h.RflanStreamStart(RxPort, 0, RxBufLength);
 
 % Read DMA buffer
-iq = h.RflanStreamBufGet(RxPort,0,200);
+iq = h.RflanStreamBufGet(RxPort,0,RxBufLength);
 
 idata = real(iq)*2^15;
 qdata = imag(iq)*2^15;

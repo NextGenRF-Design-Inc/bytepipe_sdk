@@ -126,6 +126,9 @@ classdef rflan < handle
         Rx1 = 'Rx1';
         Rx2 = 'Rx2';
         
+        MaxWriteIqLen = 64;
+        RxSampleDelay = 20;
+        
         Adrv9001TxDataPath_DMA = 0;
         ADRV9001TxDataPath_Constant = 1;
         ADRV9001TxDataPath_Incrementing = 2;
@@ -245,7 +248,7 @@ classdef rflan < handle
     % Stream
     methods
         function RflanStreamStart(obj, Port, Cyclic, SampleCnt)
-            obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
+            obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt + obj.RxSampleDelay))]);
         end
         
         function RflanStreamStop(obj, Port )
@@ -255,10 +258,28 @@ classdef rflan < handle
         function RflanStreamBufPut(obj, Port, SampleOffset, iq)
             iq = [real(iq),imag(iq)]';
             iq = iq(:);            
-            obj.Write(['RflanStreamBufPut ' char(Port) ' ' char(num2str(SampleOffset)) ' ' char(strjoin(compose("%d",int16(iq*2^15)),","))]);
+            bufOffset = 0;
+            
+            remaining = length(iq);
+            while( remaining > 0 )
+                               
+                if( remaining > obj.MaxWriteIqLen )
+                    iqBuf = iq(bufOffset+1:bufOffset + obj.MaxWriteIqLen);
+                else
+                    iqBuf = iq(bufOffset+1:end);
+                end
+                                
+                remaining = remaining - length(iqBuf);
+                               
+                obj.Write(['RflanStreamBufPut ' char(Port) ' ' char(num2str(SampleOffset + bufOffset/2)) ' ' char(strjoin(compose("%d",int16(iqBuf*2^15)),","))]);
+            
+                bufOffset = bufOffset + length(iqBuf);      
+                                
+                pause(0.1);
+            end
         end        
         
-        function RflanStreamBufLoad(obj, Port, filename, iq)                   
+        function RflanStreamBufLoad(obj, Port, filename)                   
             obj.Write(['RflanStreamBufLoad ' char(Port) ' ' char(filename)]);
         end        
                 
@@ -268,7 +289,7 @@ classdef rflan < handle
             configureCallback(obj.s, "off");
             obj.s.flush();
             
-            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset)) ' ' char(num2str(SampleCnt))]);
+            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset + obj.RxSampleDelay)) ' ' char(num2str(SampleCnt))]);
             
             tic;
             str = '';

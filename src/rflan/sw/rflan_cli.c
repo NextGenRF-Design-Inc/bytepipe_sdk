@@ -533,7 +533,8 @@ static void RflanCli_StreamBufGet(cli_t *CliInstance, const char *cmd, rflan_str
   }
 
   Cli_GetParameter(cmd, 2, CliParamTypeU32, &SampleOffset);
-  Cli_GetParameter(cmd, 3, CliParamTypeU32, &len);
+  Cli_GetParameter(cmd, 3, CliParamTypeU16, &len);
+
 
   BufAddr += (SampleOffset << 2);
 
@@ -722,7 +723,7 @@ static void RflanCli_StreamBufSave(cli_t *CliInstance, const char *cmd, rflan_st
     return;
   }
 
-  Cli_GetParameter(cmd, 2, CliParamTypeS32, &SampleCnt);
+  Cli_GetParameter(cmd, 2, CliParamTypeU32, &SampleCnt);
 
   char *filename = calloc(1, 256);
   strcpy(filename, FF_LOGICAL_DRIVE_PATH);

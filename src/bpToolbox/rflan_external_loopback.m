@@ -18,7 +18,7 @@ RxPort = h.Rx2;
 RxBufLength = 4096;
 
 % Set Tx Output Power
-h.SetTxAttn(TxPort, 40);
+h.SetTxAttn(TxPort, 20);
 h.SetTxBoost(TxPort, 0);
 
 % Load Transmit buffer with IQ data from file on SD card

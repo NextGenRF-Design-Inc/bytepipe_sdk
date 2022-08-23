@@ -46,6 +46,12 @@ profile:
 	$(MAKE) -f $(PROJECT_DIR)/../adrv9001/Makefile sw
 	rm -rf $(PROJECT_DIR)/sw/adrv9001/profile 
 	cp -r adrv9001/profile $(PROJECT_DIR)/sw/adrv9001  
+  
+sd_card:
+	rm -rf $(PROJECT)/sd_card
+	cp -rf $(PROJECT)/rpu_system/Debug/sd_card $(PROJECT)
+	cp -rf $(PROJECT_DIR)/resources/* $(PROJECT)/sd_card  
+  
 
 
 

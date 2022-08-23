@@ -13,6 +13,12 @@ static void RflanStream_Tx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
+    /* Set PA/LNA Enable */
+    Adrv9001_SetPaEnable( stream->Adrv9001, ADI_TX, ADI_CHANNEL_1, false);
+
+    /* Set Enable Pin */
+    AxiAdrv9001_SetEnablePin( stream->Adrv9001->CtrlBase, ADI_TX, ADI_CHANNEL_1, false );
+
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Tx1, stream->CallbackRef );
   }
@@ -24,6 +30,12 @@ static void RflanStream_Tx2DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
+    /* Set PA/LNA Enable */
+    Adrv9001_SetPaEnable( stream->Adrv9001, ADI_TX, ADI_CHANNEL_2, false);
+
+    /* Set Enable Pin */
+    AxiAdrv9001_SetEnablePin( stream->Adrv9001->CtrlBase, ADI_TX, ADI_CHANNEL_2, false );
+
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Tx2, stream->CallbackRef );
   }
@@ -35,6 +47,12 @@ static void RflanStream_Rx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
+    /* Set PA/LNA Enable */
+    Adrv9001_SetPaEnable( stream->Adrv9001, ADI_RX, ADI_CHANNEL_1, false);
+
+    /* Set Enable Pin */
+    AxiAdrv9001_SetEnablePin( stream->Adrv9001->CtrlBase, ADI_RX, ADI_CHANNEL_1, false );
+
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Rx1, stream->CallbackRef );
   }
@@ -46,6 +64,12 @@ static void RflanStream_Rx2DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
+    /* Set PA/LNA Enable */
+    Adrv9001_SetPaEnable( stream->Adrv9001, ADI_RX, ADI_CHANNEL_2, false);
+
+    /* Set Enable Pin */
+    AxiAdrv9001_SetEnablePin( stream->Adrv9001->CtrlBase, ADI_RX, ADI_CHANNEL_2, false );
+
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Rx2, stream->CallbackRef );
   }
@@ -164,13 +188,13 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
   if((status = RflanStream_ChannelToAdrvPortChannel( Channel, &AdiPort, &AdiChannel )) != 0)
     return status;
 
-  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
-    return status;
-
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
   if((status = AxiDma_StartTransfer( Dma, Addr, (WordCnt << 2), Cyclic )) != 0)
+    return status;
+
+  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
     return status;
 
 #endif

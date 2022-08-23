@@ -11,7 +11,7 @@ h.Open('COM16');
 TxPort = h.Tx2;
 
 % Load constant IQ value
-h.SetTxIqConstant(TxPort, hex2dec('7fff0000'));
+h.SetTxIqConstant(TxPort, hex2dec('7fff7fff'));
 
 % Change data path from DMA to Constant
 h.SetTxIqDataPath(TxPort, h.ADRV9001TxDataPath_Constant);

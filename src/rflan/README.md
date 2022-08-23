@@ -68,7 +68,24 @@ make -f ../src/rflan/Makefile sw
 
 The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan`. 
 
+# Building ADRV9002 Profile
+
+The ADRV9002 configuration is generated from Analog Devices Tranceiver Evaluation Software (TES).  The RFLAN includes a default configuration found in `src/rflan/sw/adrv9001/profile'.  To update the profile new settings need to be exported from TES and then compiled into the RFLAN.  Please review the video found [here](https://youtu.be/HQFz_zlbABc) for additional information.
+
+```
+export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
+make -f ../src/rflan/Makefile profile
+```
+
+
 # Programming BytePipe RFLAN
 
-To program the BytePipe with the RFLAN application simply copy the contents of the 
+To program the BytePipe with the RFLAN application execute the following command once the code has been built.  This will create a folder called `sd_card` with the contents to be copied to the sd card.  Please review the video found [here](https://youtu.be/HQFz_zlbABc) for additional information.
 
+```
+make -f ../src/rflan/Makefile sd_card
+```
+
+# MATLAB bpToolbox
+
+The RFLAN application can be controlled from MATLAB through the CLI interface accessible using a serial port or ethernet port.  For additional information see [bpToolbox](../bpToolbox/README.md).

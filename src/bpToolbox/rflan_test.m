@@ -19,12 +19,12 @@ if( ~strcmp(AdrvSiliconVersion,'C0'))
 end
 
 AdrvFirmwareVersion = h.GetAdrvFirmwareVersion( );
-if( ~strcmp(AdrvFirmwareVersion,'0.20.0.10'))
+if( ~strcmp(AdrvFirmwareVersion,'0.21.0.8'))
     error("Error");
 end
 
 AdrvAPIVersion = h.GetAdrvAPIVersion( );
-if( ~strcmp(AdrvAPIVersion,'48.49.2'))
+if( ~strcmp(AdrvAPIVersion,'67.1.1'))
     error("Error");
 end
 

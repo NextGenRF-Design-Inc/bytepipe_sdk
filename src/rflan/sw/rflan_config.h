@@ -84,12 +84,13 @@ extern "C"
 #define RFLAN_TASK_STACK_SIZE           4096
 #define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY
 #define RFLAN_SETUP_SCRIPT_FILENAME     ("1:/rflan_setup.txt")
+#define RFLAN_QUEUE_SIZE                4
 
 #define CLI_RX_STACK_SIZE               4096
 #define CLI_TX_STACK_SIZE               1024
 #define CLI_RX_TASK_PRIORITY            tskIDLE_PRIORITY + 2
 #define CLI_TX_TASK_PRIORITY            tskIDLE_PRIORITY + 3
-#define CLI_RX_QUEUE_SIZE               2048
+#define CLI_RX_QUEUE_SIZE               32768
 #define CLI_TX_QUEUE_SIZE               32768
 #define CLI_PRINT_BUF_SIZE              2048
 #define CLI_CMD_BUF_SIZE                1024

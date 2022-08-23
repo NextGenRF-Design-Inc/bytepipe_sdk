@@ -129,18 +129,10 @@ module axi_adrv9001#(
   input  wire           s_axi_rready
 );
   
-wire            axi_tx1_en;
-wire            axi_tx2_en;
-wire            axi_rx1_en;
-wire            axi_rx2_en;
 wire            tx1_rst;
 wire            tx2_rst;
 wire            rx1_rst;
 wire            rx2_rst;      
-wire            tx1_dclk_locked;
-wire            tx2_dclk_locked;
-wire            rx1_dclk_locked;
-wire            rx2_dclk_locked;
 wire [1:0]      tx1_data_src;
 wire [1:0]      tx2_data_src;
 wire [31:0]     tx1_tdata;
