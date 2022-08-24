@@ -29,12 +29,7 @@ To evaluate the rflan application the latest executables can be downloaded from 
 
 # Building Source
 
-Building the source files is straightforward using the supplied build scripts and video tutorials.  The first step in building the rflan source files is to build the HDL.  An alternative to building the HDL from source is to download the latest released version.  To build the HDL from source see the [Building HDL](#building-hdl) section below.  To use the latest pre-built HDL release follow instructions for [Building RPU Software](#building-rpu-software).  The folloiwng video shown below and found [here](https://youtu.be/HQFz_zlbABc) shows the process of building the RFLAN HDL and software.
-
-[![building_hdl](docs/building_rflan.png)](https://youtu.be/HQFz_zlbABc)
-
-The source files can be built anywhere on the host machine.  It is good to build them in a seperate folder from the source files so they can be deleted without effecting the source.  The following example assumes the bytepipe_sdk repository is cloned or downloaded to the users `C:` drive.  
-
+Building the source files is straightforward using the supplied build scripts and video tutorials.  The first step in building the rflan source files is to build the HDL.  An alternative to building the HDL from source is to download the latest released version.  To build the HDL from source see the [Building HDL](#building-hdl) section below.  To use the latest pre-built HDL release follow instructions for [Building RPU Software](#building-rpu-software).  The source files can be built anywhere on the host machine.  It is good to build them in a seperate folder from the source files so they can be deleted without effecting the source.  The following example assumes the bytepipe_sdk repository is cloned or downloaded to the users `C:` drive.  
 
 ```
 cd c:
@@ -48,34 +43,42 @@ cd workspace/
 
 The following describes the process for building the HDL from source files.  The HDL is built using [Vivado 2021.1](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2021-1.html). For additional information on setting up the build environment refer [here](../../docs/build_environment/BuildEnv.md). 
 
-Start by launching cygwin on your windows machine and execute the following commands.  If Vivado is not installed at `C:/Xilinx/` update the path accordingly.
+Start by launching cygwin on your windows machine and execute the following commands.  If Vivado is not installed at `C:/Xilinx/` update the path accordingly.  The build script will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opended using Vivado.  
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
 make -f ../src/rflan/Makefile hdl
 ```
 
-This will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opended using Vivado.  
+Please review the video found below for additional information.
+
+![click_to_watch.png](docs/click_to_watch.png)
+[![generating_rflan_profile](docs/generating_rflan_profile.png)](https://youtu.be/SMOLgKAgsfg)
 
 # Building RPU Software
 
-The software is built using the Xilinx Vitis IDE.  The build script will automatically download the latest HDL outputs if not previously generated.  Start by launching cygwin on your windows machine and execute the following commands.  If Vitis is not installed at `C:/Xilinx/` update the path accordingly.
+The software is built using the Xilinx Vitis IDE.  The build script will automatically download the latest HDL outputs if not previously generated.  Start by launching cygwin on your windows machine and execute the following commands.  If Vitis is not installed at `C:/Xilinx/` update the path accordingly.  The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan`. 
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
 make -f ../src/rflan/Makefile sw
 ```
 
-The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan`. 
+Please review the video found below for additional information.
+
+![click_to_watch.png](docs/click_to_watch.png)
+[![generating_rflan_profile](docs/generating_rflan_profile.png)](https://youtu.be/SMOLgKAgsfg)
 
 # Building ADRV9002 Profile
 
-The ADRV9002 configuration is generated from Analog Devices Tranceiver Evaluation Software (TES).  The RFLAN includes a default configuration found in `src/rflan/sw/adrv9001/profile'.  To update the profile new settings need to be exported from TES and then compiled into the RFLAN.  Please review the video found [here](https://youtu.be/SMOLgKAgsfg) for additional information.
+The ADRV9002 configuration is generated from Analog Devices Tranceiver Evaluation Software (TES).  The RFLAN includes a default configuration found in `src/rflan/sw/adrv9001/profile'.  To update the profile new settings need to be exported from TES and then compiled into the RFLAN. 
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
 make -f ../src/rflan/Makefile profile
 ```
+
+Please review the video found below for additional information.
 
 ![click_to_watch.png](docs/click_to_watch.png)
 [![generating_rflan_profile](docs/generating_rflan_profile.png)](https://youtu.be/SMOLgKAgsfg)
@@ -83,11 +86,13 @@ make -f ../src/rflan/Makefile profile
 
 # Programming BytePipe RFLAN
 
-To program the BytePipe with the RFLAN application execute the following command once the code has been built.  This will create a folder called `sd_card` with the contents to be copied to the sd card.  Please review the video found [here](https://youtu.be/JeQZI49h6uE) for additional information.
+To program the BytePipe with the RFLAN application execute the following command once the code has been built.  This will create a folder called `sd_card` with the contents to be copied to the sd card.  
 
 ```
 make -f ../src/rflan/Makefile sd_card
 ```
+
+Please review the video found below for additional information.
 
 ![click_to_watch.png](docs/click_to_watch.png)
 [![programming_sd_card](docs/programming_sd_card.png)](https://youtu.be/JeQZI49h6uE)
