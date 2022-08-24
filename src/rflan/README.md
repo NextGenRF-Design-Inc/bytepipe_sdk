@@ -53,7 +53,7 @@ make -f ../src/rflan/Makefile hdl
 Please review the video found below for additional information.
 
 ![click_to_watch.png](docs/click_to_watch.png)
-[![generating_rflan_profile](docs/generating_rflan_profile.png)](https://youtu.be/SMOLgKAgsfg)
+[![building_hdl](docs/building_hdl.png)]()
 
 # Building RPU Software
 
@@ -67,7 +67,7 @@ make -f ../src/rflan/Makefile sw
 Please review the video found below for additional information.
 
 ![click_to_watch.png](docs/click_to_watch.png)
-[![generating_rflan_profile](docs/generating_rflan_profile.png)](https://youtu.be/SMOLgKAgsfg)
+[![building_rpu](docs/building_rpu.png)]()
 
 # Building ADRV9002 Profile
 
