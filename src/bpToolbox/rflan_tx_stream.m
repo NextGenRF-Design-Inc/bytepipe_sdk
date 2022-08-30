@@ -31,7 +31,7 @@ fs = h.GetSampleRate(TxPort);
 
 % Generate transmit tone as a factor of sample rate
 f_tone = fs/32;
-t = (0:40*fs/f_tone-1)'/fs;
+t = (0:8*fs/f_tone-1)'/fs;
 txiq = 1/2 * (sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t));
 
 % Load Transmit Buffer with signal

@@ -34,7 +34,11 @@ module axi_adrv9001#(
   parameter SWAP_DIFF_RX2_IDATA     = 1,      
   parameter SWAP_DIFF_RX2_QDATA     = 1,    
   parameter SWAP_DIFF_RX2_STROBE    = 1,       
-  parameter SWAP_DIFF_RX2_DCLK      = 0        
+  parameter SWAP_DIFF_RX2_DCLK      = 0,
+  parameter ENABLE_TX1_ILA          = 0,
+  parameter ENABLE_TX2_ILA          = 0,
+  parameter ENABLE_RX1_ILA          = 0,
+  parameter ENABLE_RX2_ILA          = 0      
   )(
   output wire           rx1_en,
   output wire           rx2_en,
@@ -106,6 +110,11 @@ module axi_adrv9001#(
   output  wire          tx2_axis_aclk,        
   output  wire          tx2_axis_rstn,
   
+  input  wire           rx1_pl_en,
+  input  wire           rx2_pl_en,
+  input  wire           tx1_pl_en,
+  input  wire           tx2_pl_en,  
+  
   input  wire           s_axi_aclk,
   input  wire           s_axi_aresetn,
   input  wire [6:0]     s_axi_awaddr,
@@ -126,29 +135,19 @@ module axi_adrv9001#(
   output wire [31:0]    s_axi_rdata,
   output wire [1:0]     s_axi_rresp,
   output wire           s_axi_rvalid,
-  input  wire           s_axi_rready,
-  
-  input  wire           clk_dbg,
-  
-  output wire           tx1_en_dbg,
-  output wire [15:0]    tx1_idata_dbg,
-  output wire [15:0]    tx1_qdata_dbg,
-  output wire           tx1_tvalid_dbg,
-  output wire           tx1_tready_dbg,
-  
-  output wire           rx1_en_dbg,
-  output wire [15:0]    rx1_idata_dbg,
-  output wire [15:0]    rx1_qdata_dbg,
-  output wire           rx1_tvalid_dbg  
+  input  wire           s_axi_rready 
 );
-  
-  
+   
   
   
 wire            tx1_tdd_en;
 wire            tx2_tdd_en;
 wire            rx1_tdd_en;
 wire            rx2_tdd_en;      
+wire            tx1_pl_en_cdc;
+wire            tx2_pl_en_cdc;
+wire            rx1_pl_en_cdc;
+wire            rx2_pl_en_cdc;   
 wire [31:0]     tx1_disable_cnt;
 wire [31:0]     tx1_ssi_enable_cnt;
 wire [31:0]     tx2_disable_cnt;
@@ -180,21 +179,58 @@ generate
     assign dgpio_i[n] = dgpio[n];        
   end
 endgenerate
+
+
+generate
   
-cdc #(
-  .DATA_WIDTH(35) )
-tx1_dgb_cdc_i (
-  .s_cdc_tdata  ({tx1_en, tx1_axis_tdata, tx1_axis_tvalid, tx1_axis_tready}),
-  .m_cdc_clk    (clk_dbg),
-  .m_cdc_tdata  ({tx1_en_dbg, tx1_idata_dbg, tx1_qdata_dbg, tx1_tvalid_dbg, tx1_tready_dbg})
-);
+  if( ENABLE_TX1_ILA) begin
+    adrv9001_axis_ila tx1_ila(  
+      .clk(s_axi_aclk),
+      .enable(tx1_en),
+      .tdata(tx1_axis_tdata),
+      .tvalid(tx1_axis_tvalid),
+      .tready(tx1_axis_tready)
+      );  
+  end
+  
+  if( ENABLE_TX2_ILA) begin
+    adrv9001_axis_ila tx2_ila(  
+      .clk(s_axi_aclk),
+      .enable(tx2_en),
+      .tdata(tx2_axis_tdata),
+      .tvalid(tx2_axis_tvalid),
+      .tready(tx2_axis_tready)
+      );  
+  end  
+  
+  if( ENABLE_RX1_ILA) begin
+    adrv9001_axis_ila rx1_ila(  
+      .clk(s_axi_aclk),
+      .enable(rx1_en),
+      .tdata(rx1_axis_tdata),
+      .tvalid(rx1_axis_tvalid),
+      .tready(1'b0)
+      );  
+  end 
+  
+  if( ENABLE_RX2_ILA) begin
+    adrv9001_axis_ila rx2_ila(  
+      .clk(s_axi_aclk),
+      .enable(rx2_en),
+      .tdata(rx2_axis_tdata),
+      .tvalid(rx2_axis_tvalid),
+      .tready(1'b0)
+      );  
+  end    
+  
+endgenerate
 
 cdc #(
-  .DATA_WIDTH(34) )
-rx1_dgb_cdc_i (
-  .s_cdc_tdata  ({rx1_en, rx1_axis_tdata, rx1_axis_tvalid}),
-  .m_cdc_clk    (clk_dbg),
-  .m_cdc_tdata  ({rx1_en_dbg, rx1_idata_dbg, rx1_qdata_dbg, rx1_tvalid_dbg})
+  .DATA_WIDTH(4) )
+pl_en_cdc_i (
+  .s_cdc_tdata  ({rx1_pl_en, rx2_pl_en, tx1_pl_en, tx2_pl_en}),
+  .m_cdc_clk    (s_axi_aclk),
+  .m_cdc_tdata  ({rx1_pl_en_cdc, rx2_pl_en_cdc, tx1_pl_en_cdc, tx2_pl_en_cdc})
 );
  
 adrv9001_regs adrv9001_regs_i (
@@ -261,7 +297,7 @@ adrv9001_rx#(
     .qdata_n(rx1_qdata_n),
     .tdata(rx1_tdata),     
     .enable(rx1_en),
-    .tdd_en(rx1_tdd_en),
+    .tdd_en(rx1_tdd_en | rx1_pl_en_cdc),
     .disable_cnt(rx1_disable_cnt), 
     .ssi_enable_cnt(rx1_ssi_enable_cnt),
     .ssi_disable_cnt(rx1_ssi_disable_cnt),      
@@ -287,7 +323,7 @@ adrv9001_rx #(
     .qdata_n(rx2_qdata_n),
     .tdata(rx2_tdata),  
     .enable(rx2_en),
-    .tdd_en(rx2_tdd_en),
+    .tdd_en(rx2_tdd_en | rx2_pl_en_cdc),
     .disable_cnt(rx2_disable_cnt), 
     .ssi_enable_cnt(rx2_ssi_enable_cnt),
     .ssi_disable_cnt(rx2_ssi_disable_cnt),     
@@ -317,7 +353,7 @@ adrv9001_tx #(
     .qdata_n(tx1_qdata_n),
     .tdata(tx1_tdata),
     .data_src(tx1_data_src),
-    .tdd_en(tx1_tdd_en),
+    .tdd_en(tx1_tdd_en | tx1_pl_en_cdc),
     .enable(tx1_en),
     .disable_cnt(tx1_disable_cnt),
     .ssi_enable_cnt(tx1_ssi_enable_cnt),    
@@ -348,7 +384,7 @@ adrv9001_tx #(
     .qdata_n(tx2_qdata_n),
     .tdata(tx2_tdata),
     .data_src(tx2_data_src),    
-    .tdd_en(tx2_tdd_en),
+    .tdd_en(tx2_tdd_en | tx2_pl_en_cdc),
     .enable(tx2_en),
     .disable_cnt(tx2_disable_cnt),
     .ssi_enable_cnt(tx2_ssi_enable_cnt),        

@@ -9,10 +9,10 @@ h = rflan();
 h.Open('COM16');
 
 % Select Receive Port
-RxPort = h.Rx1;
+RxPort = h.Rx2;
 
 % Select Capture Length of DMA
-RxBufLength = 4000;
+RxBufLength = 2000;
 
 % Read Sample Rate
 fs = h.GetSampleRate(RxPort);
