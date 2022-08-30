@@ -179,6 +179,7 @@ typedef struct {
   XSpiPs                      Spi;                  ///< SPI Instance
   FIL                         LogFil;               ///< Log File
   pib_t                       Pib;
+  uint8_t                     PendingReboot;
 }adrv9001_t;
 
 typedef struct {

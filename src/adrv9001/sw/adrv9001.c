@@ -26,6 +26,8 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
 {
   int32_t status;
 
+  Instance->PendingReboot = 0;
+
   if((status = initialize( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileInitErr;
 
@@ -296,8 +298,14 @@ int32_t Adrv9001_SetTddTiming( adrv9001_t *Instance, adi_common_Port_e port, adi
 int32_t Adrv9001_ToRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint32_t SampleCnt )
 {
   int32_t status;
-  adi_adrv9001_ChannelEnableMode_e mode;
 
+  if( Instance->PendingReboot > 0 )
+  {
+    printf("ADRV9001 Reboot Pending...\r\n");
+    Adrv9001_LoadProfile( Instance );
+  }
+
+  adi_adrv9001_ChannelEnableMode_e mode;
   if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
     return Adrv9001Status_ReadErr;
 

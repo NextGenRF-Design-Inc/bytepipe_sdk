@@ -62,7 +62,7 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2DpdSamplingRate_Hz",                offsetof(adrv9001_params_t, Tx2DpdCfg.dpdSamplingRate_Hz),                                PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdRxTxNormalizationLowerThreshold",offsetof(adrv9001_params_t, Tx2DpdCfg.rxTxNormalizationLowerThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdRxTxNormalizationUpperThreshold",offsetof(adrv9001_params_t, Tx2DpdCfg.rxTxNormalizationUpperThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
-  { "Tx2DpdDetectionPowerThreshold",        offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPowerThreshold),                           PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdDetectionPowerThreshold",        offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPowerThreshold),                           PibTypeU32,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdDetectionPeakThreshold",         offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPeakThreshold),                            PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdTimeFilterCoefficient",          offsetof(adrv9001_params_t, Tx2DpdCfg.timeFilterCoefficient),                             PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdClgcLoopOpen",                   offsetof(adrv9001_params_t, Tx2DpdCfg.clgcLoopOpen),                                      PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
@@ -516,6 +516,9 @@ int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *s
   /* Get ID */
   if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
     return status;
+
+  if( (Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_REBOOT ) == ADRV9001_PIB_FLAG_REBOOT )
+    Instance->PendingReboot = 1;
 
   if( ( Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_VIRTUAL ) == ADRV9001_PIB_FLAG_VIRTUAL )
   {
