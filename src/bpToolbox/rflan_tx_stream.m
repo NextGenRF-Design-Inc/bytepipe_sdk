@@ -16,16 +16,22 @@ cyclic = 0;
 % Stop Previous Streams
 h.RflanStreamStop(TxPort);
 
-% Set Tx Output Power
+% Set Tx Settings
 h.SetTxAttn(TxPort, 20);
 h.SetTxBoost(TxPort, 0);
+
+% Delay before enabling SSI
+h.SetSsiEnableDelay(TxPort, 500);
+
+% Delay before disabling tx to flush ssi data
+h.SetTxDisableDelay(TxPort, 200);
 
 % Get Sample Rate 
 fs = h.GetSampleRate(TxPort);
 
 % Generate transmit tone as a factor of sample rate
-f_tone = fs/16;
-t = (0:8*fs/f_tone-1)'/fs;
+f_tone = fs/32;
+t = (0:40*fs/f_tone-1)'/fs;
 txiq = 1/2 * (sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t));
 
 % Load Transmit Buffer with signal

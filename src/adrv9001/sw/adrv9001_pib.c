@@ -145,6 +145,14 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2TestData",                          offsetof(adrv9001_params_t, Tx2TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
   { "Rx1TestData",                          offsetof(adrv9001_params_t, Rx1TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
   { "Rx2TestData",                          offsetof(adrv9001_params_t, Rx2TestModeData),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Tx1SsiEnableDly",                      offsetof(adrv9001_params_t, Tx1SsiEnableDly),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Tx2SsiEnableDly",                      offsetof(adrv9001_params_t, Tx2SsiEnableDly),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Rx1SsiEnableDly",                      offsetof(adrv9001_params_t, Rx1SsiEnableDly),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Rx2SsiEnableDly",                      offsetof(adrv9001_params_t, Rx2SsiEnableDly),                                             PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Tx1DisableDly",                        offsetof(adrv9001_params_t, Tx1DisableDly),                                               PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Tx2DisableDly",                        offsetof(adrv9001_params_t, Tx2DisableDly),                                               PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Rx1SsiDisableDly",                     offsetof(adrv9001_params_t, Rx1SsiDisableDly),                                            PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Rx2SsiDisableDly",                     offsetof(adrv9001_params_t, Rx2SsiDisableDly),                                            PibTypeU32,       PIB_FLAGS_DEFAULT },
 };
 
 static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char *name, char *str )
@@ -205,21 +213,26 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
       else
         tmp = &Instance->Params->Lo2Carrier;
     else
-      return Adrv9001Status_InvalidParameter;
+      return Adrv9001Status_InvalidPib;
 
-    if((status = adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, tmp )) == 0)
+    if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, tmp ) != 0)
+      return Adrv9001Status_CarrierFreqErr;
+
+    adi_adrv9001_ChannelState_e State;
+
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp->carrierFrequency_Hz);
+
+    if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &State ) != 0)
+      return Adrv9001Status_InvalidState;
+
+    if( State == ADI_ADRV9001_CHANNEL_CALIBRATED )
     {
-      adi_adrv9001_ChannelState_e State;
-
-      Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp->carrierFrequency_Hz);
-
-      if((status = adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &State )) == 0)
-      {
-        if( State == ADI_ADRV9001_CHANNEL_CALIBRATED )
-          status = adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, Port, Channel, tmp);
-        else
-          status = Adrv9001Status_InvalidState;
-      }
+      if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, Port, Channel, tmp) != 0)
+        return Adrv9001Status_CarrierFreqErr;
+    }
+    else
+    {
+      status = Adrv9001Status_InvalidState;
     }
   }
 
@@ -227,14 +240,14 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetData(Instance->CtrlBase, Port, Channel, tmp);
+    AxiAdrv9001_SetTxData(Instance->CtrlBase, Channel, tmp);
   }
 
   else if( strcmp( &name[3], "IqDataPath") == 0 )
   {
     axi_adrv9001_data_path_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetDataPath(Instance->CtrlBase, Port, Channel, tmp);
+    AxiAdrv9001_SetTxDataPath(Instance->CtrlBase, Channel, tmp);
   }
 
   else if( strcmp( name, "Dgpio") == 0 )
@@ -255,7 +268,8 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     float tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    status = Adrv9001_SetVcTcxo(Instance, tmp);
+    if((status = Adrv9001_SetVcTcxo(Instance, tmp)) != 0)
+      return status;
   }
 
   else if( strcmp( &name[3], "RadioState") == 0 )
@@ -269,23 +283,28 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     else if( State == ADI_ADRV9001_CHANNEL_PRIMED )
       status = Adrv9001_ToPrimed(Instance, Port, Channel);
     else if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
-      status = Adrv9001_ToRfEnabled(Instance, Port, Channel);
+      status = Adrv9001_ToRfEnabled(Instance, Port, Channel, ADRV9001_TDD_ENABLE_DUR_FOREVER);
     else
-      status = Adrv9001Status_InvalidParameter;
+      status = Adrv9001Status_InvalidState;
+
+    if( status != 0 )
+      return status;
   }
 
   else if( strcmp( name, "TxRx1SsiLoopBack") == 0 )
   {
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    status = adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, tmp);
+    if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, tmp) != 0)
+      return Adrv9001Status_SsiSetErr;
   }
 
   else if( strcmp( name, "TxRx2SsiLoopBack") == 0 )
   {
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    status = adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, tmp);
+    if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, tmp) != 0)
+      return Adrv9001Status_SsiSetErr;
   }
 
   else if( strcmp( &name[3], "TestMode") == 0 )
@@ -300,8 +319,8 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
           .fixedDataPatternToCheck = (Channel == ADI_CHANNEL_1) ? Instance->Params->Tx1TestModeData : Instance->Params->Tx2TestModeData,
           .testData = tmp };
 
-      if((status = adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg )) != 0)
-        return status;
+      if( adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
+        return Adrv9001Status_SsiTestModeErr;
     }
     else
     {
@@ -310,17 +329,17 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
           .testData = tmp
       };
 
-      if((status = adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg )) != 0)
-        return status;
+      if( adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
+        return Adrv9001Status_SsiTestModeErr;
     }
   }
 
   else
   {
-	  status = Adrv9001Status_InvalidParameter;
+	  status = Adrv9001Status_InvalidPib;
   }
 
-  return status;
+  return Adrv9001Status_Success;
 }
 
 static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *name, char *str )
@@ -356,26 +375,25 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
     Channel = ADI_CHANNEL_2;
   }
 
-  status = Adrv9001Status_InvalidParameter;
-
   if( strcmp( &name[3], "CarrierFrequency") == 0 )
   {
     adi_adrv9001_Carrier_t AdiCarrier;
-    status = adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, &AdiCarrier );
+    if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, &AdiCarrier ) != 0)
+      return Adrv9001Status_CarrierFreqErr;
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&AdiCarrier.carrierFrequency_Hz, str );
   }
 
   else if( strcmp( &name[3], "IqData") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetData(Instance->CtrlBase, Port, Channel, &tmp );
+    AxiAdrv9001_GetRxData(Instance->CtrlBase, Channel, &tmp );
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( &name[3], "IqDataPath") == 0 )
   {
     axi_adrv9001_data_path_t tmp;
-    AxiAdrv9001_GetDataPath(Instance->CtrlBase, Port, Channel, &tmp );
+    AxiAdrv9001_GetTxDataPath(Instance->CtrlBase, Channel, &tmp );
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
@@ -396,42 +414,54 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "RadioState") == 0 )
   {
     adi_adrv9001_ChannelState_e tmp;
-    status = adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &tmp );
+    if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &tmp ) != 0)
+      return Adrv9001Status_InvalidState;
+
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( name, "SiliconVersion") == 0 )
   {
     adi_adrv9001_SiliconVersion_t tmp;
-    status = adi_adrv9001_SiliconVersion_Get( &Instance->Device, &tmp );
+    if( adi_adrv9001_SiliconVersion_Get( &Instance->Device, &tmp ) != 0)
+      return Adrv9001Status_ReadErr;
+
     sprintf(str, "%X%X", tmp.major, tmp.minor);
   }
 
   else if( strcmp( name, "FirmwareVersion") == 0 )
   {
     adi_adrv9001_ArmVersion_t tmp;
-    status = adi_adrv9001_arm_Version( &Instance->Device, &tmp );
+    if( adi_adrv9001_arm_Version( &Instance->Device, &tmp ) != 0)
+      return Adrv9001Status_ReadErr;
+
     sprintf(str,"%u.%u.%u.%u", tmp.majorVer, tmp.minorVer, tmp.maintVer, tmp.rcVer );
   }
 
   else if( strcmp( name, "APIVersion") == 0 )
   {
     adi_common_ApiVersion_t tmp;
-    status = adi_adrv9001_ApiVersion_Get( &Instance->Device, &tmp );
+    if( adi_adrv9001_ApiVersion_Get( &Instance->Device, &tmp ) != 0)
+      return Adrv9001Status_ReadErr;
+
     sprintf(str,"%lu.%lu.%lu\r\n\r\n", tmp.major, tmp.minor, tmp.patch);
   }
 
   else if( strcmp( name, "Temp") == 0 )
   {
     int16_t tmp;
-    adi_adrv9001_Temperature_Get(&Instance->Device, &tmp);
+    if( adi_adrv9001_Temperature_Get(&Instance->Device, &tmp) != 0 )
+      return Adrv9001Status_ReadErr;
+
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( &name[3], "Rssi") == 0 )
   {
     uint32_t tmp;
-    status = adi_adrv9001_Rx_Rssi_Read( &Instance->Device, Channel, &tmp );
+    if( adi_adrv9001_Rx_Rssi_Read( &Instance->Device, Channel, &tmp ) != 0)
+      return Adrv9001Status_ReadErr;
+
     float tmpf = ((float)tmp) / 1000;
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmpf, str );
   }
@@ -439,14 +469,18 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( name, "VcTcxo") == 0 )
   {
     float tmp;
-    status = Adrv9001_GetVcTcxo(Instance, &tmp);
+    if( Adrv9001_GetVcTcxo(Instance, &tmp) != 0)
+      return Adrv9001Status_ReadErr;
+
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( &name[3], "CurGainIndex") == 0 )
   {
     uint8_t tmp;
-    status = adi_adrv9001_Rx_Gain_Get(&Instance->Device, Channel, &tmp);
+    if( adi_adrv9001_Rx_Gain_Get(&Instance->Device, Channel, &tmp) != 0)
+      return Adrv9001Status_ReadErr;
+
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 

@@ -53,22 +53,25 @@
 typedef enum
 {
   AXI_ADRV9001_DATA_PATH_AXIS = 0,
-  AXI_ADRV9001_DATA_PATH_AXI = 1,
-  AXI_ADRV9001_DATA_PATH_INCREMENTING = 2
+  AXI_ADRV9001_DATA_PATH_AXI = 1
 } axi_adrv9001_data_path_t;
 
-void AxiAdrv9001_SetDgpio                 ( uint32_t Base, uint32_t Value );
-void AxiAdrv9001_SetDgpioDir           	  ( uint32_t Base, uint32_t Value );
-void AxiAdrv9001_SetData                  ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t Value );
-void AxiAdrv9001_SetDataPath           	  ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value );
-void AxiAdrv9001_SetEnablePin             ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled );
 
-int32_t AxiAdrv9001_Initialize            ( uint32_t Base );
-void AxiAdrv9001_ResetbPinSet             ( uint32_t Base, uint8_t Level );
-void AxiAdrv9001_ResetSsiPort             ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel);
-void AxiAdrv9001_GetDgpio                 ( uint32_t Base, uint32_t *Value );
-void AxiAdrv9001_GetDgpioDir              ( uint32_t Base, uint32_t *Value );
-void AxiAdrv9001_GetDataPath              ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value );
-void AxiAdrv9001_GetData                  ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t *Value );
+int32_t AxiAdrv9001_Initialize      ( uint32_t Base );
+
+void AxiAdrv9001_ResetbPinSet       ( uint32_t Base, uint8_t Level );
+void AxiAdrv9001_SetDgpio           ( uint32_t Base, uint32_t Value );
+void AxiAdrv9001_GetDgpio           ( uint32_t Base, uint32_t *Value );
+void AxiAdrv9001_GetDgpioDir        ( uint32_t Base, uint32_t *Value );
+void AxiAdrv9001_SetDgpioDir        ( uint32_t Base, uint32_t Value );
+void AxiAdrv9001_SetTxDataPath      ( uint32_t Base, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value );
+void AxiAdrv9001_GetTxDataPath      ( uint32_t Base, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value );
+void AxiAdrv9001_SetTxData          ( uint32_t Base, adi_common_ChannelNumber_e Channel, uint32_t Value );
+void AxiAdrv9001_GetRxData          ( uint32_t Base, adi_common_ChannelNumber_e Channel, uint32_t *Value );
+
+void AxiAdrv9001_SetEnable          ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled );
+void AxiAdrv9001_SetDisableCnt      ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetSsiEnableCnt    ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetSsiDisableCnt   ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 
 #endif

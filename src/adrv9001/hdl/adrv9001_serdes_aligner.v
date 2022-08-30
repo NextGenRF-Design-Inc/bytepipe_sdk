@@ -19,10 +19,11 @@
 
 module adrv9001_serdes_aligner(
   input   wire        	clk,            // main clock
+  input   wire          rst,
   input   wire  [15:0]  i_in,           // 16-bit serdes data
   input   wire  [15:0]  q_in,           // 16-bit serdes data
   input   wire  [15:0]  strb_in,        // 16-bit serdes data  
-  input   wire			    valid_in,       // Input data valid
+  input   wire			valid_in,       // Input data valid
   output  reg   [15:0]  i_out = 0,      // Shifted i/q data aligning with strobe
   output  reg   [15:0]  q_out = 0,      // Shifted i/q data aligning with strobe
   output  reg           valid_out = 0   // dout valid
@@ -43,7 +44,10 @@ adrv9001_rx_serdes_phase serdes_phase(
 );
 
 always @(posedge clk) begin
-  valid_out <= valid_in;
+  if( rst )
+    valid_out <= 1'b0;
+  else
+    valid_out <= valid_in;
   
   if(valid_in) begin
     iReg <= i_in;

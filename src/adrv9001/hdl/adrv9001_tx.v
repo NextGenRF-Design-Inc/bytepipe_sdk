@@ -24,34 +24,36 @@ module adrv9001_tx#(
   parameter SWAP_DIFF_DCLK_IN = 0,        // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_DCLK_OUT = 0        // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )(
-  input   wire            rst,              // asynchrounous reset, must reset after valid ref_clk to synchronize ssi
-  input   wire            ref_clk_p,        // 1-bit Reference clock input(connect directly to top-level port)
-  input   wire            ref_clk_n,        // 1-bit Reference clock input(connect directly to top-level port)  
+  input  wire            ref_clk_p,        // 1-bit Reference clock input(connect directly to top-level port)
+  input  wire            ref_clk_n,        // 1-bit Reference clock input(connect directly to top-level port)  
   
-  output  wire            dclk_p,           // 1-bit data clock output(connect directly to top-level port)
-  output  wire			      dclk_n,           // 1-bit data clock output(connect directly to top-level port)
-  output  wire			      strobe_p,         // 1-bit strobe output(connect directly to top-level port)
-  output  wire			      strobe_n,         // 1-bit strobe output(connect directly to top-level port)
-  output  wire			      idata_p,          // 1-bit data output(connect directly to top-level port)
-  output  wire        	  idata_n,          // 1-bit data output(connect directly to top-level port)
-  output  wire        	  qdata_p,          // 1-bit data output(connect directly to top-level port)
-  output  wire			      qdata_n,          // 1-bit data output(connect directly to top-level port)
+  output wire            dclk_p,           // 1-bit data clock output(connect directly to top-level port)
+  output wire			 dclk_n,           // 1-bit data clock output(connect directly to top-level port)
+  output wire			 strobe_p,         // 1-bit strobe output(connect directly to top-level port)
+  output wire			 strobe_n,         // 1-bit strobe output(connect directly to top-level port)
+  output wire			 idata_p,          // 1-bit data output(connect directly to top-level port)
+  output wire        	 idata_n,          // 1-bit data output(connect directly to top-level port)
+  output wire        	 qdata_p,          // 1-bit data output(connect directly to top-level port)
+  output wire			 qdata_n,          // 1-bit data output(connect directly to top-level port)
   
-  output  wire            underflow,        // Indicates data input is missing
-  output  wire            overflow,         // Indicates data input is overflowing
+  input  wire            data_src,         // Data Source
+  input  wire [31:0]     tdata,            // Constant Data
   
-  input   wire [1:0]      data_src,         // Data Source
-  input   wire [31:0]     tdata,            // Constant Data
-  input   wire [31:0]	    s_axis_tdata,     // iq data input
-  output  wire            s_axis_tready,    // ready for data
-  input   wire            s_axis_tvalid,    // input data valid
-  output  wire            s_axis_aclk,   
-  output  wire            s_axis_rstn  
+  input  wire            tdd_en,
+  output reg             enable,   
+  input  wire [31:0]     disable_cnt,
+  input  wire [31:0]     ssi_enable_cnt,
+      
+  input  wire [31:0]	 s_axis_tdata,     // iq data input
+  output wire            s_axis_tready,    // ready for data
+  input  wire            s_axis_tvalid,    // input data valid
+  output wire            s_axis_aclk,   
+  output wire            s_axis_rstn  
     );
 
 wire dclk;
 wire dclk_div;
-wire serdes_rst;
+reg serdes_rst = 0;
 
 assign s_axis_aclk = dclk_div;
 
@@ -59,18 +61,18 @@ wire [7:0]  s_unpacked;
 wire [7:0]  i_unpacked;
 wire [7:0]  q_unpacked;
 
-async_rst async_rst_inst (
-  .slowest_sync_clk(dclk),          // input wire slowest_sync_clk
-  .ext_reset_in(rst),                  // input wire ext_reset_in
-  .aux_reset_in(1'b0),                  // input wire aux_reset_in
-  .mb_debug_sys_rst(1'b0),          // input wire mb_debug_sys_rst
-  .dcm_locked(1'b1),                      // input wire dcm_locked
-  .mb_reset(serdes_rst),                          // output wire mb_reset
-  .bus_struct_reset(),          // output wire [0 : 0] bus_struct_reset
-  .peripheral_reset(),          // output wire [0 : 0] peripheral_reset
-  .interconnect_aresetn(),  // output wire [0 : 0] interconnect_aresetn
-  .peripheral_aresetn(s_axis_rstn)      // output wire [0 : 0] peripheral_aresetn
-);
+//async_rst async_rst_inst (
+//  .slowest_sync_clk(dclk),          // input wire slowest_sync_clk
+//  .ext_reset_in(rst),                  // input wire ext_reset_in
+//  .aux_reset_in(1'b0),                  // input wire aux_reset_in
+//  .mb_debug_sys_rst(1'b0),          // input wire mb_debug_sys_rst
+//  .dcm_locked(1'b1),                      // input wire dcm_locked
+//  .mb_reset(serdes_rst),                          // output wire mb_reset
+//  .bus_struct_reset(),          // output wire [0 : 0] bus_struct_reset
+//  .peripheral_reset(),          // output wire [0 : 0] peripheral_reset
+//  .interconnect_aresetn(),  // output wire [0 : 0] interconnect_aresetn
+//  .peripheral_aresetn(s_axis_rstn)      // output wire [0 : 0] peripheral_aresetn
+//);
   
 adrv9001_tx_clk#(
   .LVDS(LVDS_OUTPUT),
@@ -78,7 +80,7 @@ adrv9001_tx_clk#(
   .SWAP_DIFF_CLK_IN(SWAP_DIFF_DCLK_IN)      // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin  
   )
 tx_clk_inst(  
-  .dclk_div_rst(serdes_rst),        // reset dclk_div
+  .dclk_div_rst(1'b0),        // reset dclk_div
   .ref_clk_p(ref_clk_p),            // 1-bit input: Diff_p buffer input (connect directly to top-level port)
   .ref_clk_n(ref_clk_n),            // 1-bit input: Diff_n buffer input (connect directly to top-level port)
   .dclk_p(dclk_p),                  // 1-bit data clock output(connect directly to top-level port)
@@ -129,41 +131,83 @@ q_serdes(
   .din_t(1'b0)                      // Data in tristate
 );
 
-reg             dataSrcReg0 = 0;
-reg             dataSrcReg1 = 0;
-reg [31:0]      dataReg0 = 0;
-reg [31:0]      dataReg1 = 0;
-reg             dataValidReg = 0;
+wire [31:0]  data_unpack_in;
+wire [31:0]  tdata_cdc;
+wire         data_src_cdc;
+wire [31:0]  disable_cnt_cdc;
+wire [31:0]  ssi_enable_cnt_cdc;
+wire         tdd_en_cdc;
+
+assign data_unpack_in = data_src_cdc? tdata_cdc : s_axis_tdata;
+
+cdc #(
+  .DATA_WIDTH(32) )
+tdata_cdc_i (
+  .s_cdc_tdata  (tdata),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (tdata_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(1) )
+tdata_src_cdc_i (
+  .s_cdc_tdata  (data_src),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (data_src_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(32) )
+disable_cnt_cdc_i (
+  .s_cdc_tdata  (disable_cnt),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (disable_cnt_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(32) )
+ssi_enable_cnt_cdc_i (
+  .s_cdc_tdata  (ssi_enable_cnt),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (ssi_enable_cnt_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(1) )
+tdd_en_cdc_i (
+  .s_cdc_tdata  (tdd_en),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (tdd_en_cdc)
+);
+
+reg [31:0] cnt = 0;
 
 always @( posedge dclk_div ) begin
 
-  dataReg0 <= tdata;
-  dataSrcReg0 <= data_src;
-  dataSrcReg1 <= dataSrcReg0;
-  
-  if( dataSrcReg1 == 2'd0 )
-    dataReg1 <= s_axis_tdata;
-  else if( dataSrcReg1 == 2'd1 )
-    dataReg1 <= dataReg0;  
-  else if( dataSrcReg1 == 2'd2 )
-    dataReg1 <= {dataReg1[31:16] + 1'd1, dataReg1[15:0] + 1'd1};      
+  if( tdd_en_cdc == 1'b0 )
+    cnt <= 0;
+  else if( cnt < 32'hffffffff )
+    cnt <= cnt + 1;   
   else
-    dataReg1 <= 0;
+    cnt <= cnt;   
     
-  if( dataSrcReg1 == 2'd0 )
-    dataValidReg <= s_axis_tvalid;
+  if( (cnt <= disable_cnt_cdc) && (cnt > 32'h0) )
+    enable <= 1'b1;
   else
-    dataValidReg <= s_axis_tready;      
+    enable <= 1'b0;
+    
+  if( ( cnt > ssi_enable_cnt_cdc ) && ( cnt <= disable_cnt_cdc ) )
+    serdes_rst <= 1'b0;
+  else
+    serdes_rst <= 1'b1;     
     
 end
 
 adrv9001_serdes_unpack unpack_inst(
   .clk(dclk_div),                   // data clock
-  .din(dataReg1),                   // packed i/q data input 
-  .din_valid(dataValidReg),        // data input valid
+  .rst(serdes_rst),
+  .din(data_unpack_in),                   // packed i/q data input 
   .din_rdy(s_axis_tready),          // Ready for new data
-  .underflow(underflow),            // Indicates data input is missing
-  .overflow(overflow),              // Indicates data input is overflowing
   .strb_out(s_unpacked),            // 8-bit unpacked strobe output to serdes
   .i_out(i_unpacked),               // 8-bit unpacked i data output to serdes
   .q_out(q_unpacked)                // 8-bit unpacked q data output to serdes

@@ -92,28 +92,37 @@
 #define ADRV9001_CTRL_BASE_ADDR         (XPAR_ADRV9002_0_BASEADDR)
 #endif
 
+#define ADRV9001_TDD_ENABLE_DUR_FOREVER (0xffffffff)
+
 /**
 * \brief Code indicated status of request
 */
 typedef enum
 {
-  Adrv9001Status_Success              = (ADI_COMMON_ACT_NO_ACTION),
-  Adrv9001Status_TimerError           = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_CHECK_TIMER),
-  Adrv9001Status_InvalidParameter     = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_CHECK_PARAM),
-  Adrv9001Status_InterfaceError       = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_RESET_INTERFACE),
-  Adrv9001Status_FeatureError         = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_RESET_FEATURE),
-  Adrv9001Status_ModuleError          = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_RESET_MODULE),
-  Adrv9001Status_Error                = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_RESET_FULL),
-  Adrv9001Status_NotSupported         = (ADRV9001_STATUS_OFFSET + ADI_COMMON_ACT_ERR_API_NOT_IMPLEMENTED),
-  Adrv9001Status_ResetArm             = (ADRV9001_STATUS_OFFSET + ADI_ADRV9001_ACT_ERR_RESET_ARM),
-  Adrv9001Status_InitCals             = (ADRV9001_STATUS_OFFSET + ADI_ADRV9001_ACT_ERR_RERUN_INIT_CALS),
-  Adrv9001Status_GpioError            = (ADRV9001_STATUS_OFFSET + ADI_ADRV9001_ACT_ERR_RESET_GPIO),
-  Adrv9001Status_LogError             = (ADRV9001_STATUS_OFFSET + ADI_ADRV9001_ACT_ERR_BBIC_LOG_ERROR),
-  Adrv9001Status_CacheError           = (ADRV9001_STATUS_OFFSET + ADI_ADRV9001_ACT_ERR_RESET_CACHE),
-  Adrv9001Status_FlushCache           = (ADRV9001_STATUS_OFFSET + ADI_ADRV9001_ACT_ERR_FLUSH_CACHE),
-  Adrv9001Status_Busy                 = (ADRV9001_STATUS_OFFSET - 600),
-  Adrv9001Status_InvalidState         = (ADRV9001_STATUS_OFFSET - 601),
-  Adrv9001Status_SpiError             = (ADRV9001_STATUS_OFFSET - 602),
+  Adrv9001Status_Success              = (0),
+  Adrv9001Status_ProfileInitErr       = (ADRV9001_STATUS_OFFSET - 1),
+  Adrv9001Status_ProfileCalErr        = (ADRV9001_STATUS_OFFSET - 2),
+  Adrv9001Status_ProfileCfgErr        = (ADRV9001_STATUS_OFFSET - 3),
+  Adrv9001Status_ToPrimedErr          = (ADRV9001_STATUS_OFFSET - 4),
+  Adrv9001Status_ToCalErr             = (ADRV9001_STATUS_OFFSET - 5),
+  Adrv9001Status_ToEnabledErr         = (ADRV9001_STATUS_OFFSET - 6),
+  Adrv9001Status_NotSupported         = (ADRV9001_STATUS_OFFSET - 7),
+  Adrv9001Status_DacErr               = (ADRV9001_STATUS_OFFSET - 8),
+  Adrv9001Status_TxAttnErr            = (ADRV9001_STATUS_OFFSET - 9),
+  Adrv9001Status_TxBoostErr           = (ADRV9001_STATUS_OFFSET - 10),
+  Adrv9001Status_GpioErr              = (ADRV9001_STATUS_OFFSET - 11),
+  Adrv9001Status_LogErr               = (ADRV9001_STATUS_OFFSET - 12),
+  Adrv9001Status_Busy                 = (ADRV9001_STATUS_OFFSET - 13),
+  Adrv9001Status_InvalidPib           = (ADRV9001_STATUS_OFFSET - 14),
+  Adrv9001Status_SpiErr               = (ADRV9001_STATUS_OFFSET - 15),
+  Adrv9001Status_InvalidPaEnable      = (ADRV9001_STATUS_OFFSET - 16),
+  Adrv9001Status_SsiSweepErr          = (ADRV9001_STATUS_OFFSET - 17),
+  Adrv9001Status_SsiTestModeErr       = (ADRV9001_STATUS_OFFSET - 18),
+  Adrv9001Status_SsiSetErr            = (ADRV9001_STATUS_OFFSET - 19),
+  Adrv9001Status_InvalidState         = (ADRV9001_STATUS_OFFSET - 20),
+  Adrv9001Status_CarrierFreqErr       = (ADRV9001_STATUS_OFFSET - 21),
+  Adrv9001Status_ReadErr              = (ADRV9001_STATUS_OFFSET - 22),
+  Adrv9001Status_EnableModeErr        = (ADRV9001_STATUS_OFFSET - 23),
 } adrv9001_status_t;
 
 #define ADRV9001_LOG_PATH_SIZE      (64)
@@ -149,6 +158,14 @@ typedef struct {
   uint32_t                              Tx2TestModeData;
   uint32_t                              Rx1TestModeData;
   uint32_t                              Rx2TestModeData;
+  uint32_t                              Tx1SsiEnableDly;
+  uint32_t                              Tx2SsiEnableDly;
+  uint32_t                              Rx1SsiEnableDly;
+  uint32_t                              Rx2SsiEnableDly;
+  uint32_t                              Tx1DisableDly;
+  uint32_t                              Tx2DisableDly;
+  uint32_t                              Rx1SsiDisableDly;
+  uint32_t                              Rx2SsiDisableDly;
   uint32_t                              HwVer;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
 } adrv9001_params_t;
@@ -172,7 +189,7 @@ typedef struct {
 
 int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
-int32_t Adrv9001_ToRfEnabled            ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
+int32_t Adrv9001_ToRfEnabled            ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint32_t SampleCnt );
 int32_t Adrv9001_ToPrimed               ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 int32_t Adrv9001_ToCalibrated           ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 int32_t Adrv9001_SetPaEnable            ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool Enable );

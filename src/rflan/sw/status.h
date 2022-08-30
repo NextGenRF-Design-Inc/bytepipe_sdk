@@ -54,32 +54,95 @@ static const char *StatusString( int32_t status )
     case 0:
       return "Success";
 
+    case Adrv9001Status_ProfileInitErr:
+      return "Profile Initialization Error";
+
+    case Adrv9001Status_ProfileCalErr:
+      return "Profile Calibration Error";
+
+    case Adrv9001Status_ProfileCfgErr:
+      return "Adrv9001 Profile Configuration Error";
+
+    case Adrv9001Status_ToPrimedErr:
+      return "Adrv9001 To Primed Error";
+
+    case Adrv9001Status_ToCalErr:
+      return "Adrv9001 To Calibrated Error";
+
+    case Adrv9001Status_ToEnabledErr:
+      return "Adrv9001 To Enabled Error";
+
+    case Adrv9001Status_NotSupported:
+      return "Adrv9001 Not Supported";
+
+    case Adrv9001Status_DacErr:
+      return "Adrv9001 DAC Error";
+
+    case Adrv9001Status_TxAttnErr:
+      return "Adrv9001 Tx Attenuation Error";
+
+    case Adrv9001Status_TxBoostErr:
+      return "Adrv9001 Tx Boost Error";
+
+    case Adrv9001Status_GpioErr:
+      return "Adrv9001 Gpio Error";
+
+    case Adrv9001Status_LogErr:
+      return "Adrv9001 Log Error";
+
+    case Adrv9001Status_Busy:
+      return "Adrv9001 Busy";
+
+    case Adrv9001Status_InvalidPib:
+      return "Adrv9001 Invalid PIB";
+
+    case Adrv9001Status_SpiErr:
+      return "Adrv9001 SPI Error";
+
+    case Adrv9001Status_SsiSweepErr:
+      return "Adrv9001 SSI Sweep Error";
+
+    case Adrv9001Status_SsiTestModeErr:
+      return "Adrv9001 SSI Test Mode Error";
+
+    case Adrv9001Status_SsiSetErr:
+      return "Adrv9001 SSI Set Error";
+
     case Adrv9001Status_InvalidState:
-      return "Invalid State";
+      return "Adrv9001 Invalid State";
+
+    case Adrv9001Status_CarrierFreqErr:
+      return "Adrv9001 Carrier Frequency Error";
+
+    case Adrv9001Status_ReadErr:
+      return "Adrv9001 Read Error";
+
+    case Adrv9001Status_EnableModeErr:
+      return "Adrv9001 Enable Mode Error";
+
+//    case Adrv9001Status_SsiSetErr:
+//      return "Adrv9001";
+//
+//    case Adrv9001Status_SsiSetErr:
+//      return "Adrv9001";
 
     case CliStatus_MemoryError:
       return "Memory Error";
 
     case CliStatus_NotSupported:
-    case Adrv9001Status_NotSupported:
       return "Not Supported";
 
     case CliStatus_OsError:
       return "OS Error";
 
     case CliStatus_Busy:
-    case Adrv9001Status_Busy:
       return "Busy";
 
     case CliStatus_InvalidParameter:
-    case Adrv9001Status_InvalidParameter:
       return "Invalid Parameter";
 
     case CliStatus_FileError:
       return "File Error";
-
-    case Adrv9001Status_GpioError:
-      return "Gpio Error";
 
     case FR_DISK_ERR:
       return "Disk Error";

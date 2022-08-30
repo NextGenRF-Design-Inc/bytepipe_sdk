@@ -53,6 +53,18 @@ parse_c99:
 	echo '  .Tx2Attn = 10000,' >> $(PROJECT)/profile/initializeinit7.c  
 	echo '  .Tx1Boost = 0,' >> $(PROJECT)/profile/initializeinit7.c  
 	echo '  .Tx2Boost = 0,' >> $(PROJECT)/profile/initializeinit7.c  
+	echo '  .Tx1TestModeData = 0xA234ABC1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx2TestModeData = 0xA234ABC1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx1TestModeData = 0xA234ABC1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx2TestModeData = 0xA234ABC1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx1SsiEnableDly = 500,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx2SsiEnableDly = 500,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx1SsiEnableDly = 500,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx2SsiEnableDly = 500,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx1DisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx2DisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c  
+	echo '  .Rx1SsiDisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx2SsiDisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c
 	rm -rf tmp.txt
 	grep 'adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1,' $(PROJECT)/profile/initialize.c >> tmp.txt
 	sed -i 's/error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1,/.Tx1ExternalPathDelay = /g' tmp.txt 
@@ -84,13 +96,13 @@ parse_c99:
 	cat tmp.txt >> $(PROJECT)/profile/initializeinit7.c  
 	rm -rf tmp.txt  
 	echo '  .Tx1DpdCfg = {' >> tmp.txt
-	grep -m 1 'adi_adrv9001_DpdCfg_t' $(PROJECT)/profile/configure.c -A 18 | tail -n18 >> tmp.txt   
+	grep -m 1 'adi_adrv9001_DpdCfg_t' $(PROJECT)/profile/configure.c -A 19 | tail -n19 >> tmp.txt   
 	sed -i '/}\;/d' tmp.txt   
 	echo '},' >> tmp.txt  
 	cat tmp.txt >> $(PROJECT)/profile/initializeinit7.c  
 	rm -rf tmp.txt  
 	echo '  .Tx2DpdCfg = {' >> tmp.txt 
-	grep -m 2 'adi_adrv9001_DpdCfg_t' $(PROJECT)/profile/configure.c -A 18 | tail -n18 >> tmp.txt  
+	grep -m 2 'adi_adrv9001_DpdCfg_t' $(PROJECT)/profile/configure.c -A 19 | tail -n19 >> tmp.txt  
 	sed -i '/}\;/d' tmp.txt   
 	echo '},' >> tmp.txt  
 	cat tmp.txt >> $(PROJECT)/profile/initializeinit7.c   
@@ -118,7 +130,7 @@ parse_c99:
 	sed -i 's/adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, \&Adrv9001Params.Tx2DpdInitCfg);/g' $(PROJECT)/profile/initialize.c 	  
 	sed -i 's/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, .*/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, \Adrv9001Params.Tx1ExternalPathDelay);/g' $(PROJECT)/profile/initialize.c      
 	sed -i 's/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, \Adrv9001Params.Tx2ExternalPathDelay);/g' $(PROJECT)/profile/initialize.c 
-	sed -i -e '/adi_adrv9001_DpdCfg_t/,+18d' $(PROJECT)/profile/configure.c  
+	sed -i -e '/adi_adrv9001_DpdCfg_t/,+19d' $(PROJECT)/profile/configure.c  
 	sed -i -e '/adi_adrv9001_RxInterfaceGainCtrl_t/,+8d' $(PROJECT)/profile/configure.c    
 	sed -i 's/adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_1, .*/adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_1, \&Adrv9001Params.Rx1Agc);/g' $(PROJECT)/profile/configure.c 
 	sed -i 's/adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_2, \&Adrv9001Params.Rx2Agc);/g' $(PROJECT)/profile/configure.c 

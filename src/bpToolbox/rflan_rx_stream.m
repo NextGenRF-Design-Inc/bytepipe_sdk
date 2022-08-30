@@ -9,17 +9,23 @@ h = rflan();
 h.Open('COM16');
 
 % Select Receive Port
-RxPort = h.Rx2;
+RxPort = h.Rx1;
 
 % Select Capture Length of DMA
-RxBufLength = 4096;
+RxBufLength = 4000;
 
-% Read Carrier Frequency
+% Read Sample Rate
 fs = h.GetSampleRate(RxPort);
+
+% Delay before enabling SSI
+h.SetSsiEnableDelay(RxPort, 500);
+
+% Flush out SSI data after rx done
+h.SetSsiDisableDelay(RxPort, 200);
 
 % Read DMA buffer and plot data several times
 figure();
-for i = 1:20
+for i = 1:1
     
 % Start DMA Burst
 h.RflanStreamStart(RxPort, 0, RxBufLength);

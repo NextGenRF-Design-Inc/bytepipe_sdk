@@ -221,7 +221,7 @@ static void Adrv9001Cli_ToRfEnabled(cli_t *CliInstance, const char *cmd, adrv900
 
   Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
 
-  status = Adrv9001_ToRfEnabled( Adrv9001, Port, Channel );
+  status = Adrv9001_ToRfEnabled( Adrv9001, Port, Channel, ADRV9001_TDD_ENABLE_DUR_FOREVER );
 
   Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
 }

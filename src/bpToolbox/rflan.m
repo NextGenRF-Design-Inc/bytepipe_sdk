@@ -248,7 +248,12 @@ classdef rflan < handle
     % Stream
     methods
         function RflanStreamStart(obj, Port, Cyclic, SampleCnt)
-            obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt + obj.RxSampleDelay))]);
+            
+            if( strcmp(Port, obj.Tx1) || strcmp(Port, obj.Tx2))
+                obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
+            else
+                obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt + obj.RxSampleDelay))]);
+            end
         end
         
         function RflanStreamStop(obj, Port )
@@ -842,7 +847,20 @@ classdef rflan < handle
 
         function SetTxIqDataPath( obj, Port, v )
             obj.Adrv9001SetParam([Port 'IqDataPath'], num2str(v));            
-        end           
+        end      
+        
+        function SetTxDisableDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DisableDly'], num2str(v));            
+        end 
+        
+        function SetSsiEnableDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'SsiEnableDly'], num2str(v));            
+        end
+        
+        function SetSsiDisableDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'SsiDisableDly'], num2str(v));            
+        end  
+        
     end
         
 end

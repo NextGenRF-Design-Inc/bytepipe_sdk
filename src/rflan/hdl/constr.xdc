@@ -63,8 +63,8 @@ set_property  -dict {PACKAGE_PIN P5     IOSTANDARD LVDS}                        
 set_property  -dict {PACKAGE_PIN N4     IOSTANDARD LVDS}                            [get_ports adrv9001_tx2_strobe_n]   ;# IO_L8N_T1L_N3_AD5N_65
 set_property  -dict {PACKAGE_PIN N5     IOSTANDARD LVDS}                            [get_ports adrv9001_tx2_strobe_p]   ;# IO_L8P_T1L_N2_AD5P_65
 
-set_property  -dict {PACKAGE_PIN T2     IOSTANDARD LVCMOS18}                        [get_ports uart1_tx]    ;# IO_L1N_T0L_N1_DBC_65
-set_property  -dict {PACKAGE_PIN T3     IOSTANDARD LVCMOS18}                        [get_ports uart1_rx]    ;# IO_L1P_T0L_N0_DBC_65
+#set_property  -dict {PACKAGE_PIN T2     IOSTANDARD LVCMOS18}                        [get_ports uart1_tx]    ;# IO_L1N_T0L_N1_DBC_65
+#set_property  -dict {PACKAGE_PIN T3     IOSTANDARD LVCMOS18}                        [get_ports uart1_rx]    ;# IO_L1P_T0L_N0_DBC_65
 #set_property  -dict {PACKAGE_PIN P3     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_qdata_p]   ;# IO_L2P_T0L_N2_65
 #set_property  -dict {PACKAGE_PIN R3     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_strobe_p]   ;# IO_L2N_T0L_N3_65
 #set_property  -dict {PACKAGE_PIN U1     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_dclk_n]   ;# IO_L3N_T0L_N5_AD15N_65
@@ -102,9 +102,4 @@ set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx2_dclk_out]
 
 # Define SPI clock
 create_clock -name spi0_clk      -period 40   [get_pins -hier */EMIOSPI0SCLKO]
-
-set_false_path -from [get_clocks -of_objects [get_pins system_i/adrv9002_0/inst/adrv9001_rx1_inst/dclk_div_buf_i/O]] -to [get_clocks clk_pl_0]
-set_false_path -from [get_clocks -of_objects [get_pins system_i/adrv9002_0/inst/adrv9001_rx2_inst/dclk_div_buf_i/O]] -to [get_clocks clk_pl_0]
-set_false_path -from [get_clocks clk_pl_0] -to [get_clocks -of_objects [get_pins system_i/adrv9002_0/inst/adrv9001_tx1_inst/tx_clk_inst/dclk_div_buf_inst/O]]
-set_false_path -from [get_clocks clk_pl_0] -to [get_clocks -of_objects [get_pins system_i/adrv9002_0/inst/adrv9001_tx2_inst/tx_clk_inst/dclk_div_buf_inst/O]]
 

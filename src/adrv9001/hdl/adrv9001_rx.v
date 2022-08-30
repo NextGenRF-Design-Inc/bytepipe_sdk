@@ -22,19 +22,24 @@ module adrv9001_rx#(
   parameter SWAP_DIFF_STROBE = 0,         // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_DCLK = 0            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )(
-  input   wire          rst,              // 
-  
+ 
   input   wire          dclk_p,           // 1-bit data clock input(connect directly to top-level port)
-  input   wire			    dclk_n,           // 1-bit data clock input(connect directly to top-level port)
-  input   wire			    strobe_p,         // 1-bit strobe input(connect directly to top-level port)
-  input   wire			    strobe_n,         // 1-bit strobe input(connect directly to top-level port)
-  input   wire			    idata_p,          // 1-bit data input(connect directly to top-level port)
+  input   wire		    dclk_n,           // 1-bit data clock input(connect directly to top-level port)
+  input   wire			strobe_p,         // 1-bit strobe input(connect directly to top-level port)
+  input   wire			strobe_n,         // 1-bit strobe input(connect directly to top-level port)
+  input   wire			idata_p,          // 1-bit data input(connect directly to top-level port)
   input   wire        	idata_n,          // 1-bit data input(connect directly to top-level port)
   input   wire        	qdata_p,          // 1-bit data input(connect directly to top-level port)
-  input   wire		      qdata_n,          // 1-bit data input(connect directly to top-level port)
+  input   wire		    qdata_n,          // 1-bit data input(connect directly to top-level port)
 
   output  wire [31:0]   tdata,
-  output  wire [31:0]	  m_axis_tdata,     // iq data output
+  output  reg           enable = 0,
+  input   wire          tdd_en,
+  input   wire [31:0]   disable_cnt, 
+  input   wire [31:0]   ssi_enable_cnt,
+  input   wire [31:0]   ssi_disable_cnt,
+      
+  output  wire [31:0]	m_axis_tdata,     // iq data output
   output  wire          m_axis_tvalid,    // valid output  
   output  wire          m_axis_aclk,
   output  wire          m_axis_rstn
@@ -79,20 +84,20 @@ IBUFGDS dclk_ds_buf (
 );  
       
 wire dclk_in_buf;      
-wire serdes_rst;
+reg serdes_rst = 0;
 
-async_rst async_rst_inst (
-  .slowest_sync_clk(dclk_in_buf),          // input wire slowest_sync_clk
-  .ext_reset_in(rst),                  // input wire ext_reset_in
-  .aux_reset_in(1'b0),                  // input wire aux_reset_in
-  .mb_debug_sys_rst(1'b0),          // input wire mb_debug_sys_rst
-  .dcm_locked(1'b1),                      // input wire dcm_locked
-  .mb_reset(serdes_rst),                          // output wire mb_reset
-  .bus_struct_reset(),          // output wire [0 : 0] bus_struct_reset
-  .peripheral_reset(),          // output wire [0 : 0] peripheral_reset
-  .interconnect_aresetn(),  // output wire [0 : 0] interconnect_aresetn
-  .peripheral_aresetn(m_axis_rstn)      // output wire [0 : 0] peripheral_aresetn
-);
+//async_rst async_rst_inst (
+//  .slowest_sync_clk(dclk_in_buf),          // input wire slowest_sync_clk
+//  .ext_reset_in(rst),                  // input wire ext_reset_in
+//  .aux_reset_in(1'b0),                  // input wire aux_reset_in
+//  .mb_debug_sys_rst(1'b0),          // input wire mb_debug_sys_rst
+//  .dcm_locked(1'b1),                      // input wire dcm_locked
+//  .mb_reset(serdes_rst),                          // output wire mb_reset
+//  .bus_struct_reset(),          // output wire [0 : 0] bus_struct_reset
+//  .peripheral_reset(),          // output wire [0 : 0] peripheral_reset
+//  .interconnect_aresetn(),  // output wire [0 : 0] interconnect_aresetn
+//  .peripheral_aresetn(m_axis_rstn)      // output wire [0 : 0] peripheral_aresetn
+//);
           
 BUFGCE #(
   .CE_TYPE ("SYNC"),
@@ -124,7 +129,7 @@ BUFGCE_DIV #(
 dclk_div_buf_i (
   .O (dclk_div),
   .CE (1'b1),
-  .CLR (serdes_rst),
+  .CLR (1'b0),
   .I (dclk_in_buf)
 );      
            
@@ -179,9 +184,71 @@ adrv9001_serdes_pack pack(
   .valid_out(valid_packed)        // Output data valid
 );
 
+
+wire [31:0]  disable_cnt_cdc;
+wire [31:0]  ssi_enable_cnt_cdc;
+wire [31:0]  ssi_disable_cnt_cdc;
+wire         tdd_en_cdc;
+
+cdc #(
+  .DATA_WIDTH(32) )
+disable_cnt_cdc_i (
+  .s_cdc_tdata  (disable_cnt),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (disable_cnt_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(32) )
+ssi_enable_cnt_cdc_i (
+  .s_cdc_tdata  (ssi_enable_cnt),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (ssi_enable_cnt_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(32) )
+ssi_disable_cnt_cdc_i (
+  .s_cdc_tdata  (ssi_disable_cnt),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (ssi_disable_cnt_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(1) )
+tdd_en_cdc_i (
+  .s_cdc_tdata  (tdd_en),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (tdd_en_cdc)
+);
+
+reg [31:0] cnt = 0;
+
+always @( posedge dclk_div ) begin
+
+  if( tdd_en_cdc == 1'b0 )
+    cnt <= 0;
+  else if( cnt < 32'hffffffff )
+    cnt <= cnt + 1;   
+  else
+    cnt <= cnt;   
+    
+  if( (cnt <= disable_cnt_cdc) && (cnt > 32'h0) )
+    enable <= 1'b1;
+  else
+    enable <= 1'b0;
+        
+  if( ( cnt > ssi_enable_cnt_cdc ) && ( cnt <= ssi_disable_cnt_cdc ) )
+    serdes_rst <= 1'b0;
+  else
+    serdes_rst <= 1'b1;     
+    
+end
+
 /* Align Signals */
 adrv9001_serdes_aligner align(
   .clk(dclk_div),                 // clock
+  .rst(serdes_rst),
   .i_in(i_packed),                // 16-bit i/q data input from serdes
   .q_in(q_packed),                // 16-bit i/q data input from serdes  
   .strb_in(strb_packed),          // 16-bit strobe input from serdes

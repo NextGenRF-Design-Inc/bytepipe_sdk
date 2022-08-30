@@ -125,6 +125,7 @@ if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 nextgenrf.com:user:adrv9001:1.0\
 xilinx.com:ip:smartconnect:1.0\
+xilinx.com:ip:ila:6.2\
 analog.com:user:axi_dmac:1.0\
 xilinx.com:ip:xlconstant:1.1\
 xilinx.com:ip:xlconcat:2.1\
@@ -1315,9 +1316,9 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__GPIO1_MIO__IO {MIO 26 .. 51} \
    CONFIG.PSU__GPIO1_MIO__PERIPHERAL__ENABLE {1} \
    CONFIG.PSU__GPIO2_MIO__PERIPHERAL__ENABLE {0} \
-   CONFIG.PSU__GPIO_EMIO_WIDTH {5} \
+   CONFIG.PSU__GPIO_EMIO_WIDTH {26} \
    CONFIG.PSU__GPIO_EMIO__PERIPHERAL__ENABLE {1} \
-   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {5} \
+   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {26} \
    CONFIG.PSU__GPIO_EMIO__WIDTH {[94:0]} \
    CONFIG.PSU__GPU_PP0__POWER__ON {0} \
    CONFIG.PSU__GPU_PP1__POWER__ON {0} \
@@ -1915,6 +1916,16 @@ proc create_root_design { parentCell } {
   # Create instance: cpu
   create_hier_cell_cpu [current_bd_instance .] cpu
 
+  # Create instance: ila_0, and set properties
+  set ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:ila:6.2 ila_0 ]
+  set_property -dict [ list \
+   CONFIG.C_DATA_DEPTH {32768} \
+   CONFIG.C_ENABLE_ILA_AXI_MON {false} \
+   CONFIG.C_INPUT_PIPE_STAGES {3} \
+   CONFIG.C_MONITOR_TYPE {Native} \
+   CONFIG.C_NUM_OF_PROBES {9} \
+ ] $ila_0
+
   # Create instance: rx1_dma, and set properties
   set rx1_dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 rx1_dma ]
   set_property -dict [ list \
@@ -1976,13 +1987,22 @@ proc create_root_design { parentCell } {
   # Create port connections
   connect_bd_net -net adrv9001_spi_miso_1 [get_bd_ports adrv9001_miso] [get_bd_pins cpu/adrv9001_spi_miso]
   connect_bd_net -net adrv9002_0_rx1_axis_aclk [get_bd_pins adrv9002_0/rx1_axis_aclk] [get_bd_pins rx1_dma/s_axis_aclk]
+  connect_bd_net -net adrv9002_0_rx1_en_dbg [get_bd_pins adrv9002_0/rx1_en_dbg] [get_bd_pins ila_0/probe5]
+  connect_bd_net -net adrv9002_0_rx1_idata_dbg [get_bd_pins adrv9002_0/rx1_idata_dbg] [get_bd_pins ila_0/probe6]
+  connect_bd_net -net adrv9002_0_rx1_qdata_dbg [get_bd_pins adrv9002_0/rx1_qdata_dbg] [get_bd_pins ila_0/probe7]
+  connect_bd_net -net adrv9002_0_rx1_tvalid_dbg [get_bd_pins adrv9002_0/rx1_tvalid_dbg] [get_bd_pins ila_0/probe8]
   connect_bd_net -net adrv9002_0_rx2_axis_aclk [get_bd_pins adrv9002_0/rx2_axis_aclk] [get_bd_pins rx2_dma/s_axis_aclk]
   connect_bd_net -net adrv9002_0_tx1_axis_aclk [get_bd_pins adrv9002_0/tx1_axis_aclk] [get_bd_pins tx1_dma/m_axis_aclk]
+  connect_bd_net -net adrv9002_0_tx1_en_dbg [get_bd_pins adrv9002_0/tx1_en_dbg] [get_bd_pins ila_0/probe0]
+  connect_bd_net -net adrv9002_0_tx1_idata_dbg [get_bd_pins adrv9002_0/tx1_idata_dbg] [get_bd_pins ila_0/probe1]
+  connect_bd_net -net adrv9002_0_tx1_qdata_dbg [get_bd_pins adrv9002_0/tx1_qdata_dbg] [get_bd_pins ila_0/probe2]
+  connect_bd_net -net adrv9002_0_tx1_tready_dbg [get_bd_pins adrv9002_0/tx1_tready_dbg] [get_bd_pins ila_0/probe4]
+  connect_bd_net -net adrv9002_0_tx1_tvalid_dbg [get_bd_pins adrv9002_0/tx1_tvalid_dbg] [get_bd_pins ila_0/probe3]
   connect_bd_net -net adrv9002_0_tx2_axis_aclk [get_bd_pins adrv9002_0/tx2_axis_aclk] [get_bd_pins tx2_dma/m_axis_aclk]
   connect_bd_net -net cpu_adrv9001_spi_csn [get_bd_ports adrv9001_csn] [get_bd_pins cpu/adrv9001_spi_csn]
   connect_bd_net -net cpu_adrv9001_spi_mosi [get_bd_ports adrv9001_mosi] [get_bd_pins cpu/adrv9001_spi_mosi]
   connect_bd_net -net cpu_adrv9001_spi_sclk [get_bd_ports adrv9001_sclk] [get_bd_pins cpu/adrv9001_spi_sclk]
-  connect_bd_net -net cpu_clk250m [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/clk250m] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk]
+  connect_bd_net -net cpu_clk250m [get_bd_pins adrv9002_0/clk_dbg] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/clk250m] [get_bd_pins ila_0/clk] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk]
   connect_bd_net -net cpu_clk250m_aresetn [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/clk250m_aresetn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn]
   connect_bd_net -net irq11_1 [get_bd_pins cpu/irq11] [get_bd_pins tx2_dma/irq]
   connect_bd_net -net irq12_1 [get_bd_pins cpu/irq12] [get_bd_pins tx1_dma/irq]
@@ -2000,7 +2020,7 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces tx1_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
   assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
   assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
-  assign_bd_address -offset 0x80004000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9002_0/s_axi/reg0] -force
+  assign_bd_address -offset 0x80010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9002_0/s_axi/reg0] -force
   assign_bd_address -offset 0x80001000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx1_dma/s_axi/axi_lite] -force
   assign_bd_address -offset 0x80000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx2_dma/s_axi/axi_lite] -force
   assign_bd_address -offset 0x80002000 -range 0x00001000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx1_dma/s_axi/axi_lite] -force

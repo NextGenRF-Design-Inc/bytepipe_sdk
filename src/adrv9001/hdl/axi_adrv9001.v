@@ -126,31 +126,76 @@ module axi_adrv9001#(
   output wire [31:0]    s_axi_rdata,
   output wire [1:0]     s_axi_rresp,
   output wire           s_axi_rvalid,
-  input  wire           s_axi_rready
+  input  wire           s_axi_rready,
+  
+  input  wire           clk_dbg,
+  
+  output wire           tx1_en_dbg,
+  output wire [15:0]    tx1_idata_dbg,
+  output wire [15:0]    tx1_qdata_dbg,
+  output wire           tx1_tvalid_dbg,
+  output wire           tx1_tready_dbg,
+  
+  output wire           rx1_en_dbg,
+  output wire [15:0]    rx1_idata_dbg,
+  output wire [15:0]    rx1_qdata_dbg,
+  output wire           rx1_tvalid_dbg  
 );
   
-wire            tx1_rst;
-wire            tx2_rst;
-wire            rx1_rst;
-wire            rx2_rst;      
-wire [1:0]      tx1_data_src;
-wire [1:0]      tx2_data_src;
+  
+  
+  
+wire            tx1_tdd_en;
+wire            tx2_tdd_en;
+wire            rx1_tdd_en;
+wire            rx2_tdd_en;      
+wire [31:0]     tx1_disable_cnt;
+wire [31:0]     tx1_ssi_enable_cnt;
+wire [31:0]     tx2_disable_cnt;
+wire [31:0]     tx2_ssi_enable_cnt;
+wire [31:0]     rx1_disable_cnt;
+wire [31:0]     rx1_ssi_enable_cnt;
+wire [31:0]     rx1_ssi_disable_cnt;
+wire [31:0]     rx2_disable_cnt;
+wire [31:0]     rx2_ssi_enable_cnt;
+wire [31:0]     rx2_ssi_disable_cnt;
+
+wire            tx1_data_src;
+wire            tx2_data_src;
 wire [31:0]     tx1_tdata;
 wire [31:0]     tx2_tdata;
 wire [31:0]     rx1_tdata;
 wire [31:0]     rx2_tdata;
-wire            rx1_ssi_en;
-wire            rx2_ssi_en;
-wire            tx1_ssi_en;
-wire            tx2_ssi_en;
-  
-assign rx1_rst = (rx1_en == 0) | (rx1_ssi_en == 0);
-assign rx2_rst = (rx2_en == 0) | (rx2_ssi_en == 0);
-assign tx1_rst = (tx1_en == 0) | (tx1_ssi_en == 0);
-assign tx2_rst = (tx2_en == 0) | (tx2_ssi_en == 0);
 
-//assign rx1_dbg = {rx1_rst, rx1_en, rx1_ssi_en, rx1_axis_tvalid};
-//assign tx1_dbg = {tx1_rst, tx1_en, tx1_ssi_en, tx1_axis_tvalid, tx1_axis_tready};
+wire [11:0]     dgpio_t;
+wire [11:0]     dgpio_o;
+wire [11:0]     dgpio_i;
+
+
+/* GPIO */
+genvar n;
+generate
+  for (n = 0; n < 12; n = n + 1) begin: dgpio_io
+    assign dgpio[n] = (dgpio_t[n] == 1'b1) ? 1'bz : dgpio_o[n];
+    assign dgpio_i[n] = dgpio[n];        
+  end
+endgenerate
+  
+cdc #(
+  .DATA_WIDTH(35) )
+tx1_dgb_cdc_i (
+  .s_cdc_tdata  ({tx1_en, tx1_axis_tdata, tx1_axis_tvalid, tx1_axis_tready}),
+  .m_cdc_clk    (clk_dbg),
+  .m_cdc_tdata  ({tx1_en_dbg, tx1_idata_dbg, tx1_qdata_dbg, tx1_tvalid_dbg, tx1_tready_dbg})
+);
+
+cdc #(
+  .DATA_WIDTH(34) )
+rx1_dgb_cdc_i (
+  .s_cdc_tdata  ({rx1_en, rx1_axis_tdata, rx1_axis_tvalid}),
+  .m_cdc_clk    (clk_dbg),
+  .m_cdc_tdata  ({rx1_en_dbg, rx1_idata_dbg, rx1_qdata_dbg, rx1_tvalid_dbg})
+);
  
 adrv9001_regs adrv9001_regs_i (
     .s_axi_aclk(s_axi_aclk),
@@ -174,16 +219,24 @@ adrv9001_regs adrv9001_regs_i (
     .s_axi_rresp(s_axi_rresp),
     .s_axi_rvalid(s_axi_rvalid),
     .s_axi_rready(s_axi_rready),
-    .rx1_en(rx1_en),
-    .rx2_en(rx2_en),
-    .tx1_en(tx1_en),
-    .tx2_en(tx2_en),
-    .rx1_ssi_en(rx1_ssi_en),
-    .rx2_ssi_en(rx2_ssi_en),
-    .tx1_ssi_en(tx1_ssi_en),
-    .tx2_ssi_en(tx2_ssi_en),    
+    .rx1_tdd_en(rx1_tdd_en),
+    .rx2_tdd_en(rx2_tdd_en),
+    .tx1_tdd_en(tx1_tdd_en),
+    .tx2_tdd_en(tx2_tdd_en),
+    .tx1_disable_cnt(tx1_disable_cnt),
+    .tx1_ssi_enable_cnt(tx1_ssi_enable_cnt),
+    .tx2_disable_cnt(tx2_disable_cnt),      
+    .tx2_ssi_enable_cnt(tx2_ssi_enable_cnt),
+    .rx1_disable_cnt(rx1_disable_cnt),
+    .rx1_ssi_enable_cnt(rx1_ssi_enable_cnt),
+    .rx1_ssi_disable_cnt(rx1_ssi_disable_cnt),
+    .rx2_disable_cnt(rx2_disable_cnt), 
+    .rx2_ssi_enable_cnt(rx2_ssi_enable_cnt),
+    .rx2_ssi_disable_cnt(rx2_ssi_disable_cnt),
     .rstn(rstn),
-    .dgpio(dgpio),
+    .gpio_i(dgpio_i),
+    .gpio_o(dgpio_o),
+    .gpio_t(dgpio_t),        
     .tx1_data_src(tx1_data_src),
     .tx2_data_src(tx2_data_src),
     .tx1_data(tx1_tdata),
@@ -198,7 +251,6 @@ adrv9001_rx#(
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX1_STROBE),
     .SWAP_DIFF_DCLK(SWAP_DIFF_RX1_DCLK)
 ) adrv9001_rx1_inst (
-    .rst(rx1_rst),
     .dclk_p(rx1_dclk_p),
     .dclk_n(rx1_dclk_n),
     .strobe_p(rx1_strobe_p),
@@ -208,6 +260,11 @@ adrv9001_rx#(
     .qdata_p(rx1_qdata_p),
     .qdata_n(rx1_qdata_n),
     .tdata(rx1_tdata),     
+    .enable(rx1_en),
+    .tdd_en(rx1_tdd_en),
+    .disable_cnt(rx1_disable_cnt), 
+    .ssi_enable_cnt(rx1_ssi_enable_cnt),
+    .ssi_disable_cnt(rx1_ssi_disable_cnt),      
     .m_axis_tdata(rx1_axis_tdata),
     .m_axis_tvalid(rx1_axis_tvalid),
     .m_axis_aclk(rx1_axis_aclk),
@@ -220,7 +277,6 @@ adrv9001_rx #(
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX2_STROBE),
     .SWAP_DIFF_DCLK(SWAP_DIFF_RX2_DCLK)
 ) adrv9001_rx2_inst (
-    .rst(rx2_rst),
     .dclk_p(rx2_dclk_p),
     .dclk_n(rx2_dclk_n),
     .strobe_p(rx2_strobe_p),
@@ -230,6 +286,11 @@ adrv9001_rx #(
     .qdata_p(rx2_qdata_p),
     .qdata_n(rx2_qdata_n),
     .tdata(rx2_tdata),  
+    .enable(rx2_en),
+    .tdd_en(rx2_tdd_en),
+    .disable_cnt(rx2_disable_cnt), 
+    .ssi_enable_cnt(rx2_ssi_enable_cnt),
+    .ssi_disable_cnt(rx2_ssi_disable_cnt),     
     .m_axis_tdata(rx2_axis_tdata),
     .m_axis_tvalid(rx2_axis_tvalid),
     .m_axis_aclk(rx2_axis_aclk),
@@ -244,7 +305,6 @@ adrv9001_tx #(
     .SWAP_DIFF_DCLK_IN(SWAP_DIFF_TX1_DCLK_IN),
     .SWAP_DIFF_DCLK_OUT(SWAP_DIFF_TX1_DCLK_OUT)
 ) adrv9001_tx1_inst (
-    .rst(tx1_rst),
     .ref_clk_p(tx1_ref_clk_p),
     .ref_clk_n(tx1_ref_clk_n),
     .dclk_p(tx1_dclk_p),
@@ -255,10 +315,12 @@ adrv9001_tx #(
     .idata_n(tx1_idata_n),
     .qdata_p(tx1_qdata_p),
     .qdata_n(tx1_qdata_n),
-    .underflow( ),
-    .overflow( ),
     .tdata(tx1_tdata),
     .data_src(tx1_data_src),
+    .tdd_en(tx1_tdd_en),
+    .enable(tx1_en),
+    .disable_cnt(tx1_disable_cnt),
+    .ssi_enable_cnt(tx1_ssi_enable_cnt),    
     .s_axis_tdata(tx1_axis_tdata),
     .s_axis_tready(tx1_axis_tready),
     .s_axis_tvalid(tx1_axis_tvalid),
@@ -274,7 +336,6 @@ adrv9001_tx #(
     .SWAP_DIFF_DCLK_IN(SWAP_DIFF_TX2_DCLK_IN),
     .SWAP_DIFF_DCLK_OUT(SWAP_DIFF_TX2_DCLK_OUT)
 ) adrv9001_tx2_inst (
-    .rst(tx2_rst),
     .ref_clk_p(tx2_ref_clk_p),
     .ref_clk_n(tx2_ref_clk_n),
     .dclk_p(tx2_dclk_p),
@@ -285,10 +346,12 @@ adrv9001_tx #(
     .idata_n(tx2_idata_n),
     .qdata_p(tx2_qdata_p),
     .qdata_n(tx2_qdata_n),
-    .underflow( ),
-    .overflow( ),
     .tdata(tx2_tdata),
     .data_src(tx2_data_src),    
+    .tdd_en(tx2_tdd_en),
+    .enable(tx2_en),
+    .disable_cnt(tx2_disable_cnt),
+    .ssi_enable_cnt(tx2_ssi_enable_cnt),        
     .s_axis_tdata(tx2_axis_tdata),
     .s_axis_tready(tx2_axis_tready),
     .s_axis_tvalid(tx2_axis_tvalid),

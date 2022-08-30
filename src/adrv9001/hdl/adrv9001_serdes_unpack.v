@@ -20,11 +20,9 @@
 
 module adrv9001_serdes_unpack(
   input   wire        	clk,            // main clock
+  input   wire          rst,
   input   wire  [31:0]  din,            // packed i/q data input 
-  input   wire          din_valid,      // Data input is valid
   output  wire          din_rdy,        // ready for new input data
-  output  wire          underflow,      // Indicates data input is missing
-  output  wire          overflow,       // Indicates data input is overflowing
   output  wire 	[7:0]   strb_out,       // 8-bit unpacked strobe output to serdes
   output  wire  [7:0]   i_out,          // 8-bit unpacked i data output to serdes
   output  wire  [7:0]   q_out           // 8-bit unpacked q data output to serdes
@@ -34,19 +32,18 @@ reg [7:0]   iReg = 0;
 reg [7:0]   qReg = 0;
 reg [7:0]   sReg = 0;
 reg         rdy = 1;
-reg         valid = 0;
 
 assign i_out = iReg;
 assign q_out = qReg;
 assign strb_out = sReg;
-assign din_rdy = rdy;
-assign underflow = ~valid & ~din_valid;    
-assign overflow =  valid & din_valid;    
+assign din_rdy = rdy;  
 
 always @(posedge clk) begin
 
-  valid <= din_valid;
-  rdy <= ~rdy;
+  if( rst )
+    rdy <= 1'b0;
+  else
+    rdy <= ~rdy;
   
   if( rdy ) begin
     iReg <= din[23:16];
