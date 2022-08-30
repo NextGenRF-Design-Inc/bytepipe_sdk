@@ -1397,7 +1397,8 @@ adrv9001_params_t Adrv9001Params = {
 		.settlingDelay = 0}
 , 
 		.rxQecFreezeEnable = true, 
-		.gpioFreezePin = ADI_ADRV9001_GPIO_UNASSIGNED},
+		.gpioFreezePin = ADI_ADRV9001_GPIO_UNASSIGNED 
+},
 .Rx2Agc = {
 		.peakWaitTime = 4, 
 		.maxGainIndex = 255, 
@@ -1464,7 +1465,8 @@ adrv9001_params_t Adrv9001Params = {
 		.settlingDelay = 0}
 , 
 		.rxQecFreezeEnable = true, 
-		.gpioFreezePin = ADI_ADRV9001_GPIO_UNASSIGNED},
+		.gpioFreezePin = ADI_ADRV9001_GPIO_UNASSIGNED 
+},
   .Tx1DpdInitCfg = {
 },
   .Tx2DpdInitCfg = {
@@ -1481,7 +1483,8 @@ adrv9001_params_t Adrv9001Params = {
 		.rssiMovingAverageDuration = 10, 
 		.gainControlAutomaticThreshold_dBFS = -2, 
 		.signalPAR = 15, 
-		.enableFastAttack = false},
+		.enableFastAttack = false 
+},
   .Rx2InterfaceGain = {
 		.updateInstance = ADI_ADRV9001_RX_INTERFACE_GAIN_UPDATE_TIMING_NOW, 
 		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_MANUAL, 
@@ -1490,5 +1493,6 @@ adrv9001_params_t Adrv9001Params = {
 		.rssiMovingAverageDuration = 10, 
 		.gainControlAutomaticThreshold_dBFS = -2, 
 		.signalPAR = 15, 
-		.enableFastAttack = false},
+		.enableFastAttack = false 
+},
 };

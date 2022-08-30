@@ -51,6 +51,7 @@ clean_sw:
 	rm -rf $(PROJECT)/*.bin
 	rm -rf $(PROJECT)/sd_card  
   
+.PHONY: profile
 profile:	
 	$(MAKE) -f $(PROJECT_DIR)/../adrv9001/Makefile sw
 	rm -rf $(PROJECT_DIR)/sw/adrv9001/profile 
