@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include "adrv9001_pib.h"
 
-#define ADRV9001_PIB_FLAG_REBOOT    (0x08)
-#define ADRV9001_PIB_FLAG_VIRTUAL   (0x10)
+#define ADRV9001_PIB_FLAG_REBOOT        (0x08)
+#define ADRV9001_PIB_FLAG_VIRTUAL       (0x10)
+#define ADRV9001_PIB_FLAG_SET_ACTION    (0x20)
+#define ADRV9001_PIB_FLAG_GET_ACTION    (0x40)
 
 /* PIB Definition */
 static pib_def_t Adrv9001PibDef[] =
@@ -16,10 +18,10 @@ static pib_def_t Adrv9001PibDef[] =
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   { "HwVer",                                offsetof(adrv9001_params_t, HwVer),                                                       PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
   { "LogPath",                              offsetof(adrv9001_params_t, LogPath),                                                     PibTypeStr,       PIB_FLAGS_DEFAULT  },
-  { "Tx1Attn",                              offsetof(adrv9001_params_t, Tx1Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT  },
-  { "Tx2Attn",                              offsetof(adrv9001_params_t, Tx2Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT  },
-  { "Tx1Boost",                             offsetof(adrv9001_params_t, Tx1Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT  },
-  { "Tx2Boost",                             offsetof(adrv9001_params_t, Tx1Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT  },
+  { "Tx1Attn",                              offsetof(adrv9001_params_t, Tx1Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Tx2Attn",                              offsetof(adrv9001_params_t, Tx2Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Tx1Boost",                             offsetof(adrv9001_params_t, Tx1Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Tx2Boost",                             offsetof(adrv9001_params_t, Tx2Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Tx1DpdEnable",                         offsetof(adrv9001_params_t, Tx1DpdInitCfg.enable),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx1DpdAmplifierType",                  offsetof(adrv9001_params_t, Tx1DpdInitCfg.amplifierType),                                 PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx1DpdLutSize",                        offsetof(adrv9001_params_t, Tx1DpdInitCfg.lutSize),                                       PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
@@ -62,7 +64,7 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2DpdSamplingRate_Hz",                offsetof(adrv9001_params_t, Tx2DpdCfg.dpdSamplingRate_Hz),                                PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdRxTxNormalizationLowerThreshold",offsetof(adrv9001_params_t, Tx2DpdCfg.rxTxNormalizationLowerThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdRxTxNormalizationUpperThreshold",offsetof(adrv9001_params_t, Tx2DpdCfg.rxTxNormalizationUpperThreshold),                   PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
-  { "Tx2DpdDetectionPowerThreshold",        offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPowerThreshold),                           PibTypeU32,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
+  { "Tx2DpdDetectionPowerThreshold",        offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPowerThreshold),                           PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdDetectionPeakThreshold",         offsetof(adrv9001_params_t, Tx2DpdCfg.detectionPeakThreshold),                            PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdTimeFilterCoefficient",          offsetof(adrv9001_params_t, Tx2DpdCfg.timeFilterCoefficient),                             PibTypeU32,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
   { "Tx2DpdClgcLoopOpen",                   offsetof(adrv9001_params_t, Tx2DpdCfg.clgcLoopOpen),                                      PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_REBOOT },
@@ -154,6 +156,62 @@ static pib_def_t Adrv9001PibDef[] =
   { "Rx1SsiDisableDly",                     offsetof(adrv9001_params_t, Rx1SsiDisableDly),                                            PibTypeU32,       PIB_FLAGS_DEFAULT },
   { "Rx2SsiDisableDly",                     offsetof(adrv9001_params_t, Rx2SsiDisableDly),                                            PibTypeU32,       PIB_FLAGS_DEFAULT },
 };
+static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *name, char *str )
+{
+  int32_t status = 0;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+  int32_t id;
+
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if(strncmp(name, "Tx1", 3) == 0 )
+  {
+    Port = ADI_TX;
+    Channel = ADI_CHANNEL_1;
+  }
+  else if(strncmp(name, "Tx2", 3) == 0 )
+  {
+    Port = ADI_TX;
+    Channel = ADI_CHANNEL_2;
+  }
+  else if(strncmp(name, "Rx1", 3) == 0 )
+  {
+    Port = ADI_RX;
+    Channel = ADI_CHANNEL_1;
+  }
+  else if(strncmp(name, "Rx2", 3) == 0 )
+  {
+    Port = ADI_RX;
+    Channel = ADI_CHANNEL_2;
+  }
+
+  if( strcmp( &name[3], "Attn") == 0 )
+  {
+    if( Channel == ADI_CHANNEL_1 )
+      status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, Channel, Instance->Params->Tx1Attn);
+    else
+      status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, Channel, Instance->Params->Tx2Attn);
+  }
+
+  else if( strcmp( &name[3], "Boost") == 0 )
+  {
+    if( Channel == ADI_CHANNEL_1 )
+      status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, Channel, Instance->Params->Tx1Boost);
+    else
+      status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, Channel, Instance->Params->Tx2Boost);
+  }
+
+  else
+  {
+    status = Adrv9001Status_InvalidPib;
+  }
+
+  return Adrv9001Status_Success;
+}
 
 static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char *name, char *str )
 {
@@ -527,6 +585,9 @@ int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *s
   else
   {
     status = Pib_SetByNameByString( &Instance->Pib, name, str );
+
+    if(( Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_SET_ACTION ) == ADRV9001_PIB_FLAG_SET_ACTION )
+      status = Adrv9001Pib_SetActionByNameByString( Instance, name, str );
   }
 
   return status;

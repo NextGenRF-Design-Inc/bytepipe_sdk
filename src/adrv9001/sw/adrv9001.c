@@ -40,6 +40,18 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
   if((status = prime( &Instance->Device )) != 0)
     return Adrv9001Status_ToPrimedErr;
 
+  if((status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, ADI_CHANNEL_1, Instance->Params->Tx1Attn)) != 0)
+    return Adrv9001Status_TxAttnErr;
+
+  if((status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, ADI_CHANNEL_2, Instance->Params->Tx2Attn)) != 0)
+    return Adrv9001Status_TxAttnErr;
+
+  if((status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_1, Instance->Params->Tx1Boost)) != 0)
+    return Adrv9001Status_TxBoostErr;
+
+  if((status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_2, Instance->Params->Tx2Boost)) != 0)
+    return Adrv9001Status_TxBoostErr;
+
   if( Instance->Params->HwVer == 2 )
   {
     /* TCXO DAC    = ADI_ADRV9001_GPIO_ANALOG_00 */
@@ -278,7 +290,6 @@ int32_t Adrv9001_SetTddTiming( adrv9001_t *Instance, adi_common_Port_e port, adi
     SsiDisableCnt = DisableCnt + Instance->Params->Rx2SsiDisableDly;
   }
 
-
   if( SampleCnt == ADRV9001_TDD_ENABLE_DUR_FOREVER )
     AxiAdrv9001_SetDisableCnt( Instance->CtrlBase, port, channel, ADRV9001_TDD_ENABLE_DUR_FOREVER );
   else
@@ -308,30 +319,6 @@ int32_t Adrv9001_ToRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_
   adi_adrv9001_ChannelEnableMode_e mode;
   if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
     return Adrv9001Status_ReadErr;
-
-  if( port == ADI_TX )
-  {
-    uint16_t attn;
-    uint8_t boost;
-
-    if( channel == ADI_CHANNEL_1 )
-    {
-      attn = Instance->Params->Tx1Attn;
-      boost = Instance->Params->Tx1Boost;
-    }
-    else
-    {
-      attn = Instance->Params->Tx2Attn;
-      boost = Instance->Params->Tx2Boost;
-    }
-
-    if( adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, channel, attn) != 0 )
-      return Adrv9001Status_TxAttnErr;
-
-    if( adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, channel, boost ) != 0 )
-      return Adrv9001Status_TxBoostErr;
-  }
-
 
   /* Set PA/LNA Enable */
   if((status = Adrv9001_SetPaEnable(Instance, port, channel, true)) != 0 )
@@ -497,12 +484,41 @@ static int32_t Adrv9001_FindBestSsiDelay( uint16_t results[8][8], uint8_t *DataI
   return Adrv9001Status_Success;
 }
 
+bool Adrv9001_IsPortEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
+{
+  if( (port == ADI_TX) && (channel == ADI_CHANNEL_1))
+  {
+    if( (Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX1 ) == ADI_ADRV9001_TX1 )
+      return true;
+  }
+  else if( (port == ADI_TX) && (channel == ADI_CHANNEL_2))
+  {
+    if( (Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX2 ) == ADI_ADRV9001_TX2 )
+      return true;
+  }
+  else if( (port == ADI_RX) && (channel == ADI_CHANNEL_1))
+  {
+    if( (Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX1 ) == ADI_ADRV9001_RX1 )
+      return true;
+  }
+  else if( (port == ADI_RX) && (channel == ADI_CHANNEL_2))
+  {
+    if( (Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX2 ) == ADI_ADRV9001_RX2 )
+      return true;
+  }
+
+  return false;
+}
+
 int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
 {
   int32_t status;
   uint16_t results[8][8];
   uint8_t clkMax = 0;
   uint8_t dataMax = 0;
+
+  if( Adrv9001_IsPortEnabled( Instance, port, channel ) == false )
+    return Adrv9001Status_Success;
 
   if((status = Adrv9001_PerformSsiSweep( Instance, port, channel, results )) != 0)
     return status;
@@ -516,7 +532,7 @@ int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port
   if((status = Adrv9001_SetSsiClkDelay( Instance, port, channel, clkMax )) != 0)
     return status;
 
-  return 0;
+  return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_SetPaEnable( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool Enable )
