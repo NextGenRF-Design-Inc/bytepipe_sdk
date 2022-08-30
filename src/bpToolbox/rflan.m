@@ -572,7 +572,7 @@ classdef rflan < handle
         end
         
         function v = GetDpdClgcGainTarget_dB( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'DpdClgcGainTarget_HundredthdB']);
+            v = obj.Adrv9001GetParam([Port 'DpdClgcGainTarget_dB']);
             v = v / 100;
         end
         
@@ -621,10 +621,41 @@ classdef rflan < handle
         end
         
         function v = GetExternalLoopbackDelay(obj, Port)
-            v = obj.Adrv9001GetParam([Port 'Gain']);
-            v = v * 100;
+            v = obj.Adrv9001GetParam([Port 'ExternalPathDelay']);
         end
         
+        function v = GetDpdConfig( obj, Port )
+            
+            v = struct('DpdEnable', obj.GetDpdEnable(Port),...
+                       'DpdAmplifierType', obj.GetDpdAmplifierType(Port),...
+                       'DpdLutSize', obj.GetDpdLutSize(Port),...
+                       'DpdModel', obj.GetDpdModel(Port),...
+                       'DpdChangeModelTapOrders', obj.GetDpdChangeModelTapOrders(Port),...
+                       'DpdClgcEnable', obj.GetDpdClgcEnable(Port),...
+                       'DpdPreLutScale', obj.GetDpdPreLutScale(Port),...
+                       'DpdNumberofSamples', obj.GetDpdNumberofSamples(Port),...
+                       'DpdAdditionalPowerScale', obj.GetDpdAdditionalPowerScale(Port),...
+                       'DpdCountsLessThanPowerThreshold', obj.GetDpdCountsLessThanPowerThreshold(Port),...
+                       'DpdCountsGreaterThanPeakThreshold',obj.GetDpdCountsGreaterThanPeakThreshold(Port),...
+                       'DpdImmediateLutSwitching',obj.GetDpdImmediateLutSwitching(Port),...
+                       'DpdUseSpecialFrame',obj.GetDpdUseSpecialFrame(Port),...
+                       'DpdResetLuts',obj.GetDpdResetLuts(Port),...
+                       'DpdSamplingRate_Hz',obj.GetDpdSamplingRate_Hz(Port),...
+                       'DpdRxTxNormalizationLowerThreshold_dBm',obj.GetDpdRxTxNormalizationLowerThreshold_dBm(Port),...
+                       'DpdRxTxNormalizationUpperThreshold_dBm',obj.GetDpdRxTxNormalizationUpperThreshold_dBm(Port),...
+                       'DpdDetectionPowerThreshold_dBm',obj.GetDpdDetectionPowerThreshold_dBm(Port),...
+                       'DpdDetectionPeakThreshold_dBm',obj.GetDpdDetectionPeakThreshold_dBm(Port),...
+                       'DpdTimeFilterCoefficient',obj.GetDpdTimeFilterCoefficient(Port),...
+                       'DpdClgcLoopOpen',obj.GetDpdClgcLoopOpen(Port),...
+                       'DpdClgcFilterAlpha',obj.GetDpdClgcFilterAlpha(Port),...
+                       'DpdClgcGainTarget_dB',obj.GetDpdClgcGainTarget_dB(Port),...
+                       'DpdClgcLastGain_dB',obj.GetDpdClgcLastGain_dB(Port),...
+                       'DpdClgcFilteredGain_dB',obj.GetDpdClgcFilteredGain_dB(Port),...
+                       'ExternalLoopbackPower',obj.GetExternalLoopbackPower(Port),...
+                       'ExternalLoopbackDelay',obj.GetExternalLoopbackDelay(Port));
+            
+        end
+            
         function v = GetRadioState( obj, Port )
             v = obj.Adrv9001GetParam([Port 'RadioState']);
             
@@ -754,19 +785,19 @@ classdef rflan < handle
         end
         
         function SetDpdRxTxNormalizationLowerThreshold_dB( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationLowerThreshold ' num2str(10^(v/10)*2^30)]);
+            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationLowerThreshold'], num2str(floor(10^(v/10)*2^30)));
         end
         
         function SetDpdRxTxNormalizationUpperThreshold_dB( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationUpperThreshold ' num2str(10^(v/10)*2^30)]);
+            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationUpperThreshold'], num2str(floor(10^(v/10)*2^30)));
         end
         
         function SetDpdDetectionPowerThreshold_dB( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'DpdDetectionPowerThreshold ' num2str(10^(v/10)*2^31)]);
+            obj.Adrv9001SetParam([Port 'DpdDetectionPowerThreshold'], num2str(floor(10^(v/10)*2^31)));
         end
         
         function SetDpdDetectionPeakThreshold_dB( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'DpdDetectionPeakThreshold ' num2str(10^(v/10)*2^31)]);
+            obj.Adrv9001SetParam([Port 'DpdDetectionPeakThreshold'], num2str(floor(10^(v/10)*2^31)));
         end
         
         function SetDpdTimeFilterCoefficient( obj, Port, v )
@@ -816,13 +847,12 @@ classdef rflan < handle
             end
         end
         
-        function v = SetExternalLoopbackPower(obj, Port)
-            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackPower']);
-            obj.Adrv9001SetParam([Port 'ExternalLoopbackPower ' num2str(v *10)]);
+        function v = SetExternalLoopbackPower(obj, Port, v)
+            obj.Adrv9001SetParam([Port 'ExternalLoopbackPower'], num2str(v * 10));
         end
         
-        function v = SetExternalLoopbackDelay(obj, Port)
-            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackDelay']);
+        function v = SetExternalLoopbackDelay(obj, Port, v)
+            obj.Adrv9001SetParam([Port 'ExternalPathDelay'], num2str(v));
         end
         
         function SetSsiClockDelay( obj, Port, v )
