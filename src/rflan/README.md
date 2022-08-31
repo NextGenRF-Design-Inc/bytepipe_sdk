@@ -71,7 +71,7 @@ make -f ../src/rflan/Makefile hdl
 
 Please review the video found below for additional information.
 
-[![building_hdl](docs/building_hdl.png)]()
+[![building_hdl](docs/building_hdl.png)](https://youtu.be/DPGf76sNKHY)
 
 # Building RPU Software
 
