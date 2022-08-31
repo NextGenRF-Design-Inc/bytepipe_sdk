@@ -84,7 +84,7 @@ make -f ../src/rflan/Makefile sw
 
 Please review the video found below for additional information.
 
-[![building_rpu](docs/building_rpu.png)]()
+[![building_rpu](docs/building_rpu.png)](https://youtu.be/-x7LC3vSTFg)
 
 # Building ADRV9002 Profile
 
