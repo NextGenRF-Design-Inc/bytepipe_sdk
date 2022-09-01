@@ -9,7 +9,7 @@ hdl: | $(PROJECT)/vivado
 $(PROJECT)/vivado:
 	@echo '$(shell printf '\033')[0;33mBuilding $(PROJECT) Programmable Logic $(shell printf '\033')[0m'
 	vivado -mode batch -nojournal -quiet -source $(shell cygpath -w $(PROJECT_DIR))\hdl\make_hdl.tcl -notrace 
-  
+
 sw: adrv9001_sdk copy_c99 parse_c99
 
 copy_c99:
@@ -26,8 +26,8 @@ copy_c99:
 	cp -r $$C99_DIR/prime*.c $(PROJECT)/profile; \
 	cp -r $$C99_DIR/prime*.h $(PROJECT)/profile
   
-adrv9001_sdk: |adrv9001-sdk-eval-software.zip
-adrv9001-sdk-eval-software.zip:
+adrv9001_sdk: | adrv9001-sdk 
+adrv9001-sdk:  
 	wget -nc "https://www.analog.com/media/en/evaluation-boards-kits/evaluation-software/adrv9001-sdk-eval-software.zip" || true
 	unzip adrv9001-sdk-eval-software.zip  
 	chmod -R 777 adrv9001-sdk
