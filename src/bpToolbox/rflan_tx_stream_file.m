@@ -15,12 +15,12 @@ TxPort = h.Tx1;
 % Transmit burst or continous using cyclic flag
 cyclic = 1;
 
-% Stop Previous Streams
-h.RflanStreamStop(TxPort);
-
 % Set Tx Settings
-h.SetTxAttn(TxPort, 10);
+h.SetTxAttn(TxPort, 0);
 h.SetTxBoost(TxPort, 0);
+
+% Load Transmit buffer with IQ data from file on SD card
+h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_61p44M_bw_20M.csv');
 
 % Delay before enabling SSI
 h.SetSsiEnableDelay(TxPort, 500);
@@ -31,23 +31,12 @@ h.SetTxDisableDelay(TxPort, 200);
 % Get Sample Rate 
 fs = h.GetSampleRate(TxPort);
 
-% Generate transmit tone as a factor of sample rate
-f_tone = fs/32;
-t = (0:8*fs/f_tone-1)'/fs;
-txiq = 1/2 * (sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t));
-
-% Load Transmit Buffer with signal
-h.RflanStreamBufPut(TxPort,0,txiq);
-
 % Enable continuous transmit of the iq data
-h.RflanStreamStart(TxPort, cyclic, length(txiq));
+h.RflanStreamStart(TxPort, cyclic, 76800);
 
 % Get Carrier Frequency 
-fc = h.GetCarrierFrequency(TxPort) - f_tone;
-
-disp(['Tone Frequency = ' num2str(fc)]);
+fc = h.GetCarrierFrequency(TxPort);
 
 %% Disable Stream
 
 h.RflanStreamStop(TxPort);
-

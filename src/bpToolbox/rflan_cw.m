@@ -8,7 +8,7 @@ h = rflan();
 h.Open('COM16');
 
 %% Enable CW 
-TxPort = h.Tx2;
+TxPort = h.Tx1;
 
 % Load constant IQ value
 h.SetTxIqConstant(TxPort, hex2dec('7fff7fff'));

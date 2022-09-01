@@ -22,9 +22,11 @@ If you are new to the BytePipe start with the [rflan](src/rflan/README.md) appli
 | [adrv9001](src/adrv9001/README.md)                                | Production optimized ADRV9001 interface for BytePipe          | 
 | [bpToolbox](src/bpToolbox/README.md)                              | Matlab toolbox for interfacing to BytePipe                    | 
 | [rflan](src/rflan/README.md)                                      | Production example streaming IQ data to RPU                   | 
-| [rflan_qpsk](src/axi_dma/README.md)                               | QPSK modem example using RPU and Mathworks HDL Coder          | 
+| [rflan_qpsk](src/rflan_qpsk/README.md)                            | QPSK modem example using RPU and Mathworks HDL Coder          | 
+| [rflan_dpd](src/rflan_dpd/README.md)                              | DPD example using Radio Carbon and BytePipe SOM               | 
 | [petalinux](src/petalinux/README.md)                              | Petalinux build.                                              | 
 | [Radio Carbon](docs/hardware/RadioCarbon/RadioCarbon.md)          | Radio Carbon User Guide                                       | 
+| [Video Tutorials](https://www.youtube.com/playlist?list=PL1O6z4HXixy3uAJCNkjg2Hvm9Dcu4XAUr)                         | Playlist of video tutorials              | 
 
 
 # Hardware Overview

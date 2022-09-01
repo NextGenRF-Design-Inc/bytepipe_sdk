@@ -30,7 +30,7 @@ The following diagram provides an overview of each library component.  The ADRV9
 
 # CLI Interface
 
-The command line interface (CLI) provides an external user inteface accessible through a serial port or ethernet connection.  Both interfaces are operational simultaneously allowing users to use one or both interfaces.  The serial port is accessible through the JTAG/USB interface using a USB micro cable connected to J26 on the [BytePipe Hardware Development Kit](../../docs/hardware/hdk/hdk.md).  [Tera Term](https://download.cnet.com/Tera-Term/3000-2094_4-75766675.html) is the preferred serial terminal operating at 115200 baud.  
+The command line interface (CLI) provides an external user interface accessible through a serial port or ethernet connection.  Both interfaces are operational simultaneously allowing users to use one or both interfaces.  The serial port is accessible through the JTAG/USB interface using a USB micro cable connected to J26 on the [BytePipe Hardware Development Kit](../../docs/hardware/hdk/hdk.md).  [Tera Term](https://download.cnet.com/Tera-Term/3000-2094_4-75766675.html) is the preferred serial terminal operating at 115200 baud.  
 
 ![cli_01](docs/cli_01.png)
 
@@ -62,7 +62,7 @@ cd workspace/
 
 The following describes the process for building the HDL from source files.  The HDL is built using [Vivado 2021.1](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2021-1.html). For additional information on setting up the build environment refer [here](../../docs/build_environment/BuildEnv.md). 
 
-Start by launching cygwin on your windows machine and execute the following commands.  If Vivado is not installed at `C:/Xilinx/` update the path accordingly.  The build script will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opended using Vivado.  
+Start by launching cygwin on your windows machine and execute the following commands.  If Vivado is not installed at `C:/Xilinx/` update the path accordingly.  The build script will download the necessary source files and build the HDL.  When the build is finished the following output will be generated: `workspace/rflan/rflan_xzcuxxx.xsa`.  Once the build is completed the project can be opened using Vivado.  
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
@@ -75,7 +75,7 @@ Please review the video found below for additional information.
 
 # Building RPU Software
 
-The software is built using the Xilinx Vitis IDE.  The build script will automatically download the latest HDL outputs if not previously generated.  Start by launching cygwin on your windows machine and execute the following commands.  If Vitis is not installed at `C:/Xilinx/` update the path accordingly.  The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be openend using Vitis with the workspace set to `workspace/rflan`. 
+The software is built using the Xilinx Vitis IDE.  The build script will automatically download the latest HDL outputs if not previously generated.  Start by launching cygwin on your windows machine and execute the following commands.  If Vitis is not installed at `C:/Xilinx/` update the path accordingly.  The script will generate the hardware platform, board support package, and rflan application.  Once the script is finished the project can be opened using Vitis with the workspace set to `workspace/rflan`. 
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
@@ -88,7 +88,7 @@ Please review the video found below for additional information.
 
 # Building ADRV9002 Profile
 
-The ADRV9002 configuration is generated from Analog Devices Tranceiver Evaluation Software (TES).  The RFLAN includes a default configuration found in `src/rflan/sw/adrv9001/profile'.  To update the profile new settings need to be exported from TES and then compiled into the RFLAN. 
+The ADRV9002 configuration is generated from Analog Devices Transceiver Evaluation Software (TES).  The RFLAN includes a default configuration found in `src/rflan/sw/adrv9001/profile'.  To update the profile, new settings need to be exported from TES and then compiled into the RFLAN. 
 
 ```
 export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH

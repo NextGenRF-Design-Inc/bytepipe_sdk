@@ -51,11 +51,16 @@ end
 %% Carrier Frequency
 clc;
 v = 2.899e9;
+
+h.SetRadioState(h.Tx1, h.Calibrated);
+
 h.SetCarrierFrequency(h.Tx1, v);
 v2 = h.GetCarrierFrequency(h.Tx1);
 if( abs(v2 - v) > 10 )
     error("Error");
 end
+
+h.SetRadioState(h.Tx1, h.Primed);
 
 %% Transmit Attenuation
 clc;
@@ -116,80 +121,6 @@ end
 
 %% RSSI
 h.GetRssi(h.Rx1);
-
-
-%% Tx Stream from File
-
-% Load Transmit buffer with IQ data from file on SD card
-% type "ls" to see files on sd card
-h.RflanStreamBufLoad(h.Tx1,'CFR_sample_rate_15p36M_bw_10M.csv');
-
-% Enable transmit stream of nSamp number of samples.  Optionally repeat
-% this pattern if Cyclic is set to 1.  If Cyclic equals 0 then the IQ data
-% is transmitted once and then turned off.
-Cyclic = 1;
-nSamp = 2e3;
-h.RflanStreamStart(h.Tx1, Cyclic, nSamp);
-
-
-%% Tx Stream from Matlab
-
-% Load Transmit buffer with IQ data from file on SD card
-% type "ls" to see files on sd card
-h.RflanStreamBufLoad(h.Tx1,'CFR_sample_rate_15p36M_bw_10M.csv');
-
-% Enable transmit stream of nSamp number of samples.  Optionally repeat
-% this pattern if Cyclic is set to 1.  If Cyclic equals 0 then the IQ data
-% is transmitted once and then turned off.
-Cyclic = 1;
-nSamp = 2e3;
-h.RflanStreamStart(h.Tx1, Cyclic, nSamp);
-
-
-%% Rx Stream Start
-
-% Enable receiver stream of nSamp number of samples.  
-Cyclic = 1;
-nSamp = 2e3;
-h.RflanStreamStart(h.Rx1, Cyclic, nSamp);
-
-% Read IQ samples from stream buffer
-iq = h.RflanStreamBufGet(h.Rx1,0, nSamp);
-fs = h.GetSampleRate(h.Rx1);
-
-%% Stream Stop
-
-% Stop streaming, only used if stream was started in cyclic mode.
-h.RflanStreamStop(h.Tx1);
-h.RflanStreamStop(h.Tx2);
-h.RflanStreamStop(h.Rx1);
-h.RflanStreamStop(h.Rx2);
-
-%% Plot IQ Data
-
-close all; clc;
-
-bins = length(iq)/2; 
-h2 = spectrum.welch('Hamming',bins);
-spec = msspectrum(h2,iq,...
-        'Fs',fs,...
-        'SpectrumType','twosided',...
-        'CenterDC',true);    
-    
-f = spec.Frequencies/1e6;
-a = 10*log10(spec.Data);    
-
-figure();
-plot(f,a);
-grid on; xlabel('Frequency (MHz)'); ylabel('Power (dB)'); title('Spectrum');
-
-figure();
-t = [0:length(iq)-1]/fs;
-plot(t,real(iq));
-hold all;
-plot(t,imag(iq));
-grid on; xlabel('Time (sec)'); ylabel('Amplitude'); title('IQ vs Time');
-
 
 %% Close
 h.Close();

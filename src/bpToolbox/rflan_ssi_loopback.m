@@ -22,7 +22,6 @@ h.RflanStreamStop(RxPort);
 h.RflanStreamStop(TxPort);
 
 txIq = complex([0:1000]',[-1000:0]') / 2^15;
-%txIq = txIq(1:100);
 
 % Load Transmit buffer
 h.RflanStreamBufPut(TxPort,0,txIq);
