@@ -66,7 +66,8 @@ typedef enum
 {
   PibStatus_Success               = (0),
   PibStatus_MemoryError           = (PIB_STATUS_OFFSET - 1),
-  PibStatus_InvalidParameter      = (PIB_STATUS_OFFSET - 4),
+  PibStatus_UnknownParameter      = (PIB_STATUS_OFFSET - 2),
+  PibStatus_InvalidParameter      = (PIB_STATUS_OFFSET - 3),
 } pib_status_t;
 
 /**

@@ -91,6 +91,7 @@ static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
 {
   char *name;
   char *value;
+  int32_t status;
 
   if((name = calloc(1, PIB_NAME_SIZE )) == NULL)
   {
@@ -109,9 +110,14 @@ static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   Cli_GetParameter(cmd, 1, CliParamTypeStr, name);
 
   /* Get Value */
-  Adrv9001Pib_GetStringByName( Adrv9001, name, value );
-
-  Cli_Printf(CliInstance,"%s = %s\r\n",name, value);
+  if((status = Adrv9001Pib_GetStringByName( Adrv9001, name, value )) != 0)
+  {
+	  Cli_Printf(CliInstance,"GetParam Error - %s\r\n",StatusString(status));
+  }
+  else
+  {
+	  Cli_Printf(CliInstance,"%s = %s\r\n",name, value);
+  }
 
   free(name);
   free(value);

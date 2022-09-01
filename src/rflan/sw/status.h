@@ -119,6 +119,9 @@ static const char *StatusString( int32_t status )
 
     case Adrv9001Status_EnableModeErr:
       return "Adrv9001 Enable Mode Error";
+    
+    case Adrv9001Status_InvalidEnableMode:
+      return "Adrv9001 Invalid Enable Mode";
 
 //    case Adrv9001Status_SsiSetErr:
 //      return "Adrv9001";
@@ -198,6 +201,12 @@ static const char *StatusString( int32_t status )
 
     case FR_INVALID_PARAMETER:
       return "Invalid Parameter";
+
+    case PibStatus_UnknownParameter:
+    	return "Unknown PIB Parameter";
+
+    case PibStatus_InvalidParameter:
+      return "PIB Invalid Parameter";
 
     default:
       return "Unknown Status";

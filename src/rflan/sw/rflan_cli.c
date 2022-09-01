@@ -475,6 +475,7 @@ static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
 {
   char *name;
   char *value;
+  int status;
 
   if((name = calloc(1, PIB_NAME_SIZE )) == NULL)
   {
@@ -493,9 +494,14 @@ static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   Cli_GetParameter(cmd, 1, CliParamTypeStr, name);
 
   /* Get Value */
-  Pib_GetStringByName( &RflanPib->Pib, name, value );
-
-  Cli_Printf(CliInstance,"%s\r\n",value);
+  if((status = Pib_GetStringByName( &RflanPib->Pib, name, value )) != 0)
+  {
+    Cli_Printf(CliInstance,"GetParam Error - %s\r\n",StatusString(status));
+  }
+  else
+  {
+    Cli_Printf(CliInstance,"%s = %s\r\n",name, value);
+  }
 
   free(name);
   free(value);
@@ -768,6 +774,76 @@ static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_strea
   Cli_Printf(CliInstance,"Stream Start %s\r\n",StatusString(status));
 }
 
+static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, void *ref)
+{
+  int32_t status;
+
+  char *filename = calloc(1, 256);
+  strcpy(filename, FF_LOGICAL_DRIVE_PATH);
+  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
+  
+  Cli_Printf(CliInstance,"Executing CLI Script %s\r\n", filename);
+  
+  FIL fil;
+  UINT len = 1;
+  char c;
+
+  do
+  {
+    /* Open File */
+    if((status = f_open(&fil, filename, FA_OPEN_EXISTING | FA_READ)) != 0)
+      break;
+
+    if((status = f_lseek(&fil, 0)) != 0)
+      break;
+
+    while( len > 0 )
+    {
+      if((status = f_read(&fil, (void*)&c, 1, &len)) != 0)
+        break;
+
+      if( len > 0 )
+        Cli_ProcessRxChar( CliInstance, c );
+    }
+
+  }while(0);
+
+  f_close(&fil);
+
+  Cli_Printf(CliInstance,"CLI Script %s\r\n", StatusString(status));
+}
+
+static void RflanCli_DelayMs(cli_t *CliInstance, const char *cmd, void *ref)
+{
+  uint32_t DelayMs;
+
+  Cli_GetParameter(cmd, 1, CliParamTypeU32, &DelayMs);
+  
+  DelayMs = DelayMs / portTICK_PERIOD_MS;
+
+  vTaskDelay( DelayMs );
+}
+
+static cli_cmd_t RflanCliDelayMsDef =
+{
+  "DelayMs",
+  "DelayMs: Delay in milliseconds \r\n"
+  "DelayMs < delay >\r\n\n",
+  (CliCmdFn_t)RflanCli_DelayMs,
+  1,
+  NULL
+};
+
+static cli_cmd_t RflanCliExecuteScriptDef =
+{
+  "ExecuteScript",
+  "ExecuteScript: Execute CLI script from file system \r\n"
+  "ExecuteScript < filename >\r\n\n",
+  (CliCmdFn_t)RflanCli_ExecuteScript,
+  1,
+  NULL
+};
+
 static cli_cmd_t RflanCliStreamStopDef =
 {
   "RflanStreamStop",
@@ -911,6 +987,8 @@ cli_status_t RflanCli_Initialize( cli_t *Cli, rflan_pib_t *Pib, XGpioPs *Gpio, r
   Cli_RegisterCommand(Cli, &RflanCliStreamBufPutDef);
   Cli_RegisterCommand(Cli, &RflanCliStreamStartDef);
   Cli_RegisterCommand(Cli, &RflanCliStreamStopDef);
+  Cli_RegisterCommand(Cli, &RflanCliExecuteScriptDef);
+  Cli_RegisterCommand(Cli, &RflanCliDelayMsDef);
 
   return XST_SUCCESS;
 }

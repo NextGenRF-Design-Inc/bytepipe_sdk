@@ -163,13 +163,13 @@ int32_t Pib_GetItemId( pib_t *Instance, char *name, int32_t *id )
 		}
 	}
 
-  return PibStatus_InvalidParameter;
+  return PibStatus_UnknownParameter;
 }
 
 int32_t Pib_GetItemAddress( pib_t *Instance, uint32_t id, uint8_t **ref )
 {
 	if((id < 0) || (id >= Instance->PibLen ))
-    return PibStatus_InvalidParameter;
+    return PibStatus_UnknownParameter;
 
 	/* Location of Parameter */
 	*ref = (((uint8_t*)Instance->Params) + Instance->Def[id].offset);

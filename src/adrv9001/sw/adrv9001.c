@@ -254,6 +254,10 @@ int32_t Adrv9001_ToCalibrated( adrv9001_t *Instance, adi_common_Port_e port, adi
     if( adi_adrv9001_Radio_Channel_ToCalibrated(&Instance->Device, port, channel) != 0 )
       return Adrv9001Status_ToCalErr;
   }
+  else
+  {
+    return Adrv9001Status_InvalidEnableMode;
+  }
 
   return Adrv9001Status_Success;
 }

@@ -123,6 +123,7 @@ typedef enum
   Adrv9001Status_CarrierFreqErr       = (ADRV9001_STATUS_OFFSET - 21),
   Adrv9001Status_ReadErr              = (ADRV9001_STATUS_OFFSET - 22),
   Adrv9001Status_EnableModeErr        = (ADRV9001_STATUS_OFFSET - 23),
+  Adrv9001Status_InvalidEnableMode    = (ADRV9001_STATUS_OFFSET - 24),
 } adrv9001_status_t;
 
 #define ADRV9001_LOG_PATH_SIZE      (64)

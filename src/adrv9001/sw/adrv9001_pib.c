@@ -438,6 +438,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
     adi_adrv9001_Carrier_t AdiCarrier;
     if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, &AdiCarrier ) != 0)
       return Adrv9001Status_CarrierFreqErr;
+
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&AdiCarrier.carrierFrequency_Hz, str );
   }
 
