@@ -37,7 +37,7 @@ profile:
 sd_card:
 	rm -rf $(PROJECT)/sd_card
 	cp -rf $(PROJECT)/rpu_system/Debug/sd_card $(PROJECT)
-	#cp -rf $(PROJECT_DIR)/resources/* $(PROJECT)/sd_card  
+	cp -rf $(PROJECT_DIR)/resources/* $(PROJECT)/sd_card
   
 
 

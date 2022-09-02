@@ -167,6 +167,10 @@ typedef struct {
   uint32_t                              Tx2DisableDly;
   uint32_t                              Rx1SsiDisableDly;
   uint32_t                              Rx2SsiDisableDly;
+  adi_adrv9001_ChannelEnableMode_e		Tx1EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		Tx2EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		Rx1EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		Rx2EnableMode;
   uint32_t                              HwVer;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
 } adrv9001_params_t;

@@ -138,16 +138,16 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
   if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_2 )) != 0)
     return status;
 
-  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_PIN_MODE) != 0)
+  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_1, Instance->Params->Tx1EnableMode) != 0)
     return Adrv9001Status_EnableModeErr;
 
-  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_PIN_MODE) != 0)
+  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_2, Instance->Params->Tx2EnableMode) != 0)
     return Adrv9001Status_EnableModeErr;
 
-  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_PIN_MODE) != 0)
+  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_1, Instance->Params->Rx1EnableMode) != 0)
     return Adrv9001Status_EnableModeErr;
 
-  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_PIN_MODE) != 0)
+  if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_2, Instance->Params->Rx2EnableMode) != 0)
     return Adrv9001Status_EnableModeErr;
 
   printf("%s Version Information:\r\n","ADRV9002" );

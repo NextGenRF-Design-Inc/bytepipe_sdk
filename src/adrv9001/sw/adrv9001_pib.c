@@ -155,7 +155,12 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2DisableDly",                        offsetof(adrv9001_params_t, Tx2DisableDly),                                               PibTypeU32,       PIB_FLAGS_DEFAULT },
   { "Rx1SsiDisableDly",                     offsetof(adrv9001_params_t, Rx1SsiDisableDly),                                            PibTypeU32,       PIB_FLAGS_DEFAULT },
   { "Rx2SsiDisableDly",                     offsetof(adrv9001_params_t, Rx2SsiDisableDly),                                            PibTypeU32,       PIB_FLAGS_DEFAULT },
+  { "Tx1EnableMode",                        offsetof(adrv9001_params_t, Tx1EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Tx2EnableMode",                        offsetof(adrv9001_params_t, Tx2EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Rx1EnableMode",                        offsetof(adrv9001_params_t, Rx1EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Rx2EnableMode",                        offsetof(adrv9001_params_t, Rx2EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
 };
+
 static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *name, char *str )
 {
   int32_t status = 0;
@@ -203,6 +208,30 @@ static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *
       status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, Channel, Instance->Params->Tx1Boost);
     else
       status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, Channel, Instance->Params->Tx2Boost);
+  }
+
+  else if( strcmp( &name[3], "EnableMode") == 0 )
+  {
+	  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+	  {
+		  status = adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, Port, Channel, Instance->Params->Tx1EnableMode);
+	  }
+	  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+	  {
+		  status = adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, Port, Channel, Instance->Params->Tx2EnableMode);
+	  }
+	  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+	  {
+		  status = adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, Port, Channel, Instance->Params->Rx1EnableMode);
+	  }
+	  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+	  {
+		  status = adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, Port, Channel, Instance->Params->Rx2EnableMode);
+	  }
+	  else
+	  {
+		  status = Adrv9001Status_InvalidPib;
+	  }
   }
 
   else

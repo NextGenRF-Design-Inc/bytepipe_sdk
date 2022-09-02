@@ -67,6 +67,10 @@ files:
 	echo '  .Tx2DisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c  
 	echo '  .Rx1SsiDisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c
 	echo '  .Rx2SsiDisableDly = 200,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx1EnableMode = 1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Tx2EnableMode = 1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx1EnableMode = 1,' >> $(PROJECT)/profile/initializeinit7.c
+	echo '  .Rx2EnableMode = 1,' >> $(PROJECT)/profile/initializeinit7.c
   
 Tx1ExternalPathDelay:  
 	rm -rf tmp.txt
