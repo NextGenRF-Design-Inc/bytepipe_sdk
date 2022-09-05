@@ -715,34 +715,34 @@ cli_status_t Cli_Initialize(cli_t *Instance, cli_init_t *Init )
   Instance->CallbackRef = Init->CallbackRef;
 
   /* Create Command List */
-  Instance->CmdList = calloc(Init->CmdListSize, sizeof( cli_cmd_t*));
+  Instance->CmdList = calloc(CLI_CMD_LIST_SIZE, sizeof( cli_cmd_t*));
   Instance->CmdListLen = 0;
-  Instance->CmdListSize = Init->CmdListSize;
+  Instance->CmdListSize = CLI_CMD_LIST_SIZE;
 
   /* Create Working Command Buffer */
-  Instance->CmdBuf = calloc(1, Init->CmdBufSize);
-  Instance->CmdBufSize = Init->CmdBufSize;
+  Instance->CmdBuf = calloc(1, CLI_CMD_BUF_SIZE);
+  Instance->CmdBufSize = CLI_CMD_BUF_SIZE;
 
   /* Create History Buffer */
-  Instance->HistoryBuf = calloc(1, Init->HistoryBufSize);
-  Instance->HistoryBufSize = Init->HistoryBufSize;
+  Instance->HistoryBuf = calloc(1, CLI_HISTORY_BUF_SIZE);
+  Instance->HistoryBufSize = CLI_HISTORY_BUF_SIZE;
 
   /* Create Printf Buffer */
-  Instance->PrintfBuf = calloc(1, Init->PrintfBufSize);
-  Instance->PrintfBufSize = Init->PrintfBufSize;
+  Instance->PrintfBuf = calloc(1, CLI_PRINT_BUF_SIZE);
+  Instance->PrintfBufSize = CLI_PRINT_BUF_SIZE;
 
   /* Create Rx Queue */
-  Instance->RxCharQueue = xQueueCreate(Init->RxQueueSize, sizeof(uint8_t));
+  Instance->RxCharQueue = xQueueCreate(CLI_RX_QUEUE_SIZE, sizeof(uint8_t));
 
   /* Create CLI Rx Task */
-  if(xTaskCreate((TaskFunction_t)Cli_RxTask, "CliRx", Init->RxStackSize, Instance, Init->RxTaskPriority, NULL) != pdPASS)
+  if(xTaskCreate((TaskFunction_t)Cli_RxTask, "CliRx", CLI_RX_STACK_SIZE, Instance, CLI_RX_TASK_PRIORITY, NULL) != pdPASS)
     return CliStatus_OsError;
 
   /* Create Tx Queue */
-  Instance->TxCharQueue = xQueueCreate(Init->TxQueueSize, sizeof(uint8_t));
+  Instance->TxCharQueue = xQueueCreate(CLI_TX_QUEUE_SIZE, sizeof(uint8_t));
 
   /* Create CLI Tx Task */
-  if(xTaskCreate((TaskFunction_t)Cli_TxTask, "CliTx", Init->TxStackSize, Instance, Init->TxTaskPriority, NULL) != pdPASS)
+  if(xTaskCreate((TaskFunction_t)Cli_TxTask, "CliTx", CLI_TX_STACK_SIZE, Instance, CLI_TX_TASK_PRIORITY, NULL) != pdPASS)
     return CliStatus_OsError;
 
   /* Register Base Commands */

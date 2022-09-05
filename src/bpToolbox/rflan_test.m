@@ -52,6 +52,9 @@ end
 clc;
 v = 2.899e9;
 
+mode = h.GetEnableMode(h.Tx1);
+h.SetEnableMode(h.Tx1,h.EnableModeSpi);
+
 h.SetRadioState(h.Tx1, h.Calibrated);
 
 h.SetCarrierFrequency(h.Tx1, v);
@@ -61,6 +64,7 @@ if( abs(v2 - v) > 10 )
 end
 
 h.SetRadioState(h.Tx1, h.Primed);
+h.SetEnableMode(h.Tx1,mode);
 
 %% Transmit Attenuation
 clc;
@@ -92,8 +96,13 @@ end
 
 %% Radio State
 
-% The following sets and reads the radio state.
+% The following sets and reads the radio state.  To set calibrated mode the
+% enable mode must be SPI.
 clc;
+
+mode = h.GetEnableMode(h.Tx1);
+h.SetEnableMode(h.Tx1,h.EnableModeSpi);
+
 v = h.Calibrated;
 h.SetRadioState(h.Tx1, v);
 if(~strcmp(h.GetRadioState(h.Tx1),v))
@@ -118,6 +127,7 @@ if(~strcmp(h.GetRadioState(h.Tx1),v))
     error("Error");
 end
 
+h.SetEnableMode(h.Tx1,mode);
 
 %% RSSI
 h.GetRssi(h.Rx1);

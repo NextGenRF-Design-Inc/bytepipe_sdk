@@ -50,7 +50,6 @@
 #include "xil_types.h"
 #include "xstatus.h"
 #include "ff.h"
-#include "rflan_config.h"
 #include "cli.h"
 #include "mem.h"
 #include "rflan_cli.h"

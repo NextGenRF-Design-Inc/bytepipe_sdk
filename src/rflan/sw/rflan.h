@@ -43,9 +43,22 @@
 *
 *******************************************************************************/
 
-#include "rflan_config.h"
 #include "xstatus.h"
 #include "status.h"
+#include "xparameters.h"
+#include "ff.h"
+
+#define FF_LOGICAL_DRIVE_PATH           ("1:/")
+#define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
+
+#define ADRV9001_SCRIPT_FILENAME        ("1:/adrv9001_setup.txt")
+#define RFLAN_SETUP_SCRIPT_FILENAME     ("1:/rflan_setup.txt")
+#define SYSMON_DEVICE_ID                XPAR_XSYSMONPSU_0_DEVICE_ID
+
+#define RFLAN_TASK_STACK_SIZE           4096
+#define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY
+#define RFLAN_QUEUE_SIZE                4
+
 
 void Rflan_Reboot( void );
 uint32_t Rflan_GetHwVer( void );

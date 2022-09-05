@@ -42,7 +42,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "rflan_config.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "rflan.h"
@@ -56,6 +55,7 @@
 #include "rflan_gpio.h"
 #include "rflan_pib.h"
 #include "rflan_stream.h"
+
 
 
 static XResetPs       RflanReset;
@@ -163,18 +163,8 @@ static int32_t Rflan_Initialize( void )
     printf("%s\r\n",StatusString(status));
 
   cli_init_t CliInit = {
-    .CmdListSize      = CLI_CMD_LIST_SIZE,
-    .CmdBufSize       = CLI_CMD_BUF_SIZE,
-    .HistoryBufSize   = CLI_HISTORY_BUF_SIZE,
-    .PrintfBufSize    = CLI_PRINT_BUF_SIZE,
     .Callback         = (cli_callback_t)Rflan_CliCallback,
-    .CallbackRef      = NULL,
-    .RxQueueSize      = CLI_RX_QUEUE_SIZE,
-    .TxQueueSize      = CLI_TX_QUEUE_SIZE,
-    .RxTaskPriority   = CLI_RX_TASK_PRIORITY,
-    .TxTaskPriority   = CLI_TX_TASK_PRIORITY,
-    .RxStackSize      = CLI_RX_STACK_SIZE,
-    .TxStackSize      = CLI_TX_STACK_SIZE
+    .CallbackRef      = NULL
   };
 
   /* Initialize CLI */

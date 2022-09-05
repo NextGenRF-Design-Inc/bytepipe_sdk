@@ -48,9 +48,8 @@
  extern "C" {
 #endif
 
-#ifndef PIB_STATUS_OFFSET
 #define PIB_STATUS_OFFSET    (-5000)
-#endif
+
 
 #define PIB_NAME_SIZE 64
 

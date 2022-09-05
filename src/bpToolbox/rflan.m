@@ -138,6 +138,9 @@ classdef rflan < handle
         Enabled = 'Enabled';
         Standby = 'Standby';
         
+        EnableModeSpi = 0;
+        EnableModePin = 1;
+        
         s;
         
         UserCallback = [];
@@ -456,7 +459,11 @@ classdef rflan < handle
             configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
             
         end
-                
+
+        function v = GetEnableMode( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'EnableMode']);
+        end
+        
         function v = GetTemp( obj )
             v = obj.Adrv9001GetParam('Temp');
         end
@@ -715,6 +722,10 @@ classdef rflan < handle
         function Adrv9001SetParam( obj, p, v )
             obj.Write(['Adrv9001SetParam ' p ' ' num2str(v)]);
         end        
+        
+        function SetEnableMode( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'EnableMode'], num2str(v));
+        end
         
         function SetVcTcxo( obj, v )
             obj.Adrv9001SetParam('VcTcxo', num2str(v,"%.2f"));

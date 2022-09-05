@@ -44,6 +44,12 @@
 *******************************************************************************/
 #include "xgpiops.h"
 
+#define GPIO_DEVICE_ID                  (XPAR_PSU_GPIO_0_DEVICE_ID)
+#define GPIO_LED_PIN                    (7)
+#define GPIO_HWV0_PIN                   (0)
+#define GPIO_HWV1_PIN                   (2)
+#define GPIO_HWV2_PIN                   (3)
+
 int32_t RflanGpio_WritePin      ( XGpioPs *Instance, u32 pin, u32 value );
 int32_t RflanGpio_ReadPin       ( XGpioPs *Instance, u32 pin );
 int32_t RflanGpio_WritePin      ( XGpioPs *Instance, u32 pin, u32 value );

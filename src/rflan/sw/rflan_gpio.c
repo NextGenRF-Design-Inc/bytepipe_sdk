@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include "xstatus.h"
 #include "rflan_gpio.h"
-#include "rflan_config.h"
 
 
 

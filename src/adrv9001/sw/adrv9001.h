@@ -54,44 +54,29 @@
 #include "adi_adrv9001_error.h"
 #include "adi_adrv9001_radio_types.h"
 #include "adi_adrv9001_rx_gaincontrol_types.h"
-#include "adi_adrv9001.h"
 #include "adi_adrv9001_arm.h"
 #include "adi_adrv9001_radio.h"
 #include "adi_adrv9001_profileutil.h"
 #include "adi_adrv9001_gpio.h"
-#include "adi_adrv9001.h"
 #include "adi_adrv9001_tx.h"
 #include "adi_adrv9001_rx.h"
-#include "adi_adrv9001_arm.h"
 #include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_ssi.h"
-#include "axi_adrv9001.h"
 #include "adi_adrv9001_dpd.h"
 #include "ff.h"
 #include "xspips.h"
 #include "xparameters.h"
 #include "pib.h"
+#include "axi_adrv9001.h"
 
 #ifndef ADRV9001_STATUS_OFFSET
 #define ADRV9001_STATUS_OFFSET    (0)
 #endif
 
-#ifndef ADRV9001_LOG_FILENAME
 #define ADRV9001_LOG_FILENAME           ("1:/adi_adrv9001_log.txt")
-#endif
-
-#ifndef ADRV9001_SPI_DEVICE_ID
 #define ADRV9001_SPI_DEVICE_ID          (XPAR_PSU_SPI_0_DEVICE_ID)
-#endif
-
-#ifndef ADRV9001_SPI_CS
 #define ADRV9001_SPI_CS                 (0)
-#endif
-
-#ifndef ADRV9001_CTRL_BASE_ADDR
-#define ADRV9001_CTRL_BASE_ADDR         (XPAR_ADRV9002_0_BASEADDR)
-#endif
-
+#define ADRV9001_CTRL_BASE_ADDR         XPAR_ADRV9002_0_BASEADDR
 #define ADRV9001_TDD_ENABLE_DUR_FOREVER (0xffffffff)
 
 /**

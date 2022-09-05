@@ -44,6 +44,9 @@
 *******************************************************************************/
 #include "xuartps.h"
 
+#define RFLAN_UART_DEVICE_ID            XPAR_PSU_UART_0_DEVICE_ID
+#define RFLAN_UART_INTR_ID              XPAR_XUARTPS_0_INTR
+#define RFLAN_UART_BAUDRATE             115200
 
 typedef void (*rflan_uart_callback_t)( char c, void *CallbackRef );
 

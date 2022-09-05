@@ -53,9 +53,17 @@
 #include "task.h"
 #include "queue.h"
 
-#ifndef CLI_STATUS_OFFSET
-#define CLI_STATUS_OFFSET			(-3000)
-#endif
+#define CLI_STATUS_OFFSET			          (-3000)
+#define CLI_RX_STACK_SIZE               4096
+#define CLI_TX_STACK_SIZE               1024
+#define CLI_RX_TASK_PRIORITY            tskIDLE_PRIORITY + 2
+#define CLI_TX_TASK_PRIORITY            tskIDLE_PRIORITY + 3
+#define CLI_RX_QUEUE_SIZE               32768
+#define CLI_TX_QUEUE_SIZE               32768
+#define CLI_PRINT_BUF_SIZE              2048
+#define CLI_CMD_BUF_SIZE                1024
+#define CLI_CMD_LIST_SIZE               100
+#define CLI_HISTORY_BUF_SIZE            256
 
  /**
  * \brief Code indicated status of request
@@ -172,18 +180,8 @@ typedef enum{
 **  CLI Configuration Definition
 */
 typedef struct {
-  uint16_t              CmdListSize;
-  uint16_t              CmdBufSize;
-  uint16_t              HistoryBufSize;
-  uint16_t              PrintfBufSize;
   cli_callback_t        Callback;
   void                 *CallbackRef;
-  uint32_t              RxQueueSize;
-  uint32_t              TxQueueSize;
-  uint32_t              RxTaskPriority;
-  uint32_t              TxTaskPriority;
-  uint32_t              RxStackSize;
-  uint32_t              TxStackSize;
 } cli_init_t;
 
 const char *Cli_FindParameter( const char *s, uint16_t pNum, uint16_t *len );
