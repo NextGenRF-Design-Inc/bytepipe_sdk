@@ -3134,9 +3134,9 @@ CONFIG_packagegroup-core-ssh-dropbear=y
 # CONFIG_rpmsg-mat-mul-dbg is not set
 
 #
-# rpmsg-rflan_server 
+# rpmsg-proxy-app 
 #
-#CONFIG_rflan_server=y
+CONFIG_rpmsg-proxy-app=y
 # CONFIG_rpmsg-proxy-app-dbg is not set
 # CONFIG_rpmsg-proxy-app-dev is not set
 
@@ -4096,7 +4096,7 @@ CONFIG_packagegroup-petalinux-openamp=y
 #
 # packagegroup-petalinux-python-modules 
 #
-# CONFIG_packagegroup-petalinux-python-modules is not set
+CONFIG_packagegroup-petalinux-python-modules=y
 # CONFIG_packagegroup-petalinux-python-modules-dbg is not set
 # CONFIG_packagegroup-petalinux-python-modules-dev is not set
 
@@ -4172,6 +4172,8 @@ CONFIG_auto-login=y
 #
 # CONFIG_gpio-demo is not set
 # CONFIG_peekpoke is not set
+CONFIG_rflan=y
+CONFIG_sampleapp=y
 
 #
 # user packages 

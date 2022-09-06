@@ -32,14 +32,14 @@ package:
 	petalinux-package -p bpLinux/ --force --boot --fsbl --fpga --u-boot
 	#petalinux-package -p bpLinux/ --force --boot --fsbl --fpga --add ./rflan.elf --cpu=r5-0 --u-boot
 	dtc -I dtb -O dts -o bpLinux/images/linux/system.dts bpLinux/images/linux/system.dtb
-	petalinux-package --bsp -p bpLinux/ --force --output bytepipe_x9002.bsp
+	petalinux-package --bsp -p bpLinux/ --force --output $(srcDir)bytepipe_x9002.bsp
 
 sdcard:
 	cp -f bpLinux/images/linux/BOOT.BIN /media/ngrf/BOOT/
 	cp -f bpLinux/images/linux/boot.scr /media/ngrf/BOOT/
 	cp -f bpLinux/images/linux/Image /media/ngrf/BOOT/
 	cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot /media/ngrf/BOOT/
-	sudo rm -rf /media/ngrf/rootfs/ || true;
+	#sudo rm -rf /media/ngrf/rootfs/ || true;
 	#sudo tar -xvf bpLinux/images/linux/rootfs.tar.gz -C /media/ngrf/rootfs/
 	#sync /media/ngrf/rootfs
 
