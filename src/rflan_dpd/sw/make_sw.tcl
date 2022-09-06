@@ -67,7 +67,6 @@ importsources -name rpu -path $srcDir/rflan/sw/rflan_pib.h -soft-link -target-pa
 importsources -name rpu -path $srcDir/rflan/sw/rflan_stream.h -soft-link -target-path src/
 importsources -name rpu -path $srcDir/rflan/sw/rflan_uart.h -soft-link -target-path src/
 
-importsources -name rpu -path $srcDir/rflan/sw/rflan_config.h -soft-link -target-path src/
 importsources -name rpu -path $srcDir/rflan/sw/status.h -soft-link -target-path src/
 
 importsources -name rpu -path $srcDir/rflan/sw/lib -soft-link -target-path src/lib
