@@ -213,8 +213,17 @@ int32_t Adrv9001_ToPrimed( adrv9001_t *Instance, adi_common_Port_e port, adi_com
   int32_t status;
   adi_adrv9001_ChannelEnableMode_e mode;
 
-  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
-    return Adrv9001Status_ReadErr;
+//  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
+//    return Adrv9001Status_ReadErr;
+
+  if( (port == ADI_TX) && (channel == ADI_CHANNEL_1))
+    mode = Instance->Params->Tx1EnableMode;
+  else if( (port == ADI_TX) && (channel == ADI_CHANNEL_2))
+    mode = Instance->Params->Tx2EnableMode;
+  else if( (port == ADI_RX) && (channel == ADI_CHANNEL_1))
+    mode = Instance->Params->Rx1EnableMode;
+  else
+    mode = Instance->Params->Rx2EnableMode;
 
   /* Set PA/LNA Enable */
   if((status = Adrv9001_SetPaEnable(Instance, port, channel, false)) != 0 )
@@ -238,8 +247,17 @@ int32_t Adrv9001_ToCalibrated( adrv9001_t *Instance, adi_common_Port_e port, adi
   int32_t status;
   adi_adrv9001_ChannelEnableMode_e mode;
 
-  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
-    return Adrv9001Status_ReadErr;
+//  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
+//    return Adrv9001Status_ReadErr;
+  if( (port == ADI_TX) && (channel == ADI_CHANNEL_1))
+    mode = Instance->Params->Tx1EnableMode;
+  else if( (port == ADI_TX) && (channel == ADI_CHANNEL_2))
+    mode = Instance->Params->Tx2EnableMode;
+  else if( (port == ADI_RX) && (channel == ADI_CHANNEL_1))
+    mode = Instance->Params->Rx1EnableMode;
+  else
+    mode = Instance->Params->Rx2EnableMode;
+
 
   /* Set PA/LNA Enable */
   if((status = Adrv9001_SetPaEnable(Instance, port, channel, false)) != 0 )
@@ -321,8 +339,17 @@ int32_t Adrv9001_ToRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_
   }
 
   adi_adrv9001_ChannelEnableMode_e mode;
-  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
-    return Adrv9001Status_ReadErr;
+//  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
+//    return Adrv9001Status_ReadErr;
+
+  if( (port == ADI_TX) && (channel == ADI_CHANNEL_1))
+    mode = Instance->Params->Tx1EnableMode;
+  else if( (port == ADI_TX) && (channel == ADI_CHANNEL_2))
+    mode = Instance->Params->Tx2EnableMode;
+  else if( (port == ADI_RX) && (channel == ADI_CHANNEL_1))
+    mode = Instance->Params->Rx1EnableMode;
+  else
+    mode = Instance->Params->Rx2EnableMode;
 
   /* Set PA/LNA Enable */
   if((status = Adrv9001_SetPaEnable(Instance, port, channel, true)) != 0 )
