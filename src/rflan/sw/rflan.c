@@ -267,10 +267,7 @@ static int32_t Rflan_Initialize( void )
 static void Rflan_Task( void *pvParameters )
 {
   /* Initialize RFLAN Components */
-//  Rflan_Initialize( );
-
-  /* Initialize GPIO */
-  RflanGpio_Initialize( &RflanGpio, GPIO_DEVICE_ID );
+  Rflan_Initialize( );
 
   for( ;; )
   {
