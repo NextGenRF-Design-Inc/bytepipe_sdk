@@ -64,7 +64,6 @@
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_dpd.h"
 #include "ff.h"
-#include "xspips.h"
 #include "xparameters.h"
 #include "pib.h"
 #include "axi_adrv9001.h"
@@ -109,6 +108,7 @@ typedef enum
   Adrv9001Status_ReadErr              = (ADRV9001_STATUS_OFFSET - 22),
   Adrv9001Status_EnableModeErr        = (ADRV9001_STATUS_OFFSET - 23),
   Adrv9001Status_InvalidEnableMode    = (ADRV9001_STATUS_OFFSET - 24),
+  Adrv9001Status_IrqErr               = (ADRV9001_STATUS_OFFSET - 25),
 } adrv9001_status_t;
 
 #define ADRV9001_LOG_PATH_SIZE      (64)
@@ -152,10 +152,10 @@ typedef struct {
   uint32_t                              Tx2DisableDly;
   uint32_t                              Rx1SsiDisableDly;
   uint32_t                              Rx2SsiDisableDly;
-  adi_adrv9001_ChannelEnableMode_e		Tx1EnableMode;
-  adi_adrv9001_ChannelEnableMode_e		Tx2EnableMode;
-  adi_adrv9001_ChannelEnableMode_e		Rx1EnableMode;
-  adi_adrv9001_ChannelEnableMode_e		Rx2EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		  Tx1EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		  Tx2EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		  Rx1EnableMode;
+  adi_adrv9001_ChannelEnableMode_e		  Rx2EnableMode;
   uint32_t                              HwVer;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
 } adrv9001_params_t;
@@ -166,7 +166,6 @@ typedef struct {
 	adi_adrv9001_Device_t	      Device;
   adrv9001_params_t          *Params;
   uint32_t                    CtrlBase;             ///< Control Base
-  XSpiPs                      Spi;                  ///< SPI Instance
   FIL                         LogFil;               ///< Log File
   pib_t                       Pib;
   uint8_t                     PendingReboot;

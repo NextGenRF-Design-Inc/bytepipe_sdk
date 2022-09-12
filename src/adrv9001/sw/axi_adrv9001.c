@@ -3,6 +3,11 @@
 #include <string.h>
 #include <xil_io.h>
 #include "axi_adrv9001.h"
+#include "adrv9001.h"
+#include "xscugic.h"
+#include "xparameters.h"
+
+extern XScuGic          xInterruptController;
 
 
 
@@ -36,12 +41,26 @@
 #define ADRV9001_RX2_SSI_ENABLE_CNT       ((19) << 2)
 #define ADRV9001_RX2_SSI_DISABLE_CNT      ((20) << 2)
 
+#define ADRV9001_MSPI_ADDR   		          ((21) << 2)
+
 #define ADRV9001_ID_ADDR                  ((31) << 2)
 
+static uint8_t volatile AxiAdrv9001SpiDone = 0;
+
+
+static void AxiAdrv9001_SpiIrq( void *ref )
+{
+  AxiAdrv9001SpiDone = 1;
+
+  XScuGic_Disable(&xInterruptController, XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR);
+}
 
 int32_t AxiAdrv9001_Initialize( uint32_t Base )
 {
   uint32_t regVal = Xil_In32(Base + ADRV9001_ID_ADDR);
+
+  if(XScuGic_Connect(&xInterruptController, XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR, (XInterruptHandler)AxiAdrv9001_SpiIrq, NULL ) != 0)
+    return Adrv9001Status_IrqErr;
 
   if(regVal == 0x12345678)
     return 0;
@@ -52,6 +71,57 @@ int32_t AxiAdrv9001_Initialize( uint32_t Base )
 void AxiAdrv9001_ResetbPinSet( uint32_t Base, uint8_t Level )
 {
   Xil_Out32(Base + ADRV9001_RSTN_ADDR, Level);
+}
+
+static void AxiAdrv9001_MspiWrite( uint32_t Base, uint8_t Value, uint8_t Start )
+{
+  uint32_t regValue = (uint32_t)Value + ((uint32_t)Start << 8);
+
+  Xil_Out32(Base + ADRV9001_MSPI_ADDR, regValue);
+}
+
+static bool AxiAdrv9001_MspiRead( uint32_t Base, uint8_t *Value )
+{
+  uint32_t regValue = Xil_In32(Base + ADRV9001_MSPI_ADDR);
+
+  if( (regValue & 0x100) == 0x100)
+  {
+    *Value = (uint8_t)regValue;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+int32_t AxiAdrv9001_MspiTransfer( uint32_t Base, uint8_t *TxBuf, uint8_t *RxBuf, uint32_t Length)
+{
+  AxiAdrv9001SpiDone = 0;
+
+  XScuGic_Enable(&xInterruptController, XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR);
+
+  for( int i = 0; i < Length; i++ )
+  {
+    if( i == (Length - 1))
+      AxiAdrv9001_MspiWrite(Base, TxBuf[i], 1);
+    else
+      AxiAdrv9001_MspiWrite(Base, TxBuf[i], 0);
+  }
+
+  while( AxiAdrv9001SpiDone == 0 );
+
+  uint8_t regValue;
+  for( int i = 0; i < Length; i++ )
+  {
+    if( AxiAdrv9001_MspiRead( Base, &regValue) == false)
+      return Adrv9001Status_SpiErr;
+
+    if( RxBuf != NULL )
+      RxBuf[i] = regValue;
+  }
+
+  return Adrv9001Status_Success;
 }
 
 void AxiAdrv9001_SetDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt )

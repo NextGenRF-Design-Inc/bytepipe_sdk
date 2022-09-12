@@ -29,6 +29,15 @@ module adrv9001_regs (
     output reg  [31:0]    rx2_ssi_enable_cnt = 'd20,
     output reg  [31:0]    rx2_ssi_disable_cnt = 'd130,
     
+    input  wire [7:0]     sspi_axis_tdata,
+    input  wire           sspi_axis_tvalid,
+    output reg            sspi_axis_tready = 1'b0,
+  
+    output reg            mspi_axis_enable = 'b0,
+    output reg  [7:0]     mspi_axis_tdata = 'd0,
+    output reg            mspi_axis_tvalid = 'b0,
+    input  wire           mspi_axis_tready,    
+    
     input  wire           s_axi_aclk,
     input  wire           s_axi_aresetn,
     input  wire [6:0]     s_axi_awaddr,
@@ -186,6 +195,9 @@ always @( posedge s_axi_aclk ) begin
       rx2_disable_cnt <= 'd100;    
       rx2_ssi_enable_cnt <= 'd20;
       rx2_ssi_disable_cnt <= 'd130;   
+      mspi_axis_tdata <= 8'd0;
+      mspi_axis_tvalid <= 1'b0;       
+      mspi_axis_enable <= 1'b0;
   end else if (slv_reg_wren) begin
     case ( axi_awaddr )
       5'd0:  tx1_tdd_en <= s_axi_wdata[0];
@@ -208,7 +220,13 @@ always @( posedge s_axi_aclk ) begin
       5'd17: rx1_ssi_disable_cnt <= s_axi_wdata;     
       5'd18: rx2_disable_cnt <= s_axi_wdata;   
       5'd19: rx2_ssi_enable_cnt <= s_axi_wdata;  
-      5'd20: rx2_ssi_disable_cnt <= s_axi_wdata;                                       
+      5'd20: rx2_ssi_disable_cnt <= s_axi_wdata;
+      5'd21: begin
+        mspi_axis_tdata <= s_axi_wdata[7:0];
+        mspi_axis_tvalid <= 1'b1;
+        mspi_axis_enable <= s_axi_wdata[8];
+      end
+                                               
       default: begin
         tx1_tdd_en <= tx1_tdd_en;
         tx2_tdd_en <= tx2_tdd_en;
@@ -230,7 +248,10 @@ always @( posedge s_axi_aclk ) begin
         rx1_ssi_disable_cnt <= rx1_ssi_disable_cnt;
         rx2_disable_cnt <= rx2_disable_cnt;    
         rx2_ssi_enable_cnt <= rx2_ssi_enable_cnt;
-        rx2_ssi_disable_cnt <= rx2_ssi_disable_cnt;        
+        rx2_ssi_disable_cnt <= rx2_ssi_disable_cnt; 
+        mspi_axis_tdata <= mspi_axis_tdata;
+        mspi_axis_tvalid <= 1'b0;       
+        mspi_axis_enable <= mspi_axis_enable;
       end
     endcase
   end else begin
@@ -254,7 +275,10 @@ always @( posedge s_axi_aclk ) begin
     rx1_ssi_disable_cnt <= rx1_ssi_disable_cnt;
     rx2_disable_cnt <= rx2_disable_cnt;    
     rx2_ssi_enable_cnt <= rx2_ssi_enable_cnt;
-    rx2_ssi_disable_cnt <= rx2_ssi_disable_cnt;          
+    rx2_ssi_disable_cnt <= rx2_ssi_disable_cnt;    
+    mspi_axis_tdata <= mspi_axis_tdata;
+    mspi_axis_tvalid <= 1'b0;              
+    mspi_axis_enable <= mspi_axis_enable;    
   end  
 end    
 
@@ -299,7 +323,20 @@ always @( posedge s_axi_aclk ) begin
           axi_arready <= 1'b0;
         end
     end 
+end   
+
+always @( posedge s_axi_aclk ) begin
+  if ( s_axi_aresetn == 1'b0 )
+    sspi_axis_tready <= 1'b0;
+  else begin    
+    if (~axi_arready && s_axi_arvalid && (s_axi_araddr[6:2] == 5'd21))
+      sspi_axis_tready <= 1'b1;
+    else
+      sspi_axis_tready <= 1'b0;
+  end
 end       
+
+
  
 always @( posedge s_axi_aclk ) begin
   if ( s_axi_aresetn == 1'b0 )
@@ -336,10 +373,15 @@ begin
         5'd7:  reg_data_out <= rx1_data_cdc;            
         5'd8:  reg_data_out <= rx2_data_cdc;            
         5'd9:  reg_data_out <= {20'h0, gpio_t};
-        5'd10: reg_data_out <= {20'h0, gpio_i};                                                             
+        5'd10: reg_data_out <= {20'h0, gpio_i};       
+        5'd21: begin 
+          reg_data_out <= {23'h0, sspi_axis_tvalid, sspi_axis_tdata};   
+        end                                                    
         5'd31  : reg_data_out <= 32'h12345678;             
         
-        default : reg_data_out <= 0;
+        default : begin 
+          reg_data_out <= 0;          
+        end
       endcase
 end
 

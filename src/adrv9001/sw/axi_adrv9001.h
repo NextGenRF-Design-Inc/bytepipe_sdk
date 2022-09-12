@@ -74,4 +74,6 @@ void AxiAdrv9001_SetDisableCnt      ( uint32_t Base, adi_common_Port_e Port, adi
 void AxiAdrv9001_SetSsiEnableCnt    ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 void AxiAdrv9001_SetSsiDisableCnt   ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 
+int32_t AxiAdrv9001_MspiTransfer    ( uint32_t Base, uint8_t *TxBuf, uint8_t *RxBuf, uint32_t Length);
+
 #endif

@@ -802,26 +802,6 @@ int32_t Adrv9001_Open( void *devHalCfg )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  XSpiPs_Config *SpiConfig;
-
-  if((SpiConfig = XSpiPs_LookupConfig(ADRV9001_SPI_DEVICE_ID)) == NULL)
-    return Adrv9001Status_SpiErr;
-
-  if( XSpiPs_CfgInitialize(&Adrv9001->Spi, SpiConfig, SpiConfig->BaseAddress) != 0)
-    return Adrv9001Status_SpiErr;
-
-  if( XSpiPs_SelfTest(&Adrv9001->Spi) != 0)
-    return Adrv9001Status_SpiErr;
-
-  XSpiPs_SetOptions(&Adrv9001->Spi, XSPIPS_MANUAL_START_OPTION | XSPIPS_MASTER_OPTION | XSPIPS_FORCE_SSELECT_OPTION);
-
-  XSpiPs_SetClkPrescaler(&Adrv9001->Spi, XSPIPS_CLK_PRESCALE_8);
-
-  XSpiPs_SetOptions(&Adrv9001->Spi, XSPIPS_MASTER_OPTION | XSPIPS_FORCE_SSELECT_OPTION );
-
-  if( XSpiPs_SetSlaveSelect(&Adrv9001->Spi, ADRV9001_SPI_CS) != 0 )
-    return Adrv9001Status_SpiErr;
-
   /* Delete PHY Log file */
   f_unlink(Adrv9001->Params->LogPath);
 
@@ -850,52 +830,16 @@ int32_t Adrv9001_Close( void *devHalCfg )
 
 int32_t Adrv9001_SpiWrite( void *devHalCfg, const uint8_t txData[], uint32_t numTxBytes )
 {
-  static const int32_t MAX_SIZE = 4096;
-  uint32_t toWrite = 0;
-  int32_t remaining = numTxBytes;
-
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  do
-  {
-    toWrite = (remaining > MAX_SIZE) ? MAX_SIZE : remaining;
-    uint8_t *Buf = (uint8_t*)&txData[numTxBytes - remaining];
-
-    if( XSpiPs_PolledTransfer(&Adrv9001->Spi, Buf, Buf, toWrite) != 0)
-      return Adrv9001Status_SpiErr;
-
-    remaining -= toWrite;
-
-  } while (remaining > 0);
-
-  return Adrv9001Status_Success;
+  return AxiAdrv9001_MspiTransfer( Adrv9001->CtrlBase, (uint8_t*)txData, NULL, numTxBytes);
 }
 
 int32_t Adrv9001_SpiRead( void *devHalCfg, const uint8_t txData[], uint8_t rxData[], uint32_t numRxBytes )
 {
-
-  static const int32_t MAX_SIZE = 4096;
-  uint32_t toWrite = 0;
-  int32_t remaining = numRxBytes;
-
-  memcpy(rxData, txData, numRxBytes);
-
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  do
-  {
-    toWrite = (remaining > MAX_SIZE) ? MAX_SIZE : remaining;
-
-    uint8_t *Buf = (uint8_t*)&rxData[numRxBytes - remaining];
-
-    if( XSpiPs_PolledTransfer(&Adrv9001->Spi, Buf, Buf, toWrite) != 0)
-      return Adrv9001Status_SpiErr;
-
-    remaining -= toWrite;
-
-  } while (remaining > 0);
-
-  return Adrv9001Status_Success;
+  return AxiAdrv9001_MspiTransfer( Adrv9001->CtrlBase, (uint8_t*)txData, rxData, numRxBytes);
 }
 
 int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )

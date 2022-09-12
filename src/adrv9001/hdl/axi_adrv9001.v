@@ -38,7 +38,8 @@ module axi_adrv9001#(
   parameter ENABLE_TX1_ILA          = 0,
   parameter ENABLE_TX2_ILA          = 0,
   parameter ENABLE_RX1_ILA          = 0,
-  parameter ENABLE_RX2_ILA          = 0      
+  parameter ENABLE_RX2_ILA          = 0,
+  parameter ENABLE_SPI_ILA          = 0      
   )(
   output wire           rx1_en,
   output wire           rx2_en,
@@ -115,6 +116,12 @@ module axi_adrv9001#(
   input  wire           tx1_pl_en,
   input  wire           tx2_pl_en,  
   
+  output wire           spi_clk,
+  input  wire           spi_miso,
+  output wire           spi_mosi,
+  output wire           spi_csn,
+  output wire           spi_irq,  
+  
   input  wire           s_axi_aclk,
   input  wire           s_axi_aresetn,
   input  wire [6:0]     s_axi_awaddr,
@@ -171,6 +178,15 @@ wire [11:0]     dgpio_o;
 wire [11:0]     dgpio_i;
 
 
+wire [7:0]      mspi_axis_tdata;
+wire            mspi_axis_tvalid;
+wire            mspi_axis_tready;  
+wire [7:0]      sspi_axis_tdata;
+wire            sspi_axis_tvalid;
+wire            sspi_axis_tready;
+wire            mspi_axis_enable;
+
+
 /* GPIO */
 genvar n;
 generate
@@ -221,9 +237,43 @@ generate
       .tvalid(rx2_axis_tvalid),
       .tready(1'b0)
       );  
-  end    
+  end  
+  
+  if( ENABLE_SPI_ILA) begin     
+    ila_spi ila_spi_i (
+        .clk(s_axi_aclk), // input wire clk
+        .probe0(spi_csn), // input wire [0:0]  probe0  
+        .probe1(spi_mosi), // input wire [0:0]  probe1 
+        .probe2(spi_miso), // input wire [0:0]  probe2 
+        .probe3(spi_clk), // input wire [0:0]  probe3
+	    .probe4(mspi_axis_tvalid), // input wire [0:0]  probe4 
+	    .probe5(mspi_axis_tready), // input wire [0:0]  probe5 
+	    .probe6(mspi_axis_tdata), // input wire [7:0]  probe6 
+	    .probe7(sspi_axis_tvalid), // input wire [0:0]  probe7 
+	    .probe8(sspi_axis_tready), // input wire [0:0]  probe8 
+	    .probe9(sspi_axis_tdata), // input wire [7:0]  probe9        
+	    .probe10(spi_irq) // input wire [0:0]  probe10
+    );      
+  end      
   
 endgenerate
+
+
+adrv9001_mspi adrv9001_mspi_inst (
+  .clk(s_axi_aclk),                
+  .spi_clk(spi_clk),
+  .spi_miso(spi_miso),       
+  .spi_mosi(spi_mosi),                 
+  .spi_csn(spi_csn),
+  .spi_done(spi_irq),
+  .s_axis_tdata(mspi_axis_tdata),
+  .s_axis_tvalid(mspi_axis_tvalid),
+  .s_axis_tready(mspi_axis_tready),  
+  .s_axis_enable(mspi_axis_enable),
+  .m_axis_tdata(sspi_axis_tdata),
+  .m_axis_tvalid(sspi_axis_tvalid),
+  .m_axis_tready(sspi_axis_tready)
+);
 
 cdc #(
   .DATA_WIDTH(4) )
@@ -278,7 +328,14 @@ adrv9001_regs adrv9001_regs_i (
     .tx1_data(tx1_tdata),
     .tx2_data(tx2_tdata),
     .rx1_data(rx1_tdata),
-    .rx2_data(rx2_tdata)
+    .rx2_data(rx2_tdata),
+    .mspi_axis_tdata(mspi_axis_tdata),
+    .mspi_axis_tvalid(mspi_axis_tvalid),
+    .mspi_axis_tready(mspi_axis_tready),  
+    .mspi_axis_enable(mspi_axis_enable),
+    .sspi_axis_tdata(sspi_axis_tdata),
+    .sspi_axis_tvalid(sspi_axis_tvalid),
+    .sspi_axis_tready(sspi_axis_tready)    
 );
   
 adrv9001_rx#(
