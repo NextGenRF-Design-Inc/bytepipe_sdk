@@ -223,12 +223,18 @@ tdd_en_cdc_i (
 );
 
 reg [31:0] cnt = 0;
+reg ce = 0;
 
 always @( posedge dclk_div ) begin
 
   if( tdd_en_cdc == 1'b0 )
+    ce <= 1'b0;
+  else
+    ce <= ~ce;
+
+  if( tdd_en_cdc == 1'b0 )
     cnt <= 0;
-  else if( cnt < 32'hffffffff )
+  else if( (cnt < 32'hffffffff) && ( ce == 1'b1) )
     cnt <= cnt + 1;   
   else
     cnt <= cnt;   
