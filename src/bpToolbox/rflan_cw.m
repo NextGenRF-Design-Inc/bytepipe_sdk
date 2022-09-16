@@ -15,7 +15,7 @@ h.SetTxAttn(TxPort, 0);
 h.SetTxBoost(TxPort, 0);
 
 % Load constant IQ value
-h.SetTxIqConstant(TxPort, hex2dec('7fff7fff'));
+h.SetTxIqConstant(TxPort, hex2dec('7fff0000'));
 
 % Change data path from DMA to Constant
 h.SetTxIqDataPath(TxPort, h.ADRV9001TxDataPath_Constant);

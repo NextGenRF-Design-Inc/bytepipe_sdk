@@ -268,6 +268,10 @@ static int Cli_ProcessCommand( cli_t *Instance )
 			break;
 		}
 
+	  /* Check for commented text */
+	  if( strncmp( cmd, "//", 2 ) == 0 )
+	    return CliStatus_Success;
+
 	  for(i = 0; i < Instance->CmdListLen; i++)
 	  {
 		  cmdString = Instance->CmdList[i]->cmd;

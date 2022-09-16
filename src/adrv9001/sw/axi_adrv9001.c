@@ -128,19 +128,19 @@ void AxiAdrv9001_SetDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_commo
 {
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_TX1_DISABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_TX1_DISABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_TX2_DISABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_TX2_DISABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_RX1_DISABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_RX1_DISABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_RX2_DISABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_RX2_DISABLE_CNT, SampleCnt);
   }
 }
 
@@ -148,19 +148,19 @@ void AxiAdrv9001_SetSsiEnableCnt( uint32_t Base, adi_common_Port_e Port, adi_com
 {
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_TX1_SSI_ENABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_TX1_SSI_ENABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_TX2_SSI_ENABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_TX2_SSI_ENABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_RX1_SSI_ENABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_RX1_SSI_ENABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_RX2_SSI_ENABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_RX2_SSI_ENABLE_CNT, SampleCnt);
   }
 }
 
@@ -168,11 +168,11 @@ void AxiAdrv9001_SetSsiDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_co
 {
   if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_RX1_SSI_DISABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_RX1_SSI_DISABLE_CNT, SampleCnt);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_RX2_SSI_DISABLE_CNT, SampleCnt << 1);
+    Xil_Out32(Base + ADRV9001_RX2_SSI_DISABLE_CNT, SampleCnt);
   }
 }
 

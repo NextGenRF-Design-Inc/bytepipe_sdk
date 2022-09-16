@@ -44,6 +44,7 @@
 #include <stdio.h>
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "rflan.h"
 #include "cli.h"
 #include "ff.h"
@@ -67,6 +68,7 @@ static XGpioPs        RflanGpio;
 static rflan_pib_t    RflanPib;
 static adrv9001_t     RflanAdrv9001;
 static rflan_stream_t RflanStream;
+static QueueHandle_t  RflanEvtQueue;
 
 
 static int32_t RflanReset_Initialize( XResetPs *Instance )
@@ -78,14 +80,22 @@ static int32_t RflanReset_Initialize( XResetPs *Instance )
 
 static void Rflan_StreamCallback( uint32_t Buf, uint32_t Size, rflan_stream_channel_t Channel, void *CallbackRef )
 {
-//  if( Channel == RflanStreamChannel_Tx1)
-//    printf("%s Stream Done\r\n", "Tx1");
-//  else if( Channel == RflanStreamChannel_Tx2)
-//    printf("%s Stream Done\r\n", "Tx2");
-//  else if( Channel == RflanStreamChannel_Rx1)
-//    printf("%s Stream Done\r\n", "Rx1");
-//  else
-//    printf("%s Stream Done\r\n", "Rx2");
+  rflan_evt_type_t evt;
+    
+  if( Channel == RflanStreamChannel_Tx1)
+    evt = RflanEvt_Tx1StreamDone;
+  else if( Channel == RflanStreamChannel_Tx2)
+    evt = RflanEvt_Tx2StreamDone;
+  else if( Channel == RflanStreamChannel_Rx1)
+    evt = RflanEvt_Rx1StreamDone;
+  else
+    evt = RflanEvt_Rx2StreamDone;
+
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  xQueueSendFromISR( RflanEvtQueue, &evt, &xHigherPriorityTaskWoken );
+
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 
 }
 
 static void Rflan_CliCallback( cli_evt_t *Evt )
@@ -269,15 +279,48 @@ static void Rflan_Task( void *pvParameters )
   /* Initialize RFLAN Components */
   Rflan_Initialize( );
 
+  rflan_evt_type_t evt;
+
   for( ;; )
   {
+    if( xQueueReceive( RflanEvtQueue, (void *)&evt, 500 ) == pdTRUE)
+    {
+      switch( evt )
+      {
+        case RflanEvt_Rx1StreamDone:
+          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_RX, ADI_CHANNEL_1 );
+          printf("%s Stream Done\r\n", "Rx1");
+          break;
+
+        case RflanEvt_Rx2StreamDone:
+          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_RX, ADI_CHANNEL_2 );
+          printf("%s Stream Done\r\n", "Rx2");
+          break;
+
+        case RflanEvt_Tx1StreamDone:
+          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_TX, ADI_CHANNEL_1 );
+          printf("%s Stream Done\r\n", "Tx1");
+          break;      
+
+        case RflanEvt_Tx2StreamDone:
+          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_TX, ADI_CHANNEL_2 );
+          printf("%s Stream Done\r\n", "Tx2");
+          break;      
+
+        default:
+          break;
+      }
+    }
+        
     RflanGpio_TogglePin( &RflanGpio, GPIO_LED_PIN );
-    vTaskDelay(500);
   }
 }
 
 int main()
 {
+  /* Create Queue */
+  RflanEvtQueue = xQueueCreate(RFLAN_EVT_QUEUE_SIZE, sizeof(uint32_t));
+  
   /* Create Rflan Task */
   xTaskCreate( Rflan_Task,
               "rflan",

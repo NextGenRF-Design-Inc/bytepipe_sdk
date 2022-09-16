@@ -1,0 +1,6 @@
+Adrv9001SetParam Tx2Attn 0
+Adrv9001SetParam Tx2Boost 1
+Adrv9001SetParam Tx2DpdEnable 0
+RflanStreamBufLoad Tx2 CFR_sample_rate_15p36M_bw_10M.csv
+RflanStreamStop Tx2
+RflanStreamStart Tx2 1 38400

@@ -14,8 +14,6 @@ static void RflanStream_Tx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
-    Adrv9001_ToPrimed( stream->Adrv9001, ADI_TX, ADI_CHANNEL_1 );
-
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Tx1, stream->CallbackRef );
   }
@@ -27,8 +25,6 @@ static void RflanStream_Tx2DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
-    Adrv9001_ToPrimed( stream->Adrv9001, ADI_TX, ADI_CHANNEL_2 );
-
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Tx2, stream->CallbackRef );
   }
@@ -40,8 +36,6 @@ static void RflanStream_Rx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
-    Adrv9001_ToPrimed( stream->Adrv9001, ADI_RX, ADI_CHANNEL_1 );
-
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Rx1, stream->CallbackRef );
   }
@@ -53,8 +47,6 @@ static void RflanStream_Rx2DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
 
   if( evt == EvtType_EndofTransfer)
   {
-    Adrv9001_ToPrimed( stream->Adrv9001, ADI_RX, ADI_CHANNEL_2 );
-
     if( stream->Callback != NULL )
       stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Rx2, stream->CallbackRef );
   }

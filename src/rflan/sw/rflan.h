@@ -59,10 +59,23 @@
 #define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY
 #define RFLAN_QUEUE_SIZE                4
 
+#define RFLAN_EVT_QUEUE_SIZE            4
+
 
 void Rflan_Reboot( void );
 uint32_t Rflan_GetHwVer( void );
 
+ /**
+ * \brief Type of event
+ */
+ typedef enum
+ {
+   RflanEvt_Rx1StreamDone    = 0,    /*!< Rx1 Stream Done Event */
+   RflanEvt_Rx2StreamDone    = 1,    /*!< Rx2 Stream Done Event */
+   RflanEvt_Tx1StreamDone    = 2,    /*!< Tx1 Stream Done Event */
+   RflanEvt_Tx2StreamDone    = 3,    /*!< Tx2 Stream Done Event */   
+ } rflan_evt_type_t;
+ 
 /******************************************************************************/
 /**
 *   Build Version

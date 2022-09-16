@@ -1,0 +1,1 @@
+Adrv9001SetParam Tx2Attn 0

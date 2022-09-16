@@ -1,0 +1,23 @@
+// Set Attenuation to 10dB
+Adrv9001SetParam Tx2Attn 10000
+
+// Disable Boost
+Adrv9001SetParam Tx2Boost 0
+
+// Set I = 1, Q = 0;
+Adrv9001SetParam Tx2IqData 0x7fff0000
+
+// Set IQ interface to use constant instead of axis stream
+Adrv9001SetParam Tx2IqDataPath 1
+
+// Enable Radio
+Adrv9001ToRfEnabled Tx2
+
+// Delay for 20 seconds
+DelayMs 20000
+
+// Disable Radio
+Adrv9001ToRfPrimed Tx2
+
+// Set IQ interface to axis stream
+Adrv9001SetParam Tx2IqDataPath 0

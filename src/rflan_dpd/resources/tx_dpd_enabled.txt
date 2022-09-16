@@ -1,0 +1,18 @@
+Adrv9001SetParam Tx2Attn 0
+Adrv9001SetParam Tx2Boost 1
+Adrv9001SetParam Tx2SsiEnableDly 100
+Adrv9001SetParam Tx2DpdEnable 1
+Adrv9001SetParam Tx2ExternalPathDelay 3800
+Adrv9001SetParam Tx2ExternalLoopbackPower -180
+Adrv9001SetParam Tx2DpdNumberofSamples 4096
+Adrv9001SetParam Tx2DpdRxTxNormalizationLowerThreshold 85290344
+Adrv9001SetParam Tx2DpdRxTxNormalizationUpperThreshold 269711751
+Adrv9001SetParam Tx2DpdDetectionPowerThreshold 53942350
+Adrv9001SetParam Tx2DpdDetectionPeakThreshold 214748364
+RflanStreamBufLoad Tx2 CFR_sample_rate_15p36M_bw_10M.csv
+RflanStreamStop Tx2
+RflanStreamStart Tx2 1 38400
+DelayMs 100
+RflanStreamStop Tx2
+DelayMs 1
+RflanStreamStart Tx2 1 38400

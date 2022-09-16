@@ -68,9 +68,9 @@ h.SetEnableMode(h.Tx1,mode);
 
 %% Transmit Attenuation
 clc;
-v = h.Enabled;
-h.SetRadioState(h.Tx1, v);
-if(~strcmp(h.GetRadioState(h.Tx1),v))
+v = 10;
+h.SetTxAttn(h.Tx1, v);
+if( h.GetTxAttn(h.Tx1) ~= v )
     error("Error");
 end
 
