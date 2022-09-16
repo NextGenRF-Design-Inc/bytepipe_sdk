@@ -1,1 +1,6 @@
-Adrv9001SetParam Tx2Attn 0
+// The adrv9001_setup.txt script can be used for configuration 
+// at startup of the adrv9001 module.  Add any CLI commands
+// related to the adrv9001 to this script.
+
+// Set TX2 Attenuation to 5dB
+Adrv9001SetParam Tx2Attn 5000

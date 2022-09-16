@@ -1,18 +1,55 @@
+// This script enables the transmitter with DPD disabled
+
+// Set Attenuation to 0dB
 Adrv9001SetParam Tx2Attn 0
+
+// Enable Tx Boost
 Adrv9001SetParam Tx2Boost 1
-Adrv9001SetParam Tx2SsiEnableDly 100
+
+// Set SSI enable delay
+Adrv9001SetParam Tx2SsiEnableDly 500
+
+// Set SSI disable delay
+Adrv9001SetParam Tx2DisableDly 200
+
+// Enable DPD
 Adrv9001SetParam Tx2DpdEnable 1
+
+// Set External Path Delay in picoseconds
 Adrv9001SetParam Tx2ExternalPathDelay 3800
+
+// Set External Loopback power to -18dBm
 Adrv9001SetParam Tx2ExternalLoopbackPower -180
+
+// Set number of samples to calculate DPD coefficients
 Adrv9001SetParam Tx2DpdNumberofSamples 4096
+
+// Set Normalization Lower threshold to -11dBm
 Adrv9001SetParam Tx2DpdRxTxNormalizationLowerThreshold 85290344
+
+// Set Normalization upper threshold to -6dBm
 Adrv9001SetParam Tx2DpdRxTxNormalizationUpperThreshold 269711751
+
+// Set Detection Power Threshold to -16dBm
 Adrv9001SetParam Tx2DpdDetectionPowerThreshold 53942350
+
+// Set Detection Peak Threshold to -10dBm
 Adrv9001SetParam Tx2DpdDetectionPeakThreshold 214748364
+
+// Load DMA buffer with local file
 RflanStreamBufLoad Tx2 CFR_sample_rate_15p36M_bw_10M.csv
+
+// Disable Stream
 RflanStreamStop Tx2
+
+// Enable stream allowing for coefficients to be calculated
 RflanStreamStart Tx2 1 38400
+
+// Delay 100ms
 DelayMs 100
+
+// Stop Stream
 RflanStreamStop Tx2
-DelayMs 1
+
+// Enable stream after coefficients have been calculated
 RflanStreamStart Tx2 1 38400
