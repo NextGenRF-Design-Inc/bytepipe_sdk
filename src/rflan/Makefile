@@ -27,7 +27,7 @@ hdl: clean_hdl
 sw:	clean_sw
 	@mkdir -p $(PROJECT)/
 	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v09.13.22/$(PROJECT)_$$DEVICE.xsa" -O $(PROJECT)/$(PROJECT)_$$DEVICE.xsa || true; \
+	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v09.16.22/$(PROJECT)_$$DEVICE.xsa" -O $(PROJECT)/$(PROJECT)_$$DEVICE.xsa || true; \
 	$(MAKE) -f $(PROJECT_DIR)/../adrv9001/Makefile adrv9001_sdk; \
 	echo "$(shell printf '\033')[0;33mBuilding $$DEVICE $(PROJECT) Software $(shell printf '\033')[0m"; \
 	xsct.bat "$(shell cygpath -w $(PROJECT_DIR))\sw\make_sw.tcl" $$DEVICE
