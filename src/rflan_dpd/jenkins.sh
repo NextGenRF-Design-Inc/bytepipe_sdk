@@ -4,7 +4,8 @@ wget -nc "https://www.analog.com/media/en/evaluation-boards-kits/evaluation-soft
 unzip adrv9001-sdk-eval-software.zip  
 mkdir rflan_dpd
 cp rflan/rflan_xczu3cg.xsa rflan_dpd/
-FILE=c99.zipif test -f "$FILE"; then
+FILE=c99.zip
+if test -f "$FILE"; then
   mkdir -p adrv9001/profile
   unzip -j c99.zip -d ./c99
   chmod +x src/adrv9001/sw/profile_parse.sh
