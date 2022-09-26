@@ -154,3 +154,4 @@ sed -i 's/adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adr
 sed -i 's/adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_1, .*/adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_1, \&Adrv9001Params.Rx1InterfaceGain);/g' $outDir/configure.c 
 sed -i 's/adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_2, \&Adrv9001Params.Rx2InterfaceGain);/g' $outDir/configure.c      
        
+rm -rf tmp.txt  

@@ -3,14 +3,12 @@ PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
 
 .PHONY: all
-all: clean adrv9001_sdk hdl sw
+all: clean parse_profile adrv9001_sdk hdl
 
 hdl: | $(PROJECT)/vivado
 $(PROJECT)/vivado:
 	@echo '$(shell printf '\033')[0;33mBuilding $(PROJECT) Programmable Logic $(shell printf '\033')[0m'
 	vivado -mode batch -nojournal -quiet -source $(shell cygpath -w $(PROJECT_DIR))\hdl\make_hdl.tcl -notrace 
-
-sw: adrv9001_sdk parse_profile
 
 parse_profile:
 	rm -rf $(PROJECT)/profile
@@ -27,3 +25,5 @@ adrv9001-sdk:
 
 clean:
 	rm -rf $(PROJECT)  
+	rm -rf adrv9001-sdk-eval-software.zip
+	rm -rf adrv9001-sdk    
