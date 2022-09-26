@@ -16,4 +16,4 @@ cp rflan/rpu_system/Debug/sd_card/BOOT.BIN ./${BootFilename}.bin
 cp -r src/rflan/resources/ ./sdcard
 cp rflan/rpu_system/Debug/sd_card/BOOT.BIN ./sdcard/
 cp ${BootFilename}.bin ./sdcard/
-zip -r rflan_xczu3cg_sdcard.zip sdcard/
+zip -r rflan_{$1}_sdcard.zip sdcard/
