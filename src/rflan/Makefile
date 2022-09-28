@@ -13,7 +13,7 @@ all: clean
 hdl:
 	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
 	$(MAKE) -f $(PROJECT_DIR)/../adrv9001/Makefile hdl; \
-	$(MAKE) -f $(PROJECT_DIR)/../axi_dma/Makefile hdl; \
+	$(MAKE) -f $(PROJECT_DIR)/../axi_dma/Makefile; \
 	source $(PROJECT_DIR)/rflan.sh; build_hdl $$DEVICE
   
 sw:
