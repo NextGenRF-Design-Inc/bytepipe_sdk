@@ -2,7 +2,7 @@ PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
 
 .PHONY: all
-all: clean parse_profile adrv9001_sdk hdl
+all: clean profile sdk hdl
 
 hdl: | $(PROJECT)/vivado
 $(PROJECT)/vivado:
