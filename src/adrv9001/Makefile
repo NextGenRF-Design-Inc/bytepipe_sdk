@@ -1,4 +1,3 @@
-#!/bin/bash
 PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
 
@@ -7,21 +6,15 @@ all: clean parse_profile adrv9001_sdk hdl
 
 hdl: | $(PROJECT)/vivado
 $(PROJECT)/vivado:
-	@echo '$(shell printf '\033')[0;33mBuilding $(PROJECT) Programmable Logic $(shell printf '\033')[0m'
-	vivado -mode batch -nojournal -quiet -source $(shell cygpath -w $(PROJECT_DIR))\hdl\make_hdl.tcl -notrace 
-
-parse_profile:
-	rm -rf $(PROJECT)/profile
-	@mkdir -p $(PROJECT)/profile;
-	@echo '$(shell printf '\033')[0;33mBuilding $(PROJECT) Software $(shell printf '\033')[0m'
-	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \
-	$(PROJECT_DIR)/sw/profile_parse.sh $$C99_DIR $(PROJECT)/profile
+	source $(PROJECT_DIR)/adrv9001.sh; build_hdl
   
-adrv9001_sdk: | adrv9001-sdk 
+profile:
+	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \
+  source $(PROJECT_DIR)/adrv9001.sh; profile_parse $$C99_DIR $(PROJECT)/profile
+  
+sdk: | adrv9001-sdk 
 adrv9001-sdk:  
-	wget -nc "https://www.analog.com/media/en/evaluation-boards-kits/evaluation-software/adrv9001-sdk-eval-software.zip" || true
-	unzip adrv9001-sdk-eval-software.zip  
-	chmod -R 777 adrv9001-sdk
+	source $(PROJECT_DIR)/adrv9001.sh; download_sdk
 
 clean:
 	rm -rf $(PROJECT)  
