@@ -26,9 +26,8 @@ clean:
 	rm -rf $(PROJECT)
   
 profile:	
-	$(MAKE) -f $(PROJECT_DIR)/../adrv9001/Makefile sw
-	rm -rf $(PROJECT_DIR)/sw/adrv9001/profile 
-	cp -r adrv9001/profile $(PROJECT_DIR)/sw/adrv9001	
+	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \
+  source $(PROJECT_DIR)/../adrv9001/adrv9001.sh; profile_parse $$C99_DIR $(PROJECT_DIR)/sw/adrv9001/profile
 	
 sd_card:
 	rm -rf $(PROJECT)/sd_card
