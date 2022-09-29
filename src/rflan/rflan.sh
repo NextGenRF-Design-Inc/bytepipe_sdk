@@ -24,6 +24,9 @@ build_sw()
   
   # Define project
   project="rflan"
+  
+  # Determin Host Environment
+  env=$(uname)
 
   # Make projct directory
   mkdir -p $wrkDir/$project
@@ -45,7 +48,12 @@ build_sw()
   # Indicate Build
   echo "$(printf '\033')[0;33mBuilding $project Software $(printf '\033')[0m"
 
-  xsct.bat "$projDir/sw/make_sw.tcl" $device
+  if [[ $env == *"Linux"* ]]; then
+    xsct "$projDir/sw/make_sw.tcl" $device
+  else
+    xsct.bat "$projDir/sw/make_sw.tcl" $device
+  fi
+  
   cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
   cp -rf $projDir/resources/* $wrkDir/$project/sd_card    
 
