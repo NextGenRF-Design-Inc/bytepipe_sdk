@@ -42,9 +42,6 @@ build_sw()
   rm -rf $wrkDir/$project/*.bin
   rm -rf $wrkDir/$project/sd_card	
   
-  # Download latest hardware
-	#wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v09.16.22/$project_$device.xsa" -O $wrkDir/$project/${project}_${device}.xsa
-
   # Indicate Build
   echo "$(printf '\033')[0;33mBuilding $project Software $(printf '\033')[0m"
 
