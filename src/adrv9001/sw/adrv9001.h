@@ -72,10 +72,7 @@
 #define ADRV9001_STATUS_OFFSET    (0)
 #endif
 
-#define ADRV9001_LOG_FILENAME           ("1:/adi_adrv9001_log.txt")
-#define ADRV9001_SPI_DEVICE_ID          (XPAR_PSU_SPI_0_DEVICE_ID)
-#define ADRV9001_SPI_CS                 (0)
-#define ADRV9001_CTRL_BASE_ADDR         XPAR_ADRV9002_0_BASEADDR
+
 #define ADRV9001_TDD_ENABLE_DUR_FOREVER (0xffffffff)
 
 /**

@@ -51,15 +51,25 @@
 #define FF_LOGICAL_DRIVE_PATH           ("1:/")
 #define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
 
-#define ADRV9001_SCRIPT_FILENAME        ("1:/adrv9001_setup.txt")
 #define RFLAN_SETUP_SCRIPT_FILENAME     ("1:/rflan_setup.txt")
 #define SYSMON_DEVICE_ID                XPAR_XSYSMONPSU_0_DEVICE_ID
 
 #define RFLAN_TASK_STACK_SIZE           4096
 #define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY
 #define RFLAN_QUEUE_SIZE                4
-
 #define RFLAN_EVT_QUEUE_SIZE            4
+
+#define RFLAN_ADRV9001_BASE         	XPAR_ADRV9002_0_BASEADDR
+#define RFLAN_ADRV9001_LOG_FILENAME     ("1:/adi_adrv9001_log.txt")
+#define RFLAN_ADRV9001_SCRIPT_FILENAME  ("1:/adrv9001_setup.txt")
+
+#define RFLAN_UART_DEVICE_ID            XPAR_PSU_UART_0_DEVICE_ID
+#define RFLAN_UART_INTR_ID              XPAR_XUARTPS_0_INTR
+#define RFLAN_UART_BAUDRATE             115200
+
+#define RFLAN_LWIP_EMAC_BASEADDR        XPAR_XEMACPS_0_BASEADDR
+
+#define RFLAN_GPIO_DEVICE_ID            (XPAR_PSU_GPIO_0_DEVICE_ID)
 
 
 void Rflan_Reboot( void );

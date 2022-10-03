@@ -10,7 +10,7 @@ h.Open('COM16');
 %% Enable Stream
 
 % Select Transmit Port
-TxPort = h.Tx1;
+TxPort = h.Tx2;
 
 % Transmit burst or continous using cyclic flag
 cyclic = 1;
@@ -20,7 +20,7 @@ h.SetTxAttn(TxPort, 0);
 h.SetTxBoost(TxPort, 1);
 
 % Load Transmit buffer with IQ data from file on SD card
-h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_61p44M_bw_20M.csv');
+h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_15p36M_bw_10M.csv');
 
 % Delay before enabling SSI
 h.SetSsiEnableDelay(TxPort, 500);

@@ -44,7 +44,7 @@
 *******************************************************************************/
 #include "xgpiops.h"
 
-#define GPIO_DEVICE_ID                  (XPAR_PSU_GPIO_0_DEVICE_ID)
+
 #define GPIO_LED_PIN                    (7)
 #define GPIO_HWV0_PIN                   (0)
 #define GPIO_HWV1_PIN                   (2)

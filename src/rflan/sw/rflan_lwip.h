@@ -60,7 +60,7 @@ extern "C"
 #define RFLAN_LWIP_MAC_ADDR             { 0x00, 0x00, 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 }
 #define RFLAN_LWIP_CLI_PORT             (2233)
 #define RFLAN_LWIP_RECV_BUF_SIZE        (1500)
-#define RFLAN_LWIP_EMAC_BASEADDR        XPAR_XEMACPS_0_BASEADDR
+
 
 /**
 * \brief Code indicated status of request

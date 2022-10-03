@@ -50,7 +50,7 @@
 #include "adrv9001.h"
 
 
-#define RFLAN_STREAM_STATUS_OFFSET (-2000)
+#define RFLAN_STREAM_STATUS_OFFSET 		(-2000)
 #define RFLAN_DMA_BUF_ADDR              (0x40000000)
 #define RFLAN_DMA_TX1_BUF_ADDR          (RFLAN_DMA_BUF_ADDR)
 #define RFLAN_DMA_TX1_BUF_SIZE          (0x400000)

@@ -169,7 +169,7 @@ static int32_t Rflan_Initialize( void )
   int32_t status;
 
   /* Initialize GPIO */
-  if((status = RflanGpio_Initialize( &RflanGpio, GPIO_DEVICE_ID )) != 0)
+  if((status = RflanGpio_Initialize( &RflanGpio, RFLAN_GPIO_DEVICE_ID )) != 0)
     printf("%s\r\n",StatusString(status));
 
   cli_init_t CliInit = {
@@ -188,7 +188,7 @@ static int32_t Rflan_Initialize( void )
   rflan_uart_init_t UartInit = {
       .BaudRate           = RFLAN_UART_BAUDRATE,
       .DeviceId           = RFLAN_UART_DEVICE_ID,
-      .IntrId             = XPAR_XUARTPS_0_INTR,
+      .IntrId             = RFLAN_UART_INTR_ID,
       .ParentCallback     = Rflan_UartCallback,
       .ParentCallbackRef  = &RflanCli
   };
@@ -226,21 +226,21 @@ static int32_t Rflan_Initialize( void )
   printf("\r\nType help for a list of commands\r\n\r\n");
 
   adrv9001_init_t Adrv9001Init = {
-		  .CtrlBase = ADRV9001_CTRL_BASE_ADDR,
+		  .CtrlBase = RFLAN_ADRV9001_BASE,
 		  .HwVer = Rflan_GetHwVer( ),
-		  .LogFilename = ADRV9001_LOG_FILENAME
+		  .LogFilename = RFLAN_ADRV9001_LOG_FILENAME
   };
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
-    printf("Adrv9001 %s\r\n",StatusString(status));
+    printf("%s\r\n",StatusString(status));
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001Cli_Initialize( &RflanCli, &RflanAdrv9001 )) != 0)
     printf("Adrv9001Cli %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &RflanCli, ADRV9001_SCRIPT_FILENAME)) != 0 )
+  if((status = Rflan_SetupScript( &RflanCli, RFLAN_ADRV9001_SCRIPT_FILENAME)) != 0 )
     printf("Adrv9001 Setup Script %s\r\n",StatusString(status));
 
   rflan_stream_init_t StreamInit = {

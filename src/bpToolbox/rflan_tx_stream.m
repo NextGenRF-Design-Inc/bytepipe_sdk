@@ -5,7 +5,7 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM16');
+h.Open('COM5');
 
 %% Enable Stream
 
