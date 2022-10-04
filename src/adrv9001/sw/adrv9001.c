@@ -550,23 +550,27 @@ int32_t Adrv9001_SetPaEnable( adrv9001_t *Instance, adi_common_Port_e port, adi_
   /* Check if Rx */
   if( (port == ADI_RX) && (channel == ADI_CHANNEL_1) )
   {
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, level) != 0)
-      return Adrv9001Status_GpioErr;
+    if( Instance->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, level) != 0)
+        return Adrv9001Status_GpioErr;
   }
   else if( (port == ADI_RX) && (channel == ADI_CHANNEL_2) )
   {
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, level) != 0)
-      return Adrv9001Status_GpioErr;
+    if( Instance->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, level) != 0)
+        return Adrv9001Status_GpioErr;
   }
   else if( (port == ADI_TX) && (channel == ADI_CHANNEL_1) )
   {
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, level) != 0)
-      return Adrv9001Status_GpioErr;
+    if( Instance->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, level) != 0)
+        return Adrv9001Status_GpioErr;
   }
   else
   {
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, level) != 0)
-      return Adrv9001Status_GpioErr;
+    if( Instance->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, level) != 0)
+        return Adrv9001Status_GpioErr;
   }
 
   return Adrv9001Status_Success;
