@@ -398,7 +398,7 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
       if((status = Adrv9001_ToRfEnabled( Instance, port, channel, ADRV9001_TDD_ENABLE_DUR_FOREVER)) != 0)
         return status;
 
-      usleep(1000);
+      usleep(10000);
 
       if( port == ADI_TX )
       {
