@@ -17,7 +17,6 @@ static pib_def_t Adrv9001PibDef[] =
 {
 //  Name                                                      Address                                          Storage Type                       Flags
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-  { "HwVer",                                offsetof(adrv9001_params_t, HwVer),                                                       PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY },
   { "LogPath",                              offsetof(adrv9001_params_t, LogPath),                                                     PibTypeStr,       PIB_FLAGS_DEFAULT  },
   { "Tx1Attn",                              offsetof(adrv9001_params_t, Tx1Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Tx2Attn",                              offsetof(adrv9001_params_t, Tx2Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },

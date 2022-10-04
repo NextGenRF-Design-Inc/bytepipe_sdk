@@ -52,74 +52,46 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
   if((status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_2, Instance->Params->Tx2Boost)) != 0)
     return Adrv9001Status_TxBoostErr;
 
-  if( Instance->Params->HwVer == 2 )
-  {
-    /* TCXO DAC    = ADI_ADRV9001_GPIO_ANALOG_00 */
-    /* TCXO Enable = ADI_ADRV9001_GPIO_ANALOG_07 */
-    /* Rx1A Enable = ADI_ADRV9001_GPIO_ANALOG_06 */
-    /* Rx2A Enable = ADI_ADRV9001_GPIO_ANALOG_05 */
-    if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04 ) != 0 )
-      return Adrv9001Status_GpioErr;
+  /* Configure Analog Outputs */
+  if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00 ) != 0 )
+    return Adrv9001Status_GpioErr;
 
-    /* Enable TCXO */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
-      return Adrv9001Status_GpioErr;
+  /* Configure Analog Outputs */
+  if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04 ) != 0 )
+    return Adrv9001Status_GpioErr;
 
-    /* Disable Rx1A */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_06, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-      return Adrv9001Status_GpioErr;
+  /* Configure Analog Outputs */
+  if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08 ) != 0 )
+    return Adrv9001Status_GpioErr;
 
-    /* Disable Rx2A */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_05, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-      return Adrv9001Status_GpioErr;
+  /* Enable TCXO */
+  if( Instance->Params->TcxoEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->TcxoEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
+		  return Adrv9001Status_GpioErr;
 
-    /* Enable DAC */
-    if((status = Adrv9001_EnableDac(Instance, 0, true )) != 0 )
-      return status;
+  /* Disable Rx1A */
+  if( Instance->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+		  return Adrv9001Status_GpioErr;
 
-  }
-  else if( Instance->Params->HwVer == 3 )
-  {
-    /* TCXO DAC    = ADI_ADRV9001_GPIO_ANALOG_03 */
-    /* TCXO Enable = ADI_ADRV9001_GPIO_ANALOG_07 */
-    /* Rx1A Enable = ADI_ADRV9001_GPIO_ANALOG_01 */
-    /* Rx2A Enable = ADI_ADRV9001_GPIO_ANALOG_09 */
-    /* Tx1 Enable  = ADI_ADRV9001_GPIO_ANALOG_00 */
-    /* Tx2 Enable  = ADI_ADRV9001_GPIO_ANALOG_08 */
+  /* Disable Rx2A */
+  if( Instance->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+		  return Adrv9001Status_GpioErr;
 
-    if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00 ) != 0 )
-      return Adrv9001Status_GpioErr;
+  /* Disable Tx1 */
+  if( Instance->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+		  return Adrv9001Status_GpioErr;
 
-    if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04 ) != 0 )
-      return Adrv9001Status_GpioErr;
+  /* Disable Tx2 */
+  if( Instance->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+		  return Adrv9001Status_GpioErr;
 
-    if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08 ) != 0 )
-      return Adrv9001Status_GpioErr;
-
-    /* Enable TCXO */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
-      return Adrv9001Status_GpioErr;
-
-    /* Disable Rx1A */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_01, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-      return Adrv9001Status_GpioErr;
-
-    /* Disable Rx2A */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_09, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-      return Adrv9001Status_GpioErr;
-
-    /* Disable Tx1 */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_00, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-      return Adrv9001Status_GpioErr;
-
-    /* Disable Tx2 */
-    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_08, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-      return Adrv9001Status_GpioErr;
-
-    /* Enable DAC */
-    if(( status = Adrv9001_EnableDac(Instance, 3, true )) != 0 )
-      return status;
-  }
+  /* Enable DAC */
+  if(( status = Adrv9001_EnableDac(Instance, Instance->Params->TcxoDacChannel, true )) != 0 )
+    return status;
 
   /* Set TCXO to mid scale */
   if(Adrv9001_SetVcTcxo( Instance, 0.9 ) != 0)
@@ -180,7 +152,12 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   memset(Instance, 0, sizeof(adrv9001_t));
 
   Instance->Params = &Adrv9001Params;
-  Instance->Params->HwVer = Init->HwVer;
+  Instance->Params->Rx1FrontendEnablePin = Init->Rx1FrontendEnablePin;
+  Instance->Params->Rx2FrontendEnablePin = Init->Rx2FrontendEnablePin;
+  Instance->Params->Tx1FrontendEnablePin = Init->Tx1FrontendEnablePin;
+  Instance->Params->Tx2FrontendEnablePin = Init->Tx2FrontendEnablePin;
+  Instance->Params->TcxoEnablePin = Init->TcxoEnablePin;
+  Instance->Params->TcxoDacChannel = Init->TcxoDacChannel;
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
@@ -568,49 +545,29 @@ int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port
 
 int32_t Adrv9001_SetPaEnable( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool Enable )
 {
-  adi_adrv9001_GpioPin_e pin;
   adi_adrv9001_GpioPinLevel_e level = Enable? ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH : ADI_ADRV9001_GPIO_PIN_LEVEL_LOW;
 
   /* Check if Rx */
   if( (port == ADI_RX) && (channel == ADI_CHANNEL_1) )
   {
-    if( Instance->Params->HwVer == 2 )
-      pin = ADI_ADRV9001_GPIO_ANALOG_06;
-    else if( Instance->Params->HwVer == 3 )
-      pin = ADI_ADRV9001_GPIO_ANALOG_01;
-    else
-      return Adrv9001Status_InvalidPaEnable;
+    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, level) != 0)
+      return Adrv9001Status_GpioErr;
   }
   else if( (port == ADI_RX) && (channel == ADI_CHANNEL_2) )
   {
-    if( Instance->Params->HwVer == 2 )
-      pin = ADI_ADRV9001_GPIO_ANALOG_05;
-    else if( Instance->Params->HwVer == 3 )
-      pin = ADI_ADRV9001_GPIO_ANALOG_09;
-    else
-      return Adrv9001Status_InvalidPaEnable;
+    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, level) != 0)
+      return Adrv9001Status_GpioErr;
   }
   else if( (port == ADI_TX) && (channel == ADI_CHANNEL_1) )
   {
-    if( Instance->Params->HwVer == 2 )
-      return Adrv9001Status_Success;
-    else if( Instance->Params->HwVer == 3 )
-      pin = ADI_ADRV9001_GPIO_ANALOG_00;
-    else
-      return Adrv9001Status_InvalidPaEnable;
+    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, level) != 0)
+      return Adrv9001Status_GpioErr;
   }
   else
   {
-    if( Instance->Params->HwVer == 2 )
-      return Adrv9001Status_Success;
-    else if( Instance->Params->HwVer == 3 )
-      pin = ADI_ADRV9001_GPIO_ANALOG_08;
-    else
-      return Adrv9001Status_InvalidPaEnable;
+    if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, level) != 0)
+      return Adrv9001Status_GpioErr;
   }
-
-  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, pin, level) != 0)
-    return Adrv9001Status_GpioErr;
 
   return Adrv9001Status_Success;
 }
@@ -730,20 +687,8 @@ int32_t Adrv9001_SetVcTcxo( adrv9001_t *Instance, float Voltage )
 {
   uint16_t Value = (uint16_t)((((Voltage - 0.900)/ 1.700) * 4096.000) + 2048);
 
-  if( Instance->Params->HwVer == 2 )
-  {
-    if( adi_adrv9001_AuxDac_Code_Set(&Instance->Device, ADI_ADRV9001_AUXDAC0, Value) != 0)
-      return Adrv9001Status_DacErr;
-  }
-  else if( Instance->Params->HwVer == 3 )
-  {
-    if( adi_adrv9001_AuxDac_Code_Set(&Instance->Device, ADI_ADRV9001_AUXDAC3, Value) != 0 )
-      return Adrv9001Status_DacErr;
-  }
-  else
-  {
+  if( adi_adrv9001_AuxDac_Code_Set(&Instance->Device, Instance->Params->TcxoDacChannel, Value) != 0)
     return Adrv9001Status_DacErr;
-  }
 
   return Adrv9001Status_Success;
 }
@@ -752,20 +697,8 @@ int32_t Adrv9001_GetVcTcxo( adrv9001_t *Instance, float *Voltage )
 {
   uint16_t Value;
 
-  if( Instance->Params->HwVer == 2 )
-  {
-    if( adi_adrv9001_AuxDac_Code_Get(&Instance->Device, ADI_ADRV9001_AUXDAC0, &Value) != 0 )
-      return Adrv9001Status_DacErr;
-  }
-  else if( Instance->Params->HwVer == 3 )
-  {
-    if( adi_adrv9001_AuxDac_Code_Get(&Instance->Device, ADI_ADRV9001_AUXDAC3, &Value) != 0)
-      return Adrv9001Status_DacErr;
-  }
-  else
-  {
+  if( adi_adrv9001_AuxDac_Code_Get(&Instance->Device, Instance->Params->TcxoDacChannel, &Value) != 0 )
     return Adrv9001Status_DacErr;
-  }
 
   *Voltage = 0.9000 + (((float)Value - 2048.000) / 4096.000) * 1.7;
 
@@ -775,19 +708,22 @@ int32_t Adrv9001_GetVcTcxo( adrv9001_t *Instance, float *Voltage )
 int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *comment, va_list argp)
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
-  UINT len = 0;
 
-  char *str = calloc(1,1024);
+  if( Adrv9001->Params->LogPath != NULL )
+  {
+    UINT len = 0;
 
-  vsnprintf( str, 1023, comment, argp );
+    char *str = calloc(1,1024);
 
-  if(f_write(&Adrv9001->LogFil, str, strlen(str), (UINT*)&len) != FR_OK)
-    return Adrv9001Status_LogErr;
+    vsnprintf( str, 1023, comment, argp );
 
-  f_sync(&Adrv9001->LogFil);
+    if(f_write(&Adrv9001->LogFil, str, strlen(str), (UINT*)&len) != FR_OK)
+      return Adrv9001Status_LogErr;
 
-  free(str);
+    f_sync(&Adrv9001->LogFil);
 
+    free(str);
+  }
   return Adrv9001Status_Success;
 }
 
@@ -802,17 +738,20 @@ int32_t Adrv9001_Open( void *devHalCfg )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  /* Delete PHY Log file */
-  f_unlink(Adrv9001->Params->LogPath);
+  if( Adrv9001->Params->LogPath != NULL )
+  {
+    /* Delete PHY Log file */
+    f_unlink(Adrv9001->Params->LogPath);
 
-  /* Open File */
-  if( f_open(&Adrv9001->LogFil, Adrv9001->Params->LogPath, FA_CREATE_NEW | FA_WRITE | FA_READ) != FR_OK)
-    return ADI_COMMON_ACT_WARN_RESET_LOG;
+    /* Open File */
+    if( f_open(&Adrv9001->LogFil, Adrv9001->Params->LogPath, FA_CREATE_NEW | FA_WRITE | FA_READ) != FR_OK)
+      return ADI_COMMON_ACT_WARN_RESET_LOG;
 
-  /* Point to beginning of file */
-  f_lseek(&Adrv9001->LogFil, 0);
+    /* Point to beginning of file */
+    f_lseek(&Adrv9001->LogFil, 0);
 
-  f_sync(&Adrv9001->LogFil);
+    f_sync(&Adrv9001->LogFil);
+  }
 
   return Adrv9001Status_Success;
 }
@@ -821,9 +760,12 @@ int32_t Adrv9001_Close( void *devHalCfg )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  f_sync(&Adrv9001->LogFil);
+  if( Adrv9001->Params->LogPath != NULL )
+  {
+    f_sync(&Adrv9001->LogFil);
 
-  f_close(&Adrv9001->LogFil);
+    f_close(&Adrv9001->LogFil);
+  }
 
   return Adrv9001Status_Success;
 }

@@ -227,9 +227,27 @@ static int32_t Rflan_Initialize( void )
 
   adrv9001_init_t Adrv9001Init = {
 		  .CtrlBase = RFLAN_ADRV9001_BASE,
-		  .HwVer = Rflan_GetHwVer( ),
+		  .TcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07,
 		  .LogFilename = RFLAN_ADRV9001_LOG_FILENAME
   };
+
+  if( Rflan_GetHwVer( ) == 2 )
+  {
+    Adrv9001Init.Rx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_06;
+    Adrv9001Init.Rx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_05;
+    Adrv9001Init.Tx1FrontendEnablePin = ADI_ADRV9001_GPIO_UNASSIGNED;
+    Adrv9001Init.Tx2FrontendEnablePin = ADI_ADRV9001_GPIO_UNASSIGNED;
+    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_0;
+  }
+  else if( Rflan_GetHwVer( ) == 3 )
+  {
+
+    Adrv9001Init.Rx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_01;
+    Adrv9001Init.Rx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_09;
+    Adrv9001Init.Tx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_00;
+    Adrv9001Init.Tx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_08;
+    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_3;
+  }
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)

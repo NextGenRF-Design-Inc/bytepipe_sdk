@@ -153,7 +153,12 @@ typedef struct {
   adi_adrv9001_ChannelEnableMode_e		  Tx2EnableMode;
   adi_adrv9001_ChannelEnableMode_e		  Rx1EnableMode;
   adi_adrv9001_ChannelEnableMode_e		  Rx2EnableMode;
-  uint32_t                              HwVer;
+  adi_adrv9001_GpioPin_e				        Rx1FrontendEnablePin;
+  adi_adrv9001_GpioPin_e				        Rx2FrontendEnablePin;
+  adi_adrv9001_GpioPin_e				        Tx1FrontendEnablePin;
+  adi_adrv9001_GpioPin_e				        Tx2FrontendEnablePin;
+  adi_adrv9001_GpioPin_e				        TcxoEnablePin;
+  uint8_t								                TcxoDacChannel;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
 } adrv9001_params_t;
 
@@ -169,7 +174,12 @@ typedef struct {
 }adrv9001_t;
 
 typedef struct {
-  uint32_t                    HwVer;
+	adi_adrv9001_GpioPin_e		  Rx1FrontendEnablePin;
+	adi_adrv9001_GpioPin_e		  Rx2FrontendEnablePin;
+	adi_adrv9001_GpioPin_e		  Tx1FrontendEnablePin;
+	adi_adrv9001_GpioPin_e		  Tx2FrontendEnablePin;
+	adi_adrv9001_GpioPin_e		  TcxoEnablePin;
+	uint8_t								      TcxoDacChannel;
   char                       *LogFilename;
   uint32_t                    CtrlBase;
 }adrv9001_init_t;
