@@ -158,7 +158,7 @@ typedef struct {
   adi_adrv9001_GpioPin_e				        Tx1FrontendEnablePin;
   adi_adrv9001_GpioPin_e				        Tx2FrontendEnablePin;
   adi_adrv9001_GpioPin_e				        TcxoEnablePin;
-  uint8_t								                TcxoDacChannel;
+  adi_adrv9001_AuxDac_e                 TcxoDacChannel;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
 } adrv9001_params_t;
 
@@ -196,7 +196,7 @@ int32_t Adrv9001_SetVcTcxo              ( adrv9001_t *Instance, float Voltage );
 int32_t Adrv9001_GetVcTcxo              ( adrv9001_t *Instance, float *Voltage );
 int32_t Adrv9001_PerformSsiSweep        ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t results[8][8] );
 int32_t Adrv9001_ClearError             ( adrv9001_t *Instance );
-int32_t Adrv9001_EnableDac              ( adrv9001_t *Instance, uint8_t Id, bool Enable );
+int32_t Adrv9001_EnableDac              ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable );
 int32_t Adrv9001_CalibrateSsiDelay      ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 
 #endif

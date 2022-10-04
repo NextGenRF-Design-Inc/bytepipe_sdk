@@ -159,6 +159,12 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2EnableMode",                        offsetof(adrv9001_params_t, Tx2EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Rx1EnableMode",                        offsetof(adrv9001_params_t, Rx1EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Rx2EnableMode",                        offsetof(adrv9001_params_t, Rx2EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Rx1FrontendEnablePin",                 offsetof(adrv9001_params_t, Rx1FrontendEnablePin),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Rx2FrontendEnablePin",                 offsetof(adrv9001_params_t, Rx2FrontendEnablePin),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Tx1FrontendEnablePin",                 offsetof(adrv9001_params_t, Tx1FrontendEnablePin),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "Tx2FrontendEnablePin",                 offsetof(adrv9001_params_t, Tx2FrontendEnablePin),                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "TcxoEnablePin",                        offsetof(adrv9001_params_t, TcxoEnablePin),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
+  { "TcxoDacChannel",                       offsetof(adrv9001_params_t, TcxoDacChannel),                                              PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
 };
 
 static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *name, char *str )
@@ -233,6 +239,49 @@ static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *
 		  status = Adrv9001Status_InvalidPib;
 	  }
   }
+  else if( strcmp( &name[3], "FrontendEnablePin") == 0 )
+  {
+    if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+    {
+      if( Instance->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+          return Adrv9001Status_GpioErr;
+    }
+    else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+    {
+      if( Instance->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+          return Adrv9001Status_GpioErr;
+    }
+    else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+    {
+      if( Instance->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+          return Adrv9001Status_GpioErr;
+    }
+    else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+    {
+      if( Instance->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+          return Adrv9001Status_GpioErr;
+    }
+    else
+    {
+      status = Adrv9001Status_InvalidPib;
+    }
+  }
+  else if( strcmp( &name[3], "TcxoEnablePin") == 0 )
+  {
+    if( Instance->Params->TcxoEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->TcxoEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
+        return Adrv9001Status_GpioErr;
+  }
+  else if( strcmp( &name[3], "TcxoDacChannel") == 0 )
+  {
+    if(( status = Adrv9001_EnableDac(Instance, Instance->Params->TcxoDacChannel, true )) != 0 )
+      return status;
+  }
+
 
   else
   {

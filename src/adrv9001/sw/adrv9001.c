@@ -166,7 +166,10 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->Device.common.error.logEnable = 1;
 
   /* Initialize Log Path */
-  strcpy( Instance->Params->LogPath, Init->LogFilename );
+  if( Init->LogFilename != NULL )
+    strcpy( Instance->Params->LogPath, Init->LogFilename );
+  else
+    Instance->Params->LogPath[0] = 0;
 
   Instance->CtrlBase = Init->CtrlBase;
 
@@ -660,7 +663,7 @@ int32_t Adrv9001_SetSsiClkDelay( adrv9001_t *Instance, adi_common_Port_e port, a
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_EnableDac( adrv9001_t *Instance, uint8_t Id, bool Enable )
+int32_t Adrv9001_EnableDac( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable )
 {
   adi_adrv9001_GpioSignal_e signal;
 
@@ -671,10 +674,10 @@ int32_t Adrv9001_EnableDac( adrv9001_t *Instance, uint8_t Id, bool Enable )
 
   switch( Id )
   {
-    case 0 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_0; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_00; break;
-    case 1 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_1; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_01; break;
-    case 2 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_2; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_02; break;
-    case 3 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_3; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_03; break;
+    case ADI_ADRV9001_AUXDAC0 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_0; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_00; break;
+    case ADI_ADRV9001_AUXDAC1 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_1; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_01; break;
+    case ADI_ADRV9001_AUXDAC2 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_2; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_02; break;
+    case ADI_ADRV9001_AUXDAC3 : signal = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_3; Cfg.pin = ADI_ADRV9001_GPIO_ANALOG_03; break;
     default: return Adrv9001Status_DacErr;
   }
 
@@ -713,7 +716,7 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  if( Adrv9001->Params->LogPath != NULL )
+  if( strlen(Adrv9001->Params->LogPath) > 0 )
   {
     UINT len = 0;
 
@@ -728,6 +731,7 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 
     free(str);
   }
+
   return Adrv9001Status_Success;
 }
 
@@ -742,7 +746,7 @@ int32_t Adrv9001_Open( void *devHalCfg )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  if( Adrv9001->Params->LogPath != NULL )
+  if( strlen(Adrv9001->Params->LogPath) > 0 )
   {
     /* Delete PHY Log file */
     f_unlink(Adrv9001->Params->LogPath);
@@ -764,7 +768,7 @@ int32_t Adrv9001_Close( void *devHalCfg )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  if( Adrv9001->Params->LogPath != NULL )
+  if( strlen(Adrv9001->Params->LogPath) > 0 )
   {
     f_sync(&Adrv9001->LogFil);
 

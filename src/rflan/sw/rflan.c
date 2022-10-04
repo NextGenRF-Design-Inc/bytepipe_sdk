@@ -237,7 +237,7 @@ static int32_t Rflan_Initialize( void )
     Adrv9001Init.Rx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_05;
     Adrv9001Init.Tx1FrontendEnablePin = ADI_ADRV9001_GPIO_UNASSIGNED;
     Adrv9001Init.Tx2FrontendEnablePin = ADI_ADRV9001_GPIO_UNASSIGNED;
-    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_0;
+    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_AUXDAC0;
   }
   else if( Rflan_GetHwVer( ) == 3 )
   {
@@ -246,7 +246,7 @@ static int32_t Rflan_Initialize( void )
     Adrv9001Init.Rx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_09;
     Adrv9001Init.Tx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_00;
     Adrv9001Init.Tx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_08;
-    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_GPIO_SIGNAL_AUX_DAC_3;
+    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_AUXDAC3;
   }
 
   /* Initialize ADRV9001 CLI */
