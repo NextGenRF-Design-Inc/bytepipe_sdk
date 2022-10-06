@@ -57,11 +57,11 @@ module system_top (
 );       
           
 system system_i
-   (.adrv9001_csn(adrv9001_csn),
+   (.adrv9001_spi_csn(adrv9001_csn),
     .adrv9001_dgpio(adrv9001_dgpio),
     .adrv9001_irq(adrv9001_irq),
-    .adrv9001_miso(adrv9001_miso),
-    .adrv9001_mosi(adrv9001_mosi),
+    .adrv9001_spi_miso(adrv9001_miso),
+    .adrv9001_spi_mosi(adrv9001_mosi),
     .adrv9001_rstn(adrv9001_rstn),
     .adrv9001_rx1_dclk_n(adrv9001_rx1_dclk_n),
     .adrv9001_rx1_dclk_p(adrv9001_rx1_dclk_p),
@@ -81,7 +81,7 @@ system system_i
     .adrv9001_rx2_qdata_p(adrv9001_rx2_qdata_p),
     .adrv9001_rx2_strobe_n(adrv9001_rx2_strobe_n),
     .adrv9001_rx2_strobe_p(adrv9001_rx2_strobe_p),
-    .adrv9001_sclk(adrv9001_sclk),
+    .adrv9001_spi_clk(adrv9001_sclk),
     .adrv9001_tx1_dclk_n(adrv9001_tx1_dclk_n),
     .adrv9001_tx1_dclk_p(adrv9001_tx1_dclk_p),
     .adrv9001_tx1_en(adrv9001_tx1_en),
