@@ -76,6 +76,10 @@ add_interface_ports tx2_idata_p out 1
 add_interface_ports tx2_idata_n out 1
 add_interface_ports tx2_qdata_p out 1
 add_interface_ports tx2_qdata_n out 1
+add_interface_ports spi_mosi out 1
+add_interface_ports spi_miso in 1
+add_interface_ports spi_clk out 1
+add_interface_ports spi_csn out 1
 save_bus_interface adrv9001
 
 # Package IP Core
@@ -137,6 +141,10 @@ map_port adrv9001 tx2_idata_p
 map_port adrv9001 tx2_idata_n
 map_port adrv9001 tx2_qdata_p
 map_port adrv9001 tx2_qdata_n
+map_port adrv9001 spi_mosi
+map_port adrv9001 spi_miso
+map_port adrv9001 spi_clk
+map_port adrv9001 spi_csn
 
 # Infer Axis bus interface
 ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
@@ -147,6 +155,313 @@ ipx::associate_bus_interfaces -busif rx1_axis -clock rx1_axis_aclk [ipx::current
 ipx::associate_bus_interfaces -busif rx2_axis -clock rx2_axis_aclk [ipx::current_core]
 ipx::associate_bus_interfaces -busif tx1_axis -clock tx1_axis_aclk [ipx::current_core]
 ipx::associate_bus_interfaces -busif tx2_axis -clock tx2_axis_aclk [ipx::current_core]
+
+# Add SSI Configuration Page
+ipgui::add_page -name {SSI Pins} -component [ipx::current_core] -display_name {SSI Pins}
+set_property tooltip {Configure SSI Pins} [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core] ]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_DCLK" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 4 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_DCLK" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_IN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_IN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+
+ipgui::add_static_text -name {Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core] ] -text {
+Each SSI differential pair can be swapped to account for PCB designs with swapped pairs.  
+This allows PCB designers to swap p/n signals on each differential pair to facilitate PCB routing.}
+
+ipgui::move_text -component [ipx::current_core] -order 0 [ipgui::get_textspec -name "Description" -component [ipx::current_core]]
+
+# Add ILA Configuration Page
+set_property display_name {ILA} [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ]
+set_property tooltip {Configure Integrated Logic Analyzers} [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ]
+ipgui::add_static_text -name {ILA Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ] -text {
+The following integrated logic analyzers can be enabled to facilitate evaluation of this module.}
+ipgui::move_text -component [ipx::current_core] -order 0 [ipgui::get_textspec -name "ILA Description" -component [ipx::current_core]]
+
+# Update Parameter Types
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_DCLK" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX1_DCLK -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX1_DCLK -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX1_DCLK -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX1_DCLK -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_IDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX1_IDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX1_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX1_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX1_IDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_QDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX1_QDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX1_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX1_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX1_QDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_STROBE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX1_STROBE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX1_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX1_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX1_STROBE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_DCLK" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX2_DCLK -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX2_DCLK -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX2_DCLK -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX2_DCLK -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_IDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX2_IDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX2_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX2_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX2_IDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_QDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX2_QDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX2_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX2_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX2_QDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_STROBE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_RX2_STROBE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_RX2_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_RX2_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_RX2_STROBE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_IN" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX1_DCLK_IN -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX1_DCLK_IN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX1_DCLK_IN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX1_DCLK_IN -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_OUT" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX1_DCLK_OUT -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX1_DCLK_OUT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX1_DCLK_OUT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX1_DCLK_OUT -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_IDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX1_IDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX1_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX1_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX1_IDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_QDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX1_QDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX1_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX1_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX1_QDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_STROBE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX1_STROBE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX1_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX1_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX1_STROBE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_IN" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX2_DCLK_IN -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX2_DCLK_IN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX2_DCLK_IN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX2_DCLK_IN -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_OUT" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX2_DCLK_OUT -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX2_DCLK_OUT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX2_DCLK_OUT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX2_DCLK_OUT -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_IDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX2_IDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX2_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX2_IDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX2_IDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_QDATA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX2_QDATA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX2_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX2_QDATA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX2_QDATA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_STROBE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX1_ILA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX2_ILA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX1_ILA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_ILA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_ILA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_SPI_ILA" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_RX1_ENABLE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_PL_RX1_ENABLE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_PL_RX1_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_PL_RX1_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_RX1_ENABLE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_RX2_ENABLE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_PL_RX2_ENABLE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_PL_RX2_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_PL_RX2_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_RX2_ENABLE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_TX1_ENABLE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_PL_TX1_ENABLE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_PL_TX1_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_PL_TX1_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_TX1_ENABLE -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_TX2_ENABLE" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports rx1_pl_en -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx1_pl_en -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_RX1_ENABLE > 0} [ipx::get_ports rx1_pl_en -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports rx2_pl_en -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx2_pl_en -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_RX2_ENABLE > 0} [ipx::get_ports rx2_pl_en -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_pl_en -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_pl_en -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_TX1_ENABLE > 0} [ipx::get_ports tx1_pl_en -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_pl_en -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_pl_en -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_TX2_ENABLE > 0} [ipx::get_ports tx2_pl_en -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports dgpio_pl_o -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports dgpio_pl_o -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_DGPIO > 0} [ipx::get_ports dgpio_pl_o -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_DGPIO > 0} [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
+
+# Add parameters
+ipx::add_user_parameter ENABLE_RX1_AXIS_RSTN [ipx::current_core]
+set_property value_resolve_type user [ipx::get_user_parameters ENABLE_RX1_AXIS_RSTN -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_RX1_AXIS_RSTN} -component [ipx::current_core]
+set_property display_name {Enable Rx1 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS_RSTN" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS_RSTN" -component [ipx::current_core] ]
+set_property value false [ipx::get_user_parameters ENABLE_RX1_AXIS_RSTN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX1_AXIS_RSTN -of_objects [ipx::current_core]]
+
+ipx::add_user_parameter ENABLE_RX2_AXIS_RSTN [ipx::current_core]
+set_property value_resolve_type user [ipx::get_user_parameters ENABLE_RX2_AXIS_RSTN -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_RX2_AXIS_RSTN} -component [ipx::current_core]
+set_property display_name {Enable Rx2 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS_RSTN" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS_RSTN" -component [ipx::current_core] ]
+set_property value false [ipx::get_user_parameters ENABLE_RX2_AXIS_RSTN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_AXIS_RSTN -of_objects [ipx::current_core]]
+
+ipx::add_user_parameter ENABLE_TX1_AXIS_RSTN [ipx::current_core]
+set_property value_resolve_type user [ipx::get_user_parameters ENABLE_TX1_AXIS_RSTN -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_TX1_AXIS_RSTN} -component [ipx::current_core]
+set_property display_name {Enable Tx1 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS_RSTN" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS_RSTN" -component [ipx::current_core] ]
+set_property value false [ipx::get_user_parameters ENABLE_TX1_AXIS_RSTN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_TX1_AXIS_RSTN -of_objects [ipx::current_core]]
+
+ipx::add_user_parameter ENABLE_TX2_AXIS_RSTN [ipx::current_core]
+set_property value_resolve_type user [ipx::get_user_parameters ENABLE_TX2_AXIS_RSTN -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_TX2_AXIS_RSTN} -component [ipx::current_core]
+set_property display_name {Enable Tx2 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS_RSTN" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS_RSTN" -component [ipx::current_core] ]
+set_property value false [ipx::get_user_parameters ENABLE_TX2_AXIS_RSTN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_TX2_AXIS_RSTN -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_RX1_AXIS_RSTN > 0} [ipx::get_bus_interfaces rx1_axis_rstn -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX2_AXIS_RSTN > 0} [ipx::get_bus_interfaces rx2_axis_rstn -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX1_AXIS_RSTN > 0} [ipx::get_bus_interfaces tx1_axis_rstn -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX2_AXIS_RSTN > 0} [ipx::get_bus_interfaces tx2_axis_rstn -of_objects [ipx::current_core]]
+
+
+# Add PL Interface Page
+ipgui::add_page -name {PL Interface} -component [ipx::current_core] -display_name {PL Interface}
+set_property tooltip {Configure Programmable Logic Interface Signals} [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_PL_RX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_PL_RX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_PL_TX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_PL_TX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+
+
+ipgui::add_static_text -name {PL AXIS Reset Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
+Enable AXIS Reset output pins:
+
+}
+ipgui::move_text -component [ipx::current_core] -order 0 [ipgui::get_textspec -name "PL AXIS Reset Interface Description" -component [ipx::current_core]]
+
+ipgui::add_static_text -name {PL Enable Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
+Enable control of enable signals from programmable logic:
+
+}
+ipgui::move_text -component [ipx::current_core] -order 5 [ipgui::get_textspec -name "PL Enable Interface Description" -component [ipx::current_core]]
+
+ipgui::add_static_text -name {PL Dgpio Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
+Enable control of Dgpio signals from programmable logic:
+
+}
+ipgui::move_text -component [ipx::current_core] -order 10 [ipgui::get_textspec -name "PL Dgpio Interface Description" -component [ipx::current_core]]
+
+
 
 # Create IP files and save
 set_property core_revision 2 [ipx::current_core]

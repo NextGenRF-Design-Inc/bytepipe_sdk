@@ -54,5 +54,5 @@ build_sw()
   cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
   cp -rf $projDir/resources/* $wrkDir/$project/sd_card    
 
-  zip -r "$wrkDir/$project/${project}_${device}_sdcard.zip" $wrkDir/$project/sd_card/  
+  zip -rj "$wrkDir/$project/${project}_${device}_sdcard.zip" $project/sd_card/ 
 }

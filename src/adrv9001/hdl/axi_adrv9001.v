@@ -39,7 +39,12 @@ module axi_adrv9001#(
   parameter ENABLE_TX2_ILA          = 0,
   parameter ENABLE_RX1_ILA          = 0,
   parameter ENABLE_RX2_ILA          = 0,
-  parameter ENABLE_SPI_ILA          = 0      
+  parameter ENABLE_SPI_ILA          = 0,
+  parameter ENABLE_PL_DGPIO         = 0,    
+  parameter ENABLE_PL_RX1_ENABLE    = 0,   
+  parameter ENABLE_PL_RX2_ENABLE    = 0,   
+  parameter ENABLE_PL_TX1_ENABLE    = 0,   
+  parameter ENABLE_PL_TX2_ENABLE    = 0     
   )(
   output wire           rx1_en,
   output wire           rx2_en,
@@ -194,8 +199,15 @@ wire            mspi_axis_enable;
 genvar n;
 generate
   for (n = 0; n < 12; n = n + 1) begin: dgpio_io
-    assign dgpio[n] = (dgpio_t[n] == 1'b1) ? 1'bz : dgpio_o[n] | dgpio_pl_o[n];
-    assign dgpio_i[n] = dgpio[n] | dgpio_pl_i[n];        
+  
+    if( ENABLE_PL_DGPIO ) begin
+      assign dgpio[n] = (dgpio_t[n] == 1'b1) ? 1'bz : dgpio_o[n] | dgpio_pl_o[n];
+      assign dgpio_i[n] = dgpio[n] | dgpio_pl_i[n];  
+    end else begin
+      assign dgpio[n] = (dgpio_t[n] == 1'b1) ? 1'bz : dgpio_o[n];
+      assign dgpio_i[n] = dgpio[n];  
+    end
+        
   end
 endgenerate
 
@@ -259,6 +271,64 @@ generate
     );      
   end      
   
+  if( ENABLE_PL_RX1_ENABLE ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    pl_rx1_en_cdc_i (
+      .s_cdc_tdata  (rx1_pl_en),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  (rx1_pl_en_cdc)
+    );
+  
+  end else begin
+    assign rx1_pl_en_cdc = 0;    
+  end
+
+  if( ENABLE_PL_RX2_ENABLE ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    pl_rx2_en_cdc_i (
+      .s_cdc_tdata  (rx2_pl_en),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  (rx2_pl_en_cdc)
+    );
+  
+  end else begin
+    assign rx2_pl_en_cdc = 0;    
+  end
+
+  if( ENABLE_PL_TX1_ENABLE ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    pl_tx1_en_cdc_i (
+      .s_cdc_tdata  (tx1_pl_en),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  (tx1_pl_en_cdc)
+    );
+  
+  end else begin
+    assign tx1_pl_en_cdc = 0;    
+  end
+
+  if( ENABLE_PL_TX2_ENABLE ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    pl_tx2_en_cdc_i (
+      .s_cdc_tdata  (tx2_pl_en),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  (tx2_pl_en_cdc)
+    );
+  
+  end else begin
+    assign tx2_pl_en_cdc = 0;    
+  end  
+  
+  
+  
 endgenerate
 
 
@@ -278,14 +348,7 @@ adrv9001_mspi adrv9001_mspi_inst (
   .m_axis_tready(sspi_axis_tready)
 );
 
-cdc #(
-  .DATA_WIDTH(4) )
-pl_en_cdc_i (
-  .s_cdc_tdata  ({rx1_pl_en, rx2_pl_en, tx1_pl_en, tx2_pl_en}),
-  .m_cdc_clk    (s_axi_aclk),
-  .m_cdc_tdata  ({rx1_pl_en_cdc, rx2_pl_en_cdc, tx1_pl_en_cdc, tx2_pl_en_cdc})
-);
- 
+
 adrv9001_regs adrv9001_regs_i (
     .s_axi_aclk(s_axi_aclk),
     .s_axi_aresetn(s_axi_aresetn),
