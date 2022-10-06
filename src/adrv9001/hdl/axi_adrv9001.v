@@ -65,6 +65,7 @@ module axi_adrv9001#(
   
   output wire [31:0]	rx1_axis_tdata,    
   output wire           rx1_axis_tvalid, 
+  input  wire           rx1_axis_tready,  
   output wire           rx1_axis_aclk,
   output wire           rx1_axis_rstn,  
     
@@ -79,6 +80,7 @@ module axi_adrv9001#(
   
   output wire [31:0]	rx2_axis_tdata,    
   output wire           rx2_axis_tvalid, 
+  input  wire           rx2_axis_tready,
   output wire           rx2_axis_aclk,
   output wire           rx2_axis_rstn,  
 
@@ -240,7 +242,7 @@ generate
       .enable(rx1_en),
       .tdata(rx1_axis_tdata),
       .tvalid(rx1_axis_tvalid),
-      .tready(1'b0)
+      .tready(rx1_axis_tready)
       );  
   end 
   
@@ -250,7 +252,7 @@ generate
       .enable(rx2_en),
       .tdata(rx2_axis_tdata),
       .tvalid(rx2_axis_tvalid),
-      .tready(1'b0)
+      .tready(rx2_axis_tready)
       );  
   end  
   

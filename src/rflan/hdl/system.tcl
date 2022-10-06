@@ -126,11 +126,9 @@ if { $bCheckIPs == 1 } {
 nextgenrf.com:user:adrv9001:1.0\
 xilinx.com:ip:smartconnect:1.0\
 analog.com:user:axi_dmac:1.0\
-xilinx.com:ip:xlconstant:1.1\
-xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:zynq_ultra_ps_e:3.3\
 xilinx.com:ip:proc_sys_reset:5.0\
-xilinx.com:ip:util_vector_logic:2.0\
+xilinx.com:ip:xlconcat:2.1\
 "
 
    set list_ips_missing ""
@@ -201,46 +199,15 @@ proc create_hier_cell_cpu { parentCell nameHier } {
 
 
   # Create pins
-  create_bd_pin -dir O adrv9001_spi_csn
-  create_bd_pin -dir I adrv9001_spi_miso
-  create_bd_pin -dir O adrv9001_spi_mosi
-  create_bd_pin -dir O adrv9001_spi_sclk
-  create_bd_pin -dir O clk250m
-  create_bd_pin -dir O -from 0 -to 0 clk250m_aresetn
-  create_bd_pin -dir I -from 0 -to 0 irq11
-  create_bd_pin -dir I -from 0 -to 0 irq12
-  create_bd_pin -dir I -from 0 -to 0 irq13
-  create_bd_pin -dir I -from 0 -to 0 irq14
-  create_bd_pin -dir I -from 0 -to 0 irq15
-  create_bd_pin -dir O -type clk m_axi_aclk
-  create_bd_pin -dir O -from 0 -to 0 -type rst m_axi_rstn
-  create_bd_pin -dir O -from 0 -to 0 pl_rst
-
-  # Create instance: GND_1, and set properties
-  set GND_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 GND_1 ]
-  set_property -dict [ list \
-   CONFIG.CONST_VAL {0} \
-   CONFIG.CONST_WIDTH {1} \
- ] $GND_1
-
-  # Create instance: GND_2, and set properties
-  set GND_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 GND_2 ]
-  set_property -dict [ list \
-   CONFIG.CONST_VAL {0} \
-   CONFIG.CONST_WIDTH {1} \
- ] $GND_2
-
-  # Create instance: sys_concat_intc_0, and set properties
-  set sys_concat_intc_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 sys_concat_intc_0 ]
-  set_property -dict [ list \
-   CONFIG.NUM_PORTS {8} \
- ] $sys_concat_intc_0
-
-  # Create instance: sys_concat_intc_1, and set properties
-  set sys_concat_intc_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 sys_concat_intc_1 ]
-  set_property -dict [ list \
-   CONFIG.NUM_PORTS {8} \
- ] $sys_concat_intc_1
+  create_bd_pin -dir I adrv9001_spi_irq
+  create_bd_pin -dir O pl_clk0
+  create_bd_pin -dir O -from 0 -to 0 pl_clk0_rstn
+  create_bd_pin -dir O pl_clk1
+  create_bd_pin -dir O -from 0 -to 0 pl_clk1_rstn
+  create_bd_pin -dir I rx1_dma_irq
+  create_bd_pin -dir I rx2_dma_irq
+  create_bd_pin -dir I tx1_dma_irq
+  create_bd_pin -dir I tx2_dma_irq
 
   # Create instance: sys_ps8, and set properties
   set sys_ps8 [ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.3 sys_ps8 ]
@@ -1317,8 +1284,8 @@ MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#GPIO1 MIO#SD 1#SD 1#SD 1#SD 1#SD\
    CONFIG.PSU__GPIO1_MIO__PERIPHERAL__ENABLE {1} \
    CONFIG.PSU__GPIO2_MIO__PERIPHERAL__ENABLE {0} \
    CONFIG.PSU__GPIO_EMIO_WIDTH {26} \
-   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__ENABLE {1} \
-   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {26} \
+   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__ENABLE {0} \
+   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {<Select>} \
    CONFIG.PSU__GPIO_EMIO__WIDTH {[94:0]} \
    CONFIG.PSU__GPU_PP0__POWER__ON {0} \
    CONFIG.PSU__GPU_PP1__POWER__ON {0} \
@@ -1609,7 +1576,7 @@ UNIT:KB; RegionTZ:Secure ; WrAllowed:Read/Write; subsystemId:Secure Subsystem}\
    CONFIG.PSU__PROTECTION__MASTERS_TZ {GEM0:NonSecure|SD1:NonSecure|GEM2:NonSecure|GEM1:NonSecure|GEM3:NonSecure|PCIe:NonSecure|DP:NonSecure|NAND:NonSecure|GPU:NonSecure|USB1:NonSecure|USB0:NonSecure|LDMA:NonSecure|FDMA:NonSecure|QSPI:NonSecure|SD0:NonSecure}\
    CONFIG.PSU__PROTECTION__OCM_SEGMENTS {NONE} \
    CONFIG.PSU__PROTECTION__PRESUBSYSTEMS {NONE} \
-   CONFIG.PSU__PROTECTION__SLAVES {LPD;USB3_1_XHCI;FE300000;FE3FFFFF;0|LPD;USB3_1;FF9E0000;FF9EFFFF;0|LPD;USB3_0_XHCI;FE200000;FE2FFFFF;1|LPD;USB3_0;FF9D0000;FF9DFFFF;1|LPD;UART1;FF010000;FF01FFFF;1|LPD;UART0;FF000000;FF00FFFF;1|LPD;TTC3;FF140000;FF14FFFF;1|LPD;TTC2;FF130000;FF13FFFF;1|LPD;TTC1;FF120000;FF12FFFF;1|LPD;TTC0;FF110000;FF11FFFF;1|FPD;SWDT1;FD4D0000;FD4DFFFF;1|LPD;SWDT0;FF150000;FF15FFFF;1|LPD;SPI1;FF050000;FF05FFFF;0|LPD;SPI0;FF040000;FF04FFFF;1|FPD;SMMU_REG;FD5F0000;FD5FFFFF;1|FPD;SMMU;FD800000;FDFFFFFF;1|FPD;SIOU;FD3D0000;FD3DFFFF;1|FPD;SERDES;FD400000;FD47FFFF;1|LPD;SD1;FF170000;FF17FFFF;1|LPD;SD0;FF160000;FF16FFFF;1|FPD;SATA;FD0C0000;FD0CFFFF;0|LPD;RTC;FFA60000;FFA6FFFF;1|LPD;RSA_CORE;FFCE0000;FFCEFFFF;1|LPD;RPU;FF9A0000;FF9AFFFF;1|LPD;R5_TCM_RAM_GLOBAL;FFE00000;FFE3FFFF;1|LPD;R5_1_Instruction_Cache;FFEC0000;FFECFFFF;1|LPD;R5_1_Data_Cache;FFED0000;FFEDFFFF;1|LPD;R5_1_BTCM_GLOBAL;FFEB0000;FFEBFFFF;1|LPD;R5_1_ATCM_GLOBAL;FFE90000;FFE9FFFF;1|LPD;R5_0_Instruction_Cache;FFE40000;FFE4FFFF;1|LPD;R5_0_Data_Cache;FFE50000;FFE5FFFF;1|LPD;R5_0_BTCM_GLOBAL;FFE20000;FFE2FFFF;1|LPD;R5_0_ATCM_GLOBAL;FFE00000;FFE0FFFF;1|LPD;QSPI_Linear_Address;C0000000;DFFFFFFF;1|LPD;QSPI;FF0F0000;FF0FFFFF;0|LPD;PMU_RAM;FFDC0000;FFDDFFFF;1|LPD;PMU_GLOBAL;FFD80000;FFDBFFFF;1|FPD;PCIE_MAIN;FD0E0000;FD0EFFFF;0|FPD;PCIE_LOW;E0000000;EFFFFFFF;0|FPD;PCIE_HIGH2;8000000000;BFFFFFFFFF;0|FPD;PCIE_HIGH1;600000000;7FFFFFFFF;0|FPD;PCIE_DMA;FD0F0000;FD0FFFFF;0|FPD;PCIE_ATTRIB;FD480000;FD48FFFF;0|LPD;OCM_XMPU_CFG;FFA70000;FFA7FFFF;1|LPD;OCM_SLCR;FF960000;FF96FFFF;1|OCM;OCM;FFFC0000;FFFFFFFF;1|LPD;NAND;FF100000;FF10FFFF;0|LPD;MBISTJTAG;FFCF0000;FFCFFFFF;1|LPD;LPD_XPPU_SINK;FF9C0000;FF9CFFFF;1|LPD;LPD_XPPU;FF980000;FF98FFFF;1|LPD;LPD_SLCR_SECURE;FF4B0000;FF4DFFFF;1|LPD;LPD_SLCR;FF410000;FF4AFFFF;1|LPD;LPD_GPV;FE100000;FE1FFFFF;1|LPD;LPD_DMA_7;FFAF0000;FFAFFFFF;1|LPD;LPD_DMA_6;FFAE0000;FFAEFFFF;1|LPD;LPD_DMA_5;FFAD0000;FFADFFFF;1|LPD;LPD_DMA_4;FFAC0000;FFACFFFF;1|LPD;LPD_DMA_3;FFAB0000;FFABFFFF;1|LPD;LPD_DMA_2;FFAA0000;FFAAFFFF;1|LPD;LPD_DMA_1;FFA90000;FFA9FFFF;1|LPD;LPD_DMA_0;FFA80000;FFA8FFFF;1|LPD;IPI_CTRL;FF380000;FF3FFFFF;1|LPD;IOU_SLCR;FF180000;FF23FFFF;1|LPD;IOU_SECURE_SLCR;FF240000;FF24FFFF;1|LPD;IOU_SCNTRS;FF260000;FF26FFFF;1|LPD;IOU_SCNTR;FF250000;FF25FFFF;1|LPD;IOU_GPV;FE000000;FE0FFFFF;1|LPD;I2C1;FF030000;FF03FFFF;1|LPD;I2C0;FF020000;FF02FFFF;0|FPD;GPU;FD4B0000;FD4BFFFF;0|LPD;GPIO;FF0A0000;FF0AFFFF;1|LPD;GEM3;FF0E0000;FF0EFFFF;1|LPD;GEM2;FF0D0000;FF0DFFFF;0|LPD;GEM1;FF0C0000;FF0CFFFF;0|LPD;GEM0;FF0B0000;FF0BFFFF;0|FPD;FPD_XMPU_SINK;FD4F0000;FD4FFFFF;1|FPD;FPD_XMPU_CFG;FD5D0000;FD5DFFFF;1|FPD;FPD_SLCR_SECURE;FD690000;FD6CFFFF;1|FPD;FPD_SLCR;FD610000;FD68FFFF;1|FPD;FPD_DMA_CH7;FD570000;FD57FFFF;1|FPD;FPD_DMA_CH6;FD560000;FD56FFFF;1|FPD;FPD_DMA_CH5;FD550000;FD55FFFF;1|FPD;FPD_DMA_CH4;FD540000;FD54FFFF;1|FPD;FPD_DMA_CH3;FD530000;FD53FFFF;1|FPD;FPD_DMA_CH2;FD520000;FD52FFFF;1|FPD;FPD_DMA_CH1;FD510000;FD51FFFF;1|FPD;FPD_DMA_CH0;FD500000;FD50FFFF;1|LPD;EFUSE;FFCC0000;FFCCFFFF;1|FPD;Display\
+   CONFIG.PSU__PROTECTION__SLAVES {LPD;USB3_1_XHCI;FE300000;FE3FFFFF;0|LPD;USB3_1;FF9E0000;FF9EFFFF;0|LPD;USB3_0_XHCI;FE200000;FE2FFFFF;1|LPD;USB3_0;FF9D0000;FF9DFFFF;1|LPD;UART1;FF010000;FF01FFFF;1|LPD;UART0;FF000000;FF00FFFF;1|LPD;TTC3;FF140000;FF14FFFF;1|LPD;TTC2;FF130000;FF13FFFF;1|LPD;TTC1;FF120000;FF12FFFF;1|LPD;TTC0;FF110000;FF11FFFF;1|FPD;SWDT1;FD4D0000;FD4DFFFF;1|LPD;SWDT0;FF150000;FF15FFFF;1|LPD;SPI1;FF050000;FF05FFFF;0|LPD;SPI0;FF040000;FF04FFFF;0|FPD;SMMU_REG;FD5F0000;FD5FFFFF;1|FPD;SMMU;FD800000;FDFFFFFF;1|FPD;SIOU;FD3D0000;FD3DFFFF;1|FPD;SERDES;FD400000;FD47FFFF;1|LPD;SD1;FF170000;FF17FFFF;1|LPD;SD0;FF160000;FF16FFFF;1|FPD;SATA;FD0C0000;FD0CFFFF;0|LPD;RTC;FFA60000;FFA6FFFF;1|LPD;RSA_CORE;FFCE0000;FFCEFFFF;1|LPD;RPU;FF9A0000;FF9AFFFF;1|LPD;R5_TCM_RAM_GLOBAL;FFE00000;FFE3FFFF;1|LPD;R5_1_Instruction_Cache;FFEC0000;FFECFFFF;1|LPD;R5_1_Data_Cache;FFED0000;FFEDFFFF;1|LPD;R5_1_BTCM_GLOBAL;FFEB0000;FFEBFFFF;1|LPD;R5_1_ATCM_GLOBAL;FFE90000;FFE9FFFF;1|LPD;R5_0_Instruction_Cache;FFE40000;FFE4FFFF;1|LPD;R5_0_Data_Cache;FFE50000;FFE5FFFF;1|LPD;R5_0_BTCM_GLOBAL;FFE20000;FFE2FFFF;1|LPD;R5_0_ATCM_GLOBAL;FFE00000;FFE0FFFF;1|LPD;QSPI_Linear_Address;C0000000;DFFFFFFF;1|LPD;QSPI;FF0F0000;FF0FFFFF;0|LPD;PMU_RAM;FFDC0000;FFDDFFFF;1|LPD;PMU_GLOBAL;FFD80000;FFDBFFFF;1|FPD;PCIE_MAIN;FD0E0000;FD0EFFFF;0|FPD;PCIE_LOW;E0000000;EFFFFFFF;0|FPD;PCIE_HIGH2;8000000000;BFFFFFFFFF;0|FPD;PCIE_HIGH1;600000000;7FFFFFFFF;0|FPD;PCIE_DMA;FD0F0000;FD0FFFFF;0|FPD;PCIE_ATTRIB;FD480000;FD48FFFF;0|LPD;OCM_XMPU_CFG;FFA70000;FFA7FFFF;1|LPD;OCM_SLCR;FF960000;FF96FFFF;1|OCM;OCM;FFFC0000;FFFFFFFF;1|LPD;NAND;FF100000;FF10FFFF;0|LPD;MBISTJTAG;FFCF0000;FFCFFFFF;1|LPD;LPD_XPPU_SINK;FF9C0000;FF9CFFFF;1|LPD;LPD_XPPU;FF980000;FF98FFFF;1|LPD;LPD_SLCR_SECURE;FF4B0000;FF4DFFFF;1|LPD;LPD_SLCR;FF410000;FF4AFFFF;1|LPD;LPD_GPV;FE100000;FE1FFFFF;1|LPD;LPD_DMA_7;FFAF0000;FFAFFFFF;1|LPD;LPD_DMA_6;FFAE0000;FFAEFFFF;1|LPD;LPD_DMA_5;FFAD0000;FFADFFFF;1|LPD;LPD_DMA_4;FFAC0000;FFACFFFF;1|LPD;LPD_DMA_3;FFAB0000;FFABFFFF;1|LPD;LPD_DMA_2;FFAA0000;FFAAFFFF;1|LPD;LPD_DMA_1;FFA90000;FFA9FFFF;1|LPD;LPD_DMA_0;FFA80000;FFA8FFFF;1|LPD;IPI_CTRL;FF380000;FF3FFFFF;1|LPD;IOU_SLCR;FF180000;FF23FFFF;1|LPD;IOU_SECURE_SLCR;FF240000;FF24FFFF;1|LPD;IOU_SCNTRS;FF260000;FF26FFFF;1|LPD;IOU_SCNTR;FF250000;FF25FFFF;1|LPD;IOU_GPV;FE000000;FE0FFFFF;1|LPD;I2C1;FF030000;FF03FFFF;1|LPD;I2C0;FF020000;FF02FFFF;0|FPD;GPU;FD4B0000;FD4BFFFF;0|LPD;GPIO;FF0A0000;FF0AFFFF;1|LPD;GEM3;FF0E0000;FF0EFFFF;1|LPD;GEM2;FF0D0000;FF0DFFFF;0|LPD;GEM1;FF0C0000;FF0CFFFF;0|LPD;GEM0;FF0B0000;FF0BFFFF;0|FPD;FPD_XMPU_SINK;FD4F0000;FD4FFFFF;1|FPD;FPD_XMPU_CFG;FD5D0000;FD5DFFFF;1|FPD;FPD_SLCR_SECURE;FD690000;FD6CFFFF;1|FPD;FPD_SLCR;FD610000;FD68FFFF;1|FPD;FPD_DMA_CH7;FD570000;FD57FFFF;1|FPD;FPD_DMA_CH6;FD560000;FD56FFFF;1|FPD;FPD_DMA_CH5;FD550000;FD55FFFF;1|FPD;FPD_DMA_CH4;FD540000;FD54FFFF;1|FPD;FPD_DMA_CH3;FD530000;FD53FFFF;1|FPD;FPD_DMA_CH2;FD520000;FD52FFFF;1|FPD;FPD_DMA_CH1;FD510000;FD51FFFF;1|FPD;FPD_DMA_CH0;FD500000;FD50FFFF;1|LPD;EFUSE;FFCC0000;FFCCFFFF;1|FPD;Display\
 Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD050000;FD05FFFF;1|FPD;DDR_XMPU4_CFG;FD040000;FD04FFFF;1|FPD;DDR_XMPU3_CFG;FD030000;FD03FFFF;1|FPD;DDR_XMPU2_CFG;FD020000;FD02FFFF;1|FPD;DDR_XMPU1_CFG;FD010000;FD01FFFF;1|FPD;DDR_XMPU0_CFG;FD000000;FD00FFFF;1|FPD;DDR_QOS_CTRL;FD090000;FD09FFFF;1|FPD;DDR_PHY;FD080000;FD08FFFF;1|DDR;DDR_LOW;0;7FFFFFFF;1|DDR;DDR_HIGH;800000000;800000000;0|FPD;DDDR_CTRL;FD070000;FD070FFF;1|LPD;Coresight;FE800000;FEFFFFFF;1|LPD;CSU_DMA;FFC80000;FFC9FFFF;1|LPD;CSU;FFCA0000;FFCAFFFF;1|LPD;CRL_APB;FF5E0000;FF85FFFF;1|FPD;CRF_APB;FD1A0000;FD2DFFFF;1|FPD;CCI_REG;FD5E0000;FD5EFFFF;1|LPD;CAN1;FF070000;FF07FFFF;0|LPD;CAN0;FF060000;FF06FFFF;0|FPD;APU;FD5C0000;FD5CFFFF;1|LPD;APM_INTC_IOU;FFA20000;FFA2FFFF;1|LPD;APM_FPD_LPD;FFA30000;FFA3FFFF;1|FPD;APM_5;FD490000;FD49FFFF;1|FPD;APM_0;FD0B0000;FD0BFFFF;1|LPD;APM2;FFA10000;FFA1FFFF;1|LPD;APM1;FFA00000;FFA0FFFF;1|LPD;AMS;FFA50000;FFA5FFFF;1|FPD;AFI_5;FD3B0000;FD3BFFFF;1|FPD;AFI_4;FD3A0000;FD3AFFFF;1|FPD;AFI_3;FD390000;FD39FFFF;1|FPD;AFI_2;FD380000;FD38FFFF;1|FPD;AFI_1;FD370000;FD37FFFF;1|FPD;AFI_0;FD360000;FD36FFFF;1|LPD;AFIFM6;FF9B0000;FF9BFFFF;1|FPD;ACPU_GIC;F9010000;F907FFFF;1}\
    CONFIG.PSU__PROTECTION__SUBSYSTEMS {PMU Firmware:PMU|Secure Subsystem:} \
    CONFIG.PSU__PSS_ALT_REF_CLK__ENABLE {0} \
@@ -1657,14 +1624,14 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.PSU__SD1__RESET__ENABLE {0} \
    CONFIG.PSU__SD1__SLOT_TYPE {SD 2.0} \
    CONFIG.PSU__SPI0_LOOP_SPI1__ENABLE {0} \
-   CONFIG.PSU__SPI0__GRP_SS0__ENABLE {1} \
-   CONFIG.PSU__SPI0__GRP_SS0__IO {EMIO} \
+   CONFIG.PSU__SPI0__GRP_SS0__ENABLE {0} \
+   CONFIG.PSU__SPI0__GRP_SS0__IO {<Select>} \
    CONFIG.PSU__SPI0__GRP_SS1__ENABLE {0} \
    CONFIG.PSU__SPI0__GRP_SS1__IO {<Select>} \
    CONFIG.PSU__SPI0__GRP_SS2__ENABLE {0} \
    CONFIG.PSU__SPI0__GRP_SS2__IO {<Select>} \
-   CONFIG.PSU__SPI0__PERIPHERAL__ENABLE {1} \
-   CONFIG.PSU__SPI0__PERIPHERAL__IO {EMIO} \
+   CONFIG.PSU__SPI0__PERIPHERAL__ENABLE {0} \
+   CONFIG.PSU__SPI0__PERIPHERAL__IO {<Select>} \
    CONFIG.PSU__SPI1__GRP_SS0__ENABLE {0} \
    CONFIG.PSU__SPI1__GRP_SS0__IO {<Select>} \
    CONFIG.PSU__SPI1__GRP_SS1__ENABLE {0} \
@@ -1758,7 +1725,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.PSU__USE__GDMA {0} \
    CONFIG.PSU__USE__IRQ {0} \
    CONFIG.PSU__USE__IRQ0 {1} \
-   CONFIG.PSU__USE__IRQ1 {1} \
+   CONFIG.PSU__USE__IRQ1 {0} \
    CONFIG.PSU__USE__M_AXI_GP0 {0} \
    CONFIG.PSU__USE__M_AXI_GP1 {0} \
    CONFIG.PSU__USE__M_AXI_GP2 {1} \
@@ -1817,38 +1784,28 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.C_EXT_RST_WIDTH {1} \
  ] $sys_rstgen1
 
-  # Create instance: util_vector_logic_1, and set properties
-  set util_vector_logic_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_1 ]
+  # Create instance: xlconcat_0, and set properties
+  set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
   set_property -dict [ list \
-   CONFIG.C_OPERATION {not} \
-   CONFIG.C_SIZE {1} \
-   CONFIG.LOGO_FILE {data/sym_notgate.png} \
- ] $util_vector_logic_1
+   CONFIG.NUM_PORTS {5} \
+ ] $xlconcat_0
 
   # Create interface connections
   connect_bd_intf_net -intf_net Conn1 [get_bd_intf_pins M_AXI_HPM0_LPD] [get_bd_intf_pins sys_ps8/M_AXI_HPM0_LPD]
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins S_AXI_HP1_FPD] [get_bd_intf_pins sys_ps8/S_AXI_HP1_FPD]
 
   # Create port connections
-  connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc_0/In0] [get_bd_pins sys_concat_intc_0/In1] [get_bd_pins sys_concat_intc_0/In2] [get_bd_pins sys_concat_intc_0/In3] [get_bd_pins sys_concat_intc_0/In4] [get_bd_pins sys_concat_intc_0/In5] [get_bd_pins sys_concat_intc_0/In6] [get_bd_pins sys_concat_intc_0/In7] [get_bd_pins sys_concat_intc_1/In0] [get_bd_pins sys_concat_intc_1/In1] [get_bd_pins sys_concat_intc_1/In7]
-  connect_bd_net -net GND_2_dout [get_bd_pins GND_2/dout] [get_bd_pins sys_ps8/emio_spi0_s_i] [get_bd_pins sys_ps8/emio_spi0_sclk_i] [get_bd_pins sys_ps8/emio_spi0_ss_i_n]
-  connect_bd_net -net adrv9001_rx1_dma_irq [get_bd_pins irq14] [get_bd_pins sys_concat_intc_1/In5]
-  connect_bd_net -net adrv9001_rx2_dma_irq [get_bd_pins irq13] [get_bd_pins sys_concat_intc_1/In4]
-  connect_bd_net -net adrv9001_spi_miso_1 [get_bd_pins adrv9001_spi_miso] [get_bd_pins sys_ps8/emio_spi0_m_i]
-  connect_bd_net -net adrv9001_tx1_dma_irq [get_bd_pins irq12] [get_bd_pins sys_concat_intc_1/In3]
-  connect_bd_net -net adrv9001_tx2_dma_irq [get_bd_pins irq11] [get_bd_pins sys_concat_intc_1/In2]
-  connect_bd_net -net irq15_1 [get_bd_pins irq15] [get_bd_pins sys_concat_intc_1/In6]
-  connect_bd_net -net sys_concat_intc_0_dout [get_bd_pins sys_concat_intc_0/dout] [get_bd_pins sys_ps8/pl_ps_irq0]
-  connect_bd_net -net sys_concat_intc_1_dout [get_bd_pins sys_concat_intc_1/dout] [get_bd_pins sys_ps8/pl_ps_irq1]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins m_axi_aclk] [get_bd_pins sys_ps8/maxihpm0_lpd_aclk] [get_bd_pins sys_ps8/pl_clk0] [get_bd_pins sys_rstgen/slowest_sync_clk]
-  connect_bd_net -net sys_cpu_resetn [get_bd_pins m_axi_rstn] [get_bd_pins sys_rstgen/peripheral_aresetn]
-  connect_bd_net -net sys_ps8_emio_spi0_m_o [get_bd_pins adrv9001_spi_mosi] [get_bd_pins sys_ps8/emio_spi0_m_o]
-  connect_bd_net -net sys_ps8_emio_spi0_sclk_o [get_bd_pins adrv9001_spi_sclk] [get_bd_pins sys_ps8/emio_spi0_sclk_o]
-  connect_bd_net -net sys_ps8_emio_spi0_ss_o_n [get_bd_pins adrv9001_spi_csn] [get_bd_pins sys_ps8/emio_spi0_ss_o_n]
-  connect_bd_net -net sys_ps8_pl_clk1 [get_bd_pins clk250m] [get_bd_pins sys_ps8/pl_clk1] [get_bd_pins sys_ps8/saxihp1_fpd_aclk] [get_bd_pins sys_rstgen1/slowest_sync_clk]
-  connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins sys_rstgen1/ext_reset_in] [get_bd_pins util_vector_logic_1/Op1]
-  connect_bd_net -net sys_rstgen1_peripheral_aresetn [get_bd_pins clk250m_aresetn] [get_bd_pins sys_rstgen1/peripheral_aresetn]
-  connect_bd_net -net util_vector_logic_1_Res [get_bd_pins pl_rst] [get_bd_pins util_vector_logic_1/Res]
+  connect_bd_net -net adrv9001_spi_irq_1 [get_bd_pins adrv9001_spi_irq] [get_bd_pins xlconcat_0/In4]
+  connect_bd_net -net rx1_dma_irq_1 [get_bd_pins rx1_dma_irq] [get_bd_pins xlconcat_0/In0]
+  connect_bd_net -net rx2_dma_irq_1 [get_bd_pins rx2_dma_irq] [get_bd_pins xlconcat_0/In1]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins pl_clk0] [get_bd_pins sys_ps8/maxihpm0_lpd_aclk] [get_bd_pins sys_ps8/pl_clk0] [get_bd_pins sys_rstgen/slowest_sync_clk]
+  connect_bd_net -net sys_ps8_pl_clk1 [get_bd_pins pl_clk1] [get_bd_pins sys_ps8/pl_clk1] [get_bd_pins sys_ps8/saxihp1_fpd_aclk] [get_bd_pins sys_rstgen1/slowest_sync_clk]
+  connect_bd_net -net sys_ps8_pl_resetn0 [get_bd_pins sys_ps8/pl_resetn0] [get_bd_pins sys_rstgen/ext_reset_in] [get_bd_pins sys_rstgen1/ext_reset_in]
+  connect_bd_net -net sys_rstgen1_peripheral_aresetn [get_bd_pins pl_clk1_rstn] [get_bd_pins sys_rstgen1/peripheral_aresetn]
+  connect_bd_net -net sys_rstgen_peripheral_aresetn [get_bd_pins pl_clk0_rstn] [get_bd_pins sys_rstgen/peripheral_aresetn]
+  connect_bd_net -net tx1_dma_irq_1 [get_bd_pins tx1_dma_irq] [get_bd_pins xlconcat_0/In2]
+  connect_bd_net -net tx2_dma_irq_1 [get_bd_pins tx2_dma_irq] [get_bd_pins xlconcat_0/In3]
+  connect_bd_net -net xlconcat_0_dout [get_bd_pins sys_ps8/pl_ps_irq0] [get_bd_pins xlconcat_0/dout]
 
   # Restore current instance
   current_bd_instance $oldCurInst
@@ -1892,19 +1849,42 @@ proc create_root_design { parentCell } {
 
 
   # Create ports
-  set adrv9001_csn [ create_bd_port -dir O adrv9001_csn ]
-  set adrv9001_miso [ create_bd_port -dir I adrv9001_miso ]
-  set adrv9001_mosi [ create_bd_port -dir O adrv9001_mosi ]
-  set adrv9001_sclk [ create_bd_port -dir O adrv9001_sclk ]
 
   # Create instance: adrv9002_0, and set properties
   set adrv9002_0 [ create_bd_cell -type ip -vlnv nextgenrf.com:user:adrv9001:1.0 adrv9002_0 ]
   set_property -dict [ list \
-   CONFIG.ENABLE_RX1_ILA {0} \
-   CONFIG.ENABLE_RX2_ILA {0} \
-   CONFIG.ENABLE_SPI_ILA {0} \
-   CONFIG.ENABLE_TX1_ILA {0} \
-   CONFIG.ENABLE_TX2_ILA {0} \
+   CONFIG.ENABLE_PL_DGPIO {false} \
+   CONFIG.ENABLE_PL_RX1_ENABLE {false} \
+   CONFIG.ENABLE_PL_RX2_ENABLE {false} \
+   CONFIG.ENABLE_PL_TX1_ENABLE {false} \
+   CONFIG.ENABLE_PL_TX2_ENABLE {false} \
+   CONFIG.ENABLE_RX1_AXIS_RSTN {false} \
+   CONFIG.ENABLE_RX1_ILA {false} \
+   CONFIG.ENABLE_RX2_AXIS_RSTN {false} \
+   CONFIG.ENABLE_RX2_ILA {false} \
+   CONFIG.ENABLE_SPI_ILA {false} \
+   CONFIG.ENABLE_TX1_AXIS_RSTN {false} \
+   CONFIG.ENABLE_TX1_ILA {false} \
+   CONFIG.ENABLE_TX2_AXIS_RSTN {false} \
+   CONFIG.ENABLE_TX2_ILA {false} \
+   CONFIG.SWAP_DIFF_RX1_DCLK {false} \
+   CONFIG.SWAP_DIFF_RX1_IDATA {false} \
+   CONFIG.SWAP_DIFF_RX1_QDATA {false} \
+   CONFIG.SWAP_DIFF_RX1_STROBE {false} \
+   CONFIG.SWAP_DIFF_RX2_DCLK {false} \
+   CONFIG.SWAP_DIFF_RX2_IDATA {true} \
+   CONFIG.SWAP_DIFF_RX2_QDATA {true} \
+   CONFIG.SWAP_DIFF_RX2_STROBE {true} \
+   CONFIG.SWAP_DIFF_TX1_DCLK_IN {true} \
+   CONFIG.SWAP_DIFF_TX1_DCLK_OUT {true} \
+   CONFIG.SWAP_DIFF_TX1_IDATA {true} \
+   CONFIG.SWAP_DIFF_TX1_QDATA {false} \
+   CONFIG.SWAP_DIFF_TX1_STROBE {true} \
+   CONFIG.SWAP_DIFF_TX2_DCLK_IN {false} \
+   CONFIG.SWAP_DIFF_TX2_DCLK_OUT {false} \
+   CONFIG.SWAP_DIFF_TX2_IDATA {false} \
+   CONFIG.SWAP_DIFF_TX2_QDATA {false} \
+   CONFIG.SWAP_DIFF_TX2_STROBE {false} \
  ] $adrv9002_0
 
   # Create instance: axi_cpu_interconnect, and set properties
@@ -1964,22 +1944,9 @@ proc create_root_design { parentCell } {
    CONFIG.DMA_TYPE_SRC {0} \
  ] $tx2_dma
 
-  # Create instance: xlconstant_0, and set properties
-  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
-  set_property -dict [ list \
-   CONFIG.CONST_VAL {0} \
- ] $xlconstant_0
-
-  # Create instance: xlconstant_1, and set properties
-  set xlconstant_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_1 ]
-  set_property -dict [ list \
-   CONFIG.CONST_VAL {0} \
-   CONFIG.CONST_WIDTH {12} \
- ] $xlconstant_1
-
   # Create interface connections
   connect_bd_intf_net -intf_net S00_AXI_1 [get_bd_intf_pins axi_cpu_interconnect/S00_AXI] [get_bd_intf_pins cpu/M_AXI_HPM0_LPD]
-  connect_bd_intf_net -intf_net adrv9002_0_adrv9002 [get_bd_intf_ports adrv9001] [get_bd_intf_pins adrv9002_0/adrv9001]
+  connect_bd_intf_net -intf_net adrv9002_0_adrv9001 [get_bd_intf_ports adrv9001] [get_bd_intf_pins adrv9002_0/adrv9001]
   connect_bd_intf_net -intf_net adrv9002_0_rx1_axis [get_bd_intf_pins adrv9002_0/rx1_axis] [get_bd_intf_pins rx1_dma/s_axis]
   connect_bd_intf_net -intf_net adrv9002_0_rx2_axis [get_bd_intf_pins adrv9002_0/rx2_axis] [get_bd_intf_pins rx2_dma/s_axis]
   connect_bd_intf_net -intf_net axi_cpu_interconnect_M00_AXI [get_bd_intf_pins axi_cpu_interconnect/M00_AXI] [get_bd_intf_pins rx2_dma/s_axi]
@@ -1996,25 +1963,19 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net tx2_dma_m_axis [get_bd_intf_pins adrv9002_0/tx2_axis] [get_bd_intf_pins tx2_dma/m_axis]
 
   # Create port connections
-  connect_bd_net -net adrv9001_miso_1 [get_bd_ports adrv9001_miso] [get_bd_pins adrv9002_0/spi_miso]
   connect_bd_net -net adrv9002_0_rx1_axis_aclk [get_bd_pins adrv9002_0/rx1_axis_aclk] [get_bd_pins rx1_dma/s_axis_aclk]
   connect_bd_net -net adrv9002_0_rx2_axis_aclk [get_bd_pins adrv9002_0/rx2_axis_aclk] [get_bd_pins rx2_dma/s_axis_aclk]
-  connect_bd_net -net adrv9002_0_spi_clk [get_bd_ports adrv9001_sclk] [get_bd_pins adrv9002_0/spi_clk]
-  connect_bd_net -net adrv9002_0_spi_csn [get_bd_ports adrv9001_csn] [get_bd_pins adrv9002_0/spi_csn]
-  connect_bd_net -net adrv9002_0_spi_mosi [get_bd_ports adrv9001_mosi] [get_bd_pins adrv9002_0/spi_mosi]
+  connect_bd_net -net adrv9002_0_spi_irq [get_bd_pins adrv9002_0/spi_irq] [get_bd_pins cpu/adrv9001_spi_irq]
   connect_bd_net -net adrv9002_0_tx1_axis_aclk [get_bd_pins adrv9002_0/tx1_axis_aclk] [get_bd_pins tx1_dma/m_axis_aclk]
   connect_bd_net -net adrv9002_0_tx2_axis_aclk [get_bd_pins adrv9002_0/tx2_axis_aclk] [get_bd_pins tx2_dma/m_axis_aclk]
-  connect_bd_net -net cpu_clk250m [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/clk250m] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk]
-  connect_bd_net -net cpu_clk250m_aresetn [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/clk250m_aresetn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn]
-  connect_bd_net -net irq11_1 [get_bd_pins cpu/irq11] [get_bd_pins tx2_dma/irq]
-  connect_bd_net -net irq12_1 [get_bd_pins cpu/irq12] [get_bd_pins tx1_dma/irq]
-  connect_bd_net -net irq13_1 [get_bd_pins cpu/irq13] [get_bd_pins rx1_dma/irq]
-  connect_bd_net -net irq14_1 [get_bd_pins cpu/irq14] [get_bd_pins rx2_dma/irq]
-  connect_bd_net -net irq15_1 [get_bd_pins adrv9002_0/spi_irq] [get_bd_pins cpu/irq15]
-  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9002_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins cpu/m_axi_aclk] [get_bd_pins rx1_dma/s_axi_aclk] [get_bd_pins rx2_dma/s_axi_aclk] [get_bd_pins tx1_dma/s_axi_aclk] [get_bd_pins tx2_dma/s_axi_aclk]
-  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9002_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins cpu/m_axi_rstn] [get_bd_pins rx1_dma/s_axi_aresetn] [get_bd_pins rx2_dma/s_axi_aresetn] [get_bd_pins tx1_dma/s_axi_aresetn] [get_bd_pins tx2_dma/s_axi_aresetn]
-  connect_bd_net -net xlconstant_0_dout [get_bd_pins adrv9002_0/rx1_pl_en] [get_bd_pins adrv9002_0/rx2_pl_en] [get_bd_pins adrv9002_0/tx1_pl_en] [get_bd_pins adrv9002_0/tx2_pl_en] [get_bd_pins xlconstant_0/dout]
-  connect_bd_net -net xlconstant_1_dout [get_bd_pins adrv9002_0/dgpio_pl_o] [get_bd_pins xlconstant_1/dout]
+  connect_bd_net -net cpu_clk250m [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/pl_clk1] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk]
+  connect_bd_net -net cpu_clk250m_aresetn [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/pl_clk1_rstn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn]
+  connect_bd_net -net rx1_dma_irq_1 [get_bd_pins cpu/rx1_dma_irq] [get_bd_pins rx1_dma/irq]
+  connect_bd_net -net rx2_dma_irq_1 [get_bd_pins cpu/rx2_dma_irq] [get_bd_pins rx2_dma/irq]
+  connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9002_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins cpu/pl_clk0] [get_bd_pins rx1_dma/s_axi_aclk] [get_bd_pins rx2_dma/s_axi_aclk] [get_bd_pins tx1_dma/s_axi_aclk] [get_bd_pins tx2_dma/s_axi_aclk]
+  connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9002_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins cpu/pl_clk0_rstn] [get_bd_pins rx1_dma/s_axi_aresetn] [get_bd_pins rx2_dma/s_axi_aresetn] [get_bd_pins tx1_dma/s_axi_aresetn] [get_bd_pins tx2_dma/s_axi_aresetn]
+  connect_bd_net -net tx1_dma_irq_1 [get_bd_pins cpu/tx1_dma_irq] [get_bd_pins tx1_dma/irq]
+  connect_bd_net -net tx2_dma_irq_1 [get_bd_pins cpu/tx2_dma_irq] [get_bd_pins tx2_dma/irq]
 
   # Create address segments
   assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
@@ -2035,6 +1996,7 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -2046,6 +2008,4 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
-
-common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 

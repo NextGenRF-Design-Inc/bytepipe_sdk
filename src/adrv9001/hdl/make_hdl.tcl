@@ -147,8 +147,8 @@ map_port adrv9001 spi_clk
 map_port adrv9001 spi_csn
 
 # Infer Axis bus interface
-ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
-ipx::infer_bus_interface {rx2_axis_tdata rx2_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid rx1_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {rx2_axis_tdata rx2_axis_tvalid rx2_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 ipx::infer_bus_interface {tx1_axis_tdata tx1_axis_tvalid tx1_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 ipx::infer_bus_interface {tx2_axis_tdata tx2_axis_tvalid tx2_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 ipx::associate_bus_interfaces -busif rx1_axis -clock rx1_axis_aclk [ipx::current_core]
