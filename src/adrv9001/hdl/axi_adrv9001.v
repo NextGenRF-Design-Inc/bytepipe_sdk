@@ -44,7 +44,11 @@ module axi_adrv9001#(
   parameter ENABLE_PL_RX1_ENABLE    = 0,   
   parameter ENABLE_PL_RX2_ENABLE    = 0,   
   parameter ENABLE_PL_TX1_ENABLE    = 0,   
-  parameter ENABLE_PL_TX2_ENABLE    = 0     
+  parameter ENABLE_PL_TX2_ENABLE    = 0,
+  parameter ENABLE_RX1_DEBUG        = 0,  
+  parameter ENABLE_RX2_DEBUG        = 0, 
+  parameter ENABLE_TX1_DEBUG        = 0, 
+  parameter ENABLE_TX2_DEBUG        = 0   
   )(
   output wire           rx1_en,
   output wire           rx2_en,
@@ -55,30 +59,30 @@ module axi_adrv9001#(
   inout  wire [11:0]    dgpio,
     
   input  wire           rx1_dclk_p,          
-  input  wire			rx1_dclk_n,       
-  input  wire			rx1_strobe_p, 
-  input  wire			rx1_strobe_n,    
-  input  wire			rx1_idata_p, 
-  input  wire        	rx1_idata_n,      
-  input  wire        	rx1_qdata_p,  
-  input  wire		    rx1_qdata_n,     
+  input  wire           rx1_dclk_n,       
+  input  wire           rx1_strobe_p, 
+  input  wire           rx1_strobe_n,    
+  input  wire           rx1_idata_p, 
+  input  wire           rx1_idata_n,      
+  input  wire           rx1_qdata_p,  
+  input  wire           rx1_qdata_n,     
   
-  output wire [31:0]	rx1_axis_tdata,    
+  output wire [31:0]    rx1_axis_tdata,    
   output wire           rx1_axis_tvalid, 
   input  wire           rx1_axis_tready,  
   output wire           rx1_axis_aclk,
   output wire           rx1_axis_rstn,  
     
   input  wire           rx2_dclk_p,          
-  input  wire			rx2_dclk_n,       
-  input  wire			rx2_strobe_p, 
-  input  wire			rx2_strobe_n,    
-  input  wire			rx2_idata_p, 
-  input  wire        	rx2_idata_n,      
-  input  wire        	rx2_qdata_p,  
-  input  wire		    rx2_qdata_n,     
+  input  wire           rx2_dclk_n,       
+  input  wire           rx2_strobe_p, 
+  input  wire           rx2_strobe_n,    
+  input  wire           rx2_idata_p, 
+  input  wire           rx2_idata_n,      
+  input  wire           rx2_qdata_p,  
+  input  wire           rx2_qdata_n,     
   
-  output wire [31:0]	rx2_axis_tdata,    
+  output wire [31:0]    rx2_axis_tdata,    
   output wire           rx2_axis_tvalid, 
   input  wire           rx2_axis_tready,
   output wire           rx2_axis_aclk,
@@ -87,15 +91,15 @@ module axi_adrv9001#(
   input  wire           tx1_ref_clk_p,     
   input  wire           tx1_ref_clk_n,       
   output wire           tx1_dclk_p,  
-  output wire			tx1_dclk_n,      
-  output wire			tx1_strobe_p,   
-  output wire			tx1_strobe_n,    
-  output wire			tx1_idata_p,     
-  output wire        	tx1_idata_n,       
-  output wire        	tx1_qdata_p,    
-  output wire			tx1_qdata_n, 
+  output wire           tx1_dclk_n,      
+  output wire           tx1_strobe_p,   
+  output wire           tx1_strobe_n,    
+  output wire           tx1_idata_p,     
+  output wire           tx1_idata_n,       
+  output wire           tx1_qdata_p,    
+  output wire           tx1_qdata_n, 
    
-  input  wire [31:0]	tx1_axis_tdata,  
+  input  wire [31:0]    tx1_axis_tdata,  
   output wire           tx1_axis_tready,    
   input  wire           tx1_axis_tvalid,   
   output wire           tx1_axis_aclk,    
@@ -104,15 +108,15 @@ module axi_adrv9001#(
   input  wire           tx2_ref_clk_p,     
   input  wire           tx2_ref_clk_n,  
   output wire           tx2_dclk_p,  
-  output wire			tx2_dclk_n,      
-  output wire			tx2_strobe_p,   
-  output wire			tx2_strobe_n,    
-  output wire			tx2_idata_p,     
-  output wire        	tx2_idata_n,       
-  output wire        	tx2_qdata_p,    
-  output wire			tx2_qdata_n, 
+  output wire           tx2_dclk_n,      
+  output wire           tx2_strobe_p,   
+  output wire           tx2_strobe_n,    
+  output wire           tx2_idata_p,     
+  output wire           tx2_idata_n,       
+  output wire           tx2_qdata_p,    
+  output wire           tx2_qdata_n, 
   
-  input  wire [31:0]	tx2_axis_tdata,  
+  input  wire [31:0]    tx2_axis_tdata,  
   output wire           tx2_axis_tready,    
   input  wire           tx2_axis_tvalid,   
   output wire           tx2_axis_aclk,        
@@ -152,7 +156,31 @@ module axi_adrv9001#(
   output wire [31:0]    s_axi_rdata,
   output wire [1:0]     s_axi_rresp,
   output wire           s_axi_rvalid,
-  input  wire           s_axi_rready 
+  input  wire           s_axi_rready,
+
+  output wire           rx1_en_dbg,   
+  output wire [15:0]    rx1_axis_idata_dbg, 
+  output wire [15:0]    rx1_axis_qdata_dbg,     
+  output wire           rx1_axis_valid_dbg,   
+  output wire           rx1_axis_ready_dbg, 
+
+  output wire           rx2_en_dbg,   
+  output wire [15:0]    rx2_axis_idata_dbg, 
+  output wire [15:0]    rx2_axis_qdata_dbg,     
+  output wire           rx2_axis_valid_dbg,   
+  output wire           rx2_axis_ready_dbg, 
+
+  output wire           tx1_en_dbg,   
+  output wire [15:0]    tx1_axis_idata_dbg, 
+  output wire [15:0]    tx1_axis_qdata_dbg,     
+  output wire           tx1_axis_valid_dbg,   
+  output wire           tx1_axis_ready_dbg, 
+
+  output wire           tx2_en_dbg,   
+  output wire [15:0]    tx2_axis_idata_dbg, 
+  output wire [15:0]    tx2_axis_qdata_dbg,     
+  output wire           tx2_axis_valid_dbg,   
+  output wire           tx2_axis_ready_dbg 
 );
    
   
@@ -215,6 +243,78 @@ endgenerate
 
 
 generate
+
+  if( ENABLE_RX1_DEBUG ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    rx1_debug_cdc_i (
+      .s_cdc_tdata  ({ rx1_en, rx1_axis_tdata, rx1_axis_tvalid, rx1_axis_tready } ),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  ({ rx1_en_dgb, rx1_axis_idata_dbg, rx1_axis_qdata_dbg, rx1_axis_valid_dbg, rx1_axis_ready_dbg })
+    );
+  
+  end else begin
+    assign rx1_en_dgb = 0;    
+    assign rx1_axis_idata_dbg = 0; 
+    assign rx1_axis_qdata_dbg = 0;     
+    assign rx1_axis_valid_dbg = 0;   
+    assign rx1_axis_ready_dbg = 0;       
+  end
+  
+  if( ENABLE_RX2_DEBUG ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    rx2_debug_cdc_i (
+      .s_cdc_tdata  ({ rx2_en, rx2_axis_tdata, rx2_axis_tvalid, rx2_axis_tready } ),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  ({ rx2_en_dgb, rx2_axis_idata_dbg, rx2_axis_qdata_dbg, rx2_axis_valid_dbg, rx2_axis_ready_dbg })
+    );
+  
+  end else begin
+    assign rx2_en_dgb = 0;    
+    assign rx2_axis_idata_dbg = 0; 
+    assign rx2_axis_qdata_dbg = 0;     
+    assign rx2_axis_valid_dbg = 0;   
+    assign rx2_axis_ready_dbg = 0;       
+  end
+
+  if( ENABLE_TX1_DEBUG ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    tx1_debug_cdc_i (
+      .s_cdc_tdata  ({ tx1_en, tx1_axis_tdata, tx1_axis_tvalid, tx1_axis_tready } ),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  ({ tx1_en_dgb, tx1_axis_idata_dbg, tx1_axis_qdata_dbg, tx1_axis_valid_dbg, tx1_axis_ready_dbg })
+    );
+  
+  end else begin
+    assign tx1_en_dbg = 0;    
+    assign tx1_axis_idata_dbg = 0; 
+    assign tx1_axis_qdata_dbg = 0;     
+    assign tx1_axis_valid_dbg = 0;   
+    assign tx1_axis_ready_dbg = 0;       
+  end  
+  
+  if( ENABLE_TX2_DEBUG ) begin
+  
+    cdc #(
+      .DATA_WIDTH(1) )
+    tx2_debug_cdc_i (
+      .s_cdc_tdata  ({ tx2_en, tx2_axis_tdata, tx2_axis_tvalid, tx2_axis_tready } ),
+      .m_cdc_clk    (s_axi_aclk),
+      .m_cdc_tdata  ({ tx2_en_dgb, tx2_axis_idata_dbg, tx2_axis_qdata_dbg, tx2_axis_valid_dbg, tx2_axis_ready_dbg })
+    );
+  
+  end else begin
+    assign tx2_en_dgb = 0;    
+    assign tx2_axis_idata_dbg = 0; 
+    assign tx2_axis_qdata_dbg = 0;     
+    assign tx2_axis_valid_dbg = 0;   
+    assign tx2_axis_ready_dbg = 0;       
+  end    
   
   if( ENABLE_TX1_ILA) begin
     adrv9001_axis_ila tx1_ila(  
