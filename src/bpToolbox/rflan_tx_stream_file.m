@@ -32,7 +32,7 @@ h.SetTxDisableDelay(TxPort, 200);
 fs = h.GetSampleRate(TxPort);
 
 % Enable continuous transmit of the iq data
-h.RflanStreamStart(TxPort, cyclic, 76800);
+h.RflanStreamStart(TxPort, cyclic, 38400);
 
 % Get Carrier Frequency 
 fc = h.GetCarrierFrequency(TxPort);
