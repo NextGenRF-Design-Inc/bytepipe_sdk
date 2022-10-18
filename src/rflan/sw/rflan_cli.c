@@ -770,7 +770,7 @@ static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_strea
     return;
   }
 
-  Cli_Printf(CliInstance,"Stream Start %s\r\n",StatusString(status));
+  Cli_Printf(CliInstance,"Stream Stop %s\r\n",StatusString(status));
 }
 
 static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, void *ref)
