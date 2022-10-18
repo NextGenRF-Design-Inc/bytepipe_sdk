@@ -69,6 +69,8 @@ typedef enum
   PibStatus_InvalidParameter      = (PIB_STATUS_OFFSET - 3),
 } pib_status_t;
 
+
+
 /**
 ** Variable Type Definition
 */
@@ -82,8 +84,8 @@ typedef enum {
 	PibTypeS32     	= 6, 	///< Signed 32bit word
 	PibTypeU64     	= 7, 	///< Unsigned 64bit word
 	PibTypeS64     	= 8, 	///< Signed 64bit word
-	PibTypeFloat		= 9, 	///< Single Precision Float
-	PibTypeDouble		= 10,	///< Double Precision Float
+	PibTypeFloat    = 9, 	///< Single Precision Float
+	PibTypeDouble   = 10,	///< Double Precision Float
 	PibTypeStr    	= 11,	///< String
 }PibType_t;
 
@@ -92,10 +94,10 @@ typedef enum {
 */
 typedef struct
 {
-  char     				name[PIB_NAME_SIZE + 1];  		///< Name of Attribute
-  uint16_t      	offset;    										///< Offset of Attribute
-  uint8_t					var_type;											///< Variable Type
-  uint8_t      	  flags;      									///< Attribute Entry is modifiable
+  char            name[PIB_NAME_SIZE + 1];      ///< Name of Attribute
+  uint16_t        offset;                       ///< Offset of Attribute
+  uint8_t		  var_type;                     ///< Variable Type
+  uint8_t      	  flags;                        ///< Attribute Entry is modifiable
 } pib_def_t;
 
 /**
@@ -115,10 +117,10 @@ typedef struct
 */
 typedef struct
 {
-	void					 *Params;												///< Reference To PIB Data
-	uint16_t				ParamsSize;										///< Size in bytes of Params
+	void         *Params;                       ///< Reference To PIB Data
+	uint16_t      ParamsSize;                   ///< Size in bytes of Params
   uint16_t        PibLen;                       ///< Number of parameters in PIB
-	pib_def_t      *Def;								    			///< Definition table
+	pib_def_t    *Def;                          ///< Definition table
 } pib_t;
 
 
@@ -134,6 +136,7 @@ int32_t Pib_SetByName           ( pib_t *Instance, char *name, uint8_t *value );
 int32_t Pib_StrToNum            ( char *p, PibType_t type, void *param );
 int32_t Pib_ValueToString       ( pib_t *Instance, int32_t id, uint8_t *value, char *str );
 int32_t Pib_SetByNameByString   ( pib_t *Instance, char *name, char *str );
+const char *Pib_TypeName        ( PibType_t type );
 
 #ifdef __cplusplus
 }

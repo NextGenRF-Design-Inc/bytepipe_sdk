@@ -29,6 +29,30 @@ static int32_t pib_typeSize( PibType_t type )
 	return len;
 }
 
+const char *Pib_TypeName( PibType_t type )
+{
+  const char *str = NULL;
+
+	switch(type)
+	{
+	case PibTypeChar:       str = "char"; 	break;
+	case PibTypeU8: 		str = "uint8"; 	break;
+	case PibTypeS8: 		str = "int8"; 	break;
+	case PibTypeU16: 		str = "uint16";	break;
+	case PibTypeS16: 		str = "int16"; 	break;
+	case PibTypeU32: 		str = "uint32";	break;
+	case PibTypeS32: 		str = "int32";  break;
+	case PibTypeU64: 		str = "uint64"; break;
+	case PibTypeS64: 		str = "int64"; 	break;
+	case PibTypeFloat: 	    str = "float"; 	break;
+	case PibTypeDouble:     str = "double"; break;
+	case PibTypeStr: 		str = "string";	break;
+	default:				str = NULL;     break;
+	}
+
+	return str;
+}
+
 int32_t Pib_StrToNum( char *p, PibType_t type, void *param )
 {
 	short       tmpResult = -1;
