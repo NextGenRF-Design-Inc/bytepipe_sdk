@@ -43,6 +43,7 @@ php
 ruby
 git
 wget
+unzip
 ```
 
 # Vivado Design Suite
