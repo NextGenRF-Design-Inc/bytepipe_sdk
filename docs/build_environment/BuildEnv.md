@@ -44,6 +44,7 @@ ruby
 git
 wget
 unzip
+zip
 ```
 
 # Vivado Design Suite
