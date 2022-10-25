@@ -11,7 +11,7 @@ h.Open('COM16');
 TxPort = h.Tx2;
 
 % Set Tx Settings
-h.SetTxAttn(TxPort, 0);
+h.SetTxAttn(TxPort, 10);
 h.SetTxBoost(TxPort, 0);
 
 % Load constant IQ value

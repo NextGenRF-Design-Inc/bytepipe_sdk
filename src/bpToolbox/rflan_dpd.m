@@ -9,14 +9,14 @@ h.Open('COM4');
 TxPort = h.Tx2;
 
 % Set Tx Attenuation
-h.SetTxAttn(TxPort, 0);
+h.SetTxAttn(TxPort, 7);
 h.SetTxBoost(TxPort, 1);
 
 % Load Transmit buffer with IQ data from file on SD card
 h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_15p36M_bw_10M.csv');
 
-% Set Delay before enabling SSI
-h.SetSsiEnableDelay(TxPort, 100);
+% Delay in samples between rising edge of enable and tx_axis_tready
+h.SetEnableDelay(TxPort, 500);
 
 %% Disable DPD
 h.SetDpdEnable(TxPort, 0);

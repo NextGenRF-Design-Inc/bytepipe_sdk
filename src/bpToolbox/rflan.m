@@ -127,7 +127,6 @@ classdef rflan < handle
         Rx2 = 'Rx2';
         
         MaxWriteIqLen = 64;
-        RxSampleDelay = 20;
         
         Adrv9001TxDataPath_DMA = 0;
         ADRV9001TxDataPath_Constant = 1;
@@ -250,12 +249,22 @@ classdef rflan < handle
     
     % Stream
     methods
+        
+        % Start Stream of IQ data to memory on the BytePipe.
+        % If Cyclic is 0 then the corresponding port will be enabled for
+        % SampleCnt number of samples.  If the Port is a transmit port IQ 
+        % data that has been previously loaded into memory will be streamed
+        % to the transmitter.  If the Port is a receiver port then
+        % SampleCnt number of samples will be streamed from the receiver to
+        % memory and availble for subsequent read out.  If Cyclic is 1 then
+        % the corresponding port will continuously stream SampleCnt number
+        % of samples to and from memory.
         function RflanStreamStart(obj, Port, Cyclic, SampleCnt)
             
             if( strcmp(Port, obj.Tx1) || strcmp(Port, obj.Tx2))
                 obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
             else
-                obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt + obj.RxSampleDelay))]);
+                obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
             end
         end
         
@@ -297,7 +306,7 @@ classdef rflan < handle
             configureCallback(obj.s, "off");
             obj.s.flush();
             
-            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset + obj.RxSampleDelay)) ' ' char(num2str(SampleCnt))]);
+            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset)) ' ' char(num2str(SampleCnt))]);
             
             tic;
             str = '';
@@ -460,6 +469,10 @@ classdef rflan < handle
             
         end
 
+        function v = GetRxTestData( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'TestData']);
+        end
+        
         function v = GetEnableMode( obj, Port )
             v = obj.Adrv9001GetParam([Port 'EnableMode']);
         end
@@ -683,7 +696,15 @@ classdef rflan < handle
         
         function v = GetSsiDataDelay( obj, Port )
             v = obj.Adrv9001GetParam([Port 'SsiDataDelay']);            
-        end        
+        end   
+        
+        function v = GetDisableDelay( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DisableDly']);            
+        end 
+
+        function v = GetEnableDelay( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'EnableDly']);            
+        end         
         
         function v = GetFileList( obj, filter)
             configureCallback(obj.s, "off");
@@ -733,6 +754,10 @@ classdef rflan < handle
 
         function SetTestMode( obj, Port, v )
             obj.Adrv9001SetParam([Port 'TestMode'], num2str(v));
+        end
+        
+        function SetTestModeData( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'TestData'], num2str(v,"%d"));
         end
         
         function SetDpdEnable( obj, Port, v )
@@ -889,17 +914,13 @@ classdef rflan < handle
         function SetTxIqDataPath( obj, Port, v )
             obj.Adrv9001SetParam([Port 'IqDataPath'], num2str(v));            
         end      
-        
-        function SetTxDisableDelay( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'DisableDly'], num2str(v));            
-        end 
-        
-        function SetSsiEnableDelay( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'SsiEnableDly'], num2str(v));            
+                
+        function SetEnableDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'EnableDly'], num2str(v));            
         end
         
-        function SetSsiDisableDelay( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'SsiDisableDly'], num2str(v));            
+        function SetDisableDelay( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DisableDly'], num2str(v));            
         end  
         
     end
