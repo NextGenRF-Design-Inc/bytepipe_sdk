@@ -1,10 +1,10 @@
 `timescale 1ns/100ps
 
 module system_top (
-  inout  wire             adrv9001_sclk,
-  inout  wire             adrv9001_mosi,
-  inout  wire             adrv9001_miso,
-  inout  wire             adrv9001_csn,
+  output wire             adrv9001_sclk,
+  output wire             adrv9001_mosi,
+  input  wire             adrv9001_miso,
+  output wire             adrv9001_csn,
 
   output wire             adrv9001_rstn,
   output wire             adrv9001_tx1_en,
@@ -56,9 +56,22 @@ module system_top (
     
 );       
           
+wire [11:0] dgpio_i;
+wire [11:0] dgpio_t;
+wire [11:0] dgpio_o;
+          
+IOBUF IOBUF_inst (
+   .O(dgpio_i),   
+   .I(dgpio_o), 
+   .IO(adrv9001_dgpio), 
+   .T(dgpio_t)    
+);
+          
 system system_i
    (.adrv9001_spi_csn(adrv9001_csn),
-    .adrv9001_dgpio(adrv9001_dgpio),
+    .adrv9001_dgpio_t(dgpio_t),
+    .adrv9001_dgpio_i(dgpio_i),
+    .adrv9001_dgpio_o(dgpio_o),    
     .adrv9001_irq(adrv9001_irq),
     .adrv9001_spi_miso(adrv9001_miso),
     .adrv9001_spi_mosi(adrv9001_mosi),

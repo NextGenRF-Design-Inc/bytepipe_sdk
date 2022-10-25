@@ -199,6 +199,7 @@ proc create_hier_cell_cpu { parentCell nameHier } {
 
 
   # Create pins
+  create_bd_pin -dir I adrv9001_irq
   create_bd_pin -dir I adrv9001_spi_irq
   create_bd_pin -dir O pl_clk0
   create_bd_pin -dir O -from 0 -to 0 pl_clk0_rstn
@@ -1779,7 +1780,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   # Create instance: xlconcat_0, and set properties
   set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
   set_property -dict [ list \
-   CONFIG.NUM_PORTS {5} \
+   CONFIG.NUM_PORTS {6} \
  ] $xlconcat_0
 
   # Create interface connections
@@ -1787,6 +1788,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_intf_net -intf_net axi_hp1_interconnect_M00_AXI [get_bd_intf_pins S_AXI_HP1_FPD] [get_bd_intf_pins sys_ps8/S_AXI_HP1_FPD]
 
   # Create port connections
+  connect_bd_net -net adrv9001_irq_1 [get_bd_pins adrv9001_irq] [get_bd_pins xlconcat_0/In5]
   connect_bd_net -net adrv9001_spi_irq_1 [get_bd_pins adrv9001_spi_irq] [get_bd_pins xlconcat_0/In4]
   connect_bd_net -net rx1_dma_irq_1 [get_bd_pins rx1_dma_irq] [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net rx2_dma_irq_1 [get_bd_pins rx2_dma_irq] [get_bd_pins xlconcat_0/In1]
@@ -1844,18 +1846,14 @@ proc create_root_design { parentCell } {
   set adrv9002_0 [ create_bd_cell -type ip -vlnv nextgenrf.com:user:adrv9001:1.0 adrv9002_0 ]
   set_property -dict [ list \
    CONFIG.ENABLE_PL_DGPIO {false} \
-   CONFIG.ENABLE_PL_RX1_ENABLE {false} \
-   CONFIG.ENABLE_PL_RX2_ENABLE {false} \
-   CONFIG.ENABLE_PL_TX1_ENABLE {false} \
-   CONFIG.ENABLE_PL_TX2_ENABLE {false} \
-   CONFIG.ENABLE_RX1_DEBUG {false} \
+   CONFIG.ENABLE_PL_RX1_ENABLE {true} \
+   CONFIG.ENABLE_PL_RX2_ENABLE {true} \
+   CONFIG.ENABLE_PL_TX1_ENABLE {true} \
+   CONFIG.ENABLE_PL_TX2_ENABLE {true} \
    CONFIG.ENABLE_RX1_ILA {false} \
-   CONFIG.ENABLE_RX2_DEBUG {false} \
    CONFIG.ENABLE_RX2_ILA {false} \
    CONFIG.ENABLE_SPI_ILA {false} \
-   CONFIG.ENABLE_TX1_DEBUG {false} \
    CONFIG.ENABLE_TX1_ILA {false} \
-   CONFIG.ENABLE_TX2_DEBUG {false} \
    CONFIG.ENABLE_TX2_ILA {false} \
    CONFIG.SWAP_DIFF_RX1_DCLK {false} \
    CONFIG.SWAP_DIFF_RX1_IDATA {false} \
@@ -1898,7 +1896,7 @@ proc create_root_design { parentCell } {
   set rx1_dma [ create_bd_cell -type ip -vlnv analog.com:user:axi_dmac:1.0 rx1_dma ]
   set_property -dict [ list \
    CONFIG.CYCLIC {true} \
-   CONFIG.DMA_DATA_WIDTH_DEST {32} \
+   CONFIG.DMA_DATA_WIDTH_DEST {64} \
    CONFIG.DMA_DATA_WIDTH_SRC {32} \
    CONFIG.DMA_TYPE_SRC {1} \
  ] $rx1_dma
@@ -1910,6 +1908,7 @@ proc create_root_design { parentCell } {
    CONFIG.AXI_SLICE_SRC {false} \
    CONFIG.CYCLIC {true} \
    CONFIG.DMA_2D_TRANSFER {false} \
+   CONFIG.DMA_DATA_WIDTH_DEST {64} \
    CONFIG.DMA_DATA_WIDTH_SRC {32} \
    CONFIG.DMA_TYPE_DEST {0} \
    CONFIG.DMA_TYPE_SRC {1} \
@@ -1921,6 +1920,7 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.CYCLIC {true} \
    CONFIG.DMA_DATA_WIDTH_DEST {32} \
+   CONFIG.DMA_DATA_WIDTH_SRC {64} \
    CONFIG.DMA_TYPE_DEST {1} \
    CONFIG.DMA_TYPE_SRC {0} \
  ] $tx1_dma
@@ -1930,6 +1930,7 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.CYCLIC {true} \
    CONFIG.DMA_DATA_WIDTH_DEST {32} \
+   CONFIG.DMA_DATA_WIDTH_SRC {64} \
    CONFIG.DMA_TYPE_DEST {1} \
    CONFIG.DMA_TYPE_SRC {0} \
  ] $tx2_dma
@@ -1953,17 +1954,22 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net tx2_dma_m_axis [get_bd_intf_pins adrv9002_0/tx2_axis] [get_bd_intf_pins tx2_dma/m_axis]
 
   # Create port connections
+  connect_bd_net -net adrv9002_0_pl_irq [get_bd_pins adrv9002_0/pl_irq] [get_bd_pins cpu/adrv9001_irq]
   connect_bd_net -net adrv9002_0_rx1_axis_aclk [get_bd_pins adrv9002_0/rx1_axis_aclk] [get_bd_pins rx1_dma/s_axis_aclk]
   connect_bd_net -net adrv9002_0_rx2_axis_aclk [get_bd_pins adrv9002_0/rx2_axis_aclk] [get_bd_pins rx2_dma/s_axis_aclk]
   connect_bd_net -net adrv9002_0_spi_irq [get_bd_pins adrv9002_0/spi_irq] [get_bd_pins cpu/adrv9001_spi_irq]
   connect_bd_net -net adrv9002_0_tx1_axis_aclk [get_bd_pins adrv9002_0/tx1_axis_aclk] [get_bd_pins tx1_dma/m_axis_aclk]
   connect_bd_net -net adrv9002_0_tx2_axis_aclk [get_bd_pins adrv9002_0/tx2_axis_aclk] [get_bd_pins tx2_dma/m_axis_aclk]
   connect_bd_net -net rx1_dma_irq_1 [get_bd_pins cpu/rx1_dma_irq] [get_bd_pins rx1_dma/irq]
+  connect_bd_net -net rx1_dma_s_axis_xfer_req [get_bd_pins adrv9002_0/rx1_pl_en] [get_bd_pins rx1_dma/s_axis_xfer_req]
   connect_bd_net -net rx2_dma_irq_1 [get_bd_pins cpu/rx2_dma_irq] [get_bd_pins rx2_dma/irq]
+  connect_bd_net -net rx2_dma_s_axis_xfer_req [get_bd_pins adrv9002_0/rx2_pl_en] [get_bd_pins rx2_dma/s_axis_xfer_req]
   connect_bd_net -net sys_cpu_clk [get_bd_pins adrv9002_0/s_axi_aclk] [get_bd_pins axi_cpu_interconnect/ACLK] [get_bd_pins axi_cpu_interconnect/M00_ACLK] [get_bd_pins axi_cpu_interconnect/M01_ACLK] [get_bd_pins axi_cpu_interconnect/M02_ACLK] [get_bd_pins axi_cpu_interconnect/M03_ACLK] [get_bd_pins axi_cpu_interconnect/M04_ACLK] [get_bd_pins axi_cpu_interconnect/S00_ACLK] [get_bd_pins axi_hp1_interconnect/aclk] [get_bd_pins cpu/pl_clk0] [get_bd_pins rx1_dma/m_dest_axi_aclk] [get_bd_pins rx1_dma/s_axi_aclk] [get_bd_pins rx2_dma/m_dest_axi_aclk] [get_bd_pins rx2_dma/s_axi_aclk] [get_bd_pins tx1_dma/m_src_axi_aclk] [get_bd_pins tx1_dma/s_axi_aclk] [get_bd_pins tx2_dma/m_src_axi_aclk] [get_bd_pins tx2_dma/s_axi_aclk]
   connect_bd_net -net sys_cpu_resetn [get_bd_pins adrv9002_0/s_axi_aresetn] [get_bd_pins axi_cpu_interconnect/ARESETN] [get_bd_pins axi_cpu_interconnect/M00_ARESETN] [get_bd_pins axi_cpu_interconnect/M01_ARESETN] [get_bd_pins axi_cpu_interconnect/M02_ARESETN] [get_bd_pins axi_cpu_interconnect/M03_ARESETN] [get_bd_pins axi_cpu_interconnect/M04_ARESETN] [get_bd_pins axi_cpu_interconnect/S00_ARESETN] [get_bd_pins axi_hp1_interconnect/aresetn] [get_bd_pins cpu/pl_clk0_rstn] [get_bd_pins rx1_dma/m_dest_axi_aresetn] [get_bd_pins rx1_dma/s_axi_aresetn] [get_bd_pins rx2_dma/m_dest_axi_aresetn] [get_bd_pins rx2_dma/s_axi_aresetn] [get_bd_pins tx1_dma/m_src_axi_aresetn] [get_bd_pins tx1_dma/s_axi_aresetn] [get_bd_pins tx2_dma/m_src_axi_aresetn] [get_bd_pins tx2_dma/s_axi_aresetn]
   connect_bd_net -net tx1_dma_irq_1 [get_bd_pins cpu/tx1_dma_irq] [get_bd_pins tx1_dma/irq]
+  connect_bd_net -net tx1_dma_m_axis_xfer_req [get_bd_pins adrv9002_0/tx1_pl_en] [get_bd_pins tx1_dma/m_axis_xfer_req]
   connect_bd_net -net tx2_dma_irq_1 [get_bd_pins cpu/tx2_dma_irq] [get_bd_pins tx2_dma/irq]
+  connect_bd_net -net tx2_dma_m_axis_xfer_req [get_bd_pins adrv9002_0/tx2_pl_en] [get_bd_pins tx2_dma/m_axis_xfer_req]
 
   # Create address segments
   assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force

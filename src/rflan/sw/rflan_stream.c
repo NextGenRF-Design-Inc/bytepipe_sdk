@@ -112,7 +112,7 @@ int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t 
   if((status = RflanStream_ChannelToAdrvPortChannel( Channel, &AdiPort, &AdiChannel )) != 0)
     return status;
 
-  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel, WordCnt )) != 0)
+  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
     return status;
 
   if((status = AxiDma_Stop( Dma )) != 0)
@@ -176,12 +176,12 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
 
   if( Cyclic )
   {
-    if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel, ADRV9001_TDD_ENABLE_DUR_FOREVER )) != 0)
+    if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
       return status;
   }
   else
   {
-    if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel, WordCnt )) != 0)
+    if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
       return status;
   }
 

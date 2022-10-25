@@ -43,6 +43,10 @@ bsp config total_heap_size "16777216"
 bsp config generate_runtime_stats "1"
 bsp config use_strfunc "0"
 bsp config use_lfn "1"
+#bsp config tick_setup "true"
+#bsp config enable_stm_event_trace "true"
+#bsp config enable_timer_tick_trace "true"
+#bsp config stm_channel "0"
 bsp write
 bsp reload
 catch {bsp regenerate}

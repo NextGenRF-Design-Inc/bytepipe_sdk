@@ -123,6 +123,18 @@ static const char *StatusString( int32_t status )
     case Adrv9001Status_InvalidEnableMode:
       return "Adrv9001 Invalid Enable Mode";
 
+    case Adrv9001Status_Tx1SsiCalErr:
+    	return "Adrv9001 Tx1 SSI Calibration Error";
+
+    case Adrv9001Status_Tx2SsiCalErr:
+    	return "Adrv9001 Tx2 SSI Calibration Error";
+
+    case Adrv9001Status_Rx1SsiCalErr:
+    	return "Adrv9001 Rx1 SSI Calibration Error";
+
+    case Adrv9001Status_Rx2SsiCalErr:
+    	return "Adrv9001 Rx2 SSI Calibration Error";
+
 //    case Adrv9001Status_SsiSetErr:
 //      return "Adrv9001";
 //
