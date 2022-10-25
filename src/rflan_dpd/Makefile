@@ -6,7 +6,7 @@ all: clean sw
 
 sw:
 	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v09.29.22/rflan_$$DEVICE.xsa" -O $(PROJECT)/rflan_$$DEVICE.xsa || true; \
+	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v10.25.22/rflan_$$DEVICE.xsa" -O $(PROJECT)/rflan_$$DEVICE.xsa || true; \
 	$(MAKE) -f $(PROJECT_DIR)/../adrv9001/Makefile sdk; \
 	source $(PROJECT_DIR)/rflan_dpd.sh; build_sw $$DEVICE
   
