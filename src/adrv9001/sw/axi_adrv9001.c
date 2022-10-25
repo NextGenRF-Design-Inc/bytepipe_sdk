@@ -12,36 +12,32 @@ extern XScuGic          xInterruptController;
 
 
 /* Register Address */
-#define ADRV9001_TX1_EN_ADDR              ((0) << 2)
-#define ADRV9001_TX2_EN_ADDR              ((1) << 2)
-#define ADRV9001_RX1_EN_ADDR              ((2) << 2)
-#define ADRV9001_RX2_EN_ADDR              ((3) << 2)
-#define ADRV9001_RSTN_ADDR                ((4) << 2)
+#define ADRV9001_TX1_MODE_ADDR            ((0 ) << 2)
+#define ADRV9001_TX2_MODE_ADDR            ((1 ) << 2)
+#define ADRV9001_RX1_MODE_ADDR            ((2 ) << 2)
+#define ADRV9001_RX2_MODE_ADDR            ((3 ) << 2)
+#define ADRV9001_RSTN_ADDR                ((4 ) << 2)
 
-#define ADRV9001_TX1_DATA_PATH_ADDR       ((5) << 2)
-#define ADRV9001_TX2_DATA_PATH_ADDR       ((6) << 2)
+#define ADRV9001_TX1_ENABLE_DLY_ADDR      ((5 ) << 2)
+#define ADRV9001_TX2_ENABLE_DLY_ADDR      ((6 ) << 2)
+#define ADRV9001_RX1_ENABLE_DLY_ADDR      ((7 ) << 2)
+#define ADRV9001_RX2_ENABLE_DLY_ADDR      ((8 ) << 2)
 
-#define ADRV9001_CH1_DATA_ADDR            ((7) << 2)
-#define ADRV9001_CH2_DATA_ADDR            ((8) << 2)
+#define ADRV9001_TX1_DISABLE_DLY_ADDR     ((9 ) << 2)
+#define ADRV9001_TX2_DISABLE_DLY_ADDR     ((10) << 2)
+#define ADRV9001_RX1_DISABLE_DLY_ADDR     ((11) << 2)
+#define ADRV9001_RX2_DISABLE_DLY_ADDR     ((12) << 2)
 
-#define ADRV9001_DGPIO_DIR_ADDR           ((9) << 2)
-#define ADRV9001_DGPIO_IO_ADDR            ((10) << 2)
+#define ADRV9001_DGPIO_DIR_ADDR           ((13) << 2)
+#define ADRV9001_DGPIO_IO_ADDR            ((14) << 2)
 
-#define ADRV9001_TX1_DISABLE_CNT          ((11) << 2)
-#define ADRV9001_TX1_SSI_ENABLE_CNT       ((12) << 2)
+#define ADRV9001_CH1_DATA_ADDR            ((15) << 2)
+#define ADRV9001_CH2_DATA_ADDR            ((16) << 2)
 
-#define ADRV9001_TX2_DISABLE_CNT          ((13) << 2)
-#define ADRV9001_TX2_SSI_ENABLE_CNT       ((14) << 2)
+#define ADRV9001_TX1_DATA_PATH_ADDR       ((17) << 2)
+#define ADRV9001_TX2_DATA_PATH_ADDR       ((18) << 2)
 
-#define ADRV9001_RX1_DISABLE_CNT          ((15) << 2)
-#define ADRV9001_RX1_SSI_ENABLE_CNT       ((16) << 2)
-#define ADRV9001_RX1_SSI_DISABLE_CNT      ((17) << 2)
-
-#define ADRV9001_RX2_DISABLE_CNT          ((18) << 2)
-#define ADRV9001_RX2_SSI_ENABLE_CNT       ((19) << 2)
-#define ADRV9001_RX2_SSI_DISABLE_CNT      ((20) << 2)
-
-#define ADRV9001_MSPI_ADDR   		          ((21) << 2)
+#define ADRV9001_MSPI_ADDR                ((21) << 2)
 
 #define ADRV9001_ID_ADDR                  ((31) << 2)
 
@@ -124,68 +120,108 @@ int32_t AxiAdrv9001_MspiTransfer( uint32_t Base, uint8_t *TxBuf, uint8_t *RxBuf,
   return Adrv9001Status_Success;
 }
 
-void AxiAdrv9001_SetDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt )
+void AxiAdrv9001_SetDisableDelay( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt )
 {
+  uint32_t tmp = (uint32_t)SampleCnt;
+  
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_TX1_DISABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_TX1_DISABLE_DLY_ADDR, tmp);
   }
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_TX2_DISABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_TX2_DISABLE_DLY_ADDR, tmp);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_RX1_DISABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_RX1_DISABLE_DLY_ADDR, tmp);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_RX2_DISABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_RX2_DISABLE_DLY_ADDR, tmp);
   }
 }
 
-void AxiAdrv9001_SetSsiEnableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt )
+void AxiAdrv9001_SetEnableDelay( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt )
 {
+  uint32_t tmp = (uint32_t)SampleCnt;
+    
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_TX1_SSI_ENABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_TX1_ENABLE_DLY_ADDR, tmp);
   }
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_TX2_SSI_ENABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_TX2_ENABLE_DLY_ADDR, tmp);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_RX1_SSI_ENABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_RX1_ENABLE_DLY_ADDR, tmp);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_RX2_SSI_ENABLE_CNT, SampleCnt);
+    Xil_Out32(Base + ADRV9001_RX2_ENABLE_DLY_ADDR, tmp);
   }
 }
 
-void AxiAdrv9001_SetSsiDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt )
+void AxiAdrv9001_GetDisableDelay( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt )
 {
-  if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  uint32_t tmp;
+  
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Base + ADRV9001_RX1_SSI_DISABLE_CNT, SampleCnt);
+    tmp = Xil_In32(Base + ADRV9001_TX1_DISABLE_DLY_ADDR);
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+    tmp = Xil_In32(Base + ADRV9001_TX2_DISABLE_DLY_ADDR);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+    tmp = Xil_In32(Base + ADRV9001_RX1_DISABLE_DLY_ADDR);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Base + ADRV9001_RX2_SSI_DISABLE_CNT, SampleCnt);
+    tmp = Xil_In32(Base + ADRV9001_RX2_DISABLE_DLY_ADDR);
   }
+  
+  *SampleCnt = (uint16_t)tmp;
 }
 
-void AxiAdrv9001_SetEnable( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled )
+void AxiAdrv9001_GetEnableDelay( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt )
+{
+  uint32_t tmp;
+  
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+  {
+    tmp = Xil_In32(Base + ADRV9001_TX1_ENABLE_DLY_ADDR);
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+    tmp = Xil_In32(Base + ADRV9001_TX2_ENABLE_DLY_ADDR);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+    tmp = Xil_In32(Base + ADRV9001_RX1_ENABLE_DLY_ADDR);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+  {
+    tmp = Xil_In32(Base + ADRV9001_RX2_ENABLE_DLY_ADDR);
+  }
+  
+  *SampleCnt = (uint16_t)tmp;  
+}
+
+void AxiAdrv9001_SetEnableMode( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, adi_adrv9001_ChannelEnableMode_e mode )
 {
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
-    Xil_Out32(Base + ADRV9001_TX1_EN_ADDR, (uint32_t)Enabled);
+    Xil_Out32(Base + ADRV9001_TX1_MODE_ADDR, (uint32_t)mode);
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
-    Xil_Out32(Base + ADRV9001_TX2_EN_ADDR, (uint32_t)Enabled);
+    Xil_Out32(Base + ADRV9001_TX2_MODE_ADDR, (uint32_t)mode);
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
-    Xil_Out32(Base + ADRV9001_RX1_EN_ADDR, (uint32_t)Enabled);
+    Xil_Out32(Base + ADRV9001_RX1_MODE_ADDR, (uint32_t)mode);
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
-    Xil_Out32(Base + ADRV9001_RX2_EN_ADDR, (uint32_t)Enabled);
+    Xil_Out32(Base + ADRV9001_RX2_MODE_ADDR, (uint32_t)mode);
 }
 
 void AxiAdrv9001_SetDgpio( uint32_t Base, uint32_t Value )

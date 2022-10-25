@@ -106,6 +106,11 @@ typedef enum
   Adrv9001Status_EnableModeErr        = (ADRV9001_STATUS_OFFSET - 23),
   Adrv9001Status_InvalidEnableMode    = (ADRV9001_STATUS_OFFSET - 24),
   Adrv9001Status_IrqErr               = (ADRV9001_STATUS_OFFSET - 25),
+  Adrv9001Status_Tx1SsiCalErr         = (ADRV9001_STATUS_OFFSET - 26),
+  Adrv9001Status_Tx2SsiCalErr         = (ADRV9001_STATUS_OFFSET - 27),
+  Adrv9001Status_Rx1SsiCalErr         = (ADRV9001_STATUS_OFFSET - 28),
+  Adrv9001Status_Rx2SsiCalErr         = (ADRV9001_STATUS_OFFSET - 29),
+
 } adrv9001_status_t;
 
 #define ADRV9001_LOG_PATH_SIZE      (64)
@@ -141,14 +146,6 @@ typedef struct {
   uint32_t                              Tx2TestModeData;
   uint32_t                              Rx1TestModeData;
   uint32_t                              Rx2TestModeData;
-  uint32_t                              Tx1SsiEnableDly;
-  uint32_t                              Tx2SsiEnableDly;
-  uint32_t                              Rx1SsiEnableDly;
-  uint32_t                              Rx2SsiEnableDly;
-  uint32_t                              Tx1DisableDly;
-  uint32_t                              Tx2DisableDly;
-  uint32_t                              Rx1SsiDisableDly;
-  uint32_t                              Rx2SsiDisableDly;
   adi_adrv9001_ChannelEnableMode_e		  Tx1EnableMode;
   adi_adrv9001_ChannelEnableMode_e		  Tx2EnableMode;
   adi_adrv9001_ChannelEnableMode_e		  Rx1EnableMode;
@@ -186,7 +183,7 @@ typedef struct {
 
 int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
-int32_t Adrv9001_ToRfEnabled            ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint32_t SampleCnt );
+int32_t Adrv9001_ToRfEnabled            ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 int32_t Adrv9001_ToPrimed               ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 int32_t Adrv9001_ToCalibrated           ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 int32_t Adrv9001_SetPaEnable            ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool Enable );
@@ -198,5 +195,6 @@ int32_t Adrv9001_PerformSsiSweep        ( adrv9001_t *Instance, adi_common_Port_
 int32_t Adrv9001_ClearError             ( adrv9001_t *Instance );
 int32_t Adrv9001_EnableDac              ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable );
 int32_t Adrv9001_CalibrateSsiDelay      ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
+int32_t Adrv9001_SetEnableMode          ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_ChannelEnableMode_e mode );
 
 #endif

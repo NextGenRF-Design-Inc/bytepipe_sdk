@@ -49,6 +49,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "adi_adrv9001_common_types.h"
+#include "adi_adrv9001_radio_types.h"
 
 typedef enum
 {
@@ -68,11 +69,15 @@ void AxiAdrv9001_SetTxDataPath      ( uint32_t Base, adi_common_ChannelNumber_e 
 void AxiAdrv9001_GetTxDataPath      ( uint32_t Base, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value );
 void AxiAdrv9001_SetTxData          ( uint32_t Base, adi_common_ChannelNumber_e Channel, uint32_t Value );
 void AxiAdrv9001_GetRxData          ( uint32_t Base, adi_common_ChannelNumber_e Channel, uint32_t *Value );
+void AxiAdrv9001_GetEnableDelay     ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt );
+void AxiAdrv9001_GetDisableDelay    ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt );
+void AxiAdrv9001_SetEnableMode      ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, adi_adrv9001_ChannelEnableMode_e mode );
+
 
 void AxiAdrv9001_SetEnable          ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled );
-void AxiAdrv9001_SetDisableCnt      ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
-void AxiAdrv9001_SetSsiEnableCnt    ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
-void AxiAdrv9001_SetSsiDisableCnt   ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetEnableDelay     ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
+void AxiAdrv9001_SetDisableDelay    ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
+
 
 int32_t AxiAdrv9001_MspiTransfer    ( uint32_t Base, uint8_t *TxBuf, uint8_t *RxBuf, uint32_t Length);
 

@@ -170,18 +170,36 @@ static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001
       return;
     }
 
-    Cli_GetParameter(cmd, 1, CliParamTypeStr, key);
+    Cli_GetParameter(cmd, 1, CliParamTypeStr, key);    
 
     for(int i = 0; i < Adrv9001->Pib.PibLen; i++)
     {
       if(strstr( Adrv9001->Pib.Def[i].name, key ))
-        Cli_Printf(CliInstance,"  - %s\r\n", Adrv9001->Pib.Def[i].name);
+      {
+        Cli_Printf(CliInstance,"  - %s", Adrv9001->Pib.Def[i].name);
+        
+        for( int j = strlen(Adrv9001->Pib.Def[i].name); j < 42; j++ )
+          Cli_Printf(CliInstance," ");
+        
+        const char *str = Pib_TypeName( Adrv9001->Pib.Def[i].var_type );
+
+        Cli_Printf(CliInstance,"%s\r\n", str);
+      }
     }
   }
   else
   {
     for(int i = 0; i < Adrv9001->Pib.PibLen; i++)
-      Cli_Printf(CliInstance,"  - %s\r\n", Adrv9001->Pib.Def[i].name);
+    {
+      Cli_Printf(CliInstance,"  - %s", Adrv9001->Pib.Def[i].name);
+
+      for( int j = strlen(Adrv9001->Pib.Def[i].name); j < 42; j++ )
+        Cli_Printf(CliInstance," ");
+
+      const char *str = Pib_TypeName( Adrv9001->Pib.Def[i].var_type );
+
+      Cli_Printf(CliInstance,"%s\r\n", str);
+    }
 
     Cli_Printf(CliInstance,"Note: Add keyword to display relevant parameters\r\n");
   }
@@ -227,7 +245,7 @@ static void Adrv9001Cli_ToRfEnabled(cli_t *CliInstance, const char *cmd, adrv900
 
   Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
 
-  status = Adrv9001_ToRfEnabled( Adrv9001, Port, Channel, ADRV9001_TDD_ENABLE_DUR_FOREVER );
+  status = Adrv9001_ToRfEnabled( Adrv9001, Port, Channel );
 
   Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
 }
