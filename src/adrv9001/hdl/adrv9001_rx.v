@@ -47,7 +47,7 @@ module adrv9001_rx#(
   output wire         m_axis_aclk,
   output wire         m_axis_rstn,
   
-  output wire [31:0]  m_axi_data,
+  output reg  [31:0]  m_axi_data = 0,
   
   output wire [31:0]  dbg
     );
