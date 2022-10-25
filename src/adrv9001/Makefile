@@ -18,5 +18,3 @@ adrv9001-sdk:
 
 clean:
 	rm -rf $(PROJECT)  
-	rm -rf adrv9001-sdk-eval-software.zip
-	rm -rf adrv9001-sdk    

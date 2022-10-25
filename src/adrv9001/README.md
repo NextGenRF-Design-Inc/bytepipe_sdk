@@ -50,39 +50,46 @@ In addition to the ILA configuration each SSI differential pair can be swapped f
 
 The ADRV9001 module provides several registers for control and configuration.  The following table defines each registers function and address.  
 
-| Address   | Bit Field   | Field               | Description                                                             |
-|-----------|-------------|---------------------|-------------------------------------------------------------------------|
-| 0x0000    | [31:1]      | unused              |                                                                         |
-|           | [0]         | tx1_tdd_en          | Transmit channel 1 tdd enable.                                          |
-| 0x0001    | [31:1]      | unused              |                                                                         |
-|           | [0]         | tx2_tdd_en          | Transmit channel 2 tdd enable.                                          |
-| 0x0002    | [31:1]      | unused              |                                                                         |
-|           | [0]         | rx1_tdd_en          | Receive channel 1 tdd enable.                                           |
-| 0x0003    | [31:1]      | unused              |                                                                         |
-|           | [0]         | rx2_tdd_en          | Receive channel 2 tdd enable.                                           |
-| 0x0004    | [31:1]      | unused              |                                                                         |
-|           | [0]         | rstn                | ADRV9001 Reset Pin                                                      |
-| 0x0005    | [31:1]      | unused              |                                                                         |
-|           | [0]         | tx1_data_src        | Transmit data source ( 0 = AXI_STREAM, 1 = Internal constant)           |
-| 0x0006    | [31:1]      | unused              |                                                                         |
-|           | [0]         | tx2_data_src        | Transmit data source ( 0 = AXI_STREAM, 1 = Internal constant)           |
-| 0x0007    | [31:0]      | tx1_data            | Transmit data constant associated with tx1_data_src = 1                 |
-| 0x0008    | [31:0]      | tx2_data            | Transmit data constant associated with tx2_data_src = 1                 |
-| 0x0009    | [31:12]     | unused              |                                                                         |
-|           | [11:0]      | dgpio_t             | ADRV9001 Digital GPIO direction (0 = output, 1 = input)                 |
-| 0x000A    | [31:12]     | unused              |                                                                         |
-|           | [11:0]      | dgpio_o             | Corresponds to ADRV9001 Digital GPIO output value when writing.         |
-|           | [11:0]      | dgpio_i             | Corresponds to ADRV9001 Digital GPIO input value when reading.          |
-| 0x000B    | [31:0]      | tx1_disable_cnt     | Transmit TDD disable count.                                             |
-| 0x000C    | [31:0]      | tx1_ssi_enable_cnt  | Transmit TDD SSI enable count.                                          |
-| 0x000D    | [31:0]      | tx2_disable_cnt     | Transmit TDD disable count.                                             |
-| 0x000E    | [31:0]      | tx2_ssi_enable_cnt  | Transmit TDD SSI enable count.                                          |
-| 0x000F    | [31:0]      | rx1_disable_cnt     | Receive TDD disable count.                                              |
-| 0x0010    | [31:0]      | rx1_ssi_enable_cnt  | Receive TDD SSI enable count.                                           |
-| 0x0011    | [31:0]      | rx1_ssi_disable_cnt | Receive TDD SSI disable count.                                          |
-| 0x0012    | [31:0]      | rx2_disable_cnt     | Receive TDD disable count.                                              |
-| 0x0013    | [31:0]      | rx2_ssi_enable_cnt  | Receive TDD SSI enable count.                                           |
-| 0x0014    | [31:0]      | rx2_ssi_disable_cnt | Receive TDD SSI disable count.                                          |
+| Address  | Bit Field   | Field             | Description                                                                            |
+|----------|-------------|-------------------|----------------------------------------------------------------------------------------|
+| 0x0000   | [31:1]    | unused              |                                                                                        |
+|          | [0]       | tx1_ps_en           | Transmit channel 1 enable from processing system (PS).                                 |
+| 0x0001   | [31:1]    | unused              |                                                                                        |
+|          | [0]       | tx2_ps_en           | Transmit channel 2 enable from processing system (PS).                                 |
+| 0x0002   | [31:1]    | unused              |                                                                                        |
+|          | [0]       | rx1_ps_en           | Receive channel 1 enable from processing system (PS).                                  |
+| 0x0003   | [31:1]    | unused              |                                                                                        |
+|          | [0]       | rx2_ps_en           | Receive channel 2 enable from processing system (PS).                                  |
+| 0x0004   | [31:1]    | unused              |                                                                                        |
+|          | [0]       | rstn                | ADRV9001 Reset Pin                                                                     |
+| 0x0005   | [31:16]   | unused              |                                                                                        |
+|          | [15:0]    | tx1_enable_delay    | Delay in samples between rising edge of adrv9001_tx1_enable to rising edge of axis_tready. Allows the transmitter to power up before enabling data.  |         
+| 0x0006   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | tx2_enable_delay    | Delay in samples between rising edge of adrv9001_tx2_enable to rising edge of axis_tready. Allows the transmitter to power up before enabling data.  |      
+| 0x0007   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | rx1_enable_delay    | Delay in samples between rising edge of adrv9001_rx1_enable to rising edge of axis_tvalid. Allows the receiver to power up before enabling data.     |     
+| 0x0008   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | rx2_enable_delay    | Delay in samples between rising edge of adrv9001_rx2_enable to rising edge of axis_tvalid. Allows the receiver to power up before enabling data.     |   
+| 0x0009   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | tx1_disable_delay   | Delay in samples between falling edge of user enable or axis_tvalid to falling edge of adrv9001_tx1_enable. Allows the transmitter pipeline to flush.| 
+| 0x000A   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | tx2_disable_delay   | Delay in samples between falling edge of user enable or axis_tvalid to falling edge of adrv9001_tx2_enable. Allows the transmitter pipeline to flush.| 
+| 0x000B   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | rx1_disable_delay   | Delay in samples between falling edge of user enable to falling edge of axis_tvalid. Allows the receiver pipeline to flush and ensures all IQ data is received by the BBP for the duration of time the receiver is enabled.  | 
+| 0x000C   | [31:16]   | unused              |                                                                                                                                                      |
+|          | [15:0]    | rx2_disable_delay   | Delay in samples between falling edge of user enable to falling edge of axis_tvalid. Allows the receiver pipeline to flush and ensures all IQ data is received by the BBP for the duration of time the receiver is enabled.  | 
+| 0x000D   | [31:12]   | unused              |                                                                         |
+|          | [11:0]    | dgpio_t             | ADRV9001 Digital GPIO direction (0 = output, 1 = input)                 |
+| 0x000E   | [31:12]   | unused              |                                                                         |
+|          | [11:0]    | dgpio_i             | Corresponds to ADRV9001 Digital GPIO output value when writing.         |
+|          | [11:0]    | dgpio_i             | Corresponds to ADRV9001 Digital GPIO input value when reading.          |
+| 0x000F   | [31:0]    | tx1_ps_data         | Transmit data from processing system (tx1_data_src = 1). |
+| 0x0010   | [31:0]    | tx2_ps_data         | Transmit data from processing system (tx2_data_src = 1). |
+| 0x0011   | [31:1]    | unused              |                                                                         |
+|          | [0]       | tx1_data_src        | Transmit data source. 0=AXI_STREAM, 1=processing system (PS)            |
+| 0x0012   | [31:1]    | unused              |                                                                         |
+|          | [0]       | tx2_data_src        | Transmit data source. 0=AXI_STREAM, 1=processing system (PS)            |
+
 
 # ADRV9001 Software
 

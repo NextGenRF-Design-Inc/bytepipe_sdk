@@ -39,7 +39,9 @@ add_interface_ports tx1_en out 1
 add_interface_ports tx2_en out 1
 add_interface_ports rstn out 1
 add_interface_ports irq in 1
-add_interface_ports dgpio inout 12
+add_interface_ports dgpio_o out 12
+add_interface_ports dgpio_i in 12
+add_interface_ports dgpio_t out 12
 add_interface_ports rx1_dclk_p in 1
 add_interface_ports rx1_dclk_n in 1
 add_interface_ports rx1_strobe_p in 1
@@ -104,7 +106,9 @@ map_port adrv9001 tx1_en
 map_port adrv9001 tx2_en
 map_port adrv9001 rstn
 map_port adrv9001 irq
-map_port adrv9001 dgpio
+map_port adrv9001 dgpio_i
+map_port adrv9001 dgpio_o
+map_port adrv9001 dgpio_t
 map_port adrv9001 rx1_dclk_p
 map_port adrv9001 rx1_dclk_n
 map_port adrv9001 rx1_strobe_p
@@ -302,56 +306,16 @@ set_property value true [ipx::get_user_parameters ENABLE_PL_TX2_ENABLE -of_objec
 set_property value true [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_user_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX1_DEBUG" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_RX1_DEBUG -of_objects [ipx::current_core]]
-set_property value false [ipx::get_hdl_parameters ENABLE_RX1_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX1_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX1_DEBUG -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_DEBUG" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_RX2_DEBUG -of_objects [ipx::current_core]]
-set_property value false [ipx::get_hdl_parameters ENABLE_RX2_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX2_DEBUG -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX1_DEBUG" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_TX1_DEBUG -of_objects [ipx::current_core]]
-set_property value false [ipx::get_hdl_parameters ENABLE_TX1_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_TX1_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX1_DEBUG -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX2_DEBUG" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_TX2_DEBUG -of_objects [ipx::current_core]]
-set_property value false [ipx::get_hdl_parameters ENABLE_TX2_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_TX2_DEBUG -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX2_DEBUG -of_objects [ipx::current_core]]
+
 
 # Add parameters
-ipx::add_user_parameter ENABLE_RX1_AXIS_RSTN [ipx::current_core]
-set_property value_resolve_type user [ipx::get_user_parameters ENABLE_RX1_AXIS_RSTN -of_objects [ipx::current_core]]
-ipgui::add_param -name {ENABLE_RX1_AXIS_RSTN} -component [ipx::current_core]
-set_property display_name {Enable Rx1 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS_RSTN" -component [ipx::current_core] ]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS_RSTN" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_RX1_AXIS_RSTN -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX1_AXIS_RSTN -of_objects [ipx::current_core]]
-ipx::add_user_parameter ENABLE_RX2_AXIS_RSTN [ipx::current_core]
-set_property value_resolve_type user [ipx::get_user_parameters ENABLE_RX2_AXIS_RSTN -of_objects [ipx::current_core]]
-ipgui::add_param -name {ENABLE_RX2_AXIS_RSTN} -component [ipx::current_core]
-set_property display_name {Enable Rx2 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS_RSTN" -component [ipx::current_core] ]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS_RSTN" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_RX2_AXIS_RSTN -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_AXIS_RSTN -of_objects [ipx::current_core]]
-ipx::add_user_parameter ENABLE_TX1_AXIS_RSTN [ipx::current_core]
-set_property value_resolve_type user [ipx::get_user_parameters ENABLE_TX1_AXIS_RSTN -of_objects [ipx::current_core]]
-ipgui::add_param -name {ENABLE_TX1_AXIS_RSTN} -component [ipx::current_core]
-set_property display_name {Enable Tx1 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS_RSTN" -component [ipx::current_core] ]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS_RSTN" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_TX1_AXIS_RSTN -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_TX1_AXIS_RSTN -of_objects [ipx::current_core]]
-ipx::add_user_parameter ENABLE_TX2_AXIS_RSTN [ipx::current_core]
-set_property value_resolve_type user [ipx::get_user_parameters ENABLE_TX2_AXIS_RSTN -of_objects [ipx::current_core]]
-ipgui::add_param -name {ENABLE_TX2_AXIS_RSTN} -component [ipx::current_core]
-set_property display_name {Enable Tx2 Axis Rstn} [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS_RSTN" -component [ipx::current_core] ]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS_RSTN" -component [ipx::current_core] ]
-set_property value false [ipx::get_user_parameters ENABLE_TX2_AXIS_RSTN -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_TX2_AXIS_RSTN -of_objects [ipx::current_core]]
+ipx::add_user_parameter ENABLE_PL_IRQ [ipx::current_core]
+set_property value_resolve_type user [ipx::get_user_parameters ENABLE_PL_IRQ -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_PL_IRQ} -component [ipx::current_core]
+set_property display_name {Enable Pl Irq} [ipgui::get_guiparamspec -name "ENABLE_PL_IRQ" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_IRQ" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_PL_IRQ -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_PL_IRQ -of_objects [ipx::current_core]]
 
 # Associate Signal Display to parameters
 set_property enablement_resolve_type dependent [ipx::get_ports rx1_pl_en -of_objects [ipx::current_core]]
@@ -372,70 +336,7 @@ set_property enablement_dependency {$ENABLE_PL_DGPIO > 0} [ipx::get_ports dgpio_
 set_property enablement_resolve_type dependent [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
 set_property driver_value 0 [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
 set_property enablement_dependency {$ENABLE_PL_DGPIO > 0} [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx1_en_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx1_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX1_DEBUG > 0} [ipx::get_ports rx1_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx1_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX1_DEBUG > 0} [ipx::get_ports rx1_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx1_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX1_DEBUG > 0} [ipx::get_ports rx1_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx1_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX1_DEBUG > 0} [ipx::get_ports rx1_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx1_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX1_DEBUG > 0} [ipx::get_ports rx1_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx2_en_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx2_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX2_DEBUG > 0} [ipx::get_ports rx2_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx2_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX2_DEBUG > 0} [ipx::get_ports rx2_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx2_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX2_DEBUG > 0} [ipx::get_ports rx2_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx2_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX2_DEBUG > 0} [ipx::get_ports rx2_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports rx2_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX2_DEBUG > 0} [ipx::get_ports rx2_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_en_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX1_DEBUG > 0} [ipx::get_ports tx1_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX1_DEBUG > 0} [ipx::get_ports tx1_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX1_DEBUG > 0} [ipx::get_ports tx1_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX1_DEBUG > 0} [ipx::get_ports tx1_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX1_DEBUG > 0} [ipx::get_ports tx1_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_en_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX2_DEBUG > 0} [ipx::get_ports tx2_en_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX2_DEBUG > 0} [ipx::get_ports tx2_axis_idata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX2_DEBUG > 0} [ipx::get_ports tx2_axis_qdata_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX2_DEBUG > 0} [ipx::get_ports tx2_axis_valid_dbg -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX2_DEBUG > 0} [ipx::get_ports tx2_axis_ready_dbg -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX1_AXIS_RSTN > 0} [ipx::get_bus_interfaces rx1_axis_rstn -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_RX2_AXIS_RSTN > 0} [ipx::get_bus_interfaces rx2_axis_rstn -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX1_AXIS_RSTN > 0} [ipx::get_bus_interfaces tx1_axis_rstn -of_objects [ipx::current_core]]
-set_property enablement_dependency {$ENABLE_TX2_AXIS_RSTN > 0} [ipx::get_bus_interfaces tx2_axis_rstn -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_PL_IRQ > 0} [ipx::get_bus_interfaces pl_irq -of_objects [ipx::current_core]]
 
 
 # Add SSI Configuration Page
@@ -445,24 +346,24 @@ ipgui::add_static_text -name {Description} -component [ipx::current_core] -paren
 Each SSI differential pair can be swapped to account for PCB designs with swapped pairs.  
 This allows PCB designers to swap p/n signals on each differential pair to facilitate PCB routing.
 }
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_DCLK" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_DCLK" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_IN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_IN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 1  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_DCLK" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 2  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 3  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 4  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_DCLK" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 6  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 7  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 8  [ipgui::get_guiparamspec -name "SWAP_DIFF_RX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 9  [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_IN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 10 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_DCLK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 11 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 12 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 13 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX1_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 14 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_IN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 15 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_DCLK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 16 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_IDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 17 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_QDATA" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 18 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
 
 
 # Add ILA Configuration Page
@@ -476,35 +377,16 @@ ipgui::move_text -component [ipx::current_core] -order 0 [ipgui::get_textspec -n
 # Add PL Interface Page
 ipgui::add_page -name {PL Interface} -component [ipx::current_core] -display_name {PL Interface}
 set_property tooltip {Configure Programmable Logic Interface Signals} [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ]
-ipgui::add_static_text -name {PL AXIS Reset Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
-Enable AXIS Reset output pins:
-}
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 4 [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS_RSTN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::add_static_text -name {PL Enable Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
-Enable control of enable signals from programmable logic:
-}
-ipgui::move_param -component [ipx::current_core] -order 6 [ipgui::get_guiparamspec -name "ENABLE_PL_RX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 7 [ipgui::get_guiparamspec -name "ENABLE_PL_RX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 8 [ipgui::get_guiparamspec -name "ENABLE_PL_TX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 9 [ipgui::get_guiparamspec -name "ENABLE_PL_TX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::add_static_text -name {PL Dgpio Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
-Enable control of Dgpio signals from programmable logic:
-}
-ipgui::move_param -component [ipx::current_core] -order 11 [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
 
-# Add Debug Page
-ipgui::add_page -name {Debug} -component [ipx::current_core] -display_name {Debug}
-set_property tooltip {Configure debug signals} [ipgui::get_pagespec -name "Debug" -component [ipx::current_core] ]
-ipgui::add_static_text -name {PL Debug Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core] ] -text {
-Enable debug signals:
+ipgui::add_static_text -name {PL Enable Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
+Enable control of signals from programmable logic:
 }
-ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "ENABLE_RX1_DEBUG" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "ENABLE_RX2_DEBUG" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "ENABLE_TX1_DEBUG" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 4 [ipgui::get_guiparamspec -name "ENABLE_TX2_DEBUG" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "ENABLE_PL_RX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "ENABLE_PL_RX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "ENABLE_PL_TX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 4 [ipgui::get_guiparamspec -name "ENABLE_PL_TX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 6 [ipgui::get_guiparamspec -name "ENABLE_PL_IRQ" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
 
 
 # Create IP files and save

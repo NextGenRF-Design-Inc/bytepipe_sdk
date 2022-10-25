@@ -43,6 +43,33 @@ build_hdl()
 	vivado -mode batch -nojournal -quiet -source $projDir/hdl/make_hdl.tcl -notrace 
 }
 
+
+agc_config()
+{
+	rm -rf tmp.txt		 
+
+  var="$(grep "adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_$1," c99/configure.c | cut -d\  -f5)"
+  echo ".Rx$1Agc = {" >> tmp.txt  
+
+  if [[ $var == *"configure_agcCfg_1"* ]]; then
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg1.c -A 66 | tail -n66 >> tmp.txt || true
+  elif [[ $var == *"configure_agcCfg_2"* ]]; then
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg2.c -A 66 | tail -n66 >> tmp.txt || true   
+  elif [[ $var == *"configure_agcCfg_3"* ]]; then
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg3.c -A 66 | tail -n66 >> tmp.txt || true     
+  elif [[ $var == *"configure_agcCfg_4"* ]]; then
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg4.c -A 66 | tail -n66 >> tmp.txt || true     
+  else
+  	echo "$(printf '\033')[0;35mMising channel $1 AGC configuration $(printf '\033')[0m"
+  fi
+    
+  sed -i 's/}\;/ /g' tmp.txt
+  echo '},' >> tmp.txt	
+  cat tmp.txt >> $outDir/initializeinit7.c 
+}
+  
+  
+  
 # This function parses the ADRV9001 TES generated C99 code into the adrv9001 driver API
 # Inputs:	
 #	$1 = Directory or zip file containing TES generated c99 code
@@ -52,6 +79,11 @@ profile_parse()
 {
 	FILENAME=$1
 	outDir=$2
+  
+    # # Remove cygwin if applicable
+	# if [[ $outDir == *"cygdrive"* ]]; then
+		# outDir=$(cygpath -w $outDir)
+	# fi
 	
   # Indicate Build
 	echo "$(printf '\033')[0;33mBuilding adrv9001 profile $(printf '\033')[0m"
@@ -102,22 +134,10 @@ profile_parse()
 	echo '	.Tx2Attn = 10000,' >> $outDir/initializeinit7.c	
 	echo '	.Tx1Boost = 0,' >> $outDir/initializeinit7.c	
 	echo '	.Tx2Boost = 0,' >> $outDir/initializeinit7.c	
-	echo '	.Tx1TestModeData = 0xA234ABC1,' >> $outDir/initializeinit7.c
-	echo '	.Tx2TestModeData = 0xA234ABC1,' >> $outDir/initializeinit7.c
-	echo '	.Rx1TestModeData = 0xA234ABC1,' >> $outDir/initializeinit7.c
-	echo '	.Rx2TestModeData = 0xA234ABC1,' >> $outDir/initializeinit7.c
-	echo '	.Tx1SsiEnableDly = 500,' >> $outDir/initializeinit7.c
-	echo '	.Tx2SsiEnableDly = 500,' >> $outDir/initializeinit7.c
-	echo '	.Rx1SsiEnableDly = 500,' >> $outDir/initializeinit7.c
-	echo '	.Rx2SsiEnableDly = 500,' >> $outDir/initializeinit7.c
-	echo '	.Tx1DisableDly = 200,' >> $outDir/initializeinit7.c
-	echo '	.Tx2DisableDly = 200,' >> $outDir/initializeinit7.c	
-	echo '	.Rx1SsiDisableDly = 200,' >> $outDir/initializeinit7.c
-	echo '	.Rx2SsiDisableDly = 200,' >> $outDir/initializeinit7.c
-	echo '	.Tx1EnableMode = 1,' >> $outDir/initializeinit7.c
-	echo '	.Tx2EnableMode = 1,' >> $outDir/initializeinit7.c
-	echo '	.Rx1EnableMode = 1,' >> $outDir/initializeinit7.c
-	echo '	.Rx2EnableMode = 1,' >> $outDir/initializeinit7.c
+	echo '	.Tx1EnableMode = ADI_ADRV9001_PIN_MODE,' >> $outDir/initializeinit7.c	 
+	echo '	.Tx2EnableMode = ADI_ADRV9001_PIN_MODE,' >> $outDir/initializeinit7.c	 
+	echo '	.Rx1EnableMode = ADI_ADRV9001_PIN_MODE,' >> $outDir/initializeinit7.c	 
+	echo '	.Rx2EnableMode = ADI_ADRV9001_PIN_MODE,' >> $outDir/initializeinit7.c	   
 
 	rm -rf tmp.txt
 	grep 'adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1,' $outDir/initialize.c >> tmp.txt || true
@@ -131,19 +151,13 @@ profile_parse()
 	sed -i 's/)\;/,/g' tmp.txt || true		
 	grep '.Tx2ExternalPathDelay' tmp.txt >> $outDir/initializeinit7.c || true		 
 
-	rm -rf tmp.txt		 
-	echo '.Rx1Agc = {' >> tmp.txt
-	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg* -A 66 | tail -n66 >> tmp.txt || true
-	sed -i 's/}\;/ /g' tmp.txt
-	echo '},' >> tmp.txt	
-	cat tmp.txt >> $outDir/initializeinit7.c 
-	 
-	rm -rf tmp.txt		
-	echo '.Rx2Agc = {' >> tmp.txt
-	grep -m 2 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg* -A 66 | tail -n66 >> tmp.txt || true
-	sed -i 's/}\;/ /g' tmp.txt	 
-	echo '},' >> tmp.txt	
-	cat tmp.txt >> $outDir/initializeinit7.c		
+
+  # AGC Channel 1
+  agc_config 1
+  
+  # AGC Channel 2
+  agc_config 2
+
 
 	rm -rf tmp.txt
 	echo '	.Tx1DpdInitCfg = {' >> tmp.txt 

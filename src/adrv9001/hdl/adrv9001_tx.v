@@ -6,7 +6,7 @@
 // This core is distributed WITHOUT ANY WARRANTY; without even the implied 
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
-// Name: 			    adrv9001_tx.v
+// Name:          adrv9001_tx.v
 // 
 // Description: 
 //
@@ -17,88 +17,80 @@
 // ***************************************************************************
 
 module adrv9001_tx#(
-  parameter LVDS_OUTPUT = 1,              // Output is LVDS or CMOS
-  parameter SWAP_DIFF_IDATA = 0,          // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_QDATA = 0,          // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_STROBE = 0,         // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_DCLK_IN = 0,        // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_DCLK_OUT = 0        // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter DBG_EN = 0,
+  parameter LVDS_OUTPUT = 1,                 // Output is LVDS or CMOS
+  parameter SWAP_DIFF_IDATA = 0,             // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_QDATA = 0,             // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_STROBE = 0,            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_DCLK_IN = 0,           // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_DCLK_OUT = 0           // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )(
-  input  wire            ref_clk_p,        // 1-bit Reference clock input(connect directly to top-level port)
-  input  wire            ref_clk_n,        // 1-bit Reference clock input(connect directly to top-level port)  
   
-  output wire            dclk_p,           // 1-bit data clock output(connect directly to top-level port)
-  output wire			 dclk_n,           // 1-bit data clock output(connect directly to top-level port)
-  output wire			 strobe_p,         // 1-bit strobe output(connect directly to top-level port)
-  output wire			 strobe_n,         // 1-bit strobe output(connect directly to top-level port)
-  output wire			 idata_p,          // 1-bit data output(connect directly to top-level port)
-  output wire        	 idata_n,          // 1-bit data output(connect directly to top-level port)
-  output wire        	 qdata_p,          // 1-bit data output(connect directly to top-level port)
-  output wire			 qdata_n,          // 1-bit data output(connect directly to top-level port)
-  
-  input  wire            data_src,         // Data Source
-  input  wire [31:0]     tdata,            // Constant Data
-  
-  input  wire            tdd_en,
-  output reg             enable,   
-  input  wire [31:0]     disable_cnt,
-  input  wire [31:0]     ssi_enable_cnt,
+// ADRV9001 interface.  Connect directly to top-level port  
+  input  wire         adrv9001_ref_clk_p,    // SSI reference clock pair
+  input  wire         adrv9001_ref_clk_n,   
+  output wire         adrv9001_dclk_p,       // SSI clock pair
+  output wire         adrv9001_dclk_n,      
+  output wire         adrv9001_strobe_p,     // SSI strobe pair
+  output wire         adrv9001_strobe_n,    
+  output wire         adrv9001_idata_p,      // SSI in-phase data pair
+  output wire         adrv9001_idata_n,      
+  output wire         adrv9001_qdata_p,      // SSI quadrature phase data pair
+  output wire         adrv9001_qdata_n,     
+  output wire         adrv9001_enable,       // ADRV9001 Transmit enable pin
+    
+// User control interface    
+  input  wire         enable,                // Enable transmitter  
+  input  wire         enable_mode,           // 0 = spi mode, 1 = pin mode
+  input  wire [15:0]  disable_delay,         // Number of samples from falling edge of enable to falling edge of adrv9001_enable  
+  input  wire [15:0]  enable_delay,          // Number of samples from rising edge of enable to rising edge of s_axis_tready
       
-  input  wire [31:0]	 s_axis_tdata,     // iq data input
-  output wire            s_axis_tready,    // ready for data
-  input  wire            s_axis_tvalid,    // input data valid
-  output wire            s_axis_aclk,   
-  output wire            s_axis_rstn  
+// User data interface        
+  input  wire [31:0]  s_axis_tdata,          // IQ data to be transmitted
+  output reg          s_axis_tready,         // Ready for new IQ data sample
+  input  wire         s_axis_tvalid,         // Input IQ data valid
+  output wire         s_axis_aclk,           // IQ data clock, 2x sample rate
+  
+  input  wire [31:0]  s_axi_data,
+  input  wire         data_src,
+  
+  output wire [63:0]  dbg
     );
 
-wire dclk;
-wire dclk_div;
-reg serdes_rst = 0;
-
-assign s_axis_aclk = dclk_div;
-
+wire        dclk;
+wire        dclk_div;
 wire [7:0]  s_unpacked;
 wire [7:0]  i_unpacked;
 wire [7:0]  q_unpacked;
+reg         ssi_enable = 0;
 
-//async_rst async_rst_inst (
-//  .slowest_sync_clk(dclk),          // input wire slowest_sync_clk
-//  .ext_reset_in(rst),                  // input wire ext_reset_in
-//  .aux_reset_in(1'b0),                  // input wire aux_reset_in
-//  .mb_debug_sys_rst(1'b0),          // input wire mb_debug_sys_rst
-//  .dcm_locked(1'b1),                      // input wire dcm_locked
-//  .mb_reset(serdes_rst),                          // output wire mb_reset
-//  .bus_struct_reset(),          // output wire [0 : 0] bus_struct_reset
-//  .peripheral_reset(),          // output wire [0 : 0] peripheral_reset
-//  .interconnect_aresetn(),  // output wire [0 : 0] interconnect_aresetn
-//  .peripheral_aresetn(s_axis_rstn)      // output wire [0 : 0] peripheral_aresetn
-//);
-  
+assign s_axis_aclk = dclk_div;
+
 adrv9001_tx_clk#(
   .LVDS(LVDS_OUTPUT),
   .SWAP_DIFF_CLK_OUT(SWAP_DIFF_DCLK_OUT),     // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   .SWAP_DIFF_CLK_IN(SWAP_DIFF_DCLK_IN)      // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin  
   )
 tx_clk_inst(  
-  .dclk_div_rst(1'b0),        // reset dclk_div
-  .ref_clk_p(ref_clk_p),            // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-  .ref_clk_n(ref_clk_n),            // 1-bit input: Diff_n buffer input (connect directly to top-level port)
-  .dclk_p(dclk_p),                  // 1-bit data clock output(connect directly to top-level port)
-  .dclk_n(dclk_n),                  // 1-bit data clock output(connect directly to top-level port)    
+  .dclk_div_rst(1'b0),              // reset dclk_div
+  .ref_clk_p(adrv9001_ref_clk_p),   // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+  .ref_clk_n(adrv9001_ref_clk_n),   // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+  .dclk_p(adrv9001_dclk_p),         // 1-bit data clock output(connect directly to top-level port)
+  .dclk_n(adrv9001_dclk_n),         // 1-bit data clock output(connect directly to top-level port)    
   .dclk(dclk),                      // 1-bit data clock output
   .dclk_div(dclk_div)               // 1-bit divided data clock output 
 );  
 
 adrv9001_tx_serdes#(
   .LVDS(LVDS_OUTPUT),
-  .SWAP_DIFF(SWAP_DIFF_STROBE)     // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  .SWAP_DIFF(SWAP_DIFF_STROBE)      // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )
 s_serdes(
-  .rst(serdes_rst),                 // reset
+  .rst(~ssi_enable),                // reset
   .dclk_div(dclk_div),              // data/divided clock synchronous to parallel input 
   .dclk(dclk),                      // data clock synchronous to output
-  .dout_p(strobe_p),                // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-  .dout_n(strobe_n),                // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+  .dout_p(adrv9001_strobe_p),       // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+  .dout_n(adrv9001_strobe_n),       // 1-bit input: Diff_n buffer input (connect directly to top-level port)
   .din(s_unpacked),                 // Parallel data output
   .din_t(1'b0)                      // Data in tristate
 );
@@ -108,11 +100,11 @@ adrv9001_tx_serdes#(
   .SWAP_DIFF(SWAP_DIFF_IDATA)       // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )
 i_serdes(
-  .rst(serdes_rst),                 // reset
+  .rst(~ssi_enable),                // reset
   .dclk_div(dclk_div),              // data/divided clock synchronous to parallel input 
   .dclk(dclk),                      // data clock synchronous to output
-  .dout_p(idata_p),                 // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-  .dout_n(idata_n),                 // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+  .dout_p(adrv9001_idata_p),        // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+  .dout_n(adrv9001_idata_n),        // 1-bit input: Diff_n buffer input (connect directly to top-level port)
   .din(i_unpacked),                 // Parallel data output
   .din_t(1'b0)                      // Data in tristate
 );
@@ -122,104 +114,164 @@ adrv9001_tx_serdes#(
   .SWAP_DIFF(SWAP_DIFF_QDATA)       // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )
 q_serdes(
-  .rst(serdes_rst),                 // reset
+  .rst(~ssi_enable),                // reset
   .dclk_div(dclk_div),              // data/divided clock synchronous to parallel input 
   .dclk(dclk),                      // data clock synchronous to output
-  .dout_p(qdata_p),                 // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-  .dout_n(qdata_n),                 // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+  .dout_p(adrv9001_qdata_p),        // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+  .dout_n(adrv9001_qdata_n),        // 1-bit input: Diff_n buffer input (connect directly to top-level port)
   .din(q_unpacked),                 // Parallel data output
   .din_t(1'b0)                      // Data in tristate
 );
 
-wire [31:0]  data_unpack_in;
-wire [31:0]  tdata_cdc;
-wire         data_src_cdc;
-wire [31:0]  disable_cnt_cdc;
-wire [31:0]  ssi_enable_cnt_cdc;
-wire         tdd_en_cdc;
+reg         ce = 0;
 
-assign data_unpack_in = data_src_cdc? tdata_cdc : s_axis_tdata;
+always @( posedge dclk_div ) begin
+  ce <= ~ce;  
+end
+
+
+wire        enable_cdc;
 
 cdc #(
-  .DATA_WIDTH(32) )
-tdata_cdc_i (
-  .s_cdc_tdata  (tdata),
+  .DATA_WIDTH(1) )
+enable_cdc_i (
+  .s_cdc_tdata  (enable),
   .m_cdc_clk    (dclk_div),
-  .m_cdc_tdata  (tdata_cdc)
+  .m_cdc_tdata  (enable_cdc)
+);
+
+
+wire        rf_enable_mode_cdc;
+wire [15:0] rf_disable_delay_cdc;
+reg  [15:0] rf_disable_cnt = 0;
+reg         rf_enable = 0;
+
+cdc #(
+  .DATA_WIDTH(1) )
+enable_mode_cdc_i (
+  .s_cdc_tdata  (enable_mode),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (rf_enable_mode_cdc)
+);
+
+cdc #(
+  .DATA_WIDTH(16) )
+disable_delay_cdc_i (
+  .s_cdc_tdata  (disable_delay),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (rf_disable_delay_cdc)
+);
+
+assign adrv9001_enable = rf_enable;
+
+
+always @( posedge dclk_div ) begin   
+
+  if( rf_enable_mode_cdc == 1'b0 )
+    rf_disable_cnt <= 16'h0;
+  else if( enable_cdc )
+     rf_disable_cnt <= rf_disable_delay_cdc;
+  else if( (rf_disable_cnt > 'h0) && ( ce == 1'b1) )
+    rf_disable_cnt <= rf_disable_cnt - 'd1;
+  else 
+    rf_disable_cnt <= rf_disable_cnt; 
+    
+  if( rf_disable_cnt > 16'h0 )
+    rf_enable <= 1'b1;
+  else 
+    rf_enable <= 1'b0;       
+    
+end
+
+
+wire [15:0] ssi_enable_delay_cdc;
+reg  [15:0] ssi_enable_cnt = 0;
+reg         ssi_enable = 0;
+
+
+cdc #(
+  .DATA_WIDTH(16) )
+ssi_enable_delay_cdc_i (
+  .s_cdc_tdata  (enable_delay),
+  .m_cdc_clk    (dclk_div),
+  .m_cdc_tdata  (ssi_enable_delay_cdc)
+);
+
+always @( posedge dclk_div ) begin   
+  
+  if( rf_enable_mode_cdc == 1'b0 )
+    ssi_enable_cnt <= 16'h0;
+  else if( ( enable_cdc == 1'b0 ) & ( rf_enable == 1'b0 ) )
+     ssi_enable_cnt <= ssi_enable_delay_cdc;
+  else if( (ssi_enable_cnt > 'h0) && ( ce == 1'b1) )
+    ssi_enable_cnt <= ssi_enable_cnt - 'd1;
+  else 
+    ssi_enable_cnt <= ssi_enable_cnt;    
+    
+  if(ssi_enable_cnt > 16'h0 )
+    ssi_enable <= 1'b0;
+  else 
+    ssi_enable <= 1'b1;  
+    
+end
+
+
+wire        data_src_cdc;
+wire [31:0] s_axi_data_cdc;
+reg  [31:0] unpack_din = 0;
+wire        unpack_ready;
+
+cdc #(
+  .DATA_WIDTH(32))
+s_axi_data_cdc_i (
+  .s_cdc_tdata(s_axi_data),
+  .m_cdc_clk  (dclk_div),
+  .m_cdc_tdata(s_axi_data_cdc)
 );
 
 cdc #(
   .DATA_WIDTH(1) )
-tdata_src_cdc_i (
+data_src_cdc_i (
   .s_cdc_tdata  (data_src),
   .m_cdc_clk    (dclk_div),
   .m_cdc_tdata  (data_src_cdc)
 );
 
-cdc #(
-  .DATA_WIDTH(32) )
-disable_cnt_cdc_i (
-  .s_cdc_tdata  (disable_cnt),
-  .m_cdc_clk    (dclk_div),
-  .m_cdc_tdata  (disable_cnt_cdc)
-);
-
-cdc #(
-  .DATA_WIDTH(32) )
-ssi_enable_cnt_cdc_i (
-  .s_cdc_tdata  (ssi_enable_cnt),
-  .m_cdc_clk    (dclk_div),
-  .m_cdc_tdata  (ssi_enable_cnt_cdc)
-);
-
-cdc #(
-  .DATA_WIDTH(1) )
-tdd_en_cdc_i (
-  .s_cdc_tdata  (tdd_en),
-  .m_cdc_clk    (dclk_div),
-  .m_cdc_tdata  (tdd_en_cdc)
-);
-
-reg [31:0] cnt = 0;
-reg ce = 0;
-
 always @( posedge dclk_div ) begin
 
-  if( tdd_en_cdc == 1'b0 )
-    ce <= 1'b0;
+  if( data_src_cdc )
+    unpack_din <= s_axi_data_cdc;
+  else if( ssi_enable == 'b0 )
+    unpack_din <= 32'h00000000;
+  else if( unpack_ready )
+    unpack_din <= s_axis_tdata;  
   else
-    ce <= ~ce;
+    unpack_din <= unpack_din;
+    
+  s_axis_tready <= unpack_ready;  
+    
+end    
 
-  if( tdd_en_cdc == 1'b0 )
-    cnt <= 0;
-  else if( (cnt < 32'hffffffff) && ( ce == 1'b1) )
-    cnt <= cnt + 1;   
-  else
-    cnt <= cnt;   
-    
-  if( (cnt <= disable_cnt_cdc) && (cnt > 32'h0) )
-    enable <= 1'b1;
-  else
-    enable <= 1'b0;
-    
-  if( ( cnt > ssi_enable_cnt_cdc ) && ( cnt <= disable_cnt_cdc ) )
-    serdes_rst <= 1'b0;
-  else
-    serdes_rst <= 1'b1;     
-    
-end
 
 adrv9001_serdes_unpack unpack_inst(
   .clk(dclk_div),                   // data clock
-  .rst(serdes_rst),
-  .din(data_unpack_in),                   // packed i/q data input 
-  .din_rdy(s_axis_tready),          // Ready for new data
+  .rst(~ssi_enable),                // Reset
+  .din(unpack_din),                 // packed i/q data input 
+  .din_rdy(unpack_ready),           // Ready for new data
   .strb_out(s_unpacked),            // 8-bit unpacked strobe output to serdes
   .i_out(i_unpacked),               // 8-bit unpacked i data output to serdes
   .q_out(q_unpacked)                // 8-bit unpacked q data output to serdes
 );   
 
 
+generate
 
+  if( DBG_EN ) begin
+    assign dbg = {ssi_enable_cnt, rf_disable_cnt, unpack_din};
+  end else begin
+    assign dbg = 0;
+  end  
+  
+endgenerate
     
 endmodule
