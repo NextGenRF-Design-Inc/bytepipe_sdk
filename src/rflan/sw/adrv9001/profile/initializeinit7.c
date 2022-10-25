@@ -1303,36 +1303,24 @@ adrv9001_params_t Adrv9001Params = {
 		.numCoeff = 13, 
 		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }}  }}
 ,
-  .Lo1Carrier = {
+	.Lo1Carrier = {
 		.loGenOptimization = ADI_ADRV9001_LO_GEN_OPTIMIZATION_POWER_CONSUMPTION, 
 		.carrierFrequency_Hz = 2450000000, 
 		.intermediateFrequency_Hz = 0, 
 		.manualRxport = ADI_ADRV9001_RX_A},
-  .Lo2Carrier = {
+	.Lo2Carrier = {
 		.loGenOptimization = ADI_ADRV9001_LO_GEN_OPTIMIZATION_PHASE_NOISE, 
 		.carrierFrequency_Hz = 900000000, 
 		.intermediateFrequency_Hz = 0, 
 		.manualRxport = ADI_ADRV9001_RX_A},
-  .Tx1Attn = 10000,
-  .Tx2Attn = 10000,
-  .Tx1Boost = 0,
-  .Tx2Boost = 0,
-  .Tx1TestModeData = 0xA234ABC1,
-  .Tx2TestModeData = 0xA234ABC1,
-  .Rx1TestModeData = 0xA234ABC1,
-  .Rx2TestModeData = 0xA234ABC1,
-  .Tx1SsiEnableDly = 500,
-  .Tx2SsiEnableDly = 500,
-  .Rx1SsiEnableDly = 500,
-  .Rx2SsiEnableDly = 500,
-  .Tx1DisableDly = 200,
-  .Tx2DisableDly = 200,
-  .Rx1SsiDisableDly = 200,
-  .Rx2SsiDisableDly = 200,
-  .Tx1EnableMode = 1,
-  .Tx2EnableMode = 1,
-  .Rx1EnableMode = 1,
-  .Rx2EnableMode = 1,
+	.Tx1Attn = 10000,
+	.Tx2Attn = 10000,
+	.Tx1Boost = 0,
+	.Tx2Boost = 0,
+	.Tx1EnableMode = ADI_ADRV9001_PIN_MODE,
+	.Tx2EnableMode = ADI_ADRV9001_PIN_MODE,
+	.Rx1EnableMode = ADI_ADRV9001_PIN_MODE,
+	.Rx2EnableMode = ADI_ADRV9001_PIN_MODE,
 	.Tx1ExternalPathDelay =  0,
 	.Tx2ExternalPathDelay =  0,
 .Rx1Agc = {
@@ -1471,15 +1459,15 @@ adrv9001_params_t Adrv9001Params = {
 		.rxQecFreezeEnable = true, 
 		.gpioFreezePin = ADI_ADRV9001_GPIO_UNASSIGNED 
 },
-  .Tx1DpdInitCfg = {
+	.Tx1DpdInitCfg = {
 },
-  .Tx2DpdInitCfg = {
+	.Tx2DpdInitCfg = {
 },
-  .Tx1DpdCfg = {
+	.Tx1DpdCfg = {
 },
-  .Tx2DpdCfg = {
+	.Tx2DpdCfg = {
 },
-  .Rx1InterfaceGain = {
+	.Rx1InterfaceGain = {
 		.updateInstance = ADI_ADRV9001_RX_INTERFACE_GAIN_UPDATE_TIMING_NOW, 
 		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_MANUAL, 
 		.gain = ADI_ADRV9001_RX_INTERFACE_GAIN_0_DB, 
@@ -1489,7 +1477,7 @@ adrv9001_params_t Adrv9001Params = {
 		.signalPAR = 15, 
 		.enableFastAttack = false 
 },
-  .Rx2InterfaceGain = {
+	.Rx2InterfaceGain = {
 		.updateInstance = ADI_ADRV9001_RX_INTERFACE_GAIN_UPDATE_TIMING_NOW, 
 		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_MANUAL, 
 		.gain = ADI_ADRV9001_RX_INTERFACE_GAIN_0_DB, 
