@@ -67,6 +67,20 @@ agc_config()
   echo '},' >> tmp.txt	
   cat tmp.txt >> $outDir/initializeinit7.c 
 }
+
+fh_config()
+{
+	rm -rf tmp.txt		 
+
+ 	grep -A 999 'adi_adrv9001_FhCfg_t' $outDir/initializefhConfig*.c >> tmp.txt || true
+  sed -i 's/adi_adrv9001_FhCfg_t.*/.FhConfig = {/g' tmp.txt 
+  
+  rm -rf $outDir/initializefhConfig*.c
+    
+  sed -i 's/}\;/ /g' tmp.txt
+  echo '},' >> tmp.txt	
+  cat tmp.txt >> $outDir/initializeinit7.c 
+}
   
   
   
@@ -157,6 +171,9 @@ profile_parse()
   
   # AGC Channel 2
   agc_config 2
+  
+  # Frequency Hopping
+  fh_config
 
 
 	rm -rf tmp.txt
@@ -222,6 +239,7 @@ profile_parse()
 	sed -i 's/adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, \&Adrv9001Params.Tx2DpdInitCfg);/g' $outDir/initialize.c 		
 	sed -i 's/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, .*/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, \Adrv9001Params.Tx1ExternalPathDelay);/g' $outDir/initialize.c			
 	sed -i 's/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, .*/adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, \Adrv9001Params.Tx2ExternalPathDelay);/g' $outDir/initialize.c
+	sed -i 's/adi_adrv9001_fh_Configure(adrv9001Device_0, .*/adi_adrv9001_fh_Configure(adrv9001Device_0, \&Adrv9001Params.FhConfig);/g' $outDir/initialize.c
 	rm -rf $outDir/configureagcCfg* || true	
 
 	sed -i -e '/adi_adrv9001_DpdCfg_t/,+19d' $outDir/configure.c	
