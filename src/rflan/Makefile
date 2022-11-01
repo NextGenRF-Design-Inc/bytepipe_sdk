@@ -1,6 +1,6 @@
 PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
-SRCDIR := $(realpath $(dir $(PROJECT_DIR)/..))
+SRCDIR := $(realpath $(dir $(PROJECT_DIR)/../))
 
 .PHONY: all
 all: clean
