@@ -8,7 +8,10 @@ h = rflan();
 h.Open('COM16');
 
 %% Enable CW 
-TxPort = h.Tx2;
+TxPort = h.Tx1;
+
+% Change to SPI mode
+h.SetEnableMode(TxPort,h.EnableModeSpi);
 
 % Set Tx Settings
 h.SetTxAttn(TxPort, 10);
@@ -27,3 +30,4 @@ h.Adrv9001ToRfEnabled( TxPort );
 
 h.Adrv9001ToRfPrimed( TxPort );
 h.SetTxIqDataPath(TxPort, h.Adrv9001TxDataPath_DMA);
+h.SetEnableMode(TxPort,h.EnableModePin);

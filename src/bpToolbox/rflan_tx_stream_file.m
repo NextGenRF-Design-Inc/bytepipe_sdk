@@ -16,8 +16,8 @@ TxPort = h.Tx1;
 cyclic = 1;
 
 % Set Tx Settings
-h.SetTxAttn(TxPort, 0);
-h.SetTxBoost(TxPort, 1);
+h.SetTxAttn(TxPort, 10);
+h.SetTxBoost(TxPort, 0);
 
 % Load Transmit buffer with IQ data from file on SD card
 h.RflanStreamBufLoad(TxPort,'CFR_sample_rate_15p36M_bw_10M.csv');

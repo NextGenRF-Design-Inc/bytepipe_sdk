@@ -13,6 +13,8 @@ clear all; close all; clc;
 h = rflan();
 h.Open('COM16');
 
+%% Perform Loopback
+
 TxPort = h.Tx2;
 RxPort = h.Rx2;
 RxBufLength = 4096;

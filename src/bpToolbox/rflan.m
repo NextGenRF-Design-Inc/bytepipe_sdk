@@ -706,6 +706,13 @@ classdef rflan < handle
             v = obj.Adrv9001GetParam([Port 'EnableDly']);            
         end         
         
+        function v = GetIqData( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'IqData']);        
+            
+            v = complex(bitshift(v,-16),bitand(v,hex2dec('ffff')))/ 2^15;    
+            
+        end 
+        
         function v = GetFileList( obj, filter)
             configureCallback(obj.s, "off");
             obj.s.flush();

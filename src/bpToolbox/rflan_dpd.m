@@ -6,6 +6,7 @@ clear all; close all; clc;
 h = rflan();
 h.Open('COM4');
 
+%% Load Stream buffer
 TxPort = h.Tx2;
 
 % Set Tx Attenuation

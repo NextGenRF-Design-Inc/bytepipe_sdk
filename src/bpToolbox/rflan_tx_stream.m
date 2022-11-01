@@ -19,8 +19,8 @@ cyclic = 1;
 h.RflanStreamStop(TxPort);
 
 % Set Tx Settings
-h.SetTxAttn(TxPort, 0);
-h.SetTxBoost(TxPort, 1);
+h.SetTxAttn(TxPort, 10);
+h.SetTxBoost(TxPort, 0);
 
 % Delay in samples between rising edge of enable and tx_axis_tready
 h.SetEnableDelay(TxPort, 500);
