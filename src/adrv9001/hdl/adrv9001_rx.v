@@ -217,7 +217,7 @@ always @( posedge dclk_div ) begin
   
   if( rf_enable_mode_cdc == 1'b0 )
     ssi_enable_cnt <= 16'h0;
-  else if( enable_cdc == 1'b0 )
+  else if( (enable_cdc == 1'b0 ) && (ssi_disable_cnt == 16'h0))
      ssi_enable_cnt <= ssi_enable_delay_cdc;
   else if( (ssi_enable_cnt > 'h0) && ( ce == 1'b1) )
     ssi_enable_cnt <= ssi_enable_cnt - 'd1;
