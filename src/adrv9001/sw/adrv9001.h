@@ -157,6 +157,7 @@ typedef struct {
   adi_adrv9001_GpioPin_e				        TcxoEnablePin;
   adi_adrv9001_AuxDac_e                 TcxoDacChannel;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
+  adi_adrv9001_FhCfg_t                  FhConfig;  
 } adrv9001_params_t;
 
 extern adrv9001_params_t Adrv9001Params;
