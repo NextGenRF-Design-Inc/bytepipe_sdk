@@ -192,7 +192,6 @@ end
 
 wire [15:0] ssi_disable_delay_cdc;
 wire [15:0] ssi_enable_delay_cdc;
-reg  [15:0] ssi_disable_cnt = 0;
 
 cdc #(
   .DATA_WIDTH(16) )

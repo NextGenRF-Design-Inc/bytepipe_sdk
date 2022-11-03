@@ -44,7 +44,6 @@
 *******************************************************************************/
 
 #include "xstatus.h"
-//#include "status.h"
 #include "xparameters.h"
 #include "ff.h"
 
@@ -95,6 +94,7 @@ uint32_t Rflan_GetHwVer( void );
  {
    RflanStatus_Success                 = (0),
    RflanStatus_InvalidPib              = (RFLAN_STATUS_OFFSET - 1),
+   RflanStatus_IicError                = (RFLAN_STATUS_OFFSET - 2),
  } rflan_status_t;
 
 /******************************************************************************/

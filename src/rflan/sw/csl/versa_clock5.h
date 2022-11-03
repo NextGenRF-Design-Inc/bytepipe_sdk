@@ -57,6 +57,7 @@
 #define GTR1_REFCLK_VERSACLK5_PORT      (3)
 #define GTR2_REFCLK_VERSACLK5_PORT      (1)
 #define GTR3_REFCLK_VERSACLK5_PORT      (0)
+#define VERSA_CLOCK5_STATUS_OFFSET      (-600)
 
 typedef struct
 {
@@ -70,7 +71,15 @@ typedef struct
   uint8_t                 Addr;
 } versa_clock5_init_t;
 
-
+/**
+* \brief Code indicated status of request
+*/
+typedef enum
+{
+  VersaClock5Status_Success                 = (0),
+  VersaClock5Status_InvalidParameter        = (VERSA_CLOCK5_STATUS_OFFSET - 1),
+  VersaClock5Status_IicError                = (VERSA_CLOCK5_STATUS_OFFSET - 2),
+} versa_clock_status_t;
 
 int32_t VersaClock5_Initialize( versa_clock5_t *Instance, versa_clock5_init_t *Init );
 int32_t VersaClock5_ReadRegister(versa_clock5_t *Instance, uint16_t Address, uint8_t *Value);

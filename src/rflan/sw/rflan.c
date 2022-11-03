@@ -60,7 +60,6 @@
 #include "status.h"
 
 
-
 static XResetPs       RflanReset;
 static FATFS          FatFs;
 static cli_t          RflanCli;
@@ -72,7 +71,29 @@ static adrv9001_t     RflanAdrv9001;
 static rflan_stream_t RflanStream;
 static QueueHandle_t  RflanEvtQueue;
 static versa_clock5_t RflanVersaClock5;
+static XIicPs         RflanIic0;
 
+static int32_t RflanIic_Initialize( XIicPs *Instance )
+{
+  XIicPs_Config *Config;
+
+  Config = XIicPs_LookupConfig(XPAR_PSU_I2C_1_DEVICE_ID);
+  if (NULL == Config) {
+    return RflanStatus_IicError;
+  }
+
+  if(XIicPs_CfgInitialize(Instance, Config, Config->BaseAddress) != 0)
+    return RflanStatus_IicError;
+
+  /* Perform a self-test to ensure that the hardware was built correctly */
+  if(XIicPs_SelfTest(Instance) != 0)
+    return RflanStatus_IicError;
+
+  /* Set the IIC serial clock rate */
+  XIicPs_SetSClk(Instance, 100e3);
+
+  return RflanStatus_Success;
+}
 
 static int32_t RflanReset_Initialize( XResetPs *Instance )
 {
@@ -204,14 +225,18 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanReset_Initialize( &RflanReset )) != 0)
     printf("Rflan Reset %s\r\n",StatusString(status));
 
-  versa_clock5_init_t VersaClock5Init = {
-      .Addr = 0x6A,
-      .Iic = NULL
-  };
-
-  /* Initialize Versa Clock */
-  if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
-    printf("VersaClock5 Initialize %s\r\n",StatusString(status));
+//  /* Initialize I2C*/
+//  if((status = RflanIic_Initialize( &RflanIic0 )) != 0)
+//    printf("I2C Initialize %s\r\n",StatusString(status));
+//
+//  versa_clock5_init_t VersaClock5Init = {
+//      .Addr = 0x6A,
+//      .Iic = &RflanIic0
+//  };
+//
+//  /* Initialize Versa Clock */
+//  if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
+//    printf("VersaClock5 Initialize %s\r\n",StatusString(status));
 
   /* Initialize File System*/
   if((status = f_mount(&FatFs, FF_LOGICAL_DRIVE_PATH, 1)) != FR_OK)

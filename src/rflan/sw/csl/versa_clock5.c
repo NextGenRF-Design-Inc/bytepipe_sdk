@@ -69,7 +69,7 @@ int32_t VersaClock5_GlobalReset( versa_clock5_t *Instance )
 
   usleep( 100000 );
 
-  return XST_SUCCESS;
+  return VersaClock5Status_Success;
 }
 
 int32_t VersaClock5_SetClockFreq(versa_clock5_t *Instance, uint8_t Port, uint32_t FreqHz )
@@ -154,31 +154,31 @@ int32_t VersaClock5_GetClockFreq(versa_clock5_t *Instance, uint8_t Port, uint32_
 
   *FreqHz = (uint32_t)tmpFreq;
 
-  return XST_SUCCESS;
+  return VersaClock5Status_Success;
 }
 
 int32_t VersaClock5_Read(versa_clock5_t *Instance, uint8_t *Buf, uint16_t Length)
 {
   int32_t status;
 
-  if((status = XIicPs_MasterRecvPolled(Instance->Iic, Buf, Length, Instance->Addr)) != XST_SUCCESS)
-    return status;
+  if((status = XIicPs_MasterRecvPolled(Instance->Iic, Buf, Length, Instance->Addr)) != 0)
+    return VersaClock5Status_IicError;
 
   while (XIicPs_BusIsBusy(Instance->Iic));
 
-  return XST_SUCCESS;
+  return VersaClock5Status_Success;
 }
 
 int32_t VersaClock5_Write(versa_clock5_t *Instance, uint8_t *Buf, uint16_t Length)
 {
   int32_t status;
 
-  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, Length, Instance->Addr)) != XST_SUCCESS)
-    return status;
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, Length, Instance->Addr)) != 0)
+    return VersaClock5Status_IicError;
 
   while (XIicPs_BusIsBusy(Instance->Iic));
 
-  return XST_SUCCESS;
+  return VersaClock5Status_Success;
 }
 
 int32_t VersaClock5_WriteRegister(versa_clock5_t *Instance, uint16_t Address, uint8_t Value)
@@ -191,18 +191,18 @@ int32_t VersaClock5_WriteRegister(versa_clock5_t *Instance, uint16_t Address, ui
 
   XIicPs_SetOptions(Instance->Iic, XIICPS_REP_START_OPTION);
 
-  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, 1, Instance->Addr)) != XST_SUCCESS)
-    return status;
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, 1, Instance->Addr)) != 0)
+    return VersaClock5Status_IicError;
 
   XIicPs_ClearOptions(Instance->Iic, XIICPS_REP_START_OPTION);
 
   Buf[0] = (uint8_t)Value;
-  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, 1, Instance->Addr)) != XST_SUCCESS)
-    return status;
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, 1, Instance->Addr)) != 0)
+    return VersaClock5Status_IicError;
 
   while (XIicPs_BusIsBusy(Instance->Iic));
 
-  return XST_SUCCESS;
+  return VersaClock5Status_Success;
 }
 
 int32_t VersaClock5_ReadRegister( versa_clock5_t *Instance, uint16_t Address, uint8_t *Value)
@@ -215,19 +215,19 @@ int32_t VersaClock5_ReadRegister( versa_clock5_t *Instance, uint16_t Address, ui
 
   XIicPs_SetOptions(Instance->Iic, XIICPS_REP_START_OPTION);
 
-  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, 1, Instance->Addr)) != XST_SUCCESS)
-    return status;
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, 1, Instance->Addr)) != 0)
+    return VersaClock5Status_IicError;
 
   XIicPs_ClearOptions(Instance->Iic, XIICPS_REP_START_OPTION);
 
-  if((status = XIicPs_MasterRecvPolled(Instance->Iic, Buf, 1, Instance->Addr)) != XST_SUCCESS)
-    return status;
+  if((status = XIicPs_MasterRecvPolled(Instance->Iic, Buf, 1, Instance->Addr)) != 0)
+    return VersaClock5Status_IicError;
 
   *Value = Buf[0];
 
   while (XIicPs_BusIsBusy(Instance->Iic));
 
-  return XST_SUCCESS;
+  return VersaClock5Status_Success;
 }
 
 /* Default Configuration: OUT1 = 300MHz, OUT2 = 27MHz, OUT3 = 52MHz, OUT4 = 125MHz */
@@ -238,35 +238,12 @@ uint8_t VersaClock5Cfg[] = {0x00,0x01,0x0F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x
 
 int32_t VersaClock5_Initialize( versa_clock5_t *Instance, versa_clock5_init_t *Init )
 {
-  int status;
-
   Instance->Addr = Init->Addr;
   Instance->Iic = Init->Iic;
 
   if( Instance->Iic == NULL )
-  {
-    if((Instance->Iic = calloc(1, sizeof(XIicPs))) == NULL)
-        return XST_FAILURE;
-
-    XIicPs_Config *Config;
-
-    Config = XIicPs_LookupConfig(XPAR_PSU_I2C_1_DEVICE_ID);
-    if (NULL == Config) {
-      return XST_FAILURE;
-    }
-
-    if((status = XIicPs_CfgInitialize(Instance->Iic, Config, Config->BaseAddress)) != XST_SUCCESS)
-      return XST_FAILURE;
-
-    /* Perform a self-test to ensure that the hardware was built correctly */
-    if((status = XIicPs_SelfTest(Instance->Iic)) != XST_SUCCESS)
-      return XST_FAILURE;
-
-    /* Set the IIC serial clock rate */
-    XIicPs_SetSClk(Instance->Iic, 100e3);
-  }
+    return VersaClock5Status_InvalidParameter;
 
   /* Write Default Registers */
   return VersaClock5_Write( Instance, VersaClock5Cfg, sizeof(VersaClock5Cfg));
-
 }
