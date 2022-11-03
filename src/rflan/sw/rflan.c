@@ -225,18 +225,18 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanReset_Initialize( &RflanReset )) != 0)
     printf("Rflan Reset %s\r\n",StatusString(status));
 
-//  /* Initialize I2C*/
-//  if((status = RflanIic_Initialize( &RflanIic0 )) != 0)
-//    printf("I2C Initialize %s\r\n",StatusString(status));
-//
-//  versa_clock5_init_t VersaClock5Init = {
-//      .Addr = 0x6A,
-//      .Iic = &RflanIic0
-//  };
-//
-//  /* Initialize Versa Clock */
-//  if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
-//    printf("VersaClock5 Initialize %s\r\n",StatusString(status));
+  /* Initialize I2C*/
+  if((status = RflanIic_Initialize( &RflanIic0 )) != 0)
+    printf("I2C Initialize %s\r\n",StatusString(status));
+
+  versa_clock5_init_t VersaClock5Init = {
+      .Addr = 0x6A,
+      .Iic = &RflanIic0
+  };
+
+  /* Initialize Versa Clock */
+  if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
+    printf("VersaClock5 Initialize %s\r\n",StatusString(status));
 
   /* Initialize File System*/
   if((status = f_mount(&FatFs, FF_LOGICAL_DRIVE_PATH, 1)) != FR_OK)
