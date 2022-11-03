@@ -8,6 +8,12 @@
 #include "rflan.h"
 #include "pib.h"
 
+
+#define RFLAN_PIB_FLAG_REBOOT        (0x08)
+#define RFLAN_PIB_FLAG_VIRTUAL       (0x10)
+#define RFLAN_PIB_FLAG_SET_ACTION    (0x20)
+#define RFLAN_PIB_FLAG_GET_ACTION    (0x40)
+
 /* PIB Definition */
 static pib_def_t RflanPibDef[] =
 {
@@ -20,6 +26,10 @@ static pib_def_t RflanPibDef[] =
   { "IpMask",         offsetof(rflan_params_t, IpMask),        PibTypeStr,       PIB_FLAGS_DEFAULT  },
   { "IpGwAddr",       offsetof(rflan_params_t, IpGwAddr),      PibTypeStr,       PIB_FLAGS_DEFAULT  },
   { "LwipEnable",     offsetof(rflan_params_t, LwipEnable),    PibTypeU8,        PIB_FLAGS_DEFAULT  },
+  { "GtrClockFreq0",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
+  { "GtrClockFreq1",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
+  { "GtrClockFreq2",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
+  { "GtrClockFreq3",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
 };
 
 /* Default PIB Parameters */
@@ -33,24 +43,152 @@ static rflan_params_t  RflanPibDefaults =
 
 };
 
-int32_t RflanPib_GetByName( rflan_pib_t *Instance, char *name, uint8_t *value )
+static int32_t RflanPib_SetVirtualByNameByString( rflan_pib_t *Instance, char *name, char *str )
 {
-  int32_t status;
+  int32_t status = 0;
+  int32_t id;
 
-  /* Get Parameter By Name */
-  if((status = Pib_GetByName( &Instance->Pib, name, value)) != 0)
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
     return status;
+
+  if( strcmp( name, "GtrClockFreq0") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = VersaClock5_SetClockFreq(Instance->VersaClock5, 0, tmp);
+  }
+
+  else if( strcmp( &name[3], "GtrClockFreq1") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = VersaClock5_SetClockFreq(Instance->VersaClock5, 1, tmp);
+  }
+
+  else if( strcmp( &name[3], "GtrClockFreq2") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = VersaClock5_SetClockFreq(Instance->VersaClock5, 2, tmp);
+  }
+
+  else if( strcmp( &name[3], "GtrClockFreq3") == 0 )
+  {
+    uint32_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    status = VersaClock5_SetClockFreq(Instance->VersaClock5, 3, tmp);
+  }
+
+  else
+  {
+	  status = RflanStatus_InvalidPib;
+  }
+
+  return RflanStatus_Success;
+}
+
+static int32_t RflanPib_GetVirtualStringByName( rflan_pib_t *Instance, char *name, char *str )
+{
+  int32_t status = 0;
+  int32_t id;
+
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if( strcmp( name, "GtrClockFreq0") == 0 )
+  {
+    uint32_t tmp = 0;
+    if((status = VersaClock5_GetClockFreq( Instance->VersaClock5, 0, &tmp)) != 0)
+      return status;
+
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "GtrClockFreq1") == 0 )
+  {
+    uint32_t tmp = 0;
+    if((status = VersaClock5_GetClockFreq( Instance->VersaClock5, 1, &tmp)) != 0)
+      return status;
+
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "GtrClockFreq2") == 0 )
+  {
+    uint32_t tmp = 0;
+    if((status = VersaClock5_GetClockFreq( Instance->VersaClock5, 2, &tmp)) != 0)
+      return status;
+
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "GtrClockFreq3") == 0 )
+  {
+    uint32_t tmp = 0;
+    if((status = VersaClock5_GetClockFreq( Instance->VersaClock5, 3, &tmp)) != 0)
+      return status;
+
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+  else
+  {
+    return RflanStatus_InvalidPib;
+  }
+
 
   return status;
 }
 
-int32_t RflanPib_SetbyName( rflan_pib_t *Instance, char *name, char *value )
+static int32_t RflanPib_SetActionByNameByString( rflan_pib_t *Instance, char *name, char *str )
 {
+
+  return 0;
+}
+
+int32_t RflanPib_GetStringByName( rflan_pib_t *Instance, char *name, char *str )
+{
+  int32_t id;
   int32_t status;
 
-  /* Set Parameter By Name */
-  if((status = Pib_SetByNameByString( &Instance->Pib, name, value)) != 0)
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
     return status;
+
+  if( ( Instance->Pib.Def[id].flags & RFLAN_PIB_FLAG_VIRTUAL ) == RFLAN_PIB_FLAG_VIRTUAL )
+  {
+    status = RflanPib_GetVirtualStringByName( Instance, name, str );
+  }
+  else
+  {
+    status = Pib_GetStringByName( &Instance->Pib, name, str );
+  }
+
+  return status;
+}
+
+int32_t RflanPib_SetbyNameByString( rflan_pib_t *Instance, char *name, char *str )
+{
+  int32_t id;
+  int32_t status;
+
+  /* Get ID */
+  if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
+    return status;
+
+  if( ( Instance->Pib.Def[id].flags & RFLAN_PIB_FLAG_VIRTUAL ) == RFLAN_PIB_FLAG_VIRTUAL )
+  {
+    status = RflanPib_SetVirtualByNameByString( Instance, name, str );
+  }
+  else
+  {
+    status = Pib_SetByNameByString( &Instance->Pib, name, str );
+
+    if(( Instance->Pib.Def[id].flags & RFLAN_PIB_FLAG_SET_ACTION ) == RFLAN_PIB_FLAG_SET_ACTION )
+      status = RflanPib_SetActionByNameByString( Instance, name, str );
+  }
 
   return status;
 }
@@ -58,6 +196,8 @@ int32_t RflanPib_SetbyName( rflan_pib_t *Instance, char *name, char *value )
 int32_t RflanPib_Initialize( rflan_pib_t *Instance, rflan_pib_init_t *Init )
 {
   int32_t status;
+
+  Instance->VersaClock5 = Init->VersaClock5;
 
   /* Create PIB Config */
   pib_init_t PibInit = {

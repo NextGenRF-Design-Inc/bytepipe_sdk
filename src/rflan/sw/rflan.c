@@ -56,6 +56,8 @@
 #include "rflan_gpio.h"
 #include "rflan_pib.h"
 #include "rflan_stream.h"
+#include "versa_clock5.h"
+#include "status.h"
 
 
 
@@ -69,6 +71,7 @@ static rflan_pib_t    RflanPib;
 static adrv9001_t     RflanAdrv9001;
 static rflan_stream_t RflanStream;
 static QueueHandle_t  RflanEvtQueue;
+static versa_clock5_t RflanVersaClock5;
 
 
 static int32_t RflanReset_Initialize( XResetPs *Instance )
@@ -201,12 +204,22 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanReset_Initialize( &RflanReset )) != 0)
     printf("Rflan Reset %s\r\n",StatusString(status));
 
+  versa_clock5_init_t VersaClock5Init = {
+      .Addr = 0x6A,
+      .Iic = NULL
+  };
+
+  /* Initialize Versa Clock */
+  if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
+    printf("VersaClock5 Initialize %s\r\n",StatusString(status));
+
   /* Initialize File System*/
   if((status = f_mount(&FatFs, FF_LOGICAL_DRIVE_PATH, 1)) != FR_OK)
     printf("FatFs %s\r\n",StatusString(status));
 
   rflan_pib_init_t PibInit = {
-      .HwVer = Rflan_GetHwVer( )
+      .HwVer = Rflan_GetHwVer( ),
+      .VersaClock5 = &RflanVersaClock5
   };
 
   /* Initialize PIB */

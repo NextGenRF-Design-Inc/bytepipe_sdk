@@ -46,6 +46,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
+#include "xiicps.h"
 //#include "cli.h"
 
 #define GTR0_REFCLK_FREQ_HZ             (52000000)
@@ -57,14 +58,27 @@
 #define GTR2_REFCLK_VERSACLK5_PORT      (1)
 #define GTR3_REFCLK_VERSACLK5_PORT      (0)
 
-int32_t VersaClock5_Initialize( void );
-int32_t VersaClock5_ReadRegister( uint16_t Address, uint8_t *Value);
-int32_t VersaClock5_WriteRegister( uint16_t Address, uint8_t Value);
-int32_t VersaClock5_Write( uint8_t *Buf, uint16_t Length);
-int32_t VersaClock5_Read( uint8_t *Buf, uint16_t Length);
-int32_t VersaClock5_GetClockFreq( uint8_t Port, uint32_t *FreqHz);
-int32_t VersaClock5_SetClockFreq( uint8_t Port, uint32_t FreqHz );
-//int VersaClock5Cli_Initialize( cli_t *Cli );
-int32_t VersaClock5_GlobalReset( void );
+typedef struct
+{
+  XIicPs                 *Iic;
+  uint8_t                 Addr;
+} versa_clock5_t;
+
+typedef struct
+{
+  XIicPs                 *Iic;
+  uint8_t                 Addr;
+} versa_clock5_init_t;
+
+
+
+int32_t VersaClock5_Initialize( versa_clock5_t *Instance, versa_clock5_init_t *Init );
+int32_t VersaClock5_ReadRegister(versa_clock5_t *Instance, uint16_t Address, uint8_t *Value);
+int32_t VersaClock5_GlobalReset( versa_clock5_t *Instance );
+int32_t VersaClock5_SetClockFreq(versa_clock5_t *Instance, uint8_t Port, uint32_t FreqHz );
+int32_t VersaClock5_GetClockFreq(versa_clock5_t *Instance, uint8_t Port, uint32_t *FreqHz );
+int32_t VersaClock5_Read(versa_clock5_t *Instance, uint8_t *Buf, uint16_t Length);
+int32_t VersaClock5_Write(versa_clock5_t *Instance, uint8_t *Buf, uint16_t Length);
+int32_t VersaClock5_WriteRegister(versa_clock5_t *Instance, uint16_t Address, uint8_t Value);
 
 #endif

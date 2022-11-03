@@ -45,6 +45,7 @@
 #include "cli.h"
 #include "ff.h"
 #include "adrv9001.h"
+#include "rflan.h"
 
 
 static const char *StatusString( int32_t status )
@@ -219,6 +220,9 @@ static const char *StatusString( int32_t status )
 
     case PibStatus_InvalidParameter:
       return "PIB Invalid Parameter";
+
+    case RflanStatus_InvalidPib:
+      return "Rflan Invalid Pib";
 
     default:
       return "Unknown Status";

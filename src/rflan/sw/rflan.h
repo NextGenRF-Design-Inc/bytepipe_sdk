@@ -44,7 +44,7 @@
 *******************************************************************************/
 
 #include "xstatus.h"
-#include "status.h"
+//#include "status.h"
 #include "xparameters.h"
 #include "ff.h"
 
@@ -59,7 +59,7 @@
 #define RFLAN_QUEUE_SIZE                4
 #define RFLAN_EVT_QUEUE_SIZE            4
 
-#define RFLAN_ADRV9001_BASE         	XPAR_ADRV9002_0_BASEADDR
+#define RFLAN_ADRV9001_BASE         	  XPAR_ADRV9002_0_BASEADDR
 #define RFLAN_ADRV9001_LOG_FILENAME     ("1:/adi_adrv9001_log.txt")
 #define RFLAN_ADRV9001_SCRIPT_FILENAME  ("1:/adrv9001_setup.txt")
 
@@ -70,6 +70,8 @@
 #define RFLAN_LWIP_EMAC_BASEADDR        XPAR_XEMACPS_0_BASEADDR
 
 #define RFLAN_GPIO_DEVICE_ID            (XPAR_PSU_GPIO_0_DEVICE_ID)
+
+#define RFLAN_STATUS_OFFSET             (-500)
 
 
 void Rflan_Reboot( void );
@@ -86,6 +88,15 @@ uint32_t Rflan_GetHwVer( void );
    RflanEvt_Tx2StreamDone    = 3,    /*!< Tx2 Stream Done Event */   
  } rflan_evt_type_t;
  
+ /**
+ * \brief Code indicated status of request
+ */
+ typedef enum
+ {
+   RflanStatus_Success                 = (0),
+   RflanStatus_InvalidPib              = (RFLAN_STATUS_OFFSET - 1),
+ } rflan_status_t;
+
 /******************************************************************************/
 /**
 *   Build Version

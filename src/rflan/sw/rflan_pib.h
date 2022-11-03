@@ -48,6 +48,7 @@
 
 #include "cli.h"
 #include "pib.h"
+#include "versa_clock5.h"
 
 /**
 ** RFLAN parameters
@@ -67,6 +68,7 @@ typedef struct {
 */
 typedef struct {
   uint32_t            HwVer;
+  versa_clock5_t     *VersaClock5;
 } rflan_pib_init_t;
 
 /**
@@ -75,13 +77,13 @@ typedef struct {
 typedef struct {
   pib_t               Pib;
   rflan_params_t      Params;
+  versa_clock5_t     *VersaClock5;
 } rflan_pib_t;
 
 
 int32_t RflanPib_Initialize     ( rflan_pib_t *Instance, rflan_pib_init_t *Init );
-int32_t RflanPib_SetbyName      ( rflan_pib_t *Instance, char *name, char *value );
-int32_t RflanPib_GetByName      ( rflan_pib_t *Instance, char *name, uint8_t *value );
-
+int32_t RflanPib_SetbyNameByString    ( rflan_pib_t *Instance, char *name, char *str );
+int32_t RflanPib_GetStringByName      ( rflan_pib_t *Instance, char *name, char *str );
 #ifdef __cplusplus
 }
 #endif

@@ -58,6 +58,7 @@
 #include "rflan_gpio.h"
 #include "rflan_stream.h"
 #include "ff.h"
+#include "status.h"
 
 #define BOOT_BUF_SIZE   16384
 
@@ -462,7 +463,7 @@ static void RflanCli_SetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   Cli_GetParameter(cmd, 2, CliParamTypeStr, value);
 
   /* Set PIB parameter */
-  int32_t status = RflanPib_SetbyName( RflanPib, name, value );
+  int32_t status = RflanPib_SetbyNameByString( RflanPib, name, value );
 
   Cli_Printf(CliInstance,"SetParam %s\r\n",StatusString(status));
 
@@ -493,7 +494,7 @@ static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   Cli_GetParameter(cmd, 1, CliParamTypeStr, name);
 
   /* Get Value */
-  if((status = Pib_GetStringByName( &RflanPib->Pib, name, value )) != 0)
+  if((status = RflanPib_GetStringByName( RflanPib, name, value )) != 0)
   {
     Cli_Printf(CliInstance,"GetParam Error - %s\r\n",StatusString(status));
   }
