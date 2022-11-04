@@ -13,7 +13,7 @@ set srcDir [lindex $argv 1]
 set part [lindex $argv 2]
 
 # Create project
-create_project $proj_name $proj_name/vivado -part $part-sbva484-1-e -force
+create_project $proj_name $proj_name/vivado -part $part -force
 
 # Add IP Catalog
 set_property ip_repo_paths . [current_fileset]
@@ -50,4 +50,3 @@ wait_on_run -quiet impl_1
 update_compile_order -fileset sources_1
 write_hw_platform -fixed -include_bit -force -file [file normalize $proj_name/${proj_name}_${part}.xsa]
 
-}

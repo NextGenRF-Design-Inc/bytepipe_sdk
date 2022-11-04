@@ -9,20 +9,19 @@ all: clean
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl; \
 	$(MAKE) -f $(SDK_SRCDIR)/axi_dma/Makefile; \
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk; \
-	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $$DEVICE; \
-	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE
+	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e; \
+	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
 
 hdl:
 	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl; \
 	$(MAKE) -f $(SDK_SRCDIR)/axi_dma/Makefile; \
-	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $$DEVICE
+	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
   
 sw:
 	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v10.25.22/$(PROJECT)_$$DEVICE.xsa" -O $(PROJECT)/$(PROJECT)_$$DEVICE.xsa || true; \
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk; \
-	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE
+	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
   
 clean:
 	rm -rf $(PROJECT)

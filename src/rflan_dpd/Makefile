@@ -8,9 +8,8 @@ all: clean sw
 
 sw:
 	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v10.25.22/rflan_$$DEVICE.xsa" -O $(PROJECT)/rflan_$$DEVICE.xsa || true; \
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk; \
-	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE
+	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
   
 clean:
 	rm -rf $(PROJECT)
