@@ -22,24 +22,34 @@ static pib_def_t RflanPibDef[] =
   { "PibSize",        offsetof(rflan_params_t, PibSize),       PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY  },
   { "FwVer",          offsetof(rflan_params_t, FwVer),         PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY  },
   { "HwVer",          offsetof(rflan_params_t, HwVer),         PibTypeU32,       PIB_FLAGS_DEFAULT | PIB_FLAG_READ_ONLY  },
+
+#ifdef RFLAN_LWIP_ENABLE
   { "IpAddr",         offsetof(rflan_params_t, IpAddr),        PibTypeStr,       PIB_FLAGS_DEFAULT  },
   { "IpMask",         offsetof(rflan_params_t, IpMask),        PibTypeStr,       PIB_FLAGS_DEFAULT  },
   { "IpGwAddr",       offsetof(rflan_params_t, IpGwAddr),      PibTypeStr,       PIB_FLAGS_DEFAULT  },
   { "LwipEnable",     offsetof(rflan_params_t, LwipEnable),    PibTypeU8,        PIB_FLAGS_DEFAULT  },
+#endif
+
+#ifdef VERSA_CLOCK5_ENABLE
   { "GtrClockFreq0",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
   { "GtrClockFreq1",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
   { "GtrClockFreq2",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
   { "GtrClockFreq3",  0,                                       PibTypeU32,       PIB_FLAGS_DEFAULT | RFLAN_PIB_FLAG_VIRTUAL },
+#endif
+
 };
 
 /* Default PIB Parameters */
 static rflan_params_t  RflanPibDefaults =
 {
   .PibSize        = sizeof(rflan_params_t),
+
+#ifdef RFLAN_LWIP_ENABLE
   .IpAddr         =  "192.168.1.12",
   .IpMask         =  "255.255.255.0",
   .IpGwAddr       =  "192.168.1.1",
   .LwipEnable     = 1,
+#endif
 
 };
 
@@ -52,7 +62,14 @@ static int32_t RflanPib_SetVirtualByNameByString( rflan_pib_t *Instance, char *n
   if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
     return status;
 
-  if( strcmp( name, "GtrClockFreq0") == 0 )
+  if( (name == NULL) || (str == NULL) )
+  {
+	  status = RflanStatus_InvalidPib;
+  }
+
+#ifdef VERSA_CLOCK5_ENABLE
+
+  else if( strcmp( name, "GtrClockFreq0") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
@@ -80,6 +97,8 @@ static int32_t RflanPib_SetVirtualByNameByString( rflan_pib_t *Instance, char *n
     status = VersaClock5_SetClockFreq(Instance->VersaClock5, 3, tmp);
   }
 
+#endif
+
   else
   {
 	  status = RflanStatus_InvalidPib;
@@ -93,10 +112,16 @@ static int32_t RflanPib_GetVirtualStringByName( rflan_pib_t *Instance, char *nam
   int32_t status = 0;
   int32_t id;
 
-
   /* Get ID */
   if((status = Pib_GetItemId( &Instance->Pib, name, &id )) != 0)
     return status;
+
+  if( (name == NULL) || (str == NULL) )
+  {
+    status = RflanStatus_InvalidPib;
+  }
+
+#ifdef VERSA_CLOCK5_ENABLE
 
   if( strcmp( name, "GtrClockFreq0") == 0 )
   {
@@ -133,6 +158,9 @@ static int32_t RflanPib_GetVirtualStringByName( rflan_pib_t *Instance, char *nam
 
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
+
+#endif
+
   else
   {
     return RflanStatus_InvalidPib;
@@ -197,7 +225,9 @@ int32_t RflanPib_Initialize( rflan_pib_t *Instance, rflan_pib_init_t *Init )
 {
   int32_t status;
 
+#ifdef VERSA_CLOCK5_ENABLE
   Instance->VersaClock5 = Init->VersaClock5;
+#endif
 
   /* Create PIB Config */
   pib_init_t PibInit = {

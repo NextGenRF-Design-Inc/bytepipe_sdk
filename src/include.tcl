@@ -1,12 +1,3 @@
-# ******************************************************************************************
-# ******************************************************************************************
-#              Copyright 2020 (c) NextGen RF Design. All rights reserved.
-#
-#        This core is distributed WITHOUT ANY WARRANTY; without even the implied 
-#           warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# ******************************************************************************************
-# ******************************************************************************************
 
 proc add_interface_ports {name dir width {type none}} {
 

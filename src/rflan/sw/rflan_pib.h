@@ -68,7 +68,9 @@ typedef struct {
 */
 typedef struct {
   uint32_t            HwVer;
+#ifdef VERSA_CLOCK5_ENABLE
   versa_clock5_t     *VersaClock5;
+#endif
 } rflan_pib_init_t;
 
 /**
@@ -77,7 +79,9 @@ typedef struct {
 typedef struct {
   pib_t               Pib;
   rflan_params_t      Params;
+#ifdef VERSA_CLOCK5_ENABLE
   versa_clock5_t     *VersaClock5;
+#endif
 } rflan_pib_t;
 
 

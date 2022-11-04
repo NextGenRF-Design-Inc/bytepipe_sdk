@@ -40,6 +40,8 @@
 *
 *******************************************************************************/
 
+#ifdef RFLAN_LWIP_ENABLE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -175,3 +177,4 @@ rflan_lwip_status_t RflanLwip_Initialize( rflan_lwip_t *Instance, rflan_lwip_ini
 }
 
 
+#endif

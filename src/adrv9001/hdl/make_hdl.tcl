@@ -18,7 +18,7 @@ set srcDir [file dirname [file normalize [ info script ] ] ]
 create_project $proj_name $proj_name/vivado -part xczu2cg-sbva484-1-e -force
 
 # Add include tcl processes
-source $srcDir/../../hdl_include.tcl
+source $srcDir/../../include.tcl
 
 # Add IP Repo
 set_property ip_repo_paths $proj_name [current_fileset]

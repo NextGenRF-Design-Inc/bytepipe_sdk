@@ -7,7 +7,8 @@
 #include "mem.h"
 #include "sleep.h"
 
-#ifdef USE_RFLAN_STREAM
+#ifdef RFLAN_STREAM_ENABLE
+
 static void RflanStream_Tx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t evt )
 {
   rflan_stream_t *stream = (rflan_stream_t*)Instance->CallbackRef;
@@ -98,11 +99,9 @@ static int32_t RflanStream_ChannelToAdrvPortChannel( rflan_stream_channel_t Stre
   return RflanStreamStatus_Success;
 }
 
-#endif
 
 int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel )
 {
-#ifdef USE_RFLAN_STREAM
   int32_t status;
   adi_common_Port_e AdiPort;
   adi_common_ChannelNumber_e AdiChannel;
@@ -124,15 +123,11 @@ int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t 
   if((status = Adrv9001_ToPrimed( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
     return status;
 
-#endif
-
   return RflanStreamStatus_Success;
 }
 
 int32_t RflanStream_StopTransfer( rflan_stream_t *Instance, rflan_stream_channel_t Channel )
 {
-#ifdef USE_RFLAN_STREAM
-
   int32_t status;
   adi_common_Port_e AdiPort;
   adi_common_ChannelNumber_e AdiChannel;
@@ -148,14 +143,11 @@ int32_t RflanStream_StopTransfer( rflan_stream_t *Instance, rflan_stream_channel
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-#endif
-
   return RflanStreamStatus_Success;
 }
 
 int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel, bool Cyclic )
 {
-#ifdef USE_RFLAN_STREAM
   int32_t status;
   adi_common_Port_e AdiPort;
   adi_common_ChannelNumber_e AdiChannel;
@@ -185,14 +177,11 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
       return status;
   }
 
-#endif
-
   return RflanStreamStatus_Success;
 }
 
 int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *Init )
 {
-#ifdef USE_RFLAN_STREAM
   Instance->Adrv9001 = Init->Adrv9001;
   Instance->Callback = Init->Callback;
   Instance->CallbackRef = Init->CallbackRef;
@@ -236,7 +225,7 @@ int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *In
   if((status = AxiDma_Initialize( &Instance->Rx2Dma, &DmaInit )) != 0)
     return status;
 
-#endif
-
   return RflanStreamStatus_Success;
 }
+
+#endif

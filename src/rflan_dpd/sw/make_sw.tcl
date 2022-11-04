@@ -52,54 +52,39 @@ platform generate
 app create -name rpu -platform hwp -os {freertos10_xilinx} -proc {psu_cortexr5_0} -template {Empty Application(C)}
 
 # Import RPU Sources
-importsources -name rpu -path $srcDir/rflan/sw/rflan.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_cli.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_gpio.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_lwip.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_pib.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_stream.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_uart.c -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan.h -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_cli.h -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_gpio.h -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_lwip.h -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_pib.h -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_stream.h -soft-link -target-path src/
-importsources -name rpu -path $srcDir/rflan/sw/rflan_uart.h -soft-link -target-path src/
+importsources -name rpu -path $srcDir/rflan/sw -soft-link -target-path src
+importsources -name rpu -path $srcDir/$proj_name/sw -soft-link -target-path src
+importsources -name rpu -path $srcDir/rflan/sw/lscript.ld -target-path src -linker-script
 
-importsources -name rpu -path $srcDir/rflan/sw/status.h -soft-link -target-path src/
-
-importsources -name rpu -path $srcDir/rflan/sw/lib -soft-link -target-path src/lib
-importsources -name rpu -path $srcDir/rflan/sw/csl -soft-link -target-path src/csl
-importsources -name rpu -path $srcDir/rflan_dpd/sw -soft-link -target-path src
 importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001 -soft-link -target-path src/adrv9001/adi_adrv9001
 importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/common -soft-link -target-path src/adrv9001/common
 importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/jsmn/jsmn.c -soft-link -target-path src/jsmn
 importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/jsmn/jsmn.h -soft-link -target-path src/jsmn
 importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/adi_pmag_macros/adi_pmag_macros.h -soft-link -target-path /src/adrv9001/
-importsources -name rpu -path $srcDir/adrv9001/sw -soft-link -target-path src/adrv9001
+
 importsources -name rpu -path $srcDir/axi_dma/sw -soft-link -target-path src/axi_dma
-importsources -name rpu -path $srcDir/rflan/sw/lscript.ld -target-path src -linker-script
+importsources -name rpu -path $srcDir/adrv9001/sw -soft-link -target-path src/adrv9001
+
 
 # Configure RPU Project
 app config -name rpu define-compiler-symbols ADI_COMMON_VERBOSE
-app config -name rpu define-compiler-symbols RFLAN_CLI_ENABLE
-app config -name rpu define-compiler-symbols RFLAN_RTL_SDR_ENABLE
 app config -name rpu define-compiler-symbols CUSTOMER_PLATFORM
 app config -name rpu define-compiler-symbols ADI_ADRV9001_ARM_VERBOSE
 app config -name rpu define-compiler-symbols XPS_BOARD_ZCU102
-app config -name rpu define-compiler-symbols USE_RFLAN_STREAM
+app config -name rpu define-compiler-symbols RFLAN_STREAM_ENABLE
+app config -name rpu define-compiler-symbols RFLAN_LWIP_ENABLE
+app config -name rpu define-compiler-symbols VERSA_CLOCK5_ENABLE
+
 app config -name rpu undef-compiler-symbols CLIENT_IGNORE
 app config -name rpu undef-compiler-symbols ADI_DYNAMIC_PROFILE_LOAD
 app config -name rpu undef-compiler-symbols ADRV9001_BITFIELD_NULL_CHECK
-app config -name rpu undef-compiler-symbols RFLAN_CLI_LWIP_ENABLE
 
 
+# Configure Project Paths
 app config -name rpu include-path $srcDir/rflan/sw
 app config -name rpu include-path $srcDir/rflan/sw/csl
 app config -name rpu include-path $srcDir/rflan/sw/lib
-app config -name rpu include-path $srcDir/rflan_dpd/sw/adrv9001/profile
-app config -name rpu include-path $srcDir/adrv9001/sw
+app config -name rpu include-path $srcDir/$proj_name/sw/adrv9001/profile
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/jsmn/
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001/private/include
@@ -108,6 +93,7 @@ app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devi
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/common
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/adi_pmag_macros
 app config -name rpu include-path $srcDir/axi_dma/sw
+app config -name rpu include-path $srcDir/adrv9001/sw
 
 app config -name rpu libraries m
 app build all

@@ -46,6 +46,9 @@
 *******************************************************************************/
 #include <stdlib.h>
 #include <stdbool.h>
+
+#ifdef RFLAN_STREAM_ENABLE
+
 #include "axi_dma.h"
 #include "adrv9001.h"
 
@@ -110,4 +113,5 @@ int32_t RflanStream_StartTransfer ( rflan_stream_t *Instance, uint32_t Addr, uin
 int32_t RflanStream_Transfer      ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel );
 int32_t RflanStream_StopTransfer  ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
 
+#endif
 #endif

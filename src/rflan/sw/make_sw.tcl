@@ -68,18 +68,18 @@ importsources -name rpu -path $srcDir/rflan/sw/lscript.ld -target-path src -link
 
 # Configure RPU Project
 app config -name rpu define-compiler-symbols ADI_COMMON_VERBOSE
-app config -name rpu define-compiler-symbols RFLAN_CLI_ENABLE
-app config -name rpu define-compiler-symbols RFLAN_RTL_SDR_ENABLE
 app config -name rpu define-compiler-symbols CUSTOMER_PLATFORM
 app config -name rpu define-compiler-symbols ADI_ADRV9001_ARM_VERBOSE
 app config -name rpu define-compiler-symbols XPS_BOARD_ZCU102
-app config -name rpu define-compiler-symbols USE_RFLAN_STREAM
+app config -name rpu define-compiler-symbols RFLAN_STREAM_ENABLE
+app config -name rpu define-compiler-symbols RFLAN_LWIP_ENABLE
+app config -name rpu define-compiler-symbols VERSA_CLOCK5_ENABLE
+
 app config -name rpu undef-compiler-symbols CLIENT_IGNORE
 app config -name rpu undef-compiler-symbols ADI_DYNAMIC_PROFILE_LOAD
 app config -name rpu undef-compiler-symbols ADRV9001_BITFIELD_NULL_CHECK
-app config -name rpu undef-compiler-symbols RFLAN_CLI_LWIP_ENABLE
 
-
+# Configure Project Paths
 app config -name rpu include-path $srcDir/rflan/sw
 app config -name rpu include-path $srcDir/rflan/sw/csl
 app config -name rpu include-path $srcDir/rflan/sw/lib

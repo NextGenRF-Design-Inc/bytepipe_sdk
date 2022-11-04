@@ -53,7 +53,32 @@ extern "C"
 #include "rflan_gpio.h"
 #include "rflan_stream.h"
 
-cli_status_t RflanCli_Initialize( cli_t *Cli, rflan_pib_t *Pib, XGpioPs *Gpio, rflan_stream_t *Stream );
+/**
+** RFLAN CLI Init
+*/
+typedef struct {
+  cli_t              *Cli;
+  rflan_pib_t        *RflanPib;
+  XGpioPs            *Gpio;
+#ifdef RFLAN_STREAM_ENABLE
+  rflan_stream_t     *RflanStream;
+#endif
+} rflan_cli_init_t;
+
+/**
+** RFLAN CLI Init
+*/
+typedef struct {
+  cli_t              *Cli;
+  rflan_pib_t        *RflanPib;
+  XGpioPs            *Gpio;
+#ifdef RFLAN_STREAM_ENABLE
+  rflan_stream_t     *RflanStream;
+#endif
+} rflan_cli_t;
+
+
+int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init );
 
 
 

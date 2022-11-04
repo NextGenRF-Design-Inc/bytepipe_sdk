@@ -216,7 +216,7 @@ static int32_t RflanCli_IqFileWrite( const char* filename, uint32_t Addr, uint32
   return status;
 }
 
-static void RflanCli_Reboot(cli_t *CliInstance, const char *cmd, void *userData)
+static void RflanCli_Reboot(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   if( Cli_GetParameterCount( cmd ) > 0 )
   {
@@ -302,7 +302,7 @@ static void RflanCli_Reboot(cli_t *CliInstance, const char *cmd, void *userData)
   Rflan_Reboot();
 }
 
-static void RflanCli_CliLs(cli_t *CliInstance, const char *cmd, void *userData)
+static void RflanCli_CliLs(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   int status;
   DIR dp;
@@ -352,7 +352,7 @@ static void RflanCli_CliLs(cli_t *CliInstance, const char *cmd, void *userData)
   f_closedir(&dp);
 }
 
-static void RflanCli_TaskInfo(cli_t *CliInstance, const char *cmd, void *userData)
+static void RflanCli_TaskInfo(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   Cli_Printf(CliInstance, "Name            Stack   Usage\r\n");
   Cli_Printf(CliInstance, "-----------------------------\r\n");
@@ -409,7 +409,7 @@ static void RflanCli_TaskInfo(cli_t *CliInstance, const char *cmd, void *userDat
 
 }
 
-static void RflanCli_ListParamNames(cli_t *CliInstance, const char *cmd, rflan_pib_t *RflanPib)
+static void RflanCli_ListParamNames(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   Cli_Printf(CliInstance,"RFLAN Parameter Names:\r\n");
 
@@ -425,20 +425,20 @@ static void RflanCli_ListParamNames(cli_t *CliInstance, const char *cmd, rflan_p
 
     Cli_GetParameter(cmd, 1, CliParamTypeStr, key);
 
-    for(int i = 0; i < RflanPib->Pib.PibLen; i++)
+    for(int i = 0; i < Instance->RflanPib->Pib.PibLen; i++)
     {
-      if(strstr( RflanPib->Pib.Def[i].name, key ))
-        Cli_Printf(CliInstance,"  - %s\r\n", RflanPib->Pib.Def[i].name);
+      if(strstr( Instance->RflanPib->Pib.Def[i].name, key ))
+        Cli_Printf(CliInstance,"  - %s\r\n", Instance->RflanPib->Pib.Def[i].name);
     }
   }
   else
   {
-    for(int i = 0; i < RflanPib->Pib.PibLen; i++)
-      Cli_Printf(CliInstance,"  - %s\r\n", RflanPib->Pib.Def[i].name);
+    for(int i = 0; i < Instance->RflanPib->Pib.PibLen; i++)
+      Cli_Printf(CliInstance,"  - %s\r\n", Instance->RflanPib->Pib.Def[i].name);
   }
 }
 
-static void RflanCli_SetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pib_t *RflanPib)
+static void RflanCli_SetRflanParam(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   char *name;
   char *value;
@@ -463,7 +463,7 @@ static void RflanCli_SetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   Cli_GetParameter(cmd, 2, CliParamTypeStr, value);
 
   /* Set PIB parameter */
-  int32_t status = RflanPib_SetbyNameByString( RflanPib, name, value );
+  int32_t status = RflanPib_SetbyNameByString( Instance->RflanPib, name, value );
 
   Cli_Printf(CliInstance,"SetParam %s\r\n",StatusString(status));
 
@@ -471,7 +471,7 @@ static void RflanCli_SetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   free(value);
 }
 
-static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pib_t *RflanPib)
+static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   char *name;
   char *value;
@@ -494,7 +494,7 @@ static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   Cli_GetParameter(cmd, 1, CliParamTypeStr, name);
 
   /* Get Value */
-  if((status = RflanPib_GetStringByName( RflanPib, name, value )) != 0)
+  if((status = RflanPib_GetStringByName( Instance->RflanPib, name, value )) != 0)
   {
     Cli_Printf(CliInstance,"GetParam Error - %s\r\n",StatusString(status));
   }
@@ -507,7 +507,9 @@ static void RflanCli_GetRflanParam(cli_t *CliInstance, const char *cmd, rflan_pi
   free(value);
 }
 
-static void RflanCli_StreamBufGet(cli_t *CliInstance, const char *cmd, rflan_stream_t *Stream)
+#ifdef RFLAN_STREAM_ENABLE
+
+static void RflanCli_StreamBufGet(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint32_t SampleOffset;
   uint16_t len;
@@ -560,7 +562,7 @@ static void RflanCli_StreamBufGet(cli_t *CliInstance, const char *cmd, rflan_str
 
 }
 
-static void RflanCli_StreamBufPut(cli_t *CliInstance, const char *cmd, rflan_stream_t *Stream)
+static void RflanCli_StreamBufPut(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint16_t len;
   uint32_t SampleOffset;
@@ -622,7 +624,7 @@ static void RflanCli_StreamBufPut(cli_t *CliInstance, const char *cmd, rflan_str
   Cli_Printf(CliInstance,"Success\r\n");
 }
 
-static void RflanCli_StreamStart(cli_t *CliInstance, const char *cmd, rflan_stream_t *Stream)
+static void RflanCli_StreamStart(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint16_t len;
   int32_t status;
@@ -636,19 +638,19 @@ static void RflanCli_StreamStart(cli_t *CliInstance, const char *cmd, rflan_stre
 
   if(strncmp(str, "Tx1", 3) == 0 )
   {
-    status = RflanStream_StartTransfer( Stream, RFLAN_DMA_TX1_BUF_ADDR, SampleCnt, RflanStreamChannel_Tx1, Cyclic );
+    status = RflanStream_StartTransfer( Instance->RflanStream, RFLAN_DMA_TX1_BUF_ADDR, SampleCnt, RflanStreamChannel_Tx1, Cyclic );
   }
   else if(strncmp(str, "Tx2", 3) == 0 )
   {
-    status = RflanStream_StartTransfer( Stream, RFLAN_DMA_TX2_BUF_ADDR, SampleCnt, RflanStreamChannel_Tx2, Cyclic );
+    status = RflanStream_StartTransfer( Instance->RflanStream, RFLAN_DMA_TX2_BUF_ADDR, SampleCnt, RflanStreamChannel_Tx2, Cyclic );
   }
   else if(strncmp(str, "Rx1", 3) == 0 )
   {
-    status = RflanStream_StartTransfer( Stream, RFLAN_DMA_RX1_BUF_ADDR, SampleCnt, RflanStreamChannel_Rx1, Cyclic );
+    status = RflanStream_StartTransfer( Instance->RflanStream, RFLAN_DMA_RX1_BUF_ADDR, SampleCnt, RflanStreamChannel_Rx1, Cyclic );
   }
   else if(strncmp(str, "Rx2", 3) == 0 )
   {
-    status = RflanStream_StartTransfer( Stream, RFLAN_DMA_RX2_BUF_ADDR, SampleCnt, RflanStreamChannel_Rx2, Cyclic );
+    status = RflanStream_StartTransfer( Instance->RflanStream, RFLAN_DMA_RX2_BUF_ADDR, SampleCnt, RflanStreamChannel_Rx2, Cyclic );
   }
   else
   {
@@ -659,7 +661,7 @@ static void RflanCli_StreamStart(cli_t *CliInstance, const char *cmd, rflan_stre
   Cli_Printf(CliInstance,"Stream Start %s\r\n",StatusString(status));
 }
 
-static void RflanCli_StreamBufLoad(cli_t *CliInstance, const char *cmd, rflan_stream_t *Stream)
+static void RflanCli_StreamBufLoad(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint16_t len;
   uint32_t BufAddr;
@@ -699,7 +701,7 @@ static void RflanCli_StreamBufLoad(cli_t *CliInstance, const char *cmd, rflan_st
   Cli_Printf(CliInstance,"Success\r\n");
 }
 
-static void RflanCli_StreamBufSave(cli_t *CliInstance, const char *cmd, rflan_stream_t *Stream)
+static void RflanCli_StreamBufSave(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint16_t len;
   uint32_t BufAddr;
@@ -742,7 +744,7 @@ static void RflanCli_StreamBufSave(cli_t *CliInstance, const char *cmd, rflan_st
   Cli_Printf(CliInstance,"Success\r\n");
 }
 
-static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_stream_t *Stream)
+static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint16_t len;
   int32_t status;
@@ -751,19 +753,19 @@ static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_strea
 
   if(strncmp(str, "Tx1", 3) == 0 )
   {
-    status = RflanStream_StopTransfer( Stream, RflanStreamChannel_Tx1 );
+    status = RflanStream_StopTransfer( Instance->RflanStream, RflanStreamChannel_Tx1 );
   }
   else if(strncmp(str, "Tx2", 3) == 0 )
   {
-    status = RflanStream_StopTransfer( Stream, RflanStreamChannel_Tx2 );
+    status = RflanStream_StopTransfer( Instance->RflanStream, RflanStreamChannel_Tx2 );
   }
   else if(strncmp(str, "Rx1", 3) == 0 )
   {
-    status = RflanStream_StopTransfer( Stream, RflanStreamChannel_Rx1 );
+    status = RflanStream_StopTransfer( Instance->RflanStream, RflanStreamChannel_Rx1 );
   }
   else if(strncmp(str, "Rx2", 3) == 0 )
   {
-    status = RflanStream_StopTransfer( Stream, RflanStreamChannel_Rx2 );
+    status = RflanStream_StopTransfer( Instance->RflanStream, RflanStreamChannel_Rx2 );
   }
   else
   {
@@ -774,7 +776,9 @@ static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_strea
   Cli_Printf(CliInstance,"Stream Stop %s\r\n",StatusString(status));
 }
 
-static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, void *ref)
+#endif
+
+static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   int32_t status;
 
@@ -813,7 +817,7 @@ static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, void *re
   Cli_Printf(CliInstance,"CLI Script %s\r\n", StatusString(status));
 }
 
-static void RflanCli_DelayMs(cli_t *CliInstance, const char *cmd, void *ref)
+static void RflanCli_DelayMs(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint32_t DelayMs;
 
@@ -843,6 +847,8 @@ static cli_cmd_t RflanCliExecuteScriptDef =
   1,
   NULL
 };
+
+#ifdef RFLAN_STREAM_ENABLE
 
 static cli_cmd_t RflanCliStreamStopDef =
 {
@@ -904,6 +910,8 @@ static cli_cmd_t RflanCliStreamStartDef =
   NULL
 };
 
+#endif
+
 static cli_cmd_t RflanCliListParamNamesDef =
 {
   "RflanListParams",
@@ -964,31 +972,46 @@ static cli_cmd_t RflanCliTaskInfoDef =
   NULL
 };
 
-cli_status_t RflanCli_Initialize( cli_t *Cli, rflan_pib_t *Pib, XGpioPs *Gpio, rflan_stream_t *Stream )
+int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init )
 {
-  RflanCliListParamNamesDef.userData = Pib;
-  RflanCliSetParamDef.userData = Pib;
-  RflanCliGetPibDef.userData = Pib;
-  RflanCliStreamBufSaveDef.userData = Stream;
-  RflanCliStreamBufLoadDef.userData = Stream;
-  RflanCliStreamBufGetDef.userData = Stream;
-  RflanCliStreamBufPutDef.userData = Stream;
-  RflanCliStreamStartDef.userData = Stream;
-  RflanCliStreamStopDef.userData = Stream;
+  Instance->Cli = Init->Cli;
+  Instance->Gpio = Init->Gpio;
+  Instance->RflanPib = Init->RflanPib;
 
-  Cli_RegisterCommand(Cli, &RflanCliLsDef);
-  Cli_RegisterCommand(Cli, &RflanCliTaskInfoDef);
-  Cli_RegisterCommand(Cli, &RflanCliRebootDef);
-  Cli_RegisterCommand(Cli, &RflanCliListParamNamesDef);
-  Cli_RegisterCommand(Cli, &RflanCliSetParamDef);
-  Cli_RegisterCommand(Cli, &RflanCliGetPibDef);
-  Cli_RegisterCommand(Cli, &RflanCliStreamBufLoadDef);
-  Cli_RegisterCommand(Cli, &RflanCliStreamBufGetDef);
-  Cli_RegisterCommand(Cli, &RflanCliStreamBufPutDef);
-  Cli_RegisterCommand(Cli, &RflanCliStreamStartDef);
-  Cli_RegisterCommand(Cli, &RflanCliStreamStopDef);
-  Cli_RegisterCommand(Cli, &RflanCliExecuteScriptDef);
-  Cli_RegisterCommand(Cli, &RflanCliDelayMsDef);
+#ifdef RFLAN_STREAM_ENABLE
+  Instance->RflanStream = Init->RflanStream;
+#endif
+
+  RflanCliListParamNamesDef.userData = Instance;
+  RflanCliSetParamDef.userData = Instance;
+  RflanCliGetPibDef.userData = Instance;
+
+#ifdef RFLAN_STREAM_ENABLE
+  RflanCliStreamBufSaveDef.userData = Instance;
+  RflanCliStreamBufLoadDef.userData = Instance;
+  RflanCliStreamBufGetDef.userData = Instance;
+  RflanCliStreamBufPutDef.userData = Instance;
+  RflanCliStreamStartDef.userData = Instance;
+  RflanCliStreamStopDef.userData = Instance;
+#endif
+
+  Cli_RegisterCommand(Instance->Cli, &RflanCliLsDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliTaskInfoDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliRebootDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliListParamNamesDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliSetParamDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliGetPibDef);
+
+#ifdef RFLAN_STREAM_ENABLE
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamBufLoadDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamBufGetDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamBufPutDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamStartDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamStopDef);
+#endif
+
+  Cli_RegisterCommand(Instance->Cli, &RflanCliExecuteScriptDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliDelayMsDef);
 
   return XST_SUCCESS;
 }

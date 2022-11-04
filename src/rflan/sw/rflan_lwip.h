@@ -47,7 +47,11 @@ extern "C"
 {
 #endif
 
+
 #include <stdint.h>
+
+#ifdef RFLAN_LWIP_ENABLE
+
 #include "rflan_cli.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/tcp.h"
@@ -103,5 +107,7 @@ typedef struct
 
 rflan_lwip_status_t RflanLwip_Send( rflan_lwip_t *Instance, char *Buf, uint16_t Length );
 rflan_lwip_status_t RflanLwip_Initialize( rflan_lwip_t *Instance, rflan_lwip_init_t *Init );
+
+#endif
 
 #endif /* SRC_RFLAN_LWIP_H_ */

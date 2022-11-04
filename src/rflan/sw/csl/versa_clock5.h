@@ -46,8 +46,10 @@
 *******************************************************************************/
 
 #include <stdint.h>
+
+#ifdef VERSA_CLOCK5_ENABLE
+
 #include "xiicps.h"
-//#include "cli.h"
 
 #define GTR0_REFCLK_FREQ_HZ             (52000000)
 #define GTR1_REFCLK_FREQ_HZ             (125000000)
@@ -89,5 +91,7 @@ int32_t VersaClock5_GetClockFreq(versa_clock5_t *Instance, uint8_t Port, uint32_
 int32_t VersaClock5_Read(versa_clock5_t *Instance, uint8_t *Buf, uint16_t Length);
 int32_t VersaClock5_Write(versa_clock5_t *Instance, uint8_t *Buf, uint16_t Length);
 int32_t VersaClock5_WriteRegister(versa_clock5_t *Instance, uint16_t Address, uint8_t Value);
+
+#endif
 
 #endif

@@ -42,6 +42,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "versa_clock5.h"
+
+
+#ifdef VERSA_CLOCK5_ENABLE
+
 #include "xparameters.h"
 #include "mem.h"
 #include "math.h"
@@ -247,3 +251,5 @@ int32_t VersaClock5_Initialize( versa_clock5_t *Instance, versa_clock5_init_t *I
   /* Write Default Registers */
   return VersaClock5_Write( Instance, VersaClock5Cfg, sizeof(VersaClock5Cfg));
 }
+
+#endif

@@ -51,26 +51,36 @@
 #include "rflan_uart.h"
 #include "rflan_cli.h"
 #include "xresetps.h"
-#include "rflan_lwip.h"
 #include "adrv9001_cli.h"
 #include "rflan_gpio.h"
 #include "rflan_pib.h"
-#include "rflan_stream.h"
-#include "versa_clock5.h"
 #include "status.h"
+#include "xiicps.h"
 
+#ifdef VERSA_CLOCK5_ENABLE
+#include "versa_clock5.h"
+static versa_clock5_t RflanVersaClock5;
+#endif
+
+#ifdef RFLAN_LWIP_ENABLE
+#include "rflan_lwip.h"
+static rflan_lwip_t   RflanLwip;
+#endif
+
+#ifdef RFLAN_STREAM_ENABLE
+#include "rflan_stream.h"
+static rflan_stream_t RflanStream;
+#endif
 
 static XResetPs       RflanReset;
 static FATFS          FatFs;
-static cli_t          RflanCli;
+static cli_t          Cli;
+static rflan_cli_t    RflanCli;
 static rflan_uart_t   RflanUart;
-static rflan_lwip_t   RflanLwip;
 static XGpioPs        RflanGpio;
 static rflan_pib_t    RflanPib;
 static adrv9001_t     RflanAdrv9001;
-static rflan_stream_t RflanStream;
 static QueueHandle_t  RflanEvtQueue;
-static versa_clock5_t RflanVersaClock5;
 static XIicPs         RflanIic0;
 
 static int32_t RflanIic_Initialize( XIicPs *Instance )
@@ -102,6 +112,8 @@ static int32_t RflanReset_Initialize( XResetPs *Instance )
   return XResetPs_CfgInitialize(Instance, Cfg);
 }
 
+#ifdef RFLAN_STREAM_ENABLE
+
 static void Rflan_StreamCallback( uint32_t Buf, uint32_t Size, rflan_stream_channel_t Channel, void *CallbackRef )
 {
   rflan_evt_type_t evt;
@@ -122,6 +134,8 @@ static void Rflan_StreamCallback( uint32_t Buf, uint32_t Size, rflan_stream_chan
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 
 }
 
+#endif
+
 static void Rflan_CliCallback( cli_evt_t *Evt )
 {
   if( Evt->Type == CliEvtType_TxChar)
@@ -129,7 +143,11 @@ static void Rflan_CliCallback( cli_evt_t *Evt )
     while( RflanUart_Send( &RflanUart, Evt->c ) != 0 )
       vTaskDelay(1);
 
+#ifdef RFLAN_LWIP_ENABLE
+
     RflanLwip_Send( &RflanLwip, &Evt->c, 1);
+
+#endif
   }
   else if( Evt->Type == CliEvtType_TxMsg)
   {
@@ -139,7 +157,11 @@ static void Rflan_CliCallback( cli_evt_t *Evt )
         vTaskDelay(1);
     }
 
+#ifdef RFLAN_LWIP_ENABLE
+
     RflanLwip_Send( &RflanLwip, Evt->msg.Buf, Evt->msg.Length);
+
+#endif
   }
 }
 
@@ -148,6 +170,8 @@ static void Rflan_UartCallback( char c, void *CallbackRef )
   Cli_ProcessRxChar( CallbackRef, c );
 }
 
+#ifdef RFLAN_LWIP_ENABLE
+
 static void Rflan_LwipCallback( char *Buf, uint16_t Length, void *CallbackRef )
 {
   for( int i = 0; i < Length; i++ )
@@ -155,6 +179,8 @@ static void Rflan_LwipCallback( char *Buf, uint16_t Length, void *CallbackRef )
     Cli_ProcessRxChar( CallbackRef, Buf[i] );
   }
 }
+
+#endif
 
 static int32_t Rflan_SetupScript( cli_t *cli, char *Filename )
 {
@@ -202,11 +228,20 @@ static int32_t Rflan_Initialize( void )
   };
 
   /* Initialize CLI */
-  if((status = Cli_Initialize( &RflanCli, &CliInit )) != 0)
+  if((status = Cli_Initialize( &Cli, &CliInit )) != 0)
     printf("%s\r\n",StatusString(status));
 
+  rflan_cli_init_t RflanCliInit = {
+    .Cli           = &Cli,
+    .Gpio          = &RflanGpio,
+    .RflanPib      = &RflanPib,
+#ifdef RFLAN_STREAM_ENABLE
+    .RflanStream   = &RflanStream
+#endif
+  };
+
   /* Initialize RFLAN Commands */
-  if((status = RflanCli_Initialize( &RflanCli, &RflanPib, &RflanGpio, &RflanStream )) != 0)
+  if((status = RflanCli_Initialize( &RflanCli, &RflanCliInit )) != 0)
     printf("Rflan Cli %s\r\n",StatusString(status));
 
   rflan_uart_init_t UartInit = {
@@ -214,8 +249,7 @@ static int32_t Rflan_Initialize( void )
       .DeviceId           = RFLAN_UART_DEVICE_ID,
       .IntrId             = RFLAN_UART_INTR_ID,
       .ParentCallback     = Rflan_UartCallback,
-      .ParentCallbackRef  = &RflanCli
-  };
+      .ParentCallbackRef  = &Cli };
 
   /* Initialize System Reset */
   if((status = RflanUart_Initialize( &RflanUart, &UartInit )) != 0)
@@ -229,14 +263,17 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanIic_Initialize( &RflanIic0 )) != 0)
     printf("I2C Initialize %s\r\n",StatusString(status));
 
+#ifdef VERSA_CLOCK5_ENABLE
+
   versa_clock5_init_t VersaClock5Init = {
       .Addr = 0x6A,
-      .Iic = &RflanIic0
-  };
+      .Iic = &RflanIic0 };
 
   /* Initialize Versa Clock */
   if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
     printf("VersaClock5 Initialize %s\r\n",StatusString(status));
+
+#endif
 
   /* Initialize File System*/
   if((status = f_mount(&FatFs, FF_LOGICAL_DRIVE_PATH, 1)) != FR_OK)
@@ -244,7 +281,9 @@ static int32_t Rflan_Initialize( void )
 
   rflan_pib_init_t PibInit = {
       .HwVer = Rflan_GetHwVer( ),
-      .VersaClock5 = &RflanVersaClock5
+#ifdef VERSA_CLOCK5_ENABLE
+      .VersaClock5 = &RflanVersaClock5,
+#endif
   };
 
   /* Initialize PIB */
@@ -252,7 +291,7 @@ static int32_t Rflan_Initialize( void )
     printf("Rflan Pib Init %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &RflanCli, RFLAN_SETUP_SCRIPT_FILENAME)) != 0 )
+  if((status = Rflan_SetupScript( &Cli, RFLAN_SETUP_SCRIPT_FILENAME)) != 0 )
     printf("Rflan Setup Script %s\r\n",StatusString(status));
 
 
@@ -292,12 +331,14 @@ static int32_t Rflan_Initialize( void )
     printf("%s\r\n",StatusString(status));
 
   /* Initialize ADRV9001 CLI */
-  if((status = Adrv9001Cli_Initialize( &RflanCli, &RflanAdrv9001 )) != 0)
+  if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001 )) != 0)
     printf("Adrv9001Cli %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &RflanCli, RFLAN_ADRV9001_SCRIPT_FILENAME)) != 0 )
+  if((status = Rflan_SetupScript( &Cli, RFLAN_ADRV9001_SCRIPT_FILENAME)) != 0 )
     printf("Adrv9001 Setup Script %s\r\n",StatusString(status));
+
+#ifdef RFLAN_STREAM_ENABLE
 
   rflan_stream_init_t StreamInit = {
       .Callback = Rflan_StreamCallback,
@@ -309,11 +350,15 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanStream_Initialize( &RflanStream, &StreamInit )) != 0)
     printf("Stream %s\r\n",StatusString(status));
 
+#endif
+
+#ifdef RFLAN_LWIP_ENABLE
+
   if( RflanPib.Params.LwipEnable )
   {
     rflan_lwip_init_t LwipInit = {
         .Callback = Rflan_LwipCallback,
-        .CallbackRef = &RflanCli,
+        .CallbackRef = &Cli,
         .RxBufSize = RFLAN_LWIP_RECV_BUF_SIZE,
         .CliPort = RFLAN_LWIP_CLI_PORT,
         .MacAddr = RFLAN_LWIP_MAC_ADDR,
@@ -326,6 +371,8 @@ static int32_t Rflan_Initialize( void )
     if((status = RflanLwip_Initialize( &RflanLwip, &LwipInit )) != 0)
       printf("Lwip %s\r\n",StatusString(status));
   }
+
+#endif
 
   return status;
 }
@@ -343,6 +390,8 @@ static void Rflan_Task( void *pvParameters )
     {
       switch( evt )
       {
+#ifdef RFLAN_STREAM_ENABLE
+
         case RflanEvt_Rx1StreamDone:
           Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_RX, ADI_CHANNEL_1 );
           printf("%s Stream Done\r\n", "Rx1");
@@ -362,6 +411,8 @@ static void Rflan_Task( void *pvParameters )
           Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_TX, ADI_CHANNEL_2 );
           printf("%s Stream Done\r\n", "Tx2");
           break;      
+
+#endif
 
         default:
           break;
