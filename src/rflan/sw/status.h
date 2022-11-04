@@ -46,7 +46,7 @@
 #include "ff.h"
 #include "adrv9001.h"
 #include "rflan.h"
-
+#include "versa_clock5.h"
 
 static const char *StatusString( int32_t status )
 {
@@ -54,6 +54,12 @@ static const char *StatusString( int32_t status )
   {
     case 0:
       return "Success";
+      
+    case VersaClock5Status_InvalidParameter:
+    	return "VersaClock5 Invalid Parameter";
+
+    case VersaClock5Status_IicError:
+    	return "VersaClock5 I2c Error";      
 
     case Adrv9001Status_ProfileInitErr:
       return "Profile Initialization Error";

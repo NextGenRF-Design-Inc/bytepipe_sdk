@@ -186,7 +186,7 @@ end
 
 wire [15:0] ssi_enable_delay_cdc;
 reg  [15:0] ssi_enable_cnt = 0;
-reg         ssi_enable = 0;
+
 
 
 cdc #(
