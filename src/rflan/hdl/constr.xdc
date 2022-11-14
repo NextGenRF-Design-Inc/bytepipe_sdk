@@ -11,6 +11,10 @@ set_property  -dict {PACKAGE_PIN D7    IOSTANDARD LVCMOS18}                     
 set_property  -dict {PACKAGE_PIN C7    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[9]]       ; # IO_L8N_HDGC_AD4N_26
 set_property  -dict {PACKAGE_PIN C8    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[10]]      ; # IO_L8P_HDGC_AD4P_26
 set_property  -dict {PACKAGE_PIN B6    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[11]]      ; # IO_L11P_AD1P_26
+#set_property  -dict {PACKAGE_PIN A3    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[12]]      ;# IO_L12N_T1U_N11_GC_66	
+#set_property  -dict {PACKAGE_PIN A4    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[13]]      ;# IO_L12P_T1U_N10_GC_66	
+#set_property  -dict {PACKAGE_PIN B1    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[14]]      ;# IO_L11N_T1U_N9_GC_66
+#set_property  -dict {PACKAGE_PIN B2    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[15]]      ;# IO_L11P_T1U_N8_GC_66
 
 set_property  -dict {PACKAGE_PIN A9    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_irq]            ; # IO_L9N_AD3N_26
 set_property  -dict {PACKAGE_PIN A8    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_rstn]           ; # IO_L10P_AD2P_26

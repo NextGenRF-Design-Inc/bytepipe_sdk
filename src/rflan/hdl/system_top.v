@@ -56,16 +56,26 @@ module system_top (
     
 );       
           
-wire [11:0] dgpio_i;
-wire [11:0] dgpio_t;
-wire [11:0] dgpio_o;
+wire [15:0] dgpio_i;
+wire [15:0] dgpio_t;
+wire [15:0] dgpio_o;
+         
+genvar n;
+generate
+  for (n = 0; n < 12; n = n + 1) begin: dgpio_iobuf
+
+    IOBUF IOBUF_inst (
+       .O(dgpio_i[n]),   
+       .I(dgpio_o[n]), 
+       .IO(adrv9001_dgpio[n]), 
+       .T(dgpio_t[n])    
+    );
+
+  end
+endgenerate
           
-IOBUF IOBUF_inst (
-   .O(dgpio_i),   
-   .I(dgpio_o), 
-   .IO(adrv9001_dgpio), 
-   .T(dgpio_t)    
-);
+
+assign dgpio_i[15:12] = 0;
           
 system system_i
    (.adrv9001_spi_csn(adrv9001_csn),
