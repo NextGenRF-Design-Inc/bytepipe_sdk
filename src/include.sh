@@ -177,30 +177,11 @@ download_xsa()
   fi
 }
 
-test_build()
+download_bytepipe_sdk()
 {
-  project=$1
-  echo "$project"
-  
-    device=$2
-  
-  if [ -z "$device" ] 
-  then
-	  echo "missing device"
-  else
-	  echo $device
-  fi  
-  
-
-
-
-
-  srcDir="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
-  if [[ $srcDir == *"cygdrive"* ]]; then
-    srcDir=$(realpath $(cygpath -w $srcDir))
-  fi  
-  
-  echo "$srcDir"  
-
+	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/archive/refs/heads/main.zip" -O bytepipe_sdk.zip
+	unzip bytepipe_sdk.zip
+	mv bytepipe_sdk-main bytepipe_sdk  
+	chmod -R 777 bytepipe_sdk  
 }
 
