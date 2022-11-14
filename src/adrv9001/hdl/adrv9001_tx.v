@@ -22,14 +22,14 @@ module adrv9001_tx#(
   parameter SWAP_DIFF_IDATA = 0,             // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_QDATA = 0,             // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_STROBE = 0,            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_DCLK_IN = 0,           // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_DCLK_OUT = 0           // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_CLK_OUT = 0            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin  
   )(
   
 // ADRV9001 interface.  Connect directly to top-level port  
-  input  wire         adrv9001_ref_clk_p,    // SSI reference clock pair
-  input  wire         adrv9001_ref_clk_n,   
-  output wire         adrv9001_dclk_p,       // SSI clock pair
+  input  wire         dclk,     
+  input  wire         dclk_div,
+  
+  output wire         adrv9001_dclk_p,       // Output data clock
   output wire         adrv9001_dclk_n,      
   output wire         adrv9001_strobe_p,     // SSI strobe pair
   output wire         adrv9001_strobe_n,    
@@ -57,8 +57,7 @@ module adrv9001_tx#(
   output wire [63:0]  dbg
     );
 
-wire        dclk;
-wire        dclk_div;
+
 wire [7:0]  s_unpacked;
 wire [7:0]  i_unpacked;
 wire [7:0]  q_unpacked;
@@ -66,20 +65,22 @@ reg         ssi_enable = 0;
 
 assign s_axis_aclk = dclk_div;
 
-adrv9001_tx_clk#(
-  .LVDS(LVDS_OUTPUT),
-  .SWAP_DIFF_CLK_OUT(SWAP_DIFF_DCLK_OUT),     // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  .SWAP_DIFF_CLK_IN(SWAP_DIFF_DCLK_IN)      // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin  
-  )
-tx_clk_inst(  
-  .dclk_div_rst(1'b0),              // reset dclk_div
-  .ref_clk_p(adrv9001_ref_clk_p),   // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-  .ref_clk_n(adrv9001_ref_clk_n),   // 1-bit input: Diff_n buffer input (connect directly to top-level port)
-  .dclk_p(adrv9001_dclk_p),         // 1-bit data clock output(connect directly to top-level port)
-  .dclk_n(adrv9001_dclk_n),         // 1-bit data clock output(connect directly to top-level port)    
-  .dclk(dclk),                      // 1-bit data clock output
-  .dclk_div(dclk_div)               // 1-bit divided data clock output 
-);  
+generate
+
+  if( SWAP_DIFF_CLK_OUT == 1) begin    
+    OBUFDS dclk_ds_buf (
+      .O(adrv9001_dclk_n),             
+      .OB(adrv9001_dclk_p),            
+      .I(~dclk));                     
+  end else begin  
+    OBUFDS dclk_ds_buf (
+      .O(adrv9001_dclk_p),                     
+      .OB(adrv9001_dclk_n),                  
+      .I(dclk));                         
+ end  
+
+endgenerate
+
 
 adrv9001_tx_serdes#(
   .LVDS(LVDS_OUTPUT),

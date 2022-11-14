@@ -17,6 +17,9 @@
 // ***************************************************************************
 
 module axi_adrv9001#(
+  parameter DEFAULT_DGPIO_DIR       = 16'hffff,
+  parameter TX1_REF_CLK_SRC         = "TX1_CLK",
+  parameter TX2_REF_CLK_SRC         = "TX2_CLK",  
   parameter SWAP_DIFF_TX1_IDATA     = 1,        
   parameter SWAP_DIFF_TX1_QDATA     = 0,       
   parameter SWAP_DIFF_TX1_STROBE    = 1,       
@@ -52,9 +55,9 @@ module axi_adrv9001#(
   output wire           tx2_en,
   output wire           rstn,
   input  wire           irq,
-  output wire [11:0]    dgpio_o,
-  input  wire [11:0]    dgpio_i,
-  output wire [11:0]    dgpio_t,
+  output wire [15:0]    dgpio_o,
+  input  wire [15:0]    dgpio_i,
+  output wire [15:0]    dgpio_t,
     
   input  wire           rx1_dclk_p,          
   input  wire           rx1_dclk_n,       
@@ -121,8 +124,8 @@ module axi_adrv9001#(
   input  wire           tx1_pl_en,
   input  wire           tx2_pl_en,  
   
-  input  wire [11:0]    dgpio_pl_o,
-  output wire [11:0]    dgpio_pl_i,
+  input  wire [15:0]    dgpio_pl_o,
+  output wire [15:0]    dgpio_pl_i,
     
   output wire           spi_clk,
   input  wire           spi_miso,
@@ -156,9 +159,9 @@ module axi_adrv9001#(
 );
 
 
-wire [11:0]   dgpio_ps_t;
-wire [11:0]   dgpio_ps_o;
-wire [11:0]   dgpio_ps_i;
+wire [15:0]   dgpio_ps_t;
+wire [15:0]   dgpio_ps_o;
+wire [15:0]   dgpio_ps_i;
 
 wire [7:0]    mspi_axis_tdata;
 wire          mspi_axis_tvalid;
@@ -211,7 +214,7 @@ generate
     assign dgpio_pl_i = dgpio_i;
   end else begin
     assign dgpio_o = dgpio_ps_o;
-    assign dgpio_pl_i = 12'h0;
+    assign dgpio_pl_i = 'h0;
   end  
   
   if( ENABLE_TX1_ILA) begin
@@ -324,7 +327,6 @@ generate
     assign tx2_enable = 0;     
   end   
   
-  
 endgenerate
 
 
@@ -344,7 +346,10 @@ adrv9001_mspi adrv9001_mspi_inst (
   .m_axis_tready(sspi_axis_tready)
 );
    
-adrv9001_regs adrv9001_regs_i (
+adrv9001_regs#(
+    .DEFAULT_DGPIO_DIR(DEFAULT_DGPIO_DIR)
+    )
+    adrv9001_regs_i (
     .s_axi_aclk(s_axi_aclk),
     .s_axi_aresetn(s_axi_aresetn),
     .s_axi_awaddr(s_axi_awaddr),
@@ -407,15 +412,28 @@ adrv9001_regs adrv9001_regs_i (
     .sspi_axis_tready(sspi_axis_tready)    
 );
   
+wire rx1_dclk;
+wire rx1_dclk_div;
+  
+adrv9001_clk_in#(
+  .SWAP_DIFF_CLK_IN(SWAP_DIFF_RX1_DCLK)      
+  )
+rx1_clk_inst(  
+  .rst(1'b0),              
+  .clk_p(rx1_dclk_p),
+  .clk_n(rx1_dclk_n),   
+  .clk(rx1_dclk),                   
+  .clk_div(rx1_dclk_div)         
+);  
+ 
 adrv9001_rx#(
     .DBG_EN( ENABLE_RX1_ILA ),
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX1_QDATA),
-    .SWAP_DIFF_STROBE(SWAP_DIFF_RX1_STROBE),
-    .SWAP_DIFF_DCLK(SWAP_DIFF_RX1_DCLK)
+    .SWAP_DIFF_STROBE(SWAP_DIFF_RX1_STROBE)
 ) adrv9001_rx1_inst (
-    .adrv9001_dclk_p(rx1_dclk_p),
-    .adrv9001_dclk_n(rx1_dclk_n),
+    .dclk(rx1_dclk),
+    .dclk_div(rx1_dclk_div),
     .adrv9001_strobe_p(rx1_strobe_p),
     .adrv9001_strobe_n(rx1_strobe_n),
     .adrv9001_idata_p(rx1_idata_p),
@@ -437,15 +455,29 @@ adrv9001_rx#(
     .dbg( rx1_dbg ) 
 );
   
+  
+wire rx2_dclk;
+wire rx2_dclk_div;
+  
+adrv9001_clk_in#(
+  .SWAP_DIFF_CLK_IN(SWAP_DIFF_RX2_DCLK)      
+  )
+rx2_clk_inst(  
+  .rst(1'b0),              
+  .clk_p(rx2_dclk_p),
+  .clk_n(rx2_dclk_n),   
+  .clk(rx2_dclk),                   
+  .clk_div(rx2_dclk_div)         
+);   
+  
 adrv9001_rx #(
     .DBG_EN( ENABLE_RX2_ILA ),
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX2_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX2_QDATA),
-    .SWAP_DIFF_STROBE(SWAP_DIFF_RX2_STROBE),
-    .SWAP_DIFF_DCLK(SWAP_DIFF_RX2_DCLK)
+    .SWAP_DIFF_STROBE(SWAP_DIFF_RX2_STROBE)
 ) adrv9001_rx2_inst (
-    .adrv9001_dclk_p(rx2_dclk_p),
-    .adrv9001_dclk_n(rx2_dclk_n),
+    .dclk(rx2_dclk),
+    .dclk_div(rx2_dclk_div),
     .adrv9001_strobe_p(rx2_strobe_p),
     .adrv9001_strobe_n(rx2_strobe_n),
     .adrv9001_idata_p(rx2_idata_p),
@@ -467,17 +499,49 @@ adrv9001_rx #(
     .dbg( rx2_dbg )  
 );  
 
+
+wire tx1_dclk;
+wire tx1_dclk_div;
+
+generate
+
+  if (TX1_REF_CLK_SRC == "TX1_CLK") begin
+  
+    adrv9001_clk_in#(
+      .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX1_DCLK_IN)      
+      )
+    tx1_clk_inst(  
+      .rst(1'b0),              
+      .clk_p(tx1_ref_clk_p),
+      .clk_n(tx1_ref_clk_n),   
+      .clk(tx1_dclk),                   
+      .clk_div(tx1_dclk_div)         
+    );  
+   
+  end else if (TX1_REF_CLK_SRC == "RX1_CLK") begin
+  
+    assign tx1_dclk     = rx1_dclk;
+    assign tx1_dclk_div = rx1_dclk_div;
+    
+  end else if (TX1_REF_CLK_SRC == "RX2_CLK") begin
+  
+    assign tx1_dclk     = rx2_dclk;
+    assign tx1_dclk_div = rx2_dclk_div;
+
+  end    
+  
+endgenerate 
+
 adrv9001_tx #(
     .LVDS_OUTPUT(1),
     .DBG_EN( ENABLE_TX1_ILA ),
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX1_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_TX1_STROBE),
-    .SWAP_DIFF_DCLK_IN(SWAP_DIFF_TX1_DCLK_IN),
-    .SWAP_DIFF_DCLK_OUT(SWAP_DIFF_TX1_DCLK_OUT)
+    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX1_DCLK_OUT)
 ) adrv9001_tx1_inst (
-    .adrv9001_ref_clk_p(tx1_ref_clk_p),
-    .adrv9001_ref_clk_n(tx1_ref_clk_n),
+    .dclk(tx1_dclk),
+    .dclk_div(tx1_dclk_div),
     .adrv9001_dclk_p(tx1_dclk_p),
     .adrv9001_dclk_n(tx1_dclk_n),
     .adrv9001_strobe_p(tx1_strobe_p),
@@ -504,19 +568,53 @@ adrv9001_tx #(
     .dbg( tx1_dbg )     
 );
   
+  
+  
+  
+wire tx2_dclk;
+wire tx2_dclk_div;
+
+generate
+
+  if (TX2_REF_CLK_SRC == "TX2_CLK") begin
+  
+    adrv9001_clk_in#(
+      .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX2_DCLK_IN)      
+      )
+    tx2_clk_inst(  
+      .rst(1'b0),              
+      .clk_p(tx2_ref_clk_p),
+      .clk_n(tx2_ref_clk_n),   
+      .clk(tx2_dclk),                   
+      .clk_div(tx2_dclk_div)         
+    );  
+   
+  end else if (TX2_REF_CLK_SRC == "RX1_CLK") begin
+  
+    assign tx2_dclk     = rx1_dclk;
+    assign tx2_dclk_div = rx1_dclk_div;
+    
+  end else if (TX2_REF_CLK_SRC == "RX2_CLK") begin
+  
+    assign tx2_dclk     = rx2_dclk;
+    assign tx2_dclk_div = rx2_dclk_div;
+
+  end    
+  
+endgenerate 
+  
 adrv9001_tx #(
     .LVDS_OUTPUT(1),
     .DBG_EN( ENABLE_TX2_ILA ),    
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX2_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX2_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_TX2_STROBE),
-    .SWAP_DIFF_DCLK_IN(SWAP_DIFF_TX2_DCLK_IN),
-    .SWAP_DIFF_DCLK_OUT(SWAP_DIFF_TX2_DCLK_OUT)
+    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX2_DCLK_OUT) 
 ) adrv9001_tx2_inst (
-    .adrv9001_ref_clk_p(tx2_ref_clk_p),
-    .adrv9001_ref_clk_n(tx2_ref_clk_n),
+    .dclk(tx2_dclk),
+    .dclk_div(tx2_dclk_div),
     .adrv9001_dclk_p(tx2_dclk_p),
-    .adrv9001_dclk_n(tx2_dclk_n),
+    .adrv9001_dclk_n(tx2_dclk_n),    
     .adrv9001_strobe_p(tx2_strobe_p),
     .adrv9001_strobe_n(tx2_strobe_n),
     .adrv9001_idata_p(tx2_idata_p),

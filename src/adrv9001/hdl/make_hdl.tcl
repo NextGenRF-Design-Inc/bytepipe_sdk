@@ -39,9 +39,9 @@ add_interface_ports tx1_en out 1
 add_interface_ports tx2_en out 1
 add_interface_ports rstn out 1
 add_interface_ports irq in 1
-add_interface_ports dgpio_o out 12
-add_interface_ports dgpio_i in 12
-add_interface_ports dgpio_t out 12
+add_interface_ports dgpio_o out 16
+add_interface_ports dgpio_i in 16
+add_interface_ports dgpio_t out 16
 add_interface_ports rx1_dclk_p in 1
 add_interface_ports rx1_dclk_n in 1
 add_interface_ports rx1_strobe_p in 1
@@ -59,7 +59,7 @@ add_interface_ports rx2_idata_n in 1
 add_interface_ports rx2_qdata_p in 1
 add_interface_ports rx2_qdata_n in 1
 add_interface_ports tx1_ref_clk_p in 1
-add_interface_ports rx1_ref_clk_n in 1
+add_interface_ports tx1_ref_clk_n in 1
 add_interface_ports tx1_dclk_p out 1
 add_interface_ports tx1_dclk_n out 1
 add_interface_ports tx1_strobe_p out 1
@@ -69,7 +69,7 @@ add_interface_ports tx1_idata_n out 1
 add_interface_ports tx1_qdata_p out 1
 add_interface_ports tx1_qdata_n out 1
 add_interface_ports tx2_ref_clk_p in 1
-add_interface_ports rx2_ref_clk_n in 1
+add_interface_ports tx2_ref_clk_n in 1
 add_interface_ports tx2_dclk_p out 1
 add_interface_ports tx2_dclk_n out 1
 add_interface_ports tx2_strobe_p out 1
@@ -307,6 +307,22 @@ set_property value true [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_object
 set_property value_format bool [ipx::get_user_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
 
+set_property widget {comboBox} [ipgui::get_guiparamspec -name "TX1_REF_CLK_SRC" -component [ipx::current_core] ]
+set_property value TX1_CLK [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value TX1_CLK [ipx::get_hdl_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_format string [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_format string [ipx::get_hdl_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_validation_type list [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_validation_list {TX1_CLK RX1_CLK RX2_CLK} [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+
+set_property widget {comboBox} [ipgui::get_guiparamspec -name "TX2_REF_CLK_SRC" -component [ipx::current_core] ]
+set_property value TX2_CLK [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value TX2_CLK [ipx::get_hdl_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_format string [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_format string [ipx::get_hdl_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_validation_type list [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property value_validation_list {TX2_CLK RX1_CLK RX2_CLK} [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+
 
 # Add parameters
 ipx::add_user_parameter ENABLE_PL_IRQ [ipx::current_core]
@@ -338,6 +354,19 @@ set_property driver_value 0 [ipx::get_ports dgpio_pl_i -of_objects [ipx::current
 set_property enablement_dependency {$ENABLE_PL_DGPIO > 0} [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
 set_property enablement_dependency {$ENABLE_PL_IRQ > 0} [ipx::get_bus_interfaces pl_irq -of_objects [ipx::current_core]]
 
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_ref_clk_p -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_ref_clk_p -of_objects [ipx::current_core]]
+set_property enablement_dependency {$TX2_REF_CLK_SRC = "TX2_CLK"} [ipx::get_ports tx2_ref_clk_p -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_ref_clk_n -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_ref_clk_n -of_objects [ipx::current_core]]
+set_property enablement_dependency {$TX2_REF_CLK_SRC = "TX2_CLK"} [ipx::get_ports tx2_ref_clk_n -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_ref_clk_p -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_ref_clk_p -of_objects [ipx::current_core]]
+set_property enablement_dependency {$TX1_REF_CLK_SRC = "TX1_CLK"} [ipx::get_ports tx1_ref_clk_p -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_ref_clk_n -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_ref_clk_n -of_objects [ipx::current_core]]
+set_property enablement_dependency {$TX1_REF_CLK_SRC = "TX1_CLK"} [ipx::get_ports tx1_ref_clk_n -of_objects [ipx::current_core]]
 
 # Add SSI Configuration Page
 ipgui::add_page -name {SSI Pins} -component [ipx::current_core] -display_name {SSI Pins}
@@ -366,6 +395,15 @@ ipgui::move_param -component [ipx::current_core] -order 17 [ipgui::get_guiparams
 ipgui::move_param -component [ipx::current_core] -order 18 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
 
 
+ipgui::add_static_text -name {Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core] ] -text {
+The following allows selction of the transmit SSI reference clock. If the receiver and transmitter are programmed to 
+use the same clock frequency the transmit reference clock pins are not required and can be used as digtal GPIO. 
+}
+
+ipgui::move_param -component [ipx::current_core] -order 20 [ipgui::get_guiparamspec -name "TX1_REF_CLK_SRC" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 21 [ipgui::get_guiparamspec -name "TX2_REF_CLK_SRC" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
+
+
 # Add ILA Configuration Page
 set_property display_name {ILA} [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ]
 set_property tooltip {Configure Integrated Logic Analyzers} [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ]
@@ -385,9 +423,21 @@ ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamsp
 ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "ENABLE_PL_RX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
 ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "ENABLE_PL_TX1_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
 ipgui::move_param -component [ipx::current_core] -order 4 [ipgui::get_guiparamspec -name "ENABLE_PL_TX2_ENABLE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 6 [ipgui::get_guiparamspec -name "ENABLE_PL_IRQ" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "ENABLE_PL_IRQ" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
 
+ipgui::add_static_text -name {PL Enable Interface Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ] -text {
+The ADRV9002 Digital GPIO can be controlled from the PS, PL, or both.  To enable control from the PL check the following box.  
+The direction of the GPIO pins can be controlled from the PS, however the following allows a custom default for convienence.
+}
+
+ipgui::move_param -component [ipx::current_core] -order 7 [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 8 [ipgui::get_guiparamspec -name "DEFAULT_DGPIO_DIR" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+
+set_property widget {hexEdit} [ipgui::get_guiparamspec -name "DEFAULT_DGPIO_DIR" -component [ipx::current_core] ]
+set_property value 0xFFFF [ipx::get_user_parameters DEFAULT_DGPIO_DIR -of_objects [ipx::current_core]]
+set_property value 0xFFFF [ipx::get_hdl_parameters DEFAULT_DGPIO_DIR -of_objects [ipx::current_core]]
+set_property value_bit_string_length 16 [ipx::get_user_parameters DEFAULT_DGPIO_DIR -of_objects [ipx::current_core]]
+set_property value_bit_string_length 16 [ipx::get_hdl_parameters DEFAULT_DGPIO_DIR -of_objects [ipx::current_core]]
 
 # Create IP files and save
 set_property core_revision 2 [ipx::current_core]

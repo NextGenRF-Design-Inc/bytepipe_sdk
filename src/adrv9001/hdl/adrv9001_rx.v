@@ -20,13 +20,12 @@ module adrv9001_rx#(
   parameter DBG_EN = 0,
   parameter SWAP_DIFF_IDATA = 0,          // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_QDATA = 0,          // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_STROBE = 0,         // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_DCLK = 0            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_STROBE = 0          // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   )(
  
 // ADRV9001 interface.  Connect directly to top-level port
-  input  wire         adrv9001_dclk_p,       // SSI clock pair
-  input  wire         adrv9001_dclk_n,       
+  input  wire         dclk,   
+  input  wire         dclk_div,       
   input  wire         adrv9001_strobe_p,     // SSI strobe pair
   input  wire         adrv9001_strobe_n,     
   input  wire         adrv9001_idata_p,      // SSI in-phase data pair
@@ -57,11 +56,6 @@ module adrv9001_rx#(
 wire [7:0]  i_data;
 wire [7:0]  q_data;
 wire [7:0]  strobe;
-wire        dclk_in_buf;   
-wire        dclk_in;
-wire        dclk;
-wire        dclk_div;
-
 
 
 wire [15:0] enable_delay_cdc;
@@ -70,46 +64,7 @@ wire        enable_pin_cdc;
 wire        enable_mode_cdc;
 reg         ssi_enable = 0;
 
-/* Differential IO Buffer */  
-IBUFGDS dclk_ds_buf (
-  .O(dclk_in),                    // 1-bit output: Buffer output
-  .I(adrv9001_dclk_p),            // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-  .IB(adrv9001_dclk_n)            // 1-bit input: Diff_n buffer input (connect directly to top-level port)
-);     
-          
-BUFGCE #(
-  .CE_TYPE ("SYNC"),
-  .IS_CE_INVERTED (1'b0),
-  .IS_I_INVERTED (1'b0)
-) dclk_in_buf_i (
-  .O (dclk_in_buf),
-  .CE (1'b1),
-  .I (dclk_in)
-);
-
-BUFGCE #(
-  .CE_TYPE ("SYNC"),
-  .IS_CE_INVERTED (1'b0),
-  .IS_I_INVERTED (1'b0)
-  ) 
-dclk_buf_i (
-  .O (dclk),
-  .CE (1'b1),
-  .I (dclk_in_buf)
-);
-
-BUFGCE_DIV #(
-  .BUFGCE_DIVIDE (4),
-  .IS_CE_INVERTED (1'b0),
-  .IS_CLR_INVERTED (1'b0),
-  .IS_I_INVERTED (1'b0)
-  )
-dclk_div_buf_i (
-  .O (dclk_div),
-  .CE (1'b1),
-  .CLR (1'b0),
-  .I (dclk_in_buf)
-);      
+     
            
 /* I Data Serdes */
 adrv9001_rx_serdes #(

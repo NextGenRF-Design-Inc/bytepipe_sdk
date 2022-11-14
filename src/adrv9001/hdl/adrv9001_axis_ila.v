@@ -23,9 +23,9 @@ module adrv9001_axis_ila(
   input  wire [31:0]  s_axis_tdata,
   input  wire         s_axis_tvalid,
   input  wire         s_axis_tready,
-  input  wire [11:0]  dgpio_i,
-  input  wire [11:0]  dgpio_o,
-  input  wire [11:0]  dgpio_t,
+  input  wire [15:0]  dgpio_i,
+  input  wire [15:0]  dgpio_o,
+  input  wire [15:0]  dgpio_t,
   input  wire [15:0]  enable_cnt,
   input  wire [15:0]  disable_cnt
 );
@@ -36,14 +36,14 @@ wire        enable_mode_cdc;
 wire        pl_en_cdc;
 wire        s_axis_tvalid_cdc;
 wire        s_axis_tready_cdc;
-wire [11:0] dgpio_monitor_cdc;
-wire [11:0] dgpio_monitor;
+wire [15:0] dgpio_monitor_cdc;
+wire [15:0] dgpio_monitor;
 wire [15:0] enable_cnt_cdc;
 wire [15:0] disable_cnt_cdc;
 
 genvar n;
 generate
-  for (n = 0; n < 12; n = n + 1) begin: dgpio_iobuf
+  for (n = 0; n < 16; n = n + 1) begin: dgpio_iobuf
     assign dgpio_monitor[n] = (dgpio_t[n] == 1'b1) ? dgpio_i[n] : dgpio_o[n];
   end
 endgenerate
@@ -57,7 +57,7 @@ iqdata_cdc_i (
 );
 
 cdc #(
-  .DATA_WIDTH(12) )
+  .DATA_WIDTH(16) )
 dgpio_cdc_i (
   .s_cdc_tdata  ( dgpio_monitor ),
   .m_cdc_clk    (clk),

@@ -1,6 +1,8 @@
 `timescale 1 ns / 1 ps
 
-module adrv9001_regs (
+module adrv9001_regs #(
+    parameter DEFAULT_DGPIO_DIR     = 'hffff
+    )(
     output reg            tx1_enable_mode = 0,   
     output reg            tx2_enable_mode = 0, 
     output reg            rx1_enable_mode = 0, 
@@ -27,9 +29,9 @@ module adrv9001_regs (
     input  wire [31:0]    rx1_ps_data,
     input  wire [31:0]    rx2_ps_data,
     
-    output reg  [11:0]    dgpio_ps_o,
-    output reg  [11:0]    dgpio_ps_t,
-    input  wire [11:0]    dgpio_ps_i,
+    output reg  [15:0]    dgpio_ps_o,
+    output reg  [15:0]    dgpio_ps_t,
+    input  wire [15:0]    dgpio_ps_i,
     
     input  wire [7:0]     sspi_axis_tdata,
     input  wire           sspi_axis_tvalid,
@@ -193,7 +195,7 @@ always @( posedge s_axi_aclk ) begin
       rx1_disable_delay <= 10;
       rx2_disable_delay <= 10;
             
-      dgpio_ps_t <= 12'hfff;
+      dgpio_ps_t <= DEFAULT_DGPIO_DIR;
       dgpio_ps_o <= 0;    
       
       tx1_ps_data <= 32'h12345678;
@@ -224,8 +226,8 @@ always @( posedge s_axi_aclk ) begin
       5'd11: rx1_disable_delay <= s_axi_wdata[15:0];   
       5'd12: rx2_disable_delay <= s_axi_wdata[15:0];    
       
-      5'd13: dgpio_ps_t <= s_axi_wdata[11:0];       
-      5'd14: dgpio_ps_o <= s_axi_wdata[11:0];   
+      5'd13: dgpio_ps_t <= s_axi_wdata[15:0];       
+      5'd14: dgpio_ps_o <= s_axi_wdata[15:0];   
 
       5'd15: tx1_ps_data <= s_axi_wdata;
       5'd16: tx2_ps_data <= s_axi_wdata;   
@@ -388,8 +390,8 @@ begin
         5'd11: reg_data_out <= {16'h0, rx1_disable_delay}; 
         5'd12: reg_data_out <= {16'h0, rx2_disable_delay};        
         
-        5'd13: reg_data_out <= {20'h0, dgpio_ps_t};     
-        5'd14: reg_data_out <= {20'h0, dgpio_ps_o}; 
+        5'd13: reg_data_out <= {16'h0, dgpio_ps_t};     
+        5'd14: reg_data_out <= {16'h0, dgpio_ps_o}; 
 
         5'd15: reg_data_out <= rx1_ps_data_cdc;
         5'd16: reg_data_out <= rx2_ps_data_cdc;  
