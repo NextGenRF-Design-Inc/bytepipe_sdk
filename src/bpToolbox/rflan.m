@@ -631,8 +631,8 @@ classdef rflan < handle
             v = obj.Adrv9001GetParam([Port 'Rssi']);
         end
         
-        function v = GetRxGain( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'Rssi']);
+        function v = GetRxGainIndex( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'CurGainIndex']);
         end
         
         function v = GetExternalLoopbackPower(obj, Port)
@@ -870,6 +870,10 @@ classdef rflan < handle
         function SetTxAttn( obj, Port, v )
             obj.Adrv9001SetParam([Port 'Attn'], num2str(v*1000));
         end
+        
+        function SetRxGainIndex( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'CurGainIndex'], num2str(v));
+        end        
         
         function SetTxBoost( obj, Port, v )
             obj.Adrv9001SetParam([Port 'Boost'], num2str(v));

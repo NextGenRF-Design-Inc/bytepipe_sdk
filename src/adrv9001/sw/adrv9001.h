@@ -110,6 +110,7 @@ typedef enum
   Adrv9001Status_Tx2SsiCalErr         = (ADRV9001_STATUS_OFFSET - 27),
   Adrv9001Status_Rx1SsiCalErr         = (ADRV9001_STATUS_OFFSET - 28),
   Adrv9001Status_Rx2SsiCalErr         = (ADRV9001_STATUS_OFFSET - 29),
+  Adrv9001Status_RxGainSetErr         = (ADRV9001_STATUS_OFFSET - 30),
 
 } adrv9001_status_t;
 

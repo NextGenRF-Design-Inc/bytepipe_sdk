@@ -490,6 +490,14 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     AxiAdrv9001_SetTxData(Instance->CtrlBase, Channel, tmp);
   }   
 
+  else if( strcmp( &name[3], "CurGainIndex") == 0 )
+  {
+    uint8_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    if( adi_adrv9001_Rx_Gain_Set(&Instance->Device, Channel, tmp) != 0)
+      return Adrv9001Status_RxGainSetErr;
+  }
+
   else
   {
 	  status = Adrv9001Status_InvalidPib;
