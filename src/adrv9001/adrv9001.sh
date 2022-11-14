@@ -70,16 +70,20 @@ agc_config()
 
 fh_config()
 {
-	rm -rf tmp.txt		 
+	rm -rf tmp.txt		
 
- 	grep -A 999 'adi_adrv9001_FhCfg_t' $outDir/initializefhConfig*.c >> tmp.txt || true
-  sed -i 's/adi_adrv9001_FhCfg_t.*/.FhConfig = {/g' tmp.txt 
-  
-  rm -rf $outDir/initializefhConfig*.c
+  FILE=$outDir/initializefhConfig*.c
+  if test -f "$FILE"; then   
+
+    grep -A 999 'adi_adrv9001_FhCfg_t' $outDir/initializefhConfig*.c >> tmp.txt || true
+    sed -i 's/adi_adrv9001_FhCfg_t.*/.FhConfig = {/g' tmp.txt 
     
-  sed -i 's/}\;/ /g' tmp.txt
-  echo '},' >> tmp.txt	
-  cat tmp.txt >> $outDir/initializeinit7.c 
+    rm -rf $outDir/initializefhConfig*.c
+      
+    sed -i 's/}\;/ /g' tmp.txt
+    echo '},' >> tmp.txt	
+    cat tmp.txt >> $outDir/initializeinit7.c
+  fi  
 }
   
   
