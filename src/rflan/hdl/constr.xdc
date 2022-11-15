@@ -11,6 +11,8 @@ set_property  -dict {PACKAGE_PIN D7    IOSTANDARD LVCMOS18}                     
 set_property  -dict {PACKAGE_PIN C7    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[9]]       ; # IO_L8N_HDGC_AD4N_26
 set_property  -dict {PACKAGE_PIN C8    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[10]]      ; # IO_L8P_HDGC_AD4P_26
 set_property  -dict {PACKAGE_PIN B6    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[11]]      ; # IO_L11P_AD1P_26
+
+# The following pins can be used instead of tx_ref_clk
 #set_property  -dict {PACKAGE_PIN A3    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[12]]      ;# IO_L12N_T1U_N11_GC_66	
 #set_property  -dict {PACKAGE_PIN A4    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[13]]      ;# IO_L12P_T1U_N10_GC_66	
 #set_property  -dict {PACKAGE_PIN B1    IOSTANDARD LVCMOS18}                         [get_ports adrv9001_dgpio[14]]      ;# IO_L11N_T1U_N9_GC_66
@@ -67,23 +69,25 @@ set_property  -dict {PACKAGE_PIN P5     IOSTANDARD LVDS}                        
 set_property  -dict {PACKAGE_PIN N4     IOSTANDARD LVDS}                            [get_ports adrv9001_tx2_strobe_n]   ;# IO_L8N_T1L_N3_AD5N_65
 set_property  -dict {PACKAGE_PIN N5     IOSTANDARD LVDS}                            [get_ports adrv9001_tx2_strobe_p]   ;# IO_L8P_T1L_N2_AD5P_65
 
-#set_property  -dict {PACKAGE_PIN T2     IOSTANDARD LVCMOS18}                        [get_ports uart1_tx]    ;# IO_L1N_T0L_N1_DBC_65
-#set_property  -dict {PACKAGE_PIN T3     IOSTANDARD LVCMOS18}                        [get_ports uart1_rx]    ;# IO_L1P_T0L_N0_DBC_65
-#set_property  -dict {PACKAGE_PIN P3     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_qdata_p]   ;# IO_L2P_T0L_N2_65
-#set_property  -dict {PACKAGE_PIN R3     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_strobe_p]   ;# IO_L2N_T0L_N3_65
-#set_property  -dict {PACKAGE_PIN U1     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_dclk_n]   ;# IO_L3N_T0L_N5_AD15N_65
-#set_property  -dict {PACKAGE_PIN U2     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_idata_n]   ;# IO_L3P_T0L_N4_AD15P_65
-#set_property  -dict {PACKAGE_PIN T4     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_qdata_n]  ;# IO_L4N_T0U_N7_DBC_AD7N_65
-#set_property  -dict {PACKAGE_PIN R4     IOSTANDARD LVCMOS18}                        [get_ports adrv9001_tx2_strobe_n]  ;# IO_L4P_T0U_N6_DBC_AD7P_SMBALERT_65
+#set_property  -dict {PACKAGE_PIN T3     IOSTANDARD LVCMOS18}                        [get_ports pmoda[0]]                ;# IO_L1P_T0L_N0_DBC_65
+#set_property  -dict {PACKAGE_PIN T2     IOSTANDARD LVCMOS18}                        [get_ports pmoda[1]]                ;# IO_L1N_T0L_N1_DBC_65
+#set_property  -dict {PACKAGE_PIN P3     IOSTANDARD LVCMOS18}                        [get_ports pmoda[2]]                ;# IO_L2P_T0L_N2_65
+#set_property  -dict {PACKAGE_PIN R3     IOSTANDARD LVCMOS18}                        [get_ports pmoda[3]]                ;# IO_L2N_T0L_N3_65
+#set_property  -dict {PACKAGE_PIN U2     IOSTANDARD LVCMOS18}                        [get_ports pmoda[4]]                ;# IO_L3P_T0L_N4_AD15P_65
+#set_property  -dict {PACKAGE_PIN U1     IOSTANDARD LVCMOS18}                        [get_ports pmoda[5]]                ;# IO_L3N_T0L_N5_AD15N_65
+#set_property  -dict {PACKAGE_PIN R4     IOSTANDARD LVCMOS18}                        [get_ports pmoda[6]]                ;# IO_L4P_T0U_N6_DBC_AD7P_SMBALERT_65
+#set_property  -dict {PACKAGE_PIN T4     IOSTANDARD LVCMOS18}                        [get_ports pmoda[7]]                ;# IO_L4N_T0U_N7_DBC_AD7N_65
 
-#set_property  -dict {PACKAGE_PIN T1     IOSTANDARD LVCMOS18}                        [get_ports dbg0]    ;## IO_L5N_T0U_N9_AD14N_65
-#set_property  -dict {PACKAGE_PIN R1     IOSTANDARD LVCMOS18}                        [get_ports dbg1]    ;## IO_L5P_T0U_N8_AD14P_65
-#set_property  -dict {PACKAGE_PIN M4     IOSTANDARD LVCMOS18}                        [get_ports dbg2]   ;## IO_L10N_T1U_N7_QBC_AD4N_65
-#set_property  -dict {PACKAGE_PIN M5     IOSTANDARD LVCMOS18}                        [get_ports dbg3]   ;## IO_L10P_T1U_N6_QBC_AD4P_65
-#set_property  -dict {PACKAGE_PIN L1     IOSTANDARD LVCMOS18}                        [get_ports dbg4]   ;## IO_L11N_T1U_N9_GC_65
-#set_property  -dict {PACKAGE_PIN L2     IOSTANDARD LVCMOS18}                        [get_ports tx2_qdata_out_p]   ;## IO_L11P_T1U_N8_GC_65
-#set_property  -dict {PACKAGE_PIN L3     IOSTANDARD LVCMOS18}                        [get_ports tx2_strobe_out_n]  ;## IO_L12N_T1U_N11_GC_65
-#set_property  -dict {PACKAGE_PIN L4     IOSTANDARD LVCMOS18}                        [get_ports tx2_strobe_out_p]  ;## IO_L12P_T1U_N10_GC_65
+
+#set_property  -dict {PACKAGE_PIN R1     IOSTANDARD LVCMOS18}                        [get_ports pmodb[0]]                ;## IO_L5P_T0U_N8_AD14P_65
+#set_property  -dict {PACKAGE_PIN T1     IOSTANDARD LVCMOS18}                        [get_ports pmodb[1]]                ;## IO_L5N_T0U_N9_AD14N_65
+#set_property  -dict {PACKAGE_PIN M5     IOSTANDARD LVCMOS18}                        [get_ports pmodb[2]]                ;## IO_L10P_T1U_N6_QBC_AD4P_65
+#set_property  -dict {PACKAGE_PIN M4     IOSTANDARD LVCMOS18}                        [get_ports pmodb[3]]                ;## IO_L10N_T1U_N7_QBC_AD4N_65
+#set_property  -dict {PACKAGE_PIN L2     IOSTANDARD LVCMOS18}                        [get_ports pmodb[4]]                ;## IO_L11P_T1U_N8_GC_65
+#set_property  -dict {PACKAGE_PIN L1     IOSTANDARD LVCMOS18}                        [get_ports pmodb[5]]                ;## IO_L11N_T1U_N9_GC_65
+#set_property  -dict {PACKAGE_PIN L4     IOSTANDARD LVCMOS18}                        [get_ports pmodb[6]]                ;## IO_L12P_T1U_N10_GC_65
+#set_property  -dict {PACKAGE_PIN L3     IOSTANDARD LVCMOS18}                        [get_ports pmodb[7]]                ;## IO_L12N_T1U_N11_GC_65
+
 
 
 
@@ -97,13 +101,8 @@ create_clock -name adrv9001_tx2_dclk_out   -period  2.034 [get_ports adrv9001_tx
 # Allow max skew of 0.5 ns between input clocks
 set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx1_dclk_out]
 set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx2_dclk_out]
-
 set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx1_dclk_out]
 set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx2_dclk_out]
 
-#set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports adrv9001_tx1_strobe_p]
-#set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports adrv9001_tx2_idata_p]
 
-# Define SPI clock
-create_clock -name spi0_clk      -period 40   [get_pins -hier */EMIOSPI0SCLKO]
 

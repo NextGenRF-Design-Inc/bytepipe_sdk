@@ -161,27 +161,27 @@ PMODA - J28:
 
 ![pmoda](pmoda.png)
 
-|  SOM Signal     |  HDK Signal | Pin | Pin | HDK Signal  |  SOM Signal     |
-|-----------------|-------------|-----|-----|-------------|-----------------|
-| IO_L1_P         | PMOD_A0_P   | 1   | 7   | PMOD_A2_P   | IO_L3_P         |
-| IO_L1_N         | PMOD_A0_N   | 2   | 8   | PMOD_A2_N   | IO_L3_N         |
-| IO_L2_P         | PMOD_A1_P   | 3   | 9   | PMOD_A3_P   | IO_L4_P         |
-| IO_L2_N         | PMOD_A1_N   | 4   | 10  | PMOD_A3_N   | IO_L4_N         |
-| Ground          | GND         | 5   | 11  | GND         | Ground          |
-| 3.3V            | VCC3V3      | 6   | 12  | VCC3V3      | 3.3V            |
+| BBP Pin  |  SOM Signal     |  HDK Signal | Pin | Pin | HDK Signal  |  SOM Signal     | BBP Pin  |
+|----------|-----------------|-------------|-----|-----|-------------|-----------------|----------|
+| T3       | IO_L1_P         | PMOD_A0_P   | 1   | 7   | PMOD_A2_P   | IO_L3_P         | U2       |
+| T2       | IO_L1_N         | PMOD_A0_N   | 2   | 8   | PMOD_A2_N   | IO_L3_N         | U1       |
+| P3       | IO_L2_P         | PMOD_A1_P   | 3   | 9   | PMOD_A3_P   | IO_L4_P         | R4       |
+| R3       | IO_L2_N         | PMOD_A1_N   | 4   | 10  | PMOD_A3_N   | IO_L4_N         | T4       |
+|          | Ground          | GND         | 5   | 11  | GND         | Ground          |          |
+|          | 3.3V            | VCC3V3      | 6   | 12  | VCC3V3      | 3.3V            |          |
 
 PMODB - J31:
 
 ![pmoda](pmodb.png)
 
-|  SOM Signal     |  HDK Signal | Pin | Pin | HDK Signal  |  SOM Signal     |
-|-----------------|-------------|-----|-----|-------------|-----------------|
-| IO_L5_P         | PMOD_B0_P   | 1   | 7   | PMOD_B2_P   | IO_L11_P        |
-| IO_L5_N         | PMOD_B0_N   | 2   | 8   | PMOD_B2_N   | IO_L11_N        |
-| IO_L10_P        | PMOD_B1_P   | 3   | 9   | PMOD_B3_P   | IO_L12_P        |
-| IO_L10_N        | PMOD_B1_N   | 4   | 10  | PMOD_B3_N   | IO_L12_N        |
-| Ground          | GND         | 5   | 11  | GND         | Ground          |
-| 3.3V            | VCC3V3      | 6   | 12  | VCC3V3      | 3.3V            |
+| BBP Pin  |  SOM Signal     |  HDK Signal | Pin | Pin | HDK Signal  |  SOM Signal     | BBP Pin  |
+|----------|-----------------|-------------|-----|-----|-------------|-----------------|----------|
+| R1       | IO_L5_P         | PMOD_B0_P   | 1   | 7   | PMOD_B2_P   | IO_L11_P        | L2       |
+| T1       | IO_L5_N         | PMOD_B0_N   | 2   | 8   | PMOD_B2_N   | IO_L11_N        | L1       |
+| M5       | IO_L10_P        | PMOD_B1_P   | 3   | 9   | PMOD_B3_P   | IO_L12_P        | L4       |
+| M4       | IO_L10_N        | PMOD_B1_N   | 4   | 10  | PMOD_B3_N   | IO_L12_N        | L3       |
+|          | Ground          | GND         | 5   | 11  | GND         | Ground          |          |
+|          | 3.3V            | VCC3V3      | 6   | 12  | VCC3V3      | 3.3V            |          |
 
 # JTAG
 
