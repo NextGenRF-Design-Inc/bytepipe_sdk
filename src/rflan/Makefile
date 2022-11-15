@@ -2,27 +2,20 @@ PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
 SRCDIR := $(realpath $(dir $(PROJECT_DIR)/../))
 SDK_SRCDIR := $(SRCDIR)
+DEV := $(shell bash -c 'read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " dev; echo $$dev-sbva484-1-e')
 
 .PHONY: all
-all: clean
-	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl; \
-	$(MAKE) -f $(SDK_SRCDIR)/axi_dma/Makefile; \
-	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk; \
-	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e; \
-	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
+all: clean hdl sw
 
 hdl:
-	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl; \
-	$(MAKE) -f $(SDK_SRCDIR)/axi_dma/Makefile; \
-	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
+	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl
+	$(MAKE) -f $(SDK_SRCDIR)/axi_dma/Makefile
+	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $(DEV)
   
-sw:
-	@read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " DEVICE; \
-	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk; \
-	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $$DEVICE-sbva484-1-e
-  
+sw: 
+	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk
+	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $(DEV)
+   
 clean:
 	rm -rf $(PROJECT)
   
