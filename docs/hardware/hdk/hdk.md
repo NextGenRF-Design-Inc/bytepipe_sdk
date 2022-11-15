@@ -1,4 +1,4 @@
-[![logo](../BytePipe_Logo.png)](../../README.md)
+[![logo](../../BytePipe_Logo.png)](../../README.md)
 ---
 
 # BytePipe Hardware Development Kit
