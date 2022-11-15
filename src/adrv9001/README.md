@@ -44,7 +44,7 @@ The ADRV9001 programmable logic is created as a standalone IP module.  The follo
 
 ![axi_adrv9001_configuration_01.png](docs/axi_adrv9001_configuration_01.png)
 
-In addition to the ILA configuration each SSI differential pair can be swapped for designs such as the BytePipe where it is advantageous for PCB routing to swap the positive and negative signals of a differential pair.  
+The second tab provides options for configuring the SSI interface between the programmable logic and ADRV9002.  Each SSI differential pair can be swapped for designs such as the BytePipe where it is advantageous for PCB routing to swap the positive and negative signals of a differential pair.  This tab also allows the transmit SSI reference clocks to be selected.  Each transmit clock can be configured to use the tx reference clock from the ADRV9002 or one of the receive clocks.  If using one of the receive clocks it must be at the same sample rate as the transmitter.  
 
 ![axi_adrv9001_configuration_02.png](docs/axi_adrv9001_configuration_02.png)
 
