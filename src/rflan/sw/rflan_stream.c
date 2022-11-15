@@ -185,34 +185,34 @@ int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *In
       .Flags = 0,
   };
 
-  DmaInit.Base = XPAR_TX1_DMA_BASEADDR;
+  DmaInit.Base = Init->Tx1DmaBase;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Tx1DmaCallback;
   DmaInit.Direction = AxiDmaDir_MemToDev;
-  DmaInit.IrqId = XPAR_FABRIC_TX1_DMA_IRQ_INTR;
+  DmaInit.IrqId = Init->Tx1DmaIrqId;
 
   if((status = AxiDma_Initialize( &Instance->Tx1Dma, &DmaInit )) != 0)
     return status;
 
-  DmaInit.Base = XPAR_TX2_DMA_BASEADDR;
+  DmaInit.Base = Init->Tx2DmaBase;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Tx2DmaCallback;
   DmaInit.Direction = AxiDmaDir_MemToDev;
-  DmaInit.IrqId = XPAR_FABRIC_TX2_DMA_IRQ_INTR;
+  DmaInit.IrqId = Init->Tx2DmaIrqId;
 
   if((status = AxiDma_Initialize( &Instance->Tx2Dma, &DmaInit )) != 0)
     return status;
 
-  DmaInit.Base = XPAR_RX1_DMA_BASEADDR;
+  DmaInit.Base = Init->Rx1DmaBase;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Rx1DmaCallback;
   DmaInit.Direction = AxiDmaDir_DevToMem;
-  DmaInit.IrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR;
+  DmaInit.IrqId = Init->Rx1DmaIrqId;
 
   if((status = AxiDma_Initialize( &Instance->Rx1Dma, &DmaInit )) != 0)
     return status;
 
-  DmaInit.Base = XPAR_RX2_DMA_BASEADDR;
+  DmaInit.Base = Init->Rx2DmaBase;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Rx2DmaCallback;
   DmaInit.Direction = AxiDmaDir_DevToMem;
-  DmaInit.IrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR;
+  DmaInit.IrqId = Init->Rx2DmaIrqId;
 
   if((status = AxiDma_Initialize( &Instance->Rx2Dma, &DmaInit )) != 0)
     return status;

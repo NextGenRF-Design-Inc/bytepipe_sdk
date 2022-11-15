@@ -150,7 +150,7 @@ int32_t Adrv9001_SetEnableMode( adrv9001_t *Instance, adi_common_Port_e port, ad
   if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, mode) != 0)
     return Adrv9001Status_EnableModeErr;
 
-  AxiAdrv9001_SetEnableMode( Instance->CtrlBase, port, channel, mode );
+  AxiAdrv9001_SetEnableMode( &Instance->Axi, port, channel, mode );
 
   return Adrv9001Status_Success;
 }
@@ -181,14 +181,12 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   else
     Instance->Params->LogPath[0] = 0;
 
-  Instance->CtrlBase = Init->CtrlBase;
-
   /* Initialize PIB */
   if((status = Adrv9001Pib_Initialize( Instance )) != 0)
     return status;
 
   /* Initialize AXI ADRV9001 */
-  if((status = AxiAdrv9001_Initialize( Instance->CtrlBase)) != 0)
+  if((status = AxiAdrv9001_Initialize( &Instance->Axi, &Init->AxiInit )) != 0)
     return status;
 
   /* Load Profile */
@@ -291,9 +289,9 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
 
   if( port == ADI_TX )
   {
-    AxiAdrv9001_SetTxDataPath( Instance->CtrlBase, channel, 1);
+    AxiAdrv9001_SetTxDataPath( &Instance->Axi, channel, 1);
 
-    AxiAdrv9001_SetTxData( Instance->CtrlBase, channel, ADRV9001_TEST_MODE_PATTERN);
+    AxiAdrv9001_SetTxData( &Instance->Axi, channel, ADRV9001_TEST_MODE_PATTERN);
   }
 
   usleep(1000);
@@ -357,8 +355,8 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
       else
       {
         uint32_t Data;
-        AxiAdrv9001_GetRxData( Instance->CtrlBase, channel, &Data );
-        AxiAdrv9001_GetRxData( Instance->CtrlBase, channel, &Data );
+        AxiAdrv9001_GetRxData( &Instance->Axi, channel, &Data );
+        AxiAdrv9001_GetRxData( &Instance->Axi, channel, &Data );
 
         if( Data == ADRV9001_TEST_MODE_PATTERN)
           results[clkDly][dataDly] = 1;
@@ -373,7 +371,7 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
 
   if( port == ADI_TX )
   {
-	  AxiAdrv9001_SetTxDataPath( Instance->CtrlBase, channel, 0);
+	  AxiAdrv9001_SetTxDataPath( &Instance->Axi, channel, 0);
   }
 
   adi_adrv9001_RxSsiTestModeCfg_t RxCfg = { .testData = ADI_ADRV9001_SSI_TESTMODE_DATA_NORMAL };
@@ -725,21 +723,21 @@ int32_t Adrv9001_SpiWrite( void *devHalCfg, const uint8_t txData[], uint32_t num
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  return AxiAdrv9001_MspiTransfer( Adrv9001->CtrlBase, (uint8_t*)txData, NULL, numTxBytes);
+  return AxiAdrv9001_MspiTransfer( &Adrv9001->Axi, (uint8_t*)txData, NULL, numTxBytes);
 }
 
 int32_t Adrv9001_SpiRead( void *devHalCfg, const uint8_t txData[], uint8_t rxData[], uint32_t numRxBytes )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  return AxiAdrv9001_MspiTransfer( Adrv9001->CtrlBase, (uint8_t*)txData, rxData, numRxBytes);
+  return AxiAdrv9001_MspiTransfer( &Adrv9001->Axi, (uint8_t*)txData, rxData, numRxBytes);
 }
 
 int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )
 {
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  AxiAdrv9001_ResetbPinSet( Adrv9001->CtrlBase, pinLevel );
+  AxiAdrv9001_ResetbPinSet( &Adrv9001->Axi, pinLevel );
 
   return Adrv9001Status_Success;
 }

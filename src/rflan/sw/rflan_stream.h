@@ -94,6 +94,14 @@ typedef struct{
   stream_callback_t   Callback;     ///< Parent Callback function
   void               *CallbackRef;  ///< Parent User Data
   adrv9001_t	       *Adrv9001;     ///< ADRV9001 Instance
+  uint32_t            Tx1DmaBase;   ///< AXI Base address
+  uint32_t            Tx2DmaBase;   ///< AXI Base address
+  uint32_t            Rx1DmaBase;   ///< AXI Base address
+  uint32_t            Rx2DmaBase;   ///< AXI Base address
+  uint32_t            Tx1DmaIrqId;  ///< IRQ Id
+  uint32_t            Tx2DmaIrqId;  ///< IRQ Id
+  uint32_t            Rx1DmaIrqId;  ///< IRQ Id
+  uint32_t            Rx2DmaIrqId;  ///< IRQ Id
 }rflan_stream_init_t;
 
 typedef struct{

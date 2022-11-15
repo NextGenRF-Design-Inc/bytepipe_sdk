@@ -60,6 +60,7 @@ typedef struct {
   cli_t              *Cli;
   rflan_pib_t        *RflanPib;
   XGpioPs            *Gpio;
+  uint8_t			  Drive;
 #ifdef RFLAN_STREAM_ENABLE
   rflan_stream_t     *RflanStream;
 #endif
@@ -72,6 +73,7 @@ typedef struct {
   cli_t              *Cli;
   rflan_pib_t        *RflanPib;
   XGpioPs            *Gpio;
+  uint8_t			  Drive;
 #ifdef RFLAN_STREAM_ENABLE
   rflan_stream_t     *RflanStream;
 #endif

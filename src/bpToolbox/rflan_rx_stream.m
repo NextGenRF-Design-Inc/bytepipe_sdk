@@ -27,7 +27,7 @@ h.SetDisableDelay(RxPort, 10);
 
 % Read DMA buffer and plot data several times
 figure();
-for i = 1:5
+for i = 1:15
 % Start DMA Burst
 h.RflanStreamStart(RxPort, 0, RxBufLength + 10);
 

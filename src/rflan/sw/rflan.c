@@ -235,6 +235,7 @@ static int32_t Rflan_Initialize( void )
     .Cli           = &Cli,
     .Gpio          = &RflanGpio,
     .RflanPib      = &RflanPib,
+	  .Drive         = 0,
 #ifdef RFLAN_STREAM_ENABLE
     .RflanStream   = &RflanStream
 #endif
@@ -246,8 +247,8 @@ static int32_t Rflan_Initialize( void )
 
   rflan_uart_init_t UartInit = {
       .BaudRate           = RFLAN_UART_BAUDRATE,
-      .DeviceId           = RFLAN_UART_DEVICE_ID,
-      .IntrId             = RFLAN_UART_INTR_ID,
+      .DeviceId           = XPAR_PSU_UART_0_DEVICE_ID,
+      .IntrId             = XPAR_XUARTPS_0_INTR,
       .ParentCallback     = Rflan_UartCallback,
       .ParentCallbackRef  = &Cli };
 
@@ -276,7 +277,7 @@ static int32_t Rflan_Initialize( void )
 #endif
 
   /* Initialize File System*/
-  if((status = f_mount(&FatFs, FF_LOGICAL_DRIVE_PATH, 1)) != FR_OK)
+  if((status = f_mount(&FatFs, "1:/", 1)) != FR_OK)
     printf("FatFs %s\r\n",StatusString(status));
 
   rflan_pib_init_t PibInit = {
@@ -291,7 +292,7 @@ static int32_t Rflan_Initialize( void )
     printf("Rflan Pib Init %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &Cli, RFLAN_SETUP_SCRIPT_FILENAME)) != 0 )
+  if((status = Rflan_SetupScript( &Cli, "1:/rflan_setup.txt")) != 0 )
     printf("Rflan Setup Script %s\r\n",StatusString(status));
 
 
@@ -303,9 +304,10 @@ static int32_t Rflan_Initialize( void )
   printf("\r\nType help for a list of commands\r\n\r\n");
 
   adrv9001_init_t Adrv9001Init = {
-		  .CtrlBase = RFLAN_ADRV9001_BASE,
+		  .AxiInit.Base = XPAR_ADRV9001_0_BASEADDR,
+		  .AxiInit.IrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
 		  .TcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07,
-		  .LogFilename = RFLAN_ADRV9001_LOG_FILENAME
+		  .LogFilename = "1:/adi_adrv9001_log.txt"
   };
 
   if( Rflan_GetHwVer( ) == 2 )
@@ -335,7 +337,7 @@ static int32_t Rflan_Initialize( void )
     printf("Adrv9001Cli %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &Cli, RFLAN_ADRV9001_SCRIPT_FILENAME)) != 0 )
+  if((status = Rflan_SetupScript( &Cli, "1:/adrv9001_setup.txt")) != 0 )
     printf("Adrv9001 Setup Script %s\r\n",StatusString(status));
 
 #ifdef RFLAN_STREAM_ENABLE
@@ -343,7 +345,15 @@ static int32_t Rflan_Initialize( void )
   rflan_stream_init_t StreamInit = {
       .Callback = Rflan_StreamCallback,
       .CallbackRef = &RflanStream,
-      .Adrv9001 = &RflanAdrv9001
+      .Adrv9001 = &RflanAdrv9001,
+      .Tx1DmaBase = XPAR_TX1_DMA_BASEADDR,
+      .Tx2DmaBase = XPAR_TX2_DMA_BASEADDR,
+      .Rx1DmaBase = XPAR_RX1_DMA_BASEADDR,
+      .Rx2DmaBase = XPAR_RX2_DMA_BASEADDR,
+      .Tx1DmaIrqId = XPAR_FABRIC_TX1_DMA_IRQ_INTR,
+      .Tx2DmaIrqId = XPAR_FABRIC_TX2_DMA_IRQ_INTR,
+      .Rx1DmaIrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR,
+      .Rx2DmaIrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR
   };
 
   /* Initialize Stream */
@@ -362,7 +372,7 @@ static int32_t Rflan_Initialize( void )
         .RxBufSize = RFLAN_LWIP_RECV_BUF_SIZE,
         .CliPort = RFLAN_LWIP_CLI_PORT,
         .MacAddr = RFLAN_LWIP_MAC_ADDR,
-        .BaseAddr = RFLAN_LWIP_EMAC_BASEADDR,
+        .BaseAddr = XPAR_XEMACPS_0_BASEADDR,
         .IpAddr = RflanPib.Params.IpAddr,
         .IpMask = RflanPib.Params.IpMask,
         .IpGw = RflanPib.Params.IpGwAddr

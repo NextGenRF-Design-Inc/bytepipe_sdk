@@ -156,6 +156,14 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2DisableDly",                        0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Rx1DisableDly",                        0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Rx2DisableDly",                        0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx1SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx1SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx2SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx1SsiDataDelay",                      0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Tx2SsiDataDelay",                      0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx1SsiDataDelay",                      0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "Rx2SsiDataDelay",                      0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Tx1EnableMode",                        offsetof(adrv9001_params_t, Tx1EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Tx2EnableMode",                        offsetof(adrv9001_params_t, Tx2EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Rx1EnableMode",                        offsetof(adrv9001_params_t, Rx1EnableMode),                                               PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
@@ -375,28 +383,28 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetTxData(Instance->CtrlBase, Channel, tmp);
+    AxiAdrv9001_SetTxData(&Instance->Axi, Channel, tmp);
   }
 
   else if( strcmp( &name[3], "IqDataPath") == 0 )
   {
     axi_adrv9001_data_path_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetTxDataPath(Instance->CtrlBase, Channel, tmp);
+    AxiAdrv9001_SetTxDataPath(&Instance->Axi, Channel, tmp);
   }
 
   else if( strcmp( name, "Dgpio") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetDgpio(Instance->CtrlBase, tmp);
+    AxiAdrv9001_SetDgpio(&Instance->Axi, tmp);
   }
 
   else if( strcmp( name, "DgpioDir") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetDgpioDir(Instance->CtrlBase, tmp);
+    AxiAdrv9001_SetDgpioDir(&Instance->Axi, tmp);
   }
 
   else if( strcmp( name, "VcTcxo") == 0 )
@@ -473,21 +481,21 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint16_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);    
-		AxiAdrv9001_SetEnableDelay(Instance->CtrlBase, Port, Channel, tmp);
+		AxiAdrv9001_SetEnableDelay(&Instance->Axi, Port, Channel, tmp);
   }
   
   else if( strcmp( &name[3], "DisableDly") == 0 )
   {
     uint16_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);    
-    AxiAdrv9001_SetDisableDelay(Instance->CtrlBase, Port, Channel, tmp);
+    AxiAdrv9001_SetDisableDelay(&Instance->Axi, Port, Channel, tmp);
   } 
 
   else if( strcmp( &name[3], "TestData") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);    
-    AxiAdrv9001_SetTxData(Instance->CtrlBase, Channel, tmp);
+    AxiAdrv9001_SetTxData(&Instance->Axi, Channel, tmp);
   }   
 
   else if( strcmp( &name[3], "CurGainIndex") == 0 )
@@ -496,6 +504,24 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
     if( adi_adrv9001_Rx_Gain_Set(&Instance->Device, Channel, tmp) != 0)
       return Adrv9001Status_RxGainSetErr;
+  }
+
+  else if( strcmp( &name[3], "SsiDataDelay") == 0 )
+  {
+    uint8_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+
+    if((status = Adrv9001_SetSsiDataDelay( Instance, Port, Channel, tmp )) != 0 )
+      return status;
+  }
+
+  else if( strcmp( &name[3], "SsiClockDelay") == 0 )
+  {
+    uint8_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+
+    if((status = Adrv9001_SetSsiClkDelay( Instance, Port, Channel, tmp )) != 0 )
+      return status;
   }
 
   else
@@ -551,28 +577,28 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "IqData") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetRxData(Instance->CtrlBase, Channel, &tmp );
+    AxiAdrv9001_GetRxData(&Instance->Axi, Channel, &tmp );
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( &name[3], "IqDataPath") == 0 )
   {
     axi_adrv9001_data_path_t tmp;
-    AxiAdrv9001_GetTxDataPath(Instance->CtrlBase, Channel, &tmp );
+    AxiAdrv9001_GetTxDataPath(&Instance->Axi, Channel, &tmp );
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( name, "Dgpio") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetDgpio(Instance->CtrlBase, &tmp);
+    AxiAdrv9001_GetDgpio(&Instance->Axi, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( name, "DgpioDir") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetDgpioDir(Instance->CtrlBase, &tmp);
+    AxiAdrv9001_GetDgpioDir(&Instance->Axi, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
@@ -652,24 +678,75 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "EnableDly") == 0 )
   {
     uint16_t tmp;    
-		AxiAdrv9001_GetEnableDelay(Instance->CtrlBase, Port, Channel, &tmp);
+		AxiAdrv9001_GetEnableDelay(&Instance->Axi, Port, Channel, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
   
   else if( strcmp( &name[3], "DisableDly") == 0 )
   {
     uint16_t tmp;    
-    AxiAdrv9001_GetDisableDelay(Instance->CtrlBase, Port, Channel, &tmp);
+    AxiAdrv9001_GetDisableDelay(&Instance->Axi, Port, Channel, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }    
 
   else if( strcmp( &name[3], "TestData") == 0 )
   {
     uint32_t tmp;    
-    AxiAdrv9001_GetRxData(Instance->CtrlBase, Channel, &tmp);
+    AxiAdrv9001_GetRxData(&Instance->Axi, Channel, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );    
   }  
   
+  else if( strcmp( &name[3], "SsiClockDelay") == 0 )
+  {
+    adi_adrv9001_SsiCalibrationCfg_t cal;
+
+    if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
+      return Adrv9001Status_SsiSetErr;
+
+    if((Port == ADI_RX) && (Channel == ADI_CHANNEL_1))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.rxClkDelay[0], str );
+    }
+    else if((Port == ADI_RX) && (Channel == ADI_CHANNEL_2))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.rxClkDelay[1], str );
+    }
+    else if((Port == ADI_TX) && (Channel == ADI_CHANNEL_1))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.txClkDelay[0], str );
+    }
+    else if((Port == ADI_TX) && (Channel == ADI_CHANNEL_2))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.txClkDelay[1], str );
+    }
+
+  }
+
+  else if( strcmp( &name[3], "SsiDataDelay") == 0 )
+  {
+    adi_adrv9001_SsiCalibrationCfg_t cal;
+
+    if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
+      return Adrv9001Status_SsiSetErr;
+
+    if((Port == ADI_RX) && (Channel == ADI_CHANNEL_1))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.rxIDataDelay[0], str );
+    }
+    else if((Port == ADI_RX) && (Channel == ADI_CHANNEL_2))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.rxIDataDelay[1], str );
+    }
+    else if((Port == ADI_TX) && (Channel == ADI_CHANNEL_1))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.txIDataDelay[0], str );
+    }
+    else if((Port == ADI_TX) && (Channel == ADI_CHANNEL_2))
+    {
+      Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&cal.txIDataDelay[1], str );
+    }
+  }
+
   return status;
 }
 

@@ -47,10 +47,8 @@
 #include "xparameters.h"
 #include "ff.h"
 
-#define FF_LOGICAL_DRIVE_PATH           ("1:/")
-#define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
 
-#define RFLAN_SETUP_SCRIPT_FILENAME     ("1:/rflan_setup.txt")
+#define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
 #define SYSMON_DEVICE_ID                XPAR_XSYSMONPSU_0_DEVICE_ID
 
 #define RFLAN_TASK_STACK_SIZE           4096
@@ -58,24 +56,8 @@
 #define RFLAN_QUEUE_SIZE                4
 #define RFLAN_EVT_QUEUE_SIZE            4
 
-#define RFLAN_ADRV9001_BASE         	  XPAR_ADRV9002_0_BASEADDR
-#define RFLAN_ADRV9001_LOG_FILENAME     ("1:/adi_adrv9001_log.txt")
-#define RFLAN_ADRV9001_SCRIPT_FILENAME  ("1:/adrv9001_setup.txt")
-
-
-
-#ifdef RFLAN_CLI_UART1
-#define RFLAN_UART_DEVICE_ID            XPAR_PSU_UART_1_DEVICE_ID
-#define RFLAN_UART_INTR_ID              XPAR_XUARTPS_1_INTR
-#else
-#define RFLAN_UART_DEVICE_ID            XPAR_PSU_UART_0_DEVICE_ID
-#define RFLAN_UART_INTR_ID              XPAR_XUARTPS_0_INTR
-#endif
 
 #define RFLAN_UART_BAUDRATE             115200
-
-#define RFLAN_LWIP_EMAC_BASEADDR        XPAR_XEMACPS_0_BASEADDR
-
 #define RFLAN_GPIO_DEVICE_ID            (XPAR_PSU_GPIO_0_DEVICE_ID)
 
 #define RFLAN_STATUS_OFFSET             (-500)

@@ -64,7 +64,6 @@
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_dpd.h"
 #include "ff.h"
-#include "xparameters.h"
 #include "pib.h"
 #include "axi_adrv9001.h"
 
@@ -166,7 +165,7 @@ extern adrv9001_params_t Adrv9001Params;
 typedef struct {
 	adi_adrv9001_Device_t	      Device;
   adrv9001_params_t          *Params;
-  uint32_t                    CtrlBase;             ///< Control Base
+  axi_adrv9001_t 			  Axi;
   FIL                         LogFil;               ///< Log File
   pib_t                       Pib;
   uint8_t                     PendingReboot;
@@ -180,7 +179,7 @@ typedef struct {
 	adi_adrv9001_GpioPin_e		  TcxoEnablePin;
 	uint8_t								      TcxoDacChannel;
   char                       *LogFilename;
-  uint32_t                    CtrlBase;
+  axi_adrv9001_init_t             AxiInit;
 }adrv9001_init_t;
 
 int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance );

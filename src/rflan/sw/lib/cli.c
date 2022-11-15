@@ -50,7 +50,6 @@
 #include "mem.h"
 #include "xil_printf.h"
 #include "portmacro.h"
-#include "xparameters.h"
 #include "xil_types.h"
 #include "xstatus.h"
 

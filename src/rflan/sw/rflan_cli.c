@@ -46,7 +46,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "xparameters.h"
+
 #include "xil_types.h"
 #include "xstatus.h"
 #include "ff.h"
@@ -60,6 +60,7 @@
 #include "ff.h"
 #include "status.h"
 
+#define RFLAN_CLI_PATH_LEN  (3)
 #define BOOT_BUF_SIZE   16384
 
 #define PHY_CLI_IQ_FILE_MAX_LINE_SIZE       (64)
@@ -228,7 +229,7 @@ static void RflanCli_Reboot(cli_t *CliInstance, const char *cmd, rflan_cli_t *In
       return;
     }
 
-	  strcpy(filename,FF_LOGICAL_DRIVE_PATH);
+	  sprintf(filename, "%d:/", Instance->Drive);
 
 	  Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
 
@@ -330,7 +331,10 @@ static void RflanCli_CliLs(cli_t *CliInstance, const char *cmd, rflan_cli_t *Ins
   }
   else
   {
-    if((status = f_opendir(&dp, FF_LOGICAL_DRIVE_PATH)) != XST_SUCCESS)
+	char filename[16];
+	sprintf(filename, "%d:/", Instance->Drive);
+
+    if((status = f_opendir(&dp, filename)) != XST_SUCCESS)
     {
       Cli_Printf(CliInstance,"Failure\r\n");
       return;
@@ -691,7 +695,7 @@ static void RflanCli_StreamBufLoad(cli_t *CliInstance, const char *cmd, rflan_cl
   }
 
   char *filename = calloc(1, 256);
-  strcpy(filename, FF_LOGICAL_DRIVE_PATH);
+  sprintf(filename, "%d:/", Instance->Drive);
   Cli_GetParameter(cmd, 2, CliParamTypeStr, &filename[strlen(filename)]);
 
   RflanCli_IqFileRead( filename, BufAddr );
@@ -734,7 +738,7 @@ static void RflanCli_StreamBufSave(cli_t *CliInstance, const char *cmd, rflan_cl
   Cli_GetParameter(cmd, 2, CliParamTypeU32, &SampleCnt);
 
   char *filename = calloc(1, 256);
-  strcpy(filename, FF_LOGICAL_DRIVE_PATH);
+  sprintf(filename, "%d:/", Instance->Drive);
   Cli_GetParameter(cmd, 3, CliParamTypeStr, &filename[strlen(filename)]);
 
   RflanCli_IqFileWrite( filename, BufAddr, SampleCnt );
@@ -783,7 +787,8 @@ static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, rflan_cl
   int32_t status;
 
   char *filename = calloc(1, 256);
-  strcpy(filename, FF_LOGICAL_DRIVE_PATH);
+  sprintf(filename, "%d:/", Instance->Drive);
+
   Cli_GetParameter(cmd, 1, CliParamTypeStr, &filename[strlen(filename)]);
   
   Cli_Printf(CliInstance,"Executing CLI Script %s\r\n", filename);
@@ -977,6 +982,7 @@ int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init )
   Instance->Cli = Init->Cli;
   Instance->Gpio = Init->Gpio;
   Instance->RflanPib = Init->RflanPib;
+  Instance->Drive = Init->Drive;
 
 #ifdef RFLAN_STREAM_ENABLE
   Instance->RflanStream = Init->RflanStream;
@@ -985,6 +991,11 @@ int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init )
   RflanCliListParamNamesDef.userData = Instance;
   RflanCliSetParamDef.userData = Instance;
   RflanCliGetPibDef.userData = Instance;
+  RflanCliLsDef.userData = Instance;
+  RflanCliTaskInfoDef.userData = Instance;
+  RflanCliRebootDef.userData = Instance;
+  RflanCliExecuteScriptDef.userData = Instance;
+  RflanCliDelayMsDef.userData = Instance;
 
 #ifdef RFLAN_STREAM_ENABLE
   RflanCliStreamBufSaveDef.userData = Instance;
