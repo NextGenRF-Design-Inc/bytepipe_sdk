@@ -1,15 +1,18 @@
 #!/bin/bash
 
-# This function builds the rflan programmable logic using Cygwin or Bash
+# This function abstracts a software build using Vitis.  The project and details 
+# of the build are defined in "$srcDir/$project/sw/make_sw.tcl" and executed by
+# Vitis.  
+#   
 # Inputs: 
 #  $1 = Source Directory
 #  $2 = project (ie. rflan)
 #  $3 = device (ie. xczu3cg)
 #
 # Prerequisites:
-#	Cygwin: export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
-#	Linux: source ~/home/Xilinx/Vitis/2021.1/settings64.sh
-#
+#	  Cygwin: export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
+#	  Linux: source ~/home/Xilinx/Vitis/2021.1/settings64.sh
+#   
 build_sw()
 {
   # Abstract Project Directory
@@ -42,47 +45,49 @@ build_sw()
   rm -rf $wrkDir/$project/.analytics
   rm -rf $wrkDir/$project/*.log
   rm -rf $wrkDir/$project/*.bin
+  rm -rf $wrkDir/$project/*.zip
   rm -rf $wrkDir/$project/sd_card	
+  rm -rf $wrkDir/$project/output
   
   # Indicate Build
   echo "$(printf '\033')[0;33mBuilding $project Software $(printf '\033')[0m"
   
-  if [ -z "$device" ] 
-  then
-    if [[ $env == *"Linux"* ]]; then
-      xsct "$srcDir/$project/sw/make_sw.tcl"
-    else
-      xsct.bat "$srcDir/$project/sw/make_sw.tcl"
-    fi
-    
-    cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
-    cp -rf $srcDir/$project/resources/* $wrkDir/$project/sd_card    
-
-    zip -rj "$wrkDir/$project/${project}_sdcard.zip" $project/sd_card/
+  if [[ $env == *"Linux"* ]]; then
+    xsct "$srcDir/$project/sw/make_sw.tcl" $device
   else
-    if [[ $env == *"Linux"* ]]; then
-      xsct "$srcDir/$project/sw/make_sw.tcl" $device
-    else
-      xsct.bat "$srcDir/$project/sw/make_sw.tcl" $device
-    fi
-    
-    cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
-    cp -rf $srcDir/$project/resources/* $wrkDir/$project/sd_card    
-
-    zip -rj "$wrkDir/$project/${project}_${device}_sdcard.zip" $project/sd_card/
+    xsct.bat "$srcDir/$project/sw/make_sw.tcl" $device
   fi
+    
+  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
+  cp -rf $srcDir/$project/resources/* $wrkDir/$project/sd_card    
+  
+  mkdir $wrkDir/$project/output
+  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf $wrkDir/$project/output
+  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf.size $wrkDir/$project/output
+  cp -rf $wrkDir/$project/hwp/zynqmp_fsbl/fsbl_a53.elf $wrkDir/$project/output
+  cp -rf $wrkDir/$project/hwp/zynqmp_pmufw/pmufw.elf $wrkDir/$project/output
+  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card/boot.bin $wrkDir/$project/output  
+  cp -rf $wrkDir/$project/${project}_${device}.xsa $wrkDir/$project/output    
+  
+  zip -rj "$wrkDir/$project/${project}_${device}_sdcard.zip" $project/sd_card/
+  zip -rj "$wrkDir/$project/${project}_${device}_artifacts.zip" $project/output/  
+  
+  rm -rf $wrkDir/$project/sd_card	
+  rm -rf $wrkDir/$project/output  
   
 }
 
-# This function builds the rflan programmable logic using Cygwin or Bash
-# Inputs: 
+# This function abstracts a programmable logic build using Vivado.  The project 
+# and details of the build are defined in "$srcDir/$project/sw/make_sw.tcl" and 
+# executed by Vivado.
+#
 #  $1 = Source Directory
 #  $2 = project (ie. rflan)
 #  $3 = device (ie. xczu3cg)
 #
 # Prerequisites:
-#	Cygwin: export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
-#	Linux: source ~/home/Xilinx/Vivado/2021.1/settings64.sh
+#	  Cygwin: export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
+#	  Linux: source ~/home/Xilinx/Vivado/2021.1/settings64.sh
 #
 build_hdl()
 {	
@@ -120,68 +125,5 @@ build_hdl()
   # Build with Vivado    
   vivado -mode batch -nojournal -quiet -source $scriptDir/make_hdl.tcl -notrace -tclargs $project $srcDir/$project/hdl $device
   
-}
-
-# This function builds the rflan programmable logic using Cygwin or Bash
-# Inputs: 
-#  $1 = project (ie. rflan)
-#  $2 = device (ie. xczu3cg)
-#
-# Prerequisites:
-#	Cygwin: export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
-#	Linux: source ~/home/Xilinx/Vivado/2021.1/settings64.sh
-#
-build()
-{	
-  # Abstract Source Directory
-  srcDir="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
-  if [[ $srcDir == *"cygdrive"* ]]; then
-    srcDir=$(realpath $(cygpath -w $srcDir))
-  fi 
-  
-  # Define project
-  project=$1
-   
-  source $srcDir/$project/$project.sh; build $@
-}
-
-# This function prompts the user to provide the device
-# Inputs: 
-#
-# Prerequisites:
-#
-prompt_device()
-{
-	read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " device
-  echo $device
-}
-
-# This function downloads the latest released hardware definition
-# Inputs: 
-#  $1 = project (ie. rflan)
-#  $2 = device (ie. xczu3cg)
-#
-# Prerequisites:
-#
-download_xsa()
-{
-  project=$1
-  
-  device=$2
-  
-  if [ -z "$device" ] 
-  then
-	  wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v10.25.22/$project.xsa" -O $project/$project.xsa
-  else  
-	  wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/releases/download/v10.25.22/$project_$device.xsa" -O $project/$project_$device.xsa
-  fi
-}
-
-download_bytepipe_sdk()
-{
-	wget -nc "https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/archive/refs/heads/main.zip" -O bytepipe_sdk.zip
-	unzip bytepipe_sdk.zip
-	mv bytepipe_sdk-main bytepipe_sdk  
-	chmod -R 777 bytepipe_sdk  
 }
 

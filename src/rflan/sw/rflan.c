@@ -235,7 +235,7 @@ static int32_t Rflan_Initialize( void )
     .Cli           = &Cli,
     .Gpio          = &RflanGpio,
     .RflanPib      = &RflanPib,
-	  .Drive         = 0,
+	  .Drive         = 1,
 #ifdef RFLAN_STREAM_ENABLE
     .RflanStream   = &RflanStream
 #endif
