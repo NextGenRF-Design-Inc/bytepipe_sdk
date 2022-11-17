@@ -47,7 +47,7 @@ build_sw()
   rm -rf $wrkDir/$project/*.bin
   rm -rf $wrkDir/$project/*.zip
   rm -rf $wrkDir/$project/sd_card	
-  rm -rf $wrkDir/$project/output
+  rm -rf $wrkDir/$project/artifacts
   
   # Indicate Build
   echo "$(printf '\033')[0;33mBuilding $project Software $(printf '\033')[0m"
@@ -61,20 +61,17 @@ build_sw()
   cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
   cp -rf $srcDir/$project/resources/* $wrkDir/$project/sd_card    
   
-  mkdir $wrkDir/$project/output
-  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf $wrkDir/$project/output
-  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf.size $wrkDir/$project/output
-  cp -rf $wrkDir/$project/hwp/zynqmp_fsbl/fsbl_a53.elf $wrkDir/$project/output
-  cp -rf $wrkDir/$project/hwp/zynqmp_pmufw/pmufw.elf $wrkDir/$project/output
-  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card/boot.bin $wrkDir/$project/output  
-  cp -rf $wrkDir/$project/${project}_${device}.xsa $wrkDir/$project/output    
+  mkdir $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf.size $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/hwp/zynqmp_fsbl/fsbl_a53.elf $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/hwp/zynqmp_pmufw/pmufw.elf $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card/boot.bin $wrkDir/$project/artifacts  
+  cp -rf $wrkDir/$project/${project}_${device}.xsa $wrkDir/$project/artifacts    
   
   zip -rj "$wrkDir/$project/${project}_${device}_sdcard.zip" $project/sd_card/
-  zip -rj "$wrkDir/$project/${project}_${device}_artifacts.zip" $project/output/  
-  
-  rm -rf $wrkDir/$project/sd_card	
-  rm -rf $wrkDir/$project/output  
-  
+  zip -rj "$wrkDir/$project/${project}_${device}_artifacts.zip" $project/artifacts/  
+   
 }
 
 # This function abstracts a programmable logic build using Vivado.  The project 
@@ -127,3 +124,39 @@ build_hdl()
   
 }
 
+# This function programs flash using Vitis tools. 
+#
+#  $1 = project (ie. rflan)
+#  $2 = flash_type (ie. qspi-x4-single, emmc)
+#
+# Prerequisites:
+#	  Cygwin: export PATH=/cygdrive/c/Xilinx/Vitis/2021.1/bin/:$PATH
+#	  Linux: source ~/home/Xilinx/Vitis/2021.1/settings64.sh
+#
+program_flash()
+{  
+  # Define project
+  project=$1
+
+  # Define flash type
+  flash_type=$2 
+  
+  # Determin Host Environment
+  env=$(uname)
+    
+  # Indicate Build
+  echo "$(printf '\033')[0;33mProgramming $project $flash_type $(printf '\033')[0m"
+  
+  # Abstract working directory
+  wrkDir=$(pwd)
+  if [[ $wrkDir == *"cygdrive"* ]]; then
+    wrkDir=$(realpath $(cygpath -w $wrkDir))
+  fi
+  
+  if [[ $env == *"Linux"* ]]; then
+    hw_server & program_flash -f $wrkDir/$project/rpu_system/Debug/sd_card/BOOT.BIN -offset 0 -flash_type $flash_type -fsbl $wrkDir/$project/hwp/export/hwp/sw/hwp/boot/fsbl.elf -blank_check -verify -cable type xilinx_tcf url TCP:127.0.0.1:3121
+  else
+    hw_server.bat & program_flash.bat -f $wrkDir/$project/rpu_system/Debug/sd_card/BOOT.BIN -offset 0 -flash_type $flash_type -fsbl $wrkDir/$project/hwp/export/hwp/sw/hwp/boot/fsbl.elf -blank_check -verify -cable type xilinx_tcf url TCP:127.0.0.1:3121
+  fi
+ 
+}
