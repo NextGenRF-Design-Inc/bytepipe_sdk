@@ -1,14 +1,11 @@
-#ifndef RFLAN_CLI_H_
-#define RFLAN_CLI_H_
 /***************************************************************************//**
-*  \ingroup    RFLAN
-*  \defgroup   RFLAN_CLI RFLAN Command Line Interface
-*  @{
+*  \addtogroup TCA9548
+*   @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       rflan_cli.h
+*  \file       tca9548.c
 *
-*  \details    RFLAN Command Line Interface Definitions
+*  \details    This file contains the VersaClock 5 driver.
 *
 *  \copyright
 *
@@ -42,44 +39,53 @@
 *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *******************************************************************************/
-#ifdef __cplusplus
-extern "C"
+#include <stdlib.h>
+#include <stdio.h>
+#include "tca9548.h"
+#include "mem.h"
+
+
+int32_t Tca9548_GetChannel(tca9548_t *Instance, uint8_t *Channel)
 {
-#endif
+  if( XIicPs_MasterRecvPolled(Instance->Iic, Channel, 1, Instance->Addr) != XST_SUCCESS)
+    return Tca9548Status_IicError;
 
-#include <stdint.h>
-#include "cli.h"
-#include "rflan_pib.h"
-#include "rflan_gpio.h"
-#include "rflan_stream.h"
+  while (XIicPs_BusIsBusy(Instance->Iic));
 
-/**
-** RFLAN CLI Init
-*/
-typedef struct {
-  cli_t              *Cli;
-  rflan_pib_t        *RflanPib;
-  XGpioPs            *Gpio;
-#ifdef RFLAN_STREAM_ENABLE
-  rflan_stream_t     *RflanStream;
-#endif
-} rflan_cli_init_t;
+  return Tca95485Status_Success;
+}
 
-/**
-** RFLAN CLI Init
-*/
-typedef struct {
-  cli_t              *Cli;
-  rflan_pib_t        *RflanPib;
-  XGpioPs            *Gpio;
-#ifdef RFLAN_STREAM_ENABLE
-  rflan_stream_t     *RflanStream;
-#endif
-} rflan_cli_t;
+int32_t Tca9548_SetChannel(tca9548_t *Instance, uint8_t Channel)
+{
+  if( XIicPs_MasterSendPolled(Instance->Iic, &Channel, 1, Instance->Addr) != XST_SUCCESS)
+    return Tca9548Status_IicError;
+
+  while (XIicPs_BusIsBusy(Instance->Iic));
+
+  return Tca95485Status_Success;
+}
+
+int32_t Tca9548_Initialize( tca9548_t *Instance, tca9548_init_t *Init )
+{
+  int status = 0;
+
+  Instance->Addr = Init->Addr;
+  Instance->Iic = Init->Iic;
+
+  if( Instance->Iic == NULL )
+    return XST_FAILURE;
+
+  uint8_t Channel;
+
+  if((status = Tca9548_SetChannel( Instance, 2 )) != 0)
+    return status;
+
+  if((status = Tca9548_GetChannel( Instance, &Channel )) != 0)
+    return status;
+
+  if( Channel != 2 )
+    return Tca9548Status_WriteError;
 
 
-int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init );
-
-
-
-#endif /* RFLAN_CLI_H_ */
+  return status;
+}

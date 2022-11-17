@@ -1,14 +1,16 @@
-#ifndef RFLAN_CLI_H_
-#define RFLAN_CLI_H_
+#ifndef TCA9548_H_
+#define TCA9548_H_
 /***************************************************************************//**
-*  \ingroup    RFLAN
-*  \defgroup   RFLAN_CLI RFLAN Command Line Interface
+*  \ingroup    CSL
+*  \defgroup   TCA9548 Driver
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       rflan_cli.h
+*  \file       tca9548.h
 *
-*  \details    RFLAN Command Line Interface Definitions
+*  \details
+*
+*  This file contains the TCA9548 driver.
 *
 *  \copyright
 *
@@ -42,44 +44,40 @@
 *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *******************************************************************************/
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 #include <stdint.h>
-#include "cli.h"
-#include "rflan_pib.h"
-#include "rflan_gpio.h"
-#include "rflan_stream.h"
+#include "xiicps.h"
+
+#define TCA9548_STATUS_OFFSET      (-700)
 
 /**
-** RFLAN CLI Init
+* \brief Code indicated status of request
 */
-typedef struct {
-  cli_t              *Cli;
-  rflan_pib_t        *RflanPib;
-  XGpioPs            *Gpio;
-#ifdef RFLAN_STREAM_ENABLE
-  rflan_stream_t     *RflanStream;
+typedef enum
+{
+  Tca95485Status_Success                 = (0),
+  Tca9548Status_InvalidParameter        = (TCA9548_STATUS_OFFSET - 1),
+  Tca9548Status_IicError                = (TCA9548_STATUS_OFFSET - 2),
+  Tca9548Status_WriteError              = (TCA9548_STATUS_OFFSET - 3),
+} tca9548_status_t;
+
+
+typedef struct
+{
+  XIicPs                 *Iic;
+  uint8_t                 Addr;
+} tca9548_t;
+
+typedef struct
+{
+  XIicPs                 *Iic;
+  uint8_t                 Addr;
+} tca9548_init_t;
+
+
+
+int32_t Tca9548_Initialize( tca9548_t *Instance, tca9548_init_t *Init );
+int32_t Tca9548_GetChannel( tca9548_t *Instance, uint8_t *Channel);
+int32_t Tca9548_SetChannel( tca9548_t *Instance, uint8_t Channel);
+
 #endif
-} rflan_cli_init_t;
-
-/**
-** RFLAN CLI Init
-*/
-typedef struct {
-  cli_t              *Cli;
-  rflan_pib_t        *RflanPib;
-  XGpioPs            *Gpio;
-#ifdef RFLAN_STREAM_ENABLE
-  rflan_stream_t     *RflanStream;
-#endif
-} rflan_cli_t;
-
-
-int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init );
-
-
-
-#endif /* RFLAN_CLI_H_ */

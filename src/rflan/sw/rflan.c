@@ -57,6 +57,15 @@
 #include "status.h"
 #include "xiicps.h"
 
+
+#if FILE_SYSTEM_LOGICAL_DRIVE == 0
+#define FILE_SYSTEM_BASE_PATH "0:/"
+#else
+#define FILE_SYSTEM_BASE_PATH "1:/"
+#endif
+
+
+
 #ifdef VERSA_CLOCK5_ENABLE
 #include "versa_clock5.h"
 static versa_clock5_t RflanVersaClock5;
@@ -219,7 +228,7 @@ static int32_t Rflan_Initialize( void )
   int32_t status;
 
   /* Initialize GPIO */
-  if((status = RflanGpio_Initialize( &RflanGpio, RFLAN_GPIO_DEVICE_ID )) != 0)
+  if((status = RflanGpio_Initialize( &RflanGpio, XPAR_PSU_GPIO_0_DEVICE_ID )) != 0)
     printf("%s\r\n",StatusString(status));
 
   cli_init_t CliInit = {
@@ -235,7 +244,6 @@ static int32_t Rflan_Initialize( void )
     .Cli           = &Cli,
     .Gpio          = &RflanGpio,
     .RflanPib      = &RflanPib,
-	  .Drive         = 1,
 #ifdef RFLAN_STREAM_ENABLE
     .RflanStream   = &RflanStream
 #endif
@@ -277,7 +285,7 @@ static int32_t Rflan_Initialize( void )
 #endif
 
   /* Initialize File System*/
-  if((status = f_mount(&FatFs, "1:/", 1)) != FR_OK)
+  if((status = f_mount(&FatFs, FILE_SYSTEM_BASE_PATH, 1)) != FR_OK)
     printf("FatFs %s\r\n",StatusString(status));
 
   rflan_pib_init_t PibInit = {
@@ -292,7 +300,7 @@ static int32_t Rflan_Initialize( void )
     printf("Rflan Pib Init %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &Cli, "1:/rflan_setup.txt")) != 0 )
+  if((status = Rflan_SetupScript( &Cli, (FILE_SYSTEM_BASE_PATH "rflan_setup.txt"))) != 0 )
     printf("Rflan Setup Script %s\r\n",StatusString(status));
 
 
@@ -307,7 +315,7 @@ static int32_t Rflan_Initialize( void )
 		  .AxiInit.Base = XPAR_ADRV9001_0_BASEADDR,
 		  .AxiInit.IrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
 		  .TcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07,
-		  .LogFilename = "1:/adi_adrv9001_log.txt"
+		  .LogFilename = (FILE_SYSTEM_BASE_PATH "adi_adrv9001_log.txt")
   };
 
   if( Rflan_GetHwVer( ) == 2 )
@@ -337,7 +345,7 @@ static int32_t Rflan_Initialize( void )
     printf("Adrv9001Cli %s\r\n",StatusString(status));
 
   /* Execute Init Script */
-  if((status = Rflan_SetupScript( &Cli, "1:/adrv9001_setup.txt")) != 0 )
+  if((status = Rflan_SetupScript( &Cli, (FILE_SYSTEM_BASE_PATH "adrv9001_setup.txt"))) != 0 )
     printf("Adrv9001 Setup Script %s\r\n",StatusString(status));
 
 #ifdef RFLAN_STREAM_ENABLE

@@ -49,7 +49,6 @@
 
 
 #define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
-#define SYSMON_DEVICE_ID                XPAR_XSYSMONPSU_0_DEVICE_ID
 
 #define RFLAN_TASK_STACK_SIZE           4096
 #define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY
@@ -58,7 +57,6 @@
 
 
 #define RFLAN_UART_BAUDRATE             115200
-#define RFLAN_GPIO_DEVICE_ID            (XPAR_PSU_GPIO_0_DEVICE_ID)
 
 #define RFLAN_STATUS_OFFSET             (-500)
 

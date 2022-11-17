@@ -74,11 +74,11 @@ app config -name rpu define-compiler-symbols XPS_BOARD_ZCU102
 app config -name rpu define-compiler-symbols RFLAN_STREAM_ENABLE
 app config -name rpu define-compiler-symbols RFLAN_LWIP_ENABLE
 app config -name rpu define-compiler-symbols VERSA_CLOCK5_ENABLE
+app config -name rpu define-compiler-symbols FILE_SYSTEM_LOGICAL_DRIVE=1
 
 app config -name rpu undef-compiler-symbols CLIENT_IGNORE
 app config -name rpu undef-compiler-symbols ADI_DYNAMIC_PROFILE_LOAD
 app config -name rpu undef-compiler-symbols ADRV9001_BITFIELD_NULL_CHECK
-app config -name rpu undef-compiler-symbols RFLAN_CLI_UART1
 
 # Configure Project Paths
 app config -name rpu include-path $srcDir/rflan/sw
