@@ -48,7 +48,7 @@ agc_config()
 {
 	rm -rf tmp.txt		 
 
-  var="$(grep "adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_$1," c99/configure.c | cut -d\  -f5)"
+  var="$(grep "adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_$1," $outDir/configure.c | cut -d\  -f5)"
   echo ".Rx$1Agc = {" >> tmp.txt  
 
   if [[ $var == *"configure_agcCfg_1"* ]]; then
