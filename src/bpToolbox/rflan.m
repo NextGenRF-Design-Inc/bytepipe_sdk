@@ -704,7 +704,11 @@ classdef rflan < handle
 
         function v = GetEnableDelay( obj, Port )
             v = obj.Adrv9001GetParam([Port 'EnableDly']);            
-        end         
+        end      
+        
+        function v = GetCaptureControlCount( obj )
+            v = obj.Adrv9001GetParam('CaptureControlCount');            
+        end   
         
         function v = GetIqData( obj, Port )
             v = obj.Adrv9001GetParam([Port 'IqData']);        
@@ -933,6 +937,10 @@ classdef rflan < handle
         function SetDisableDelay( obj, Port, v )
             obj.Adrv9001SetParam([Port 'DisableDly'], num2str(v));            
         end  
+        
+        function SetCaptureControlCount( obj, v )
+            obj.Adrv9001SetParam('CaptureControlCount', num2str(v));            
+        end          
         
     end
         
