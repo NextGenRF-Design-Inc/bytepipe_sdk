@@ -33,6 +33,8 @@ module adrv9001_regs #(
     output reg  [15:0]    dgpio_ps_t,
     input  wire [15:0]    dgpio_ps_i,
     
+    output reg  [9:0]     capture_control_cnt = 'd8,
+    
     input  wire [7:0]     sspi_axis_tdata,
     input  wire           sspi_axis_tvalid,
     output reg            sspi_axis_tready = 1'b0,
@@ -198,6 +200,8 @@ always @( posedge s_axi_aclk ) begin
       dgpio_ps_t <= DEFAULT_DGPIO_DIR;
       dgpio_ps_o <= 0;    
       
+      capture_control_cnt <= 8;
+      
       tx1_ps_data <= 32'h12345678;
       tx2_ps_data <= 32'hABCD1234;    
 
@@ -234,6 +238,8 @@ always @( posedge s_axi_aclk ) begin
       
       5'd17: tx1_data_src <= s_axi_wdata[0];
       5'd18: tx2_data_src <= s_axi_wdata[0];        
+      
+      5'd19: capture_control_cnt <= s_axi_wdata[9:0];
   
       
       5'd21: begin
@@ -258,6 +264,7 @@ always @( posedge s_axi_aclk ) begin
         rx2_disable_delay <= rx2_disable_delay;        
         dgpio_ps_t <= dgpio_ps_t;
         dgpio_ps_o <= dgpio_ps_o;
+        capture_control_cnt <= capture_control_cnt;
         tx1_ps_data <= tx1_ps_data;
         tx2_ps_data <= tx2_ps_data;                
         tx1_data_src <= tx1_data_src;
@@ -283,6 +290,7 @@ always @( posedge s_axi_aclk ) begin
     rx2_disable_delay <= rx2_disable_delay;        
     dgpio_ps_t <= dgpio_ps_t;
     dgpio_ps_o <= dgpio_ps_o;
+    capture_control_cnt <= capture_control_cnt;    
     tx1_ps_data <= tx1_ps_data;
     tx2_ps_data <= tx2_ps_data;                
     tx1_data_src <= tx1_data_src;
@@ -397,7 +405,9 @@ begin
         5'd16: reg_data_out <= rx2_ps_data_cdc;  
       
         5'd17: reg_data_out <= {31'h0, tx1_data_src};
-        5'd18: reg_data_out <= {31'h0, tx2_data_src};      
+        5'd18: reg_data_out <= {31'h0, tx2_data_src};   
+
+        5'd19: reg_data_out <= {20'h0, capture_control_cnt};           
        
         5'd21: begin 
           reg_data_out <= {23'h0, sspi_axis_tvalid, sspi_axis_tdata};   

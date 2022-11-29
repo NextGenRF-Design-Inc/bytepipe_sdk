@@ -156,6 +156,7 @@ static pib_def_t Adrv9001PibDef[] =
   { "Tx2DisableDly",                        0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Rx1DisableDly",                        0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Rx2DisableDly",                        0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
+  { "CaptureControlCount",                  0,                                                                                        PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Tx1SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Tx2SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
   { "Rx1SsiClockDelay",                     0,                                                                                        PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_VIRTUAL },
@@ -491,6 +492,13 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     AxiAdrv9001_SetDisableDelay(&Instance->Axi, Port, Channel, tmp);
   } 
 
+  else if( strcmp( name, "CaptureControlCount") == 0 )
+  {
+    uint16_t tmp;
+    Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
+    AxiAdrv9001_SetCaptureControlCnt(&Instance->Axi, (uint32_t)tmp);
+  }
+
   else if( strcmp( &name[3], "TestData") == 0 )
   {
     uint32_t tmp;
@@ -599,6 +607,13 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   {
     uint32_t tmp;
     AxiAdrv9001_GetDgpioDir(&Instance->Axi, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
+  }
+
+  else if( strcmp( name, "CaptureControlCount") == 0 )
+  {
+    uint32_t tmp;
+    AxiAdrv9001_GetCaptureControlCnt(&Instance->Axi, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 

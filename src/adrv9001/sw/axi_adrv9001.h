@@ -72,27 +72,27 @@ typedef struct{
 }axi_adrv9001_t;
 
 
-int32_t AxiAdrv9001_Initialize      ( axi_adrv9001_t *Instance, axi_adrv9001_init_t *Init );
+int32_t AxiAdrv9001_Initialize       ( axi_adrv9001_t *Instance, axi_adrv9001_init_t *Init );
 
-void AxiAdrv9001_ResetbPinSet       ( axi_adrv9001_t *Instance, uint8_t Level );
-void AxiAdrv9001_SetDgpio           ( axi_adrv9001_t *Instance, uint32_t Value );
-void AxiAdrv9001_GetDgpio           ( axi_adrv9001_t *Instance, uint32_t *Value );
-void AxiAdrv9001_GetDgpioDir        ( axi_adrv9001_t *Instance, uint32_t *Value );
-void AxiAdrv9001_SetDgpioDir        ( axi_adrv9001_t *Instance, uint32_t Value );
-void AxiAdrv9001_SetTxDataPath      ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value );
-void AxiAdrv9001_GetTxDataPath      ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value );
-void AxiAdrv9001_SetTxData          ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t Value );
-void AxiAdrv9001_GetRxData          ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t *Value );
-void AxiAdrv9001_GetEnableDelay     ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt );
-void AxiAdrv9001_GetDisableDelay    ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt );
-void AxiAdrv9001_SetEnableMode      ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, adi_adrv9001_ChannelEnableMode_e mode );
+void AxiAdrv9001_ResetbPinSet        ( axi_adrv9001_t *Instance, uint8_t Level );
+void AxiAdrv9001_SetDgpio            ( axi_adrv9001_t *Instance, uint32_t Value );
+void AxiAdrv9001_GetDgpio            ( axi_adrv9001_t *Instance, uint32_t *Value );
+void AxiAdrv9001_GetDgpioDir         ( axi_adrv9001_t *Instance, uint32_t *Value );
+void AxiAdrv9001_SetDgpioDir         ( axi_adrv9001_t *Instance, uint32_t Value );
+void AxiAdrv9001_SetTxDataPath       ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value );
+void AxiAdrv9001_GetTxDataPath       ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value );
+void AxiAdrv9001_SetTxData           ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t Value );
+void AxiAdrv9001_GetRxData           ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t *Value );
+void AxiAdrv9001_GetEnableDelay      ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt );
+void AxiAdrv9001_GetDisableDelay     ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt );
+void AxiAdrv9001_SetEnableMode       ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, adi_adrv9001_ChannelEnableMode_e mode );
+void AxiAdrv9001_GetCaptureControlCnt( axi_adrv9001_t *Instance, uint32_t *Value );
 
+void AxiAdrv9001_SetEnable           ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled );
+void AxiAdrv9001_SetEnableDelay      ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
+void AxiAdrv9001_SetDisableDelay     ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
+void AxiAdrv9001_SetCaptureControlCnt( axi_adrv9001_t *Instance, uint32_t Value );
 
-void AxiAdrv9001_SetEnable          ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled );
-void AxiAdrv9001_SetEnableDelay     ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
-void AxiAdrv9001_SetDisableDelay    ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
-
-
-int32_t AxiAdrv9001_MspiTransfer    ( axi_adrv9001_t *Instance, uint8_t *TxBuf, uint8_t *RxBuf, uint32_t Length);
+int32_t AxiAdrv9001_MspiTransfer     ( axi_adrv9001_t *Instance, uint8_t *TxBuf, uint8_t *RxBuf, uint32_t Length);
 
 #endif

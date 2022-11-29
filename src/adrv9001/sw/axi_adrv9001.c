@@ -37,6 +37,8 @@ extern XScuGic          xInterruptController;
 #define ADRV9001_TX1_DATA_PATH_ADDR       ((17) << 2)
 #define ADRV9001_TX2_DATA_PATH_ADDR       ((18) << 2)
 
+#define ADRV9001_CAPTURE_CONTROL_CNT_ADDR ((19) << 2)
+
 #define ADRV9001_MSPI_ADDR                ((21) << 2)
 
 #define ADRV9001_ID_ADDR                  ((31) << 2)
@@ -226,6 +228,17 @@ void AxiAdrv9001_SetEnableMode(axi_adrv9001_t *Instance, adi_common_Port_e Port,
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
     Xil_Out32(Instance->Base + ADRV9001_RX2_MODE_ADDR, (uint32_t)mode);
 }
+
+void AxiAdrv9001_SetCaptureControlCnt(axi_adrv9001_t *Instance, uint32_t Value )
+{
+  Xil_Out32(Instance->Base + ADRV9001_CAPTURE_CONTROL_CNT_ADDR, Value);
+}
+
+void AxiAdrv9001_GetCaptureControlCnt(axi_adrv9001_t *Instance, uint32_t *Value )
+{
+  *Value = Xil_In32(Instance->Base + ADRV9001_CAPTURE_CONTROL_CNT_ADDR);
+}
+
 
 void AxiAdrv9001_SetDgpio(axi_adrv9001_t *Instance, uint32_t Value )
 {

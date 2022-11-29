@@ -201,6 +201,8 @@ wire [63:0]   tx2_dbg;
 wire [31:0]   rx1_dbg;
 wire [31:0]   rx2_dbg;
 
+wire [9:0]    capture_control_cnt;
+
 
 assign dgpio_t = dgpio_ps_t;
 assign dgpio_ps_i = dgpio_i;
@@ -221,7 +223,6 @@ generate
       
     adrv9001_axis_ila tx1_ila(  
       .clk(s_axi_aclk),
-      .enable_mode(tx1_enable_mode),
       .pl_en(tx1_pl_en),      
       .adrv9001_enable(tx1_en),      
       .s_axis_tdata(tx1_dbg[31:0]),
@@ -231,14 +232,14 @@ generate
       .dgpio_o(dgpio_o),
       .dgpio_t(dgpio_t),
       .enable_cnt(tx1_dbg[63:48]),
-      .disable_cnt(tx1_dbg[47:32])      
+      .disable_cnt(tx1_dbg[47:32]),
+      .capture_control_cnt(capture_control_cnt)      
       );  
   end
   
   if( ENABLE_TX2_ILA) begin
     adrv9001_axis_ila tx2_ila(  
       .clk(s_axi_aclk),
-      .enable_mode(tx2_enable_mode),
       .pl_en(tx2_pl_en),      
       .adrv9001_enable(tx2_en),      
       .s_axis_tdata(tx2_dbg[31:0]),
@@ -248,14 +249,14 @@ generate
       .dgpio_o(dgpio_o),
       .dgpio_t(dgpio_t),
       .enable_cnt(tx2_dbg[63:48]),
-      .disable_cnt(tx2_dbg[47:32])        
+      .disable_cnt(tx2_dbg[47:32]),
+      .capture_control_cnt(capture_control_cnt)              
       ); 
   end  
   
   if( ENABLE_RX1_ILA) begin
     adrv9001_axis_ila rx1_ila(  
       .clk(s_axi_aclk),
-      .enable_mode(rx1_enable_mode),
       .pl_en(rx1_pl_en),      
       .adrv9001_enable(rx1_en),      
       .s_axis_tdata(rx1_axis_tdata),
@@ -265,14 +266,14 @@ generate
       .dgpio_o(dgpio_o),
       .dgpio_t(dgpio_t),
       .enable_cnt(rx1_dbg[31:16]),
-      .disable_cnt(rx1_dbg[15:0])  
+      .disable_cnt(rx1_dbg[15:0]),
+      .capture_control_cnt(capture_control_cnt)        
       ); 
   end 
   
   if( ENABLE_RX2_ILA) begin
     adrv9001_axis_ila rx2_ila(  
       .clk(s_axi_aclk),
-      .enable_mode(rx2_enable_mode),
       .pl_en(rx2_pl_en),      
       .adrv9001_enable(rx2_en),      
       .s_axis_tdata(rx2_axis_tdata),
@@ -282,7 +283,8 @@ generate
       .dgpio_o(dgpio_o),
       .dgpio_t(dgpio_t),
       .enable_cnt(rx2_dbg[31:16]),
-      .disable_cnt(rx2_dbg[15:0])  
+      .disable_cnt(rx2_dbg[15:0]),
+      .capture_control_cnt(capture_control_cnt)        
       );
   end  
   
@@ -402,6 +404,8 @@ adrv9001_regs#(
     
     .rx1_ps_data(rx1_ps_data),
     .rx2_ps_data(rx2_ps_data),
+    
+    .capture_control_cnt(capture_control_cnt),
     
     .mspi_axis_tdata(mspi_axis_tdata),
     .mspi_axis_tvalid(mspi_axis_tvalid),
