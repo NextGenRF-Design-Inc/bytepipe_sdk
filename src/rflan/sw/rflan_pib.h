@@ -2,7 +2,7 @@
 #define RFLAN_PIB_H_
 /***************************************************************************//**
 *  \ingroup    RFLAN
-*  \defgroup   RFLAN_PIB RFLAN PIB Application
+*  \defgroup   RFLAN_PIB RFLAN Parameter Information Base
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
@@ -48,7 +48,10 @@
 
 #include "cli.h"
 #include "pib.h"
+
+#ifdef VERSA_CLOCK5_ENABLE
 #include "versa_clock5.h"
+#endif
 
 /**
 ** RFLAN parameters
@@ -64,30 +67,72 @@ typedef struct {
 } rflan_params_t;
 
 /**
-** RFLAN PIB
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
 */
 typedef struct {
-  uint32_t            HwVer;
+  uint32_t            HwVer;                ///< Hardware Version
 #ifdef VERSA_CLOCK5_ENABLE
-  versa_clock5_t     *VersaClock5;
+  versa_clock5_t     *VersaClock5;          ///< VersaClock 5 Instance
 #endif
 } rflan_pib_init_t;
 
 /**
-** RFLAN PIB
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This 
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs. 
 */
 typedef struct {
-  pib_t               Pib;
-  rflan_params_t      Params;
+  pib_t               Pib;                  ///< PIB library driver Instance
+  rflan_params_t      Params;               ///< Parameter Storage
 #ifdef VERSA_CLOCK5_ENABLE
   versa_clock5_t     *VersaClock5;
 #endif
 } rflan_pib_t;
 
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanPib_Initialize( rflan_pib_t *Instance, rflan_pib_init_t *Init );
 
-int32_t RflanPib_Initialize     ( rflan_pib_t *Instance, rflan_pib_init_t *Init );
-int32_t RflanPib_SetbyNameByString    ( rflan_pib_t *Instance, char *name, char *str );
-int32_t RflanPib_GetStringByName      ( rflan_pib_t *Instance, char *name, char *str );
+/***************************************************************************//**
+*
+* \details  Set Parameter value using name of parameter and value as a string.
+*
+* \param    Instance [in]  Driver Instance
+* \param    name     [in]  String containing the parameter name
+* \param    str      [in]  String containing the parameter value
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanPib_SetbyNameByString( rflan_pib_t *Instance, char *name, char *str );
+
+/***************************************************************************//**
+*
+* \details  Get Parameter value as a string using name of parameter.
+*
+* \param    Instance [in]  Driver Instance
+* \param    name     [in]  String containing the parameter name
+* \param    str      [out] String containing the parameter value
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanPib_GetStringByName( rflan_pib_t *Instance, char *name, char *str );
+
 #ifdef __cplusplus
 }
 #endif

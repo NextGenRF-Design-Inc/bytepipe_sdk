@@ -2,7 +2,7 @@
 #define SRC_RFLAN_UART_H_
 /***************************************************************************//**
 *  \ingroup    RFLAN
-*  \defgroup   RFLAN_UART RFLAN Uart
+*  \defgroup   RFLAN_UART RFLAN UART
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
@@ -45,27 +45,73 @@
 #include "xuartps.h"
 
 
-
+/***************************************************************************//**
+*
+* \details  Callback function prototype.
+*
+* \param    c            [in]  Received character
+* \param    CallbackRef  [in]  Callback reference provided by the application
+*                              see #rflan_uart_t
+*
+* \return   none
+*
+*******************************************************************************/
 typedef void (*rflan_uart_callback_t)( char c, void *CallbackRef );
 
+/**
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This 
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs. 
+*/
 typedef struct
 {
-  XUartPs           		  RflanUart;
-  rflan_uart_callback_t   ParentCallback;     /*!< Callback provided by parent request, executed once request is complete */
-  void                   *ParentCallbackRef;  /*!< Callback data provided by parent request, provided in callback relative to specific request */
-  volatile uint8_t  		  RxChar;
+  XUartPs           		  RflanUart;          ///< UART Instance
+  rflan_uart_callback_t   ParentCallback;     ///< Callback provided by parent request, executed once request is complete
+  void                   *ParentCallbackRef;  ///< Callback data provided by parent request, provided in callback relative to specific request
+  volatile uint8_t  		  RxChar;             ///< Variable used to hold received character from interrupt routine
 } rflan_uart_t;
 
+/**
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
+*/
 typedef struct
 {
-	uint32_t 				        DeviceId;
-	uint32_t				        BaudRate;
-	uint32_t				        IntrId;
-	rflan_uart_callback_t   ParentCallback;     /*!< Callback provided by parent request, executed once request is complete */
-	void                   *ParentCallbackRef;  /*!< Callback data provided by parent request, provided in callback relative to specific request */
+	uint32_t 				        DeviceId;            ///< Device ID of UART module
+	uint32_t				        BaudRate;            ///< Baudrate in Hz
+	uint32_t				        IntrId;              ///< Processor Interrupt ID
+	rflan_uart_callback_t   ParentCallback;      ///< Callback provided by parent request, executed once request is complete 
+	void                   *ParentCallbackRef;   ///< Callback data provided by parent request, provided in callback relative to specific request
 } rflan_uart_init_t;
 
+
+/***************************************************************************//**
+*
+* \details  Send UART Character
+*
+* \param    Instance [in]  rflan_uart_t Instance
+* \param    c        [in]  Character to send
+*
+* \return   none
+*
+*******************************************************************************/
 int32_t RflanUart_Send( rflan_uart_t *Instance, char c );
+
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
 int32_t RflanUart_Initialize( rflan_uart_t *Instance, rflan_uart_init_t *Init );
 
 

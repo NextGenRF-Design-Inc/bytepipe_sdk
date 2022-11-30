@@ -1,5 +1,5 @@
 /***************************************************************************//**
-*  \addtogroup RFLAN
+*  \addtogroup RFLAN_GPIO
 *   @{
 *******************************************************************************/
 /***************************************************************************//**
@@ -39,7 +39,6 @@
 *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *******************************************************************************/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include "xstatus.h"
@@ -47,9 +46,6 @@
 
 
 
-/**
-* Write GPIO Pin
-*/
 int32_t RflanGpio_WritePin( XGpioPs *Instance, u32 pin, u32 value )
 {
   XGpioPs_WritePin(Instance, pin, value);
@@ -57,17 +53,11 @@ int32_t RflanGpio_WritePin( XGpioPs *Instance, u32 pin, u32 value )
   return XST_SUCCESS;
 }
 
-/**
-* Read GPIO Pin
-*/
 int32_t RflanGpio_ReadPin( XGpioPs *Instance, u32 pin )
 {
   return XGpioPs_ReadPin(Instance, pin);
 }
 
-/**
-* Toggle GPIO Pin
-*/
 int32_t RflanGpio_TogglePin( XGpioPs *Instance, u32 pin )
 {
   if(XGpioPs_ReadPin(Instance, pin))
@@ -108,7 +98,6 @@ int32_t RflanGpio_Initialize( XGpioPs *Instance, uint32_t DeviceId )
 
   /* Write Default Values */
   XGpioPs_WritePin(Instance, GPIO_LED_PIN, 1);
-
 
   return XST_SUCCESS;
 }

@@ -51,33 +51,53 @@ extern "C"
 #include "cli.h"
 #include "rflan_pib.h"
 #include "rflan_gpio.h"
+
+#ifdef RFLAN_STREAM_ENABLE
 #include "rflan_stream.h"
+#endif
 
 /**
-** RFLAN CLI Init
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
 */
 typedef struct {
-  cli_t              *Cli;
-  rflan_pib_t        *RflanPib;
-  XGpioPs            *Gpio;
+  cli_t              *Cli;                   ///< CLI Library Instance
+  rflan_pib_t        *RflanPib;              ///< Reference to RFLAN Parameters
+  XGpioPs            *Gpio;                  ///< Reference to RFLAN GPIO
 #ifdef RFLAN_STREAM_ENABLE
-  rflan_stream_t     *RflanStream;
+  rflan_stream_t     *RflanStream;           ///< Reference to RFLAN Stream
 #endif
 } rflan_cli_init_t;
 
 /**
-** RFLAN CLI Init
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs.
 */
 typedef struct {
-  cli_t              *Cli;
-  rflan_pib_t        *RflanPib;
-  XGpioPs            *Gpio;
+  cli_t              *Cli;                   ///< CLI Library Instance
+  rflan_pib_t        *RflanPib;              ///< Reference to RFLAN Parameters
+  XGpioPs            *Gpio;                  ///< Reference to RFLAN GPIO
 #ifdef RFLAN_STREAM_ENABLE
-  rflan_stream_t     *RflanStream;
+  rflan_stream_t     *RflanStream;           ///< Reference to RFLAN Stream
 #endif
 } rflan_cli_t;
 
-
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
 int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init );
 
 

@@ -2,13 +2,14 @@
 #define ADRV9001_PIB_H_
 /***************************************************************************//**
 *  \ingroup    ADRV9001
-*  \defgroup   ADRV9001_PIB ADRV9001 PIB Application
+*  \defgroup   ADRV9001_PIB ADRV9001 PIB
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
 *  \file       adrv9001_pib.h
 *
-*  \details    This file contains the ADRV9001 PIB application definitions.
+*  \details    This file contains the ADRV9001 parameter information base
+*              definitions.
 *
 *  \copyright
 *
@@ -50,10 +51,42 @@
 #include "pib.h"
 #include "adrv9001.h"
 
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  ADRV9001 Instance
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t Adrv9001Pib_Initialize( adrv9001_t *Instance );
 
-int32_t Adrv9001Pib_Initialize          ( adrv9001_t *Instance );
-int32_t Adrv9001Pib_SetByNameByString   ( adrv9001_t *Instance, char *name, char *str );
-int32_t Adrv9001Pib_GetStringByName     ( adrv9001_t *Instance, char *name, char *str );
+/***************************************************************************//**
+*
+* \details  Set Parameter value using name of parameter and value as a string.
+*
+* \param    Instance [in]  Driver Instance
+* \param    name     [in]  String containing the parameter name
+* \param    str      [in]  String containing the parameter value
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *str );
+
+/***************************************************************************//**
+*
+* \details  Get Parameter value as a string using name of parameter.
+*
+* \param    Instance [in]  Driver Instance
+* \param    name     [in]  String containing the parameter name
+* \param    str      [out] String containing the parameter value
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t Adrv9001Pib_GetStringByName( adrv9001_t *Instance, char *name, char *str );
 
 #ifdef __cplusplus
 }

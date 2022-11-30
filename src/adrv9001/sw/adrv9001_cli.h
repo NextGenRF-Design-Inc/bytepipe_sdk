@@ -3,13 +3,13 @@
 
 /***************************************************************************//**
 *  \ingroup    ADRV9001
-*  \defgroup   ADRV9001_CLI ADRV9001 Layer Command Line Interface
+*  \defgroup   ADRV9001_CLI ADRV9001 Command Line Interface
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
 *  \file       adrv9001_cli.h
 *
-*  \details    This file contains the ADRV9001 layer CLI definitions.
+*  \details    This file contains the ADRV9001 CLI definitions.
 *
 *  \copyright
 *
@@ -52,7 +52,16 @@ extern "C"
 #include "cli.h"
 #include "adrv9001.h"
 
-
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Cli      [in]  CLI Instance
+* \param    Adrv9001 [in]  Adrv9001 Instance
+*
+* \return   status
+*
+*******************************************************************************/
 int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001 );
 
 

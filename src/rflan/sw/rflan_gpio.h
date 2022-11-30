@@ -50,11 +50,54 @@
 #define GPIO_HWV1_PIN                   (2)
 #define GPIO_HWV2_PIN                   (3)
 
-int32_t RflanGpio_WritePin      ( XGpioPs *Instance, u32 pin, u32 value );
-int32_t RflanGpio_ReadPin       ( XGpioPs *Instance, u32 pin );
-int32_t RflanGpio_WritePin      ( XGpioPs *Instance, u32 pin, u32 value );
-int32_t RflanGpio_TogglePin     ( XGpioPs *Instance, u32 pin );
-int32_t RflanGpio_Initialize    ( XGpioPs *Instance, uint32_t DeviceId );
+/***************************************************************************//**
+*
+* \details  Write GPIO Pin
+*
+* \param    Instance [in]  XGpioPs Driver Instance
+* \param    pin      [in]  Pin Index
+* \param    value    [in]  Pin value
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanGpio_WritePin( XGpioPs *Instance, u32 pin, u32 value );
+
+/***************************************************************************//**
+*
+* \details  Read GPIO Pin
+*
+* \param    Instance [in]  XGpioPs Driver Instance
+* \param    pin      [in]  Pin Index
+*
+* \return   value of pin
+*
+*******************************************************************************/
+int32_t RflanGpio_ReadPin( XGpioPs *Instance, u32 pin );
+
+/***************************************************************************//**
+*
+* \details  Toggle GPIO Pin
+*
+* \param    Instance [in]  XGpioPs Driver Instance
+* \param    pin      [in]  Pin Index
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanGpio_TogglePin( XGpioPs *Instance, u32 pin );
+
+/***************************************************************************//**
+*
+* \details  Initialize Module
+*
+* \param    Instance [in]  Driver Instance
+* \param    DeviceId [in]  Processor device ID of GPIO driver
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanGpio_Initialize( XGpioPs *Instance, uint32_t DeviceId );
 
 
 #endif /* SRC_RFLAN_H_ */

@@ -2,7 +2,7 @@
 #define __PIB_H__
 /***************************************************************************//**
 *  \ingroup   RFLAN
-*  \defgroup  PIB Parameter Information Base (PIB)
+*  \defgroup  PIB Parameter Information Base Library
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
@@ -53,23 +53,21 @@
 
 #define PIB_NAME_SIZE 64
 
-#define PIB_FLAGS_DEFAULT				        (0x00)
-#define PIB_FLAG_READ_ONLY			        (0x01)
-#define PIB_FLAG_FATFS_WRITE_ON_SET     (0x02)
-#define PIB_FLAG_FATFS_READ_ON_GET      (0x04)
+#define PIB_FLAGS_DEFAULT               (0x00)      ///< Default Flags
+#define PIB_FLAG_READ_ONLY              (0x01)      ///< Parameter is read only
+#define PIB_FLAG_FATFS_WRITE_ON_SET     (0x02)      ///< Write to file system on set
+#define PIB_FLAG_FATFS_READ_ON_GET      (0x04)      ///< read from file system on get
 
 /**
-** Variable Type Definition
+** Status Definition
 */
 typedef enum
 {
-  PibStatus_Success               = (0),
-  PibStatus_MemoryError           = (PIB_STATUS_OFFSET - 1),
-  PibStatus_UnknownParameter      = (PIB_STATUS_OFFSET - 2),
-  PibStatus_InvalidParameter      = (PIB_STATUS_OFFSET - 3),
+  PibStatus_Success               = (0),                          ///< Success
+  PibStatus_MemoryError           = (PIB_STATUS_OFFSET - 1),      ///< Memory Error
+  PibStatus_UnknownParameter      = (PIB_STATUS_OFFSET - 2),      ///< Unknown Parameter
+  PibStatus_InvalidParameter      = (PIB_STATUS_OFFSET - 3),      ///< Invalid Parameter
 } pib_status_t;
-
-
 
 /**
 ** Variable Type Definition
@@ -101,7 +99,10 @@ typedef struct
 } pib_def_t;
 
 /**
-** PIB Configuration Definition
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
 */
 typedef struct
 {
@@ -113,18 +114,34 @@ typedef struct
 } pib_init_t;
 
 /**
-** PIB Table Definition
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs.
 */
 typedef struct
 {
-	void         *Params;                       ///< Reference To PIB Data
-	uint16_t      ParamsSize;                   ///< Size in bytes of Params
-  uint16_t        PibLen;                       ///< Number of parameters in PIB
-	pib_def_t    *Def;                          ///< Definition table
+  void         *Params;                       ///< Reference To PIB Data
+  uint16_t      ParamsSize;                   ///< Size in bytes of Params Variable
+  uint16_t      PibLen;                       ///< Number of parameters in PIB
+  pib_def_t    *Def;                          ///< Definition table
 } pib_t;
 
 
-int32_t Pib_Init                ( pib_t *Instance, pib_init_t *Init );
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t Pib_Init( pib_t *Instance, pib_init_t *Init );
+
 int32_t Pib_GetItemId           ( pib_t *Instance, char *name, int32_t *id );
 int32_t Pib_GetItemAddress      ( pib_t *Instance, uint32_t id, uint8_t **ref );
 int32_t Pib_GetStringByName     ( pib_t *Instance, char *name, char *value );

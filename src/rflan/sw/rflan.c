@@ -64,8 +64,6 @@
 #define FILE_SYSTEM_BASE_PATH "1:/"
 #endif
 
-
-
 #ifdef VERSA_CLOCK5_ENABLE
 #include "versa_clock5.h"
 static versa_clock5_t RflanVersaClock5;

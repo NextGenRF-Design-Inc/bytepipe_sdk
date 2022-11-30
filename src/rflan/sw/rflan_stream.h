@@ -1,12 +1,12 @@
 #ifndef SRC_RFLAN_STREAM_H_
 #define SRC_RFLAN_STREAM_H_
 /***************************************************************************//**
-*  \ingroup    APP
+*  \ingroup    RFLAN
 *  \defgroup   RFLAN_STREAM RFLAN Stream
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       stream.h
+*  \file       rflan_stream.h
 *
 *  \details
 *
@@ -53,43 +53,63 @@
 #include "adrv9001.h"
 
 
-#define RFLAN_STREAM_STATUS_OFFSET 		(-2000)
-#define RFLAN_DMA_BUF_ADDR              (0x40000000)
-#define RFLAN_DMA_TX1_BUF_ADDR          (RFLAN_DMA_BUF_ADDR)
-#define RFLAN_DMA_TX1_BUF_SIZE          (0x400000)
-#define RFLAN_DMA_TX2_BUF_ADDR          (RFLAN_DMA_TX1_BUF_ADDR + RFLAN_DMA_TX1_BUF_SIZE)
-#define RFLAN_DMA_TX2_BUF_SIZE          (0x400000)
-#define RFLAN_DMA_RX1_BUF_ADDR          (RFLAN_DMA_TX2_BUF_ADDR + RFLAN_DMA_TX2_BUF_SIZE)
-#define RFLAN_DMA_RX1_BUF_SIZE          (0x400000)
-#define RFLAN_DMA_RX2_BUF_ADDR          (RFLAN_DMA_RX1_BUF_ADDR + RFLAN_DMA_RX1_BUF_SIZE)
-#define RFLAN_DMA_RX2_BUF_SIZE          (0x400000)
+#define RFLAN_STREAM_STATUS_OFFSET 		(-2000)                                               ///< Status offset
+#define RFLAN_DMA_BUF_ADDR              (0x40000000)                                          ///< Address of DMA buffer
+#define RFLAN_DMA_TX1_BUF_ADDR          (RFLAN_DMA_BUF_ADDR)                                  ///< Address of Tx1 DMA buffer
+#define RFLAN_DMA_TX1_BUF_SIZE          (0x400000)                                            ///< Length of Tx1 DMA Buffer in bytes
+#define RFLAN_DMA_TX2_BUF_ADDR          (RFLAN_DMA_TX1_BUF_ADDR + RFLAN_DMA_TX1_BUF_SIZE)     ///< Address of Tx2 DMA buffer
+#define RFLAN_DMA_TX2_BUF_SIZE          (0x400000)                                            ///< Length of Tx2 DMA Buffer in bytes
+#define RFLAN_DMA_RX1_BUF_ADDR          (RFLAN_DMA_TX2_BUF_ADDR + RFLAN_DMA_TX2_BUF_SIZE)     ///< Address of Rx1 DMA buffer
+#define RFLAN_DMA_RX1_BUF_SIZE          (0x400000)                                            ///< Length of Rx1 DMA Buffer in bytes
+#define RFLAN_DMA_RX2_BUF_ADDR          (RFLAN_DMA_RX1_BUF_ADDR + RFLAN_DMA_RX1_BUF_SIZE)     ///< Address of Rx2 DMA buffer
+#define RFLAN_DMA_RX2_BUF_SIZE          (0x400000)                                            ///< Length of Rx2 DMA Buffer in bytes
 
 
+/**
+** Status Definition
+*/
 typedef enum
 {
-  RflanStreamStatus_Success               = (0),
-  RflanStreamStatus_MemoryError           = (RFLAN_STREAM_STATUS_OFFSET - 1),
-  RflanStreamStatus_InvalidParameter      = (RFLAN_STREAM_STATUS_OFFSET - 2),
-  RflanStreamStatus_DmaError              = (RFLAN_STREAM_STATUS_OFFSET - 3),
-  RflanStreamStatus_Done                  = (RFLAN_STREAM_STATUS_OFFSET - 4),
+  RflanStreamStatus_Success               = (0),                                 ///< Success
+  RflanStreamStatus_MemoryError           = (RFLAN_STREAM_STATUS_OFFSET - 1),    ///< Memory Error
+  RflanStreamStatus_InvalidParameter      = (RFLAN_STREAM_STATUS_OFFSET - 2),    ///< Invalid Parameter
+  RflanStreamStatus_DmaError              = (RFLAN_STREAM_STATUS_OFFSET - 3),    ///< DMA Error
+  RflanStreamStatus_Done                  = (RFLAN_STREAM_STATUS_OFFSET - 4),    ///< Stream Done
 } rflan_stream_status_t;
 
-
+/**
+** Stream Channel Definition
+*/
 typedef enum
 {
-  RflanStreamChannel_Tx1      = (0),
-  RflanStreamChannel_Tx2      = (1),
-  RflanStreamChannel_Rx1      = (2),
-  RflanStreamChannel_Rx2      = (3)
+  RflanStreamChannel_Tx1      = (0),     ///< TX1 Channel
+  RflanStreamChannel_Tx2      = (1),     ///< TX2 Channel
+  RflanStreamChannel_Rx1      = (2),     ///< RX1 Channel
+  RflanStreamChannel_Rx2      = (3)      ///< RX2 Channel
 } rflan_stream_channel_t;
 
 
+/***************************************************************************//**
+*
+* \details  Callback function prototype.
+*
+* \param    Buf          [in]  Address of stream buffer
+* \param    Size         [in]  Size of buffer in words
+* \param    Channel      [in]  Logical Channel of stream
+* \param    CallbackRef  [in]  Callback reference provided by the application
+*
+* \return   none
+*
+*******************************************************************************/
 typedef void (*stream_callback_t)( uint32_t Buf, uint32_t Size, rflan_stream_channel_t Channel, void *CallbackRef );
 
 
 /**
- * \brief Data for initialization of the stream.
- */
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
+*/
 typedef struct{
   stream_callback_t   Callback;     ///< Parent Callback function
   void               *CallbackRef;  ///< Parent User Data
@@ -104,6 +124,14 @@ typedef struct{
   uint32_t            Rx2DmaIrqId;  ///< IRQ Id
 }rflan_stream_init_t;
 
+/**
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs.
+*/
 typedef struct{
   stream_callback_t   Callback;     ///< Parent Callback function
   void               *CallbackRef;  ///< Parent User Data
@@ -115,7 +143,19 @@ typedef struct{
 }rflan_stream_t;
 
 
-int32_t RflanStream_Initialize    ( rflan_stream_t *Instance, rflan_stream_init_t *Init );
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t RflanStream_Initialize( rflan_stream_t *Instance, rflan_stream_init_t *Init );
+
+
 int32_t RflanStream_Disable       ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
 int32_t RflanStream_StartTransfer ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel, bool Cyclic );
 int32_t RflanStream_Transfer      ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel );

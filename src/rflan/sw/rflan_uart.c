@@ -1,5 +1,5 @@
 /***************************************************************************//**
-*  \addtogroup RFLAN
+*  \addtogroup RFLAN_UART
 *   @{
 *******************************************************************************/
 /***************************************************************************//**
@@ -47,8 +47,7 @@
 #include "rflan_uart.h"
 
 
-extern XScuGic                xInterruptController;
-
+extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
 static void RflanUart_Handler(void *CallBackRef, u32 Event, unsigned int EventData)
 {

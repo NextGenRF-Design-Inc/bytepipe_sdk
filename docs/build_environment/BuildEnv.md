@@ -49,7 +49,7 @@ zip
 
 # Vivado Design Suite
 
-The Vivado Design Suite from Xilinx must be installed on both the Windows PC and Linux PC.  The Vivado Design Suite includes the Xilinx Eclipse SDK which must be selected during installation.  This repository uses Vivado Design Suite 2021.1.  This can be downloaded and installed from [here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/archive.html).  
+The Vivado Design Suite from Xilinx must be installed on both the Windows PC and Linux PC.  This repository uses Vivado Design Suite 2021.1.  This can be downloaded and installed from [here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/archive.html).  
 
 If installing vivado on your Linux host machine update the downloaded file to be executable and run.
 
@@ -57,6 +57,11 @@ If installing vivado on your Linux host machine update the downloaded file to be
 sudo chmod +x Xilinx_Unified_2021.1_0610_2318_Lin64.bin
 ./Xilinx_Unified_2021.1_0610_2318_Lin64.bin
 ```
+
+# Vitis
+
+The Vitis Design Suite from Xilinx must be installed on both the Windows PC and Linux PC.  This repository uses Vitis Design Suite 2021.1.  This can be downloaded and installed from [here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis/2021-1.html).
+
 
 # PetaLinux
 
@@ -107,6 +112,16 @@ sudo dpkg-reconfigure dash
 ```
 
 Ensure shell is using Bash: `sudo dpkg-reconfigure dash`. Select no when prompted.
+
+# Doxygen
+
+Doxygen allows generation of documentation from annotated source code.  The source code documentation is referenced throughout this repository.   Additional information regarding Doxygen can be found [here](https://www.doxygen.nl/index.html).  Download the Doxygen Wizard [here](https://www.doxygen.nl/files/doxygen-1.9.5-setup.exe) to build the Doxygen documentation for this repository. 
+
+To build the doxygen documentation manually launch the Doxygen Wizard and open the configuration file found `src/rflan/.doxyfile` as shown below.  Then select `Run doxygen`.  The outputs will be generated in `workspace/rflan/doxygen`.
+
+![doxygen_01.png](doxygen_01.png)
+
+![doxygen_02.png](doxygen_02.png)
 
 
 # DISCLAIMER

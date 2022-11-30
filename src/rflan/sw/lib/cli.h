@@ -1,8 +1,8 @@
 #ifndef __CLI_H__
 #define __CLI_H__
 /***************************************************************************//**
-*  \ingroup    LIB
-*  \defgroup   CLI CLI Library
+*  \ingroup    RFLAN
+*  \defgroup   CLI Command Line Interface Library
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
@@ -53,58 +53,66 @@
 #include "task.h"
 #include "queue.h"
 
-#define CLI_STATUS_OFFSET			          (-3000)
-#define CLI_RX_STACK_SIZE               4096
-#define CLI_TX_STACK_SIZE               1024
-#define CLI_RX_TASK_PRIORITY            tskIDLE_PRIORITY + 2
-#define CLI_TX_TASK_PRIORITY            tskIDLE_PRIORITY + 3
-#define CLI_RX_QUEUE_SIZE               32768
-#define CLI_TX_QUEUE_SIZE               32768
-#define CLI_PRINT_BUF_SIZE              2048
-#define CLI_CMD_BUF_SIZE                1024
-#define CLI_CMD_LIST_SIZE               100
-#define CLI_HISTORY_BUF_SIZE            256
+#define CLI_STATUS_OFFSET			   (-3000)                  ///< Status code offset
+#define CLI_RX_STACK_SIZE               4096                    ///< Rx stack size in words
+#define CLI_TX_STACK_SIZE               1024                    ///< Tx stack size in words
+#define CLI_RX_TASK_PRIORITY            tskIDLE_PRIORITY + 2    ///< Rx task priority
+#define CLI_TX_TASK_PRIORITY            tskIDLE_PRIORITY + 3    ///< Tx task priority
+#define CLI_RX_QUEUE_SIZE               32768                   ///< Number of characters in rx queue
+#define CLI_TX_QUEUE_SIZE               32768                   ///< Number of characters in tx queue
+#define CLI_PRINT_BUF_SIZE              2048                    ///< Size of dedicated print buffer
+#define CLI_CMD_BUF_SIZE                1024                    ///< Size of command buffer
+#define CLI_CMD_LIST_SIZE               100                     ///< Number of commands
+#define CLI_HISTORY_BUF_SIZE            256                     ///< Size of dedicated history buffer
 
  /**
- * \brief Code indicated status of request
+ ** Status Definition
  */
  typedef enum
  {
-   CliStatus_Success               = (0),
-   CliStatus_MemoryError           = (CLI_STATUS_OFFSET - 1),
-   CliStatus_NotSupported          = (CLI_STATUS_OFFSET - 2),
-   CliStatus_OsError               = (CLI_STATUS_OFFSET - 3),
-   CliStatus_Busy                  = (CLI_STATUS_OFFSET - 4),
-   CliStatus_InvalidParameter      = (CLI_STATUS_OFFSET - 5),
-   CliStatus_FileError             = (CLI_STATUS_OFFSET - 6),
+   CliStatus_Success               = (0),                       ///< Success
+   CliStatus_MemoryError           = (CLI_STATUS_OFFSET - 1),   ///< Memory error
+   CliStatus_NotSupported          = (CLI_STATUS_OFFSET - 2),   ///< Not supported function or command
+   CliStatus_OsError               = (CLI_STATUS_OFFSET - 3),   ///< Operating system error
+   CliStatus_Busy                  = (CLI_STATUS_OFFSET - 4),   ///< Operating system busy
+   CliStatus_InvalidParameter      = (CLI_STATUS_OFFSET - 5),   ///< Invalid parameter
+   CliStatus_FileError             = (CLI_STATUS_OFFSET - 6),   ///< File error
  } cli_status_t;
 
  /**
- * \brief Type of event
+ ** Event type Definition
  */
  typedef enum
  {
-   CliEvtType_TxChar    = 0,    /*!< Transmit Character Event */
-   CliEvtType_TxMsg     = 1,    /*!< Transmit Message Event */
+   CliEvtType_TxChar    = 0,    ///< Transmit Character Event
+   CliEvtType_TxMsg     = 1,    ///< Transmit Message Event
  } cli_evt_type_t;
 
  /**
- * \brief Contains all of the information related to an event triggered by a specific request.
- *        The CallbackRef is the CallbackRef supplied by the parent request.
+ ** Event Definition
  */
  typedef struct
  {
-   cli_evt_type_t  Type;         /*!< Event Type */
+   cli_evt_type_t  Type;         ///< Event Type
    union{
-     char                c;
+     char          c;            ///< Character
      struct{
-     char         *Buf;
-     uint32_t      Length;
+     char         *Buf;          ///< Reference to buffer
+     uint32_t      Length;       ///< Length of buffer
      }msg;
    };
-   void                 *CallbackRef;  /*!< Parent data provided relative to each request */
+   void           *CallbackRef;  ///< Parent data provided relative to each request
  } cli_evt_t;
 
+ /***************************************************************************//**
+ *
+ * \details  Callback function prototype.
+ *
+ * \param    Evt   [in]  Reference to event, see #cli_evt_t
+ *
+ * \return   none
+ *
+ *******************************************************************************/
 typedef void (*cli_callback_t)( void *Evt );
 
 /******************************************************************************/
@@ -133,7 +141,12 @@ typedef struct
 } cli_cmd_t;
 
 /**
-**  CLI Instance Definition
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs.
 */
 typedef struct {
   cli_callback_t          Callback;
@@ -158,26 +171,29 @@ typedef struct {
 ** Type Definition
 */
 typedef enum{
-  CliParamTypeChar   		= 0,	///< char
-  CliParamTypeU8     		= 1, 	///< uint8_t
-  CliParamTypeS8     		= 2, 	///< int8_t
-  CliParamTypeU16    		= 3, 	///< uint16_t
-  CliParamTypeS16    		= 4, 	///< int16_t
-  CliParamTypeU32    		= 5, 	///< uint32_t
-  CliParamTypeS32    		= 6, 	///< int32_t
-  CliParamTypeU64    		= 7,	///< uint64_t
-  CliParamTypeS64    		= 8, 	///< int64_t
-  CliParamTypeFloat  		= 9, 	///< float
-  CliParamTypeDouble  	= 10,	///< double
-  CliParamTypeStr    		= 11,	///< string
-  CliParamTypeH8      	= 12,	///< hex uint8_t
-  CliParamTypeH16     	= 13,	///< hex uint16_t
-  CliParamTypeH32     	= 14,	///< hex uint32_t
-  CliParamTypeNum       = 15, ///< Number
+  CliParamTypeChar   		= 0,  ///< char
+  CliParamTypeU8     		= 1,  ///< uint8_t
+  CliParamTypeS8     		= 2,  ///< int8_t
+  CliParamTypeU16    		= 3,  ///< uint16_t
+  CliParamTypeS16    		= 4,  ///< int16_t
+  CliParamTypeU32    		= 5,  ///< uint32_t
+  CliParamTypeS32    		= 6,  ///< int32_t
+  CliParamTypeU64    		= 7,  ///< uint64_t
+  CliParamTypeS64    		= 8,  ///< int64_t
+  CliParamTypeFloat  		= 9,  ///< float
+  CliParamTypeDouble        = 10, ///< double
+  CliParamTypeStr           = 11, ///< string
+  CliParamTypeH8            = 12, ///< hex uint8_t
+  CliParamTypeH16           = 13, ///< hex uint16_t
+  CliParamTypeH32           = 14, ///< hex uint32_t
+  CliParamTypeNum           = 15, ///< Number
 } CliParamType_t;
 
 /**
-**  CLI Configuration Definition
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
 */
 typedef struct {
   cli_callback_t        Callback;
@@ -191,6 +207,17 @@ cli_status_t Cli_ProcessRxChar(cli_t *Instance, char c );
 cli_status_t Cli_ProcessRxString(cli_t *Instance, char *str );
 cli_status_t Cli_GetParameter(const char *s, uint8_t pNum, CliParamType_t type, void *param );
 cli_status_t Cli_RegisterCommand(cli_t *Instance, cli_cmd_t *cmd );
+
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
 cli_status_t Cli_Initialize(cli_t *Instance, cli_init_t *Init );
 
 #ifdef __cplusplus

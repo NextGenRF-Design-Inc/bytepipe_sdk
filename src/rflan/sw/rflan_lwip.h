@@ -80,9 +80,27 @@ typedef enum
   RflanLwipStatus_SocketError           = (RFLAN_LWIP_STATUS_OFFSET - 6),
 } rflan_lwip_status_t;
 
-
+/***************************************************************************//**
+*
+* \details  Callback function prototype.
+*
+* \param    Buf          [in]  Received buffer
+* \param    Length       [in]  Received buffer length in characters
+* \param    CallbackRef  [in]  Callback reference provided by the application
+*
+* \return   none
+*
+*******************************************************************************/
 typedef void (*rflan_lwip_callback_t)( char *Buf, uint16_t Length, void *CallbackRef  );
 
+/**
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs.
+*/
 typedef struct
 {
   struct netif            NetIf;
@@ -92,6 +110,12 @@ typedef struct
   void                   *CallbackRef;
 } rflan_lwip_t;
 
+/**
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
+*/
 typedef struct
 {
   uint32_t                RxBufSize;
@@ -106,6 +130,17 @@ typedef struct
 } rflan_lwip_init_t;
 
 rflan_lwip_status_t RflanLwip_Send( rflan_lwip_t *Instance, char *Buf, uint16_t Length );
+
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
 rflan_lwip_status_t RflanLwip_Initialize( rflan_lwip_t *Instance, rflan_lwip_init_t *Init );
 
 #endif

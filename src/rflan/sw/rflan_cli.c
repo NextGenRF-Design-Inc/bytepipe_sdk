@@ -56,9 +56,10 @@
 #include "rflan.h"
 #include "rflan_pib.h"
 #include "rflan_gpio.h"
-#include "rflan_stream.h"
 #include "ff.h"
 #include "status.h"
+
+
 
 #if FILE_SYSTEM_LOGICAL_DRIVE == 0
 #define FILE_SYSTEM_BASE_PATH ("0:/")

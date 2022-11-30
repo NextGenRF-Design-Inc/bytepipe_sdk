@@ -1,12 +1,11 @@
 #ifndef SRC_RFLAN_H_
 #define SRC_RFLAN_H_
 /***************************************************************************//**
-*  \ingroup    RFLAN
-*  \defgroup   APP RFLAN Application
+*  \defgroup  RFLAN RF Local Area Network
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       app.h
+*  \file       rflan.h
 *
 *  \details    This file contains the RFLAN application definitions.
 *
@@ -41,27 +40,46 @@
 *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
+*
+*  \mainpage   RFLAN
+*
+*  The Radio Frequency Local Area Network (RFLAN) is responsible for control and
+*  configuration of all radio components.  The following diagram shows the block 
+*  diagram of the RFLAN firmware and programmable logic.  The RFLAN firmware is 
+*  executed on the Real-time Processing Unit (RPU).
+*
+*  \image html rflan_block_diagram_01.png
+*
 *******************************************************************************/
-
 #include "xstatus.h"
 #include "xparameters.h"
 #include "ff.h"
 
 
-#define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)
+#define FF_FILENAME_MAX_LEN             (FF_LFN_BUF)            ///< Maximum filename length
+#define RFLAN_TASK_STACK_SIZE           4096                    ///< OS Task size in words
+#define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY        ///< OS Task priority
+#define RFLAN_QUEUE_SIZE                4                       ///< OS Queue Size
+#define RFLAN_EVT_QUEUE_SIZE            4                       ///< Event Queue Size
+#define RFLAN_UART_BAUDRATE             115200                  ///< UART Baudrate
+#define RFLAN_STATUS_OFFSET             (-500)                  ///< Status offset
 
-#define RFLAN_TASK_STACK_SIZE           4096
-#define RFLAN_TASK_PRIORITY             tskIDLE_PRIORITY
-#define RFLAN_QUEUE_SIZE                4
-#define RFLAN_EVT_QUEUE_SIZE            4
-
-
-#define RFLAN_UART_BAUDRATE             115200
-
-#define RFLAN_STATUS_OFFSET             (-500)
-
-
+/***************************************************************************//**
+*
+* \details  Reboot Processor
+*
+* \return   none
+*
+*******************************************************************************/
 void Rflan_Reboot( void );
+
+/***************************************************************************//**
+*
+* \details  Read Hardware Version
+*
+* \return   version
+*
+*******************************************************************************/
 uint32_t Rflan_GetHwVer( void );
 
  /**
@@ -75,14 +93,14 @@ uint32_t Rflan_GetHwVer( void );
    RflanEvt_Tx2StreamDone    = 3,    /*!< Tx2 Stream Done Event */   
  } rflan_evt_type_t;
  
- /**
- * \brief Code indicated status of request
- */
+/**
+**  Status codes
+*/
  typedef enum
  {
-   RflanStatus_Success                 = (0),
-   RflanStatus_InvalidPib              = (RFLAN_STATUS_OFFSET - 1),
-   RflanStatus_IicError                = (RFLAN_STATUS_OFFSET - 2),
+   RflanStatus_Success                 = (0),                        ///< Success
+   RflanStatus_InvalidPib              = (RFLAN_STATUS_OFFSET - 1),  ///< Invalid Parameter
+   RflanStatus_IicError                = (RFLAN_STATUS_OFFSET - 2),  ///< I2C Error
  } rflan_status_t;
 
 /******************************************************************************/

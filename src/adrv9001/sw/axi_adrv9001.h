@@ -1,12 +1,12 @@
 #ifndef SRC_AXI_ADRV9001_H_
 #define SRC_AXI_ADRV9001_H_
 /***************************************************************************//**
-*  \ingroup    RFLAN
-*  \defgroup   ADRV9001 ADRV9001 Interface Driver
+*  \ingroup    ADRV9001
+*  \defgroup   AXI_ADRV9001 AXI ADRV9001 Interface Driver
 *  @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       adrv9001.h
+*  \file       axi_adrv9001.h
 *
 *  \details
 *
@@ -51,34 +51,118 @@
 #include "adi_adrv9001_common_types.h"
 #include "adi_adrv9001_radio_types.h"
 
+
+/**
+**  Data Path Structure
+*/
 typedef enum
 {
-  AXI_ADRV9001_DATA_PATH_AXIS = 0,
-  AXI_ADRV9001_DATA_PATH_AXI = 1
+  AXI_ADRV9001_DATA_PATH_AXIS = 0,      ///< Route SSI data to and from AXIS stream
+  AXI_ADRV9001_DATA_PATH_AXI = 1        ///< Route SSI data to and from AXI register
 } axi_adrv9001_data_path_t;
 
 /**
- * \brief Data for initialization.
- */
+**  Initialization Structure
+**
+**  This structure is used to initialization the module.  The application can
+**  destroy the corresponding parameter after calling initializing the module.
+*/
 typedef struct{
-  uint32_t            Base;
-  uint32_t            IrqId;
+  uint32_t            Base;             ///< AXI bus base address
+  uint32_t            IrqId;            ///< Processor interrupt ID.
 }axi_adrv9001_init_t;
 
+/**
+**  Instance structure
+**
+**  This structure holds the variables associated with this module.  This
+**  structure must be allocated and maintained by the application.  The application
+**  should not access this structure directly.  The application must pass this
+**  variable when calling all APIs.
+*/
 typedef struct{
-  uint32_t            Base;
-  uint32_t            IrqId;
-  uint8_t volatile    SpiDone;
+  uint32_t            Base;             ///< AXI bus base address
+  uint32_t            IrqId;            ///< Processor interrupt ID.
+  uint8_t volatile    SpiDone;          ///< Flag for waiting on SPI interrupt
 }axi_adrv9001_t;
 
 
-int32_t AxiAdrv9001_Initialize       ( axi_adrv9001_t *Instance, axi_adrv9001_init_t *Init );
+/***************************************************************************//**
+*
+* \details  Initialize Driver
+*
+* \param    Instance [in]  Driver Instance
+* \param    Init     [in]  Initialization structure
+*
+* \return   status
+*
+*******************************************************************************/
+int32_t AxiAdrv9001_Initialize( axi_adrv9001_t *Instance, axi_adrv9001_init_t *Init );
 
-void AxiAdrv9001_ResetbPinSet        ( axi_adrv9001_t *Instance, uint8_t Level );
-void AxiAdrv9001_SetDgpio            ( axi_adrv9001_t *Instance, uint32_t Value );
-void AxiAdrv9001_GetDgpio            ( axi_adrv9001_t *Instance, uint32_t *Value );
-void AxiAdrv9001_GetDgpioDir         ( axi_adrv9001_t *Instance, uint32_t *Value );
-void AxiAdrv9001_SetDgpioDir         ( axi_adrv9001_t *Instance, uint32_t Value );
+
+/***************************************************************************//**
+*
+* \details  Set Reset Pin connected to ADRV9001
+*
+* \param    Instance [in]  Driver Instance
+* \param    Level    [in]  0 = low, 1 = high
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_ResetbPinSet( axi_adrv9001_t *Instance, uint8_t Level );
+
+/***************************************************************************//**
+*
+* \details  Set DGPIO Pin values
+*
+* \param    Instance [in]  Driver Instance
+* \param    Value    [in]  Bitmask corresponding to each pin
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_SetDgpio( axi_adrv9001_t *Instance, uint32_t Value );
+
+/***************************************************************************//**
+*
+* \details  Get DGPIO Pin values
+*
+* \param    Instance [in]  Driver Instance
+* \param    Value    [out] Bitmask corresponding to each pin
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_GetDgpio( axi_adrv9001_t *Instance, uint32_t *Value );
+
+/***************************************************************************//**
+*
+* \details  Get DGPIO Pin direction
+*
+* \param    Instance [in]  Driver Instance
+* \param    Value    [out] Bitmask corresponding to each pin, 0 = output,
+*                          1 = input
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_GetDgpioDir( axi_adrv9001_t *Instance, uint32_t *Value );
+
+/***************************************************************************//**
+*
+* \details  Set DGPIO Pin direction
+*
+* \param    Instance [in]  Driver Instance
+* \param    Value    [in]  Bitmask corresponding to each pin, 0 = output,
+*                          1 = input
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_SetDgpioDir( axi_adrv9001_t *Instance, uint32_t Value );
+
+
 void AxiAdrv9001_SetTxDataPath       ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value );
 void AxiAdrv9001_GetTxDataPath       ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value );
 void AxiAdrv9001_SetTxData           ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t Value );

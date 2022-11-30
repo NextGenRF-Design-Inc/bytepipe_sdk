@@ -1,11 +1,11 @@
 /***************************************************************************//**
-*  \addtogroup RFLAN
+*  \addtogroup RFLAN_LWIP
 *   @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       rflan_server.c
+*  \file       rflan_lwip.c
 *
-*  \details    This file contains the RFLAN server application.
+*  \details    This file contains the RFLAN LWIP implementation.
 *
 *  \copyright
 *
