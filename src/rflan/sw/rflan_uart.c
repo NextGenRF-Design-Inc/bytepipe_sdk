@@ -42,12 +42,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "xscugic.h"
 #include "xstatus.h"
 #include "rflan_uart.h"
 
-
-extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
 static void RflanUart_Handler(void *CallBackRef, u32 Event, unsigned int EventData)
 {
@@ -76,6 +73,7 @@ int32_t RflanUart_Initialize( rflan_uart_t *Instance, rflan_uart_init_t *Init )
 
   Instance->ParentCallback = Init->ParentCallback;
   Instance->ParentCallbackRef = Init->ParentCallbackRef;
+  Instance->IrqInstance = Init->IrqInstance;
 
   /* Lookup Configuration */
   if((Config = XUartPs_LookupConfig(Init->DeviceId)) == NULL) return XST_FAILURE;
@@ -88,7 +86,7 @@ int32_t RflanUart_Initialize( rflan_uart_t *Instance, rflan_uart_init_t *Init )
   if(XUartPs_SelfTest(&Instance->RflanUart) != XST_SUCCESS) return XST_FAILURE;
 
   /* Connect UART handler */
-  XScuGic_Connect(&xInterruptController, Init->IntrId,
+  XScuGic_Connect(Instance->IrqInstance, Init->IntrId,
       (Xil_ExceptionHandler) XUartPs_InterruptHandler, (void *) &Instance->RflanUart);
 
   /* Set Local Handler */
@@ -105,12 +103,12 @@ int32_t RflanUart_Initialize( rflan_uart_t *Instance, rflan_uart_init_t *Init )
   XUartPs_SetFifoThreshold(&Instance->RflanUart, 1);
 
   /* Enable the Interrupt */
-  XScuGic_Enable(&xInterruptController, Init->IntrId);
+  XScuGic_Enable(Instance->IrqInstance, Init->IntrId);
 
   XUartPs_Recv(&Instance->RflanUart, (u8*)&Instance->RxChar, 1);
 
   /* Set Priority */
-  XScuGic_SetPriorityTriggerType(&xInterruptController, Init->IntrId, 0xA0, 0x3);
+  XScuGic_SetPriorityTriggerType(Instance->IrqInstance, Init->IntrId, 0xA0, 0x3);
 
   return XST_SUCCESS;
 }

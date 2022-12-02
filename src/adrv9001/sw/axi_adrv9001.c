@@ -44,10 +44,6 @@
 #include <xil_io.h>
 #include "axi_adrv9001.h"
 #include "adrv9001.h"
-#include "xscugic.h"
-
-
-extern XScuGic          xInterruptController;
 
 
 
@@ -97,7 +93,7 @@ static void AxiAdrv9001_SpiIrq( axi_adrv9001_t *Instance )
 {
   Instance->SpiDone = 1;
 
-  XScuGic_Disable(&xInterruptController, Instance->IrqId);
+  XScuGic_Disable(Instance->IrqInstance, Instance->IrqId);
 }
 
 
@@ -148,7 +144,7 @@ int32_t AxiAdrv9001_MspiTransfer(axi_adrv9001_t *Instance, uint8_t *TxBuf, uint8
 {
   Instance->SpiDone = 0;
 
-  XScuGic_Enable(&xInterruptController, Instance->IrqId);
+  XScuGic_Enable(Instance->IrqInstance, Instance->IrqId);
 
   for( int i = 0; i < Length; i++ )
   {
@@ -349,10 +345,11 @@ int32_t AxiAdrv9001_Initialize(axi_adrv9001_t *Instance, axi_adrv9001_init_t *In
 {
   Instance->Base = Init->Base;
   Instance->IrqId = Init->IrqId;
+  Instance->IrqInstance = Init->IrqInstance;
 
   uint32_t regVal = Xil_In32(Instance->Base + ADRV9001_ID_ADDR);
 
-  if(XScuGic_Connect(&xInterruptController, Instance->IrqId, (XInterruptHandler)AxiAdrv9001_SpiIrq, Instance ) != 0)
+  if(XScuGic_Connect(Instance->IrqInstance, Instance->IrqId, (XInterruptHandler)AxiAdrv9001_SpiIrq, Instance ) != 0)
     return Adrv9001Status_IrqErr;
 
   if(regVal == 0x12345678)

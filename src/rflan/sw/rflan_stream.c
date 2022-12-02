@@ -224,6 +224,7 @@ int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *In
   axi_dma_init_t DmaInit = {
       .CallbackRef = Instance,
       .Flags = 0,
+	  .IrqInstance = Init->IrqInstance
   };
 
   DmaInit.Base = Init->Tx1DmaBase;

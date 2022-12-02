@@ -57,6 +57,7 @@
 #include "status.h"
 #include "xiicps.h"
 
+extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
 #if FILE_SYSTEM_LOGICAL_DRIVE == 0
 #define FILE_SYSTEM_BASE_PATH "0:/"
@@ -255,6 +256,7 @@ static int32_t Rflan_Initialize( void )
       .BaudRate           = RFLAN_UART_BAUDRATE,
       .DeviceId           = XPAR_PSU_UART_0_DEVICE_ID,
       .IntrId             = XPAR_XUARTPS_0_INTR,
+	  .IrqInstance        = &xInterruptController,
       .ParentCallback     = Rflan_UartCallback,
       .ParentCallbackRef  = &Cli };
 
@@ -310,10 +312,11 @@ static int32_t Rflan_Initialize( void )
   printf("\r\nType help for a list of commands\r\n\r\n");
 
   adrv9001_init_t Adrv9001Init = {
-		  .AxiInit.Base = XPAR_ADRV9001_0_BASEADDR,
-		  .AxiInit.IrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
+		  .AxiBase = XPAR_ADRV9001_0_BASEADDR,
+		  .AxiIrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
 		  .TcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07,
-		  .LogFilename = (FILE_SYSTEM_BASE_PATH "adi_adrv9001_log.txt")
+		  .LogFilename = (FILE_SYSTEM_BASE_PATH "adi_adrv9001_log.txt"),
+	      .IrqInstance = &xInterruptController
   };
 
   if( Rflan_GetHwVer( ) == 2 )
@@ -359,7 +362,8 @@ static int32_t Rflan_Initialize( void )
       .Tx1DmaIrqId = XPAR_FABRIC_TX1_DMA_IRQ_INTR,
       .Tx2DmaIrqId = XPAR_FABRIC_TX2_DMA_IRQ_INTR,
       .Rx1DmaIrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR,
-      .Rx2DmaIrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR
+      .Rx2DmaIrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR,
+	  .IrqInstance = &xInterruptController
   };
 
   /* Initialize Stream */

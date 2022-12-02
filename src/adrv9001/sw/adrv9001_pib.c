@@ -59,7 +59,9 @@ static pib_def_t Adrv9001PibDef[] =
 {
 //  Name                                                      Address                                                                Storage Type                       Flags
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+#ifdef ADRV9001_USE_FS
   { "LogPath",                              offsetof(adrv9001_params_t, LogPath),                                                     PibTypeStr,       PIB_FLAGS_DEFAULT },                                      // File system path to store adrv9001 logs
+#endif
   { "Tx1Attn",                              offsetof(adrv9001_params_t, Tx1Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },       // Transmitter attenuation in milli dB ( 7500 = 7.5dB )
   { "Tx2Attn",                              offsetof(adrv9001_params_t, Tx2Attn),                                                     PibTypeU16,       PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
   { "Tx1Boost",                             offsetof(adrv9001_params_t, Tx1Boost),                                                    PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },

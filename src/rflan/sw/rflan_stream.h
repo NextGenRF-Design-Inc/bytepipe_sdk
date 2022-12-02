@@ -51,7 +51,7 @@
 
 #include "axi_dma.h"
 #include "adrv9001.h"
-
+#include "xscugic.h"
 
 #define RFLAN_STREAM_STATUS_OFFSET 		(-2000)                                               ///< Status offset
 #define RFLAN_DMA_BUF_ADDR              (0x40000000)                                          ///< Address of DMA buffer
@@ -122,6 +122,7 @@ typedef struct{
   uint32_t            Tx2DmaIrqId;  ///< IRQ Id
   uint32_t            Rx1DmaIrqId;  ///< IRQ Id
   uint32_t            Rx2DmaIrqId;  ///< IRQ Id
+  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
 }rflan_stream_init_t;
 
 /**

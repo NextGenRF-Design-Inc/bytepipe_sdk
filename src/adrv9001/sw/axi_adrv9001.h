@@ -50,7 +50,7 @@
 #include <stdbool.h>
 #include "adi_adrv9001_common_types.h"
 #include "adi_adrv9001_radio_types.h"
-
+#include "xscugic.h"
 
 /**
 **  Data Path Structure
@@ -70,6 +70,7 @@ typedef enum
 typedef struct{
   uint32_t            Base;             ///< AXI bus base address
   uint32_t            IrqId;            ///< Processor interrupt ID.
+  XScuGic            *IrqInstance;      ///< Processor Interrupt Controller Instance
 }axi_adrv9001_init_t;
 
 /**
@@ -84,6 +85,7 @@ typedef struct{
   uint32_t            Base;             ///< AXI bus base address
   uint32_t            IrqId;            ///< Processor interrupt ID.
   uint8_t volatile    SpiDone;          ///< Flag for waiting on SPI interrupt
+  XScuGic            *IrqInstance;      ///< Processor Interrupt Controller Instance
 }axi_adrv9001_t;
 
 
@@ -172,7 +174,6 @@ void AxiAdrv9001_GetDisableDelay     ( axi_adrv9001_t *Instance, adi_common_Port
 void AxiAdrv9001_SetEnableMode       ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, adi_adrv9001_ChannelEnableMode_e mode );
 void AxiAdrv9001_GetCaptureControlCnt( axi_adrv9001_t *Instance, uint32_t *Value );
 
-void AxiAdrv9001_SetEnable           ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enabled );
 void AxiAdrv9001_SetEnableDelay      ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
 void AxiAdrv9001_SetDisableDelay     ( axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt );
 void AxiAdrv9001_SetCaptureControlCnt( axi_adrv9001_t *Instance, uint32_t Value );

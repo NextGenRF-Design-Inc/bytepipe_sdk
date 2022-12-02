@@ -75,6 +75,7 @@ app config -name rpu define-compiler-symbols RFLAN_STREAM_ENABLE
 app config -name rpu define-compiler-symbols RFLAN_LWIP_ENABLE
 app config -name rpu define-compiler-symbols VERSA_CLOCK5_ENABLE
 app config -name rpu define-compiler-symbols FILE_SYSTEM_LOGICAL_DRIVE=1
+app config -name rpu define-compiler-symbols ADRV9001_USE_FS
 
 app config -name rpu undef-compiler-symbols CLIENT_IGNORE
 app config -name rpu undef-compiler-symbols ADI_DYNAMIC_PROFILE_LOAD

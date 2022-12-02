@@ -43,7 +43,7 @@
 *
 *******************************************************************************/
 #include "xuartps.h"
-
+#include "xscugic.h"
 
 /***************************************************************************//**
 *
@@ -72,6 +72,7 @@ typedef struct
   rflan_uart_callback_t   ParentCallback;     ///< Callback provided by parent request, executed once request is complete
   void                   *ParentCallbackRef;  ///< Callback data provided by parent request, provided in callback relative to specific request
   volatile uint8_t  		  RxChar;             ///< Variable used to hold received character from interrupt routine
+  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
 } rflan_uart_t;
 
 /**
@@ -87,6 +88,7 @@ typedef struct
 	uint32_t				        IntrId;              ///< Processor Interrupt ID
 	rflan_uart_callback_t   ParentCallback;      ///< Callback provided by parent request, executed once request is complete 
 	void                   *ParentCallbackRef;   ///< Callback data provided by parent request, provided in callback relative to specific request
+	  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
 } rflan_uart_init_t;
 
 

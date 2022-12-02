@@ -73,7 +73,7 @@ fh_config()
 	rm -rf tmp.txt		
 
   FILE=$outDir/initializefhConfig*.c
-  if test -f "$FILE"; then   
+  if file $FILE; then   
 
     grep -A 999 'adi_adrv9001_FhCfg_t' $outDir/initializefhConfig*.c >> tmp.txt || true
     sed -i 's/adi_adrv9001_FhCfg_t.*/.FhConfig = {/g' tmp.txt 

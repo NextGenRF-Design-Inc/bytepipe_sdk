@@ -43,10 +43,9 @@
 #include <stdint.h>
 #include <xil_io.h>
 #include "axi_dma.h"
-#include "xscugic.h"
 #include "xil_cache.h"
 
-extern XScuGic          xInterruptController;
+
 #define BIT(n)          (1 << (n))
 
 static int32_t AxiDma_Read(axi_dma_t *Instance, uint32_t Addr, uint32_t *Value)
@@ -316,6 +315,7 @@ int32_t AxiDma_Initialize(axi_dma_t *Instance, axi_dma_init_t *Init)
 
 	memset(Instance, 0, sizeof(axi_dma_t));
 
+	Instance->IrqInstance           = Init->IrqInstance;
 	Instance->Base                  = Init->Base;
 	Instance->Callback              = Init->Callback;
 	Instance->CallbackRef           = Init->CallbackRef;
@@ -329,10 +329,10 @@ int32_t AxiDma_Initialize(axi_dma_t *Instance, axi_dma_init_t *Init)
 	AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, Instance->TransferMaxSize);
 	AxiDma_Read(Instance, AXI_DMAC_REG_X_LENGTH, &Instance->TransferMaxSize);
 
-  if((status = XScuGic_Connect(&xInterruptController, Init->IrqId, (XInterruptHandler)AxiDma_Handler, Instance )) != 0)
+  if((status = XScuGic_Connect(Instance->IrqInstance, Init->IrqId, (XInterruptHandler)AxiDma_Handler, Instance )) != 0)
     return status;
 
-	XScuGic_Enable(&xInterruptController, Init->IrqId);
+	XScuGic_Enable(Instance->IrqInstance, Init->IrqId);
 
 
 	return XST_SUCCESS;

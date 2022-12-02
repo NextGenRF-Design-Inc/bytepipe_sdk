@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "xscugic.h"
 
 #define AXI_DMAC_REG_IRQ_MASK           0x80
 #define AXI_DMAC_REG_IRQ_PENDING        0x84
@@ -96,6 +96,7 @@ typedef struct {
   uint32_t                      Flags;
   uint32_t                      TransferMaxSize;
   volatile axi_dma_transfer_t   BigTransfer;
+  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
 }axi_dma_t;
 
 typedef struct {
@@ -105,6 +106,7 @@ typedef struct {
   uint32_t                      IrqId;
   axi_dma_direction_t           Direction;
   uint32_t                      Flags;
+  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
 }axi_dma_init_t;
 
 int32_t AxiDma_Stop           (axi_dma_t *Instance );

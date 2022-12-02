@@ -63,7 +63,9 @@
 #include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_dpd.h"
+#ifdef ADRV9001_USE_FS
 #include "ff.h"
+#endif
 #include "pib.h"
 #include "axi_adrv9001.h"
 
@@ -156,19 +158,24 @@ typedef struct {
   adi_adrv9001_GpioPin_e				        Tx2FrontendEnablePin;
   adi_adrv9001_GpioPin_e				        TcxoEnablePin;
   adi_adrv9001_AuxDac_e                 TcxoDacChannel;
+#ifdef ADRV9001_USE_FS
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
+#endif
   adi_adrv9001_FhCfg_t                  FhConfig;  
 } adrv9001_params_t;
 
 extern adrv9001_params_t Adrv9001Params;
 
 typedef struct {
-	adi_adrv9001_Device_t	      Device;
-  adrv9001_params_t          *Params;
-  axi_adrv9001_t 			  Axi;
-  FIL                         LogFil;               ///< Log File
-  pib_t                       Pib;
-  uint8_t                     PendingReboot;
+	adi_adrv9001_Device_t	      Device;            ///< ADI ADRV9001 Instance
+  adrv9001_params_t          *Params;            ///< ADRV9001 Parameters
+  axi_adrv9001_t 			        Axi;               ///< AXI Instance
+#ifdef ADRV9001_USE_FS
+  FIL                         LogFil;            ///< Log File
+#endif
+  pib_t                       Pib;               ///< Parameter information base
+  uint8_t                     PendingReboot;     ///< ADRV9001 requires reboot due to profile changes
+  XScuGic                    *IrqInstance;       ///< Processor Interrupt Controller Instance
 }adrv9001_t;
 
 typedef struct {
@@ -178,8 +185,12 @@ typedef struct {
 	adi_adrv9001_GpioPin_e		  Tx2FrontendEnablePin;
 	adi_adrv9001_GpioPin_e		  TcxoEnablePin;
 	uint8_t								      TcxoDacChannel;
-  char                       *LogFilename;
-  axi_adrv9001_init_t             AxiInit;
+#ifdef ADRV9001_USE_FS
+  char                       *LogFilename;           ///< Log Filename
+#endif
+  uint32_t                    AxiBase;               ///< AXI bus base address
+  uint32_t                    AxiIrqId;              ///< Processor interrupt ID.
+  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
 }adrv9001_init_t;
 
 int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance );

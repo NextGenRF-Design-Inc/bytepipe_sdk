@@ -208,6 +208,7 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->Params->Tx2FrontendEnablePin = Init->Tx2FrontendEnablePin;
   Instance->Params->TcxoEnablePin = Init->TcxoEnablePin;
   Instance->Params->TcxoDacChannel = Init->TcxoDacChannel;
+  Instance->IrqInstance = Init->IrqInstance;
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
@@ -215,18 +216,26 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   /* Enable Logging */
   Instance->Device.common.error.logEnable = 1;
 
+#ifdef ADRV9001_USE_FS
   /* Initialize Log Path */
   if( Init->LogFilename != NULL )
     strcpy( Instance->Params->LogPath, Init->LogFilename );
   else
     Instance->Params->LogPath[0] = 0;
+#endif
 
   /* Initialize PIB */
   if((status = Adrv9001Pib_Initialize( Instance )) != 0)
     return status;
 
+  axi_adrv9001_init_t AxiInit = {
+      .Base = Init->AxiBase,
+      .IrqId = Init->AxiIrqId,
+      .IrqInstance = Init->IrqInstance,
+  };
+
   /* Initialize AXI ADRV9001 */
-  if((status = AxiAdrv9001_Initialize( &Instance->Axi, &Init->AxiInit )) != 0)
+  if((status = AxiAdrv9001_Initialize( &Instance->Axi, &AxiInit )) != 0)
     return status;
 
   /* Load Profile */
@@ -695,6 +704,8 @@ int32_t Adrv9001_GetVcTcxo( adrv9001_t *Instance, float *Voltage )
 
 int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *comment, va_list argp)
 {
+#ifdef ADRV9001_USE_FS
+
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
   if( strlen(Adrv9001->Params->LogPath) > 0 )
@@ -712,7 +723,7 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 
     free(str);
   }
-
+#endif
   return Adrv9001Status_Success;
 }
 
@@ -725,6 +736,7 @@ int32_t Adrv9001_DelayUs(void *devHalCfg, uint32_t time_us)
 
 int32_t Adrv9001_Open( void *devHalCfg )
 {
+#ifdef ADRV9001_USE_FS
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
   if( strlen(Adrv9001->Params->LogPath) > 0 )
@@ -742,11 +754,14 @@ int32_t Adrv9001_Open( void *devHalCfg )
     f_sync(&Adrv9001->LogFil);
   }
 
+#endif
+
   return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_Close( void *devHalCfg )
 {
+#ifdef ADRV9001_USE_FS
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
   if( strlen(Adrv9001->Params->LogPath) > 0 )
@@ -755,7 +770,7 @@ int32_t Adrv9001_Close( void *devHalCfg )
 
     f_close(&Adrv9001->LogFil);
   }
-
+#endif
   return Adrv9001Status_Success;
 }
 
