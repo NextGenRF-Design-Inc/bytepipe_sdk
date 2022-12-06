@@ -52,6 +52,23 @@
 #include "adi_adrv9001_radio_types.h"
 #include "xscugic.h"
 
+#define ADRV9001_DGPIO_PIN_0              (0)       ///< DGPIO[0] pin number
+#define ADRV9001_DGPIO_PIN_1              (1)       ///< DGPIO[1] pin number
+#define ADRV9001_DGPIO_PIN_2              (2)       ///< DGPIO[2] pin number
+#define ADRV9001_DGPIO_PIN_3              (3)       ///< DGPIO[3] pin number
+#define ADRV9001_DGPIO_PIN_4              (4)       ///< DGPIO[4] pin number
+#define ADRV9001_DGPIO_PIN_5              (5)       ///< DGPIO[5] pin number
+#define ADRV9001_DGPIO_PIN_6              (6)       ///< DGPIO[6] pin number
+#define ADRV9001_DGPIO_PIN_7              (7)       ///< DGPIO[7] pin number
+#define ADRV9001_DGPIO_PIN_8              (8)       ///< DGPIO[8] pin number
+#define ADRV9001_DGPIO_PIN_9              (9)       ///< DGPIO[9] pin number
+#define ADRV9001_DGPIO_PIN_10             (10)      ///< DGPIO[10] pin number
+#define ADRV9001_DGPIO_PIN_11             (11)      ///< DGPIO[11] pin number
+#define ADRV9001_DGPIO_PIN_12             (12)      ///< DGPIO[12] pin number
+#define ADRV9001_DGPIO_PIN_13             (13)      ///< DGPIO[13] pin number
+#define ADRV9001_DGPIO_PIN_14             (14)      ///< DGPIO[14] pin number
+#define ADRV9001_DGPIO_PIN_15             (15)      ///< DGPIO[15] pin number
+
 /**
 **  Data Path Structure
 */
@@ -163,6 +180,31 @@ void AxiAdrv9001_GetDgpioDir( axi_adrv9001_t *Instance, uint32_t *Value );
 *
 *******************************************************************************/
 void AxiAdrv9001_SetDgpioDir( axi_adrv9001_t *Instance, uint32_t Value );
+
+/***************************************************************************//**
+*
+* \details  Set DGPIO Pin value
+*
+* \param    Instance [in]  Driver Instance
+* \param    Pin      [in]  Pin number.
+* \param    Level    [in]  Level, hi = 1, lo = 0
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_SetDgpioPin(axi_adrv9001_t *Instance, uint8_t Pin, uint8_t Level );
+
+/***************************************************************************//**
+*
+* \details  Toggle DGPIO Pin
+*
+* \param    Instance [in]  Driver Instance
+* \param    Pin      [in]  Pin number.
+*
+* \return   none
+*
+*******************************************************************************/
+void AxiAdrv9001_ToggleDgpioPin(axi_adrv9001_t *Instance, uint8_t Pin );
 
 
 void AxiAdrv9001_SetTxDataPath       ( axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value );

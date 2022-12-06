@@ -80,6 +80,7 @@
 #define ADRV9001_ID_ADDR                  ((31) << 2)    ///< Driver id register offset
 
 
+
 /***************************************************************************//**
 *
 * \details  SPI Interrupt routine
@@ -95,7 +96,6 @@ static void AxiAdrv9001_SpiIrq( axi_adrv9001_t *Instance )
 
   XScuGic_Disable(Instance->IrqInstance, Instance->IrqId);
 }
-
 
 /***************************************************************************//**
 *
@@ -283,6 +283,35 @@ void AxiAdrv9001_GetCaptureControlCnt(axi_adrv9001_t *Instance, uint32_t *Value 
   *Value = Xil_In32(Instance->Base + ADRV9001_CAPTURE_CONTROL_CNT_ADDR);
 }
 
+void AxiAdrv9001_SetDgpioPin(axi_adrv9001_t *Instance, uint8_t Pin, uint8_t Level )
+{
+  uint32_t value;
+
+  AxiAdrv9001_GetDgpio( Instance, &value );
+
+  if( Level > 0 )
+    value |= ( 1UL << Pin );
+  else
+    value &= ~( 1UL << Pin );
+
+  Xil_Out32(Instance->Base + ADRV9001_DGPIO_IO_ADDR, value);
+
+}
+
+void AxiAdrv9001_ToggleDgpioPin(axi_adrv9001_t *Instance, uint8_t Pin )
+{
+  uint32_t value;
+  uint32_t mask = (uint32_t)( 1UL << Pin );
+
+  AxiAdrv9001_GetDgpio( Instance, &value );
+
+  if( (value & mask) == mask )
+    value &= ~( 1UL << Pin );
+  else
+    value |= ( 1UL << Pin );
+
+  Xil_Out32(Instance->Base + ADRV9001_DGPIO_IO_ADDR, value);
+}
 
 void AxiAdrv9001_SetDgpio(axi_adrv9001_t *Instance, uint32_t Value )
 {
