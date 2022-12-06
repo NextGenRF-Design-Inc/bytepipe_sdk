@@ -54,8 +54,8 @@
 #include "queue.h"
 
 #define CLI_STATUS_OFFSET			   (-3000)                  ///< Status code offset
-#define CLI_RX_STACK_SIZE               4096                    ///< Rx stack size in words
-#define CLI_TX_STACK_SIZE               1024                    ///< Tx stack size in words
+#define CLI_RX_STACK_SIZE               16384                   ///< Rx stack size in words
+#define CLI_TX_STACK_SIZE               16384                   ///< Tx stack size in words
 #define CLI_RX_TASK_PRIORITY            tskIDLE_PRIORITY + 2    ///< Rx task priority
 #define CLI_TX_TASK_PRIORITY            tskIDLE_PRIORITY + 3    ///< Tx task priority
 #define CLI_RX_QUEUE_SIZE               32768                   ///< Number of characters in rx queue

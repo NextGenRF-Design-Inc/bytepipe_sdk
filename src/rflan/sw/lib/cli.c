@@ -409,38 +409,37 @@ static void Cli_RxTask( cli_t *Instance )
        if(Instance->CmdBufLen > 0)
        {
          const char *Match = NULL;
-         uint8_t  MatchLen = 0xff;
+         uint8_t shortest_match_len = 0xff;
 
          for(uint16_t i = 0; i < Instance->CmdListLen; i++)
          {
            if(Instance->CmdList[i] == NULL) break;
 
-           /* Check if current text is at beginning of command in list */
-           if(strstr(Instance->CmdList[i]->cmd, Instance->CmdBuf) == Instance->CmdList[i]->cmd)
+           if( strlen(Instance->CmdList[i]->cmd) > Instance->CmdBufLen )
            {
-             /* Find the shortest match that doesn't match any previous match */
-             for(int j = 0; j < MatchLen; j++)
+             /* Check if buffer matches beginning of command */
+             if( strncmp( Instance->CmdList[i]->cmd, Instance->CmdBuf, Instance->CmdBufLen ) == 0 )
              {
-               if( Match == NULL)
-                 Match = Instance->CmdList[i]->cmd;
-
-               if((Instance->CmdList[i]->cmd[j] == '\0') || (Instance->CmdList[i]->cmd[j] == ' ') || (Instance->CmdList[i]->cmd[j] != Match[j]))
+               if( Match == NULL )
                {
-                 /* Compare to previous match */
-                 if( Match != NULL )
+                 Match = Instance->CmdList[i]->cmd;
+                 shortest_match_len = strlen(Instance->CmdList[i]->cmd);
+               }
+               else
+               {
+                 for(int j = 0; j < shortest_match_len; j++)
                  {
-                   MatchLen = strspn(Match, Instance->CmdList[i]->cmd);
-                   Match = Instance->CmdList[i]->cmd;
+                   if( Instance->CmdList[i]->cmd[j] != Match[j] )
+                   {
+                     shortest_match_len = j;
+                     break;
+                   }
                  }
-                 else
-                 {
-                   MatchLen = j;
-                 }
-                 break;
                }
              }
            }
          }
+
 
          if( Match != NULL )
          {
@@ -448,10 +447,10 @@ static void Cli_RxTask( cli_t *Instance )
            Cli_Printf(Instance, "\033[2K", Instance->CallbackRef );
            Cli_Printf(Instance, "\r", Instance->CallbackRef );
 
-           Instance->CmdBufLen = MatchLen;
+           Instance->CmdBufLen = shortest_match_len;
 
            /* Copy reference to current command */
-           strncpy(Instance->CmdBuf, Match, Instance->CmdBufLen);
+           memcpy((uint8_t*)Instance->CmdBuf, (uint8_t*)Match, shortest_match_len);
 
            /* Add NULL to end of command */
            Instance->CmdBuf[Instance->CmdBufLen] = 0;
