@@ -44,7 +44,7 @@ To access the CLI using ethernet connect an ethernet cable to the RFJ45 connecto
 
 Once connected CLI commands can be executed by typing in the Putty terminal.  The following shows the results of the `help` command which provides a list of supported CLI commands.  Users can easily implment their own custom commands supporting a range of custom applications.  For additional information on the CLI interface watch the following video found [here]() or by clicking the following figure.
 
-[![putty_02](docs/putty_02.png)]()
+[![putty_02](docs/putty_02.png)](https://youtu.be/2NFF3URMyvA)
 
 # Building Source
 
