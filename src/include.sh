@@ -66,7 +66,7 @@ build_sw()
   cp -rf $wrkDir/$project/rpu/Debug/rpu.elf.size $wrkDir/$project/artifacts
   cp -rf $wrkDir/$project/hwp/zynqmp_fsbl/fsbl_a53.elf $wrkDir/$project/artifacts
   cp -rf $wrkDir/$project/hwp/zynqmp_pmufw/pmufw.elf $wrkDir/$project/artifacts
-  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card/boot.bin $wrkDir/$project/artifacts  
+  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card/BOOT.BIN $wrkDir/$project/artifacts  
   cp -rf $wrkDir/$project/${project}_${device}.xsa $wrkDir/$project/artifacts    
   
   zip -rj "$wrkDir/$project/${project}_${device}_sdcard.zip" $project/sd_card/
