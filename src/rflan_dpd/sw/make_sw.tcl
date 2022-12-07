@@ -26,7 +26,7 @@ file delete -force -- $projDir/IDE.log
 setws $projDir
 
 # Create Hardware Platform
-platform create -name {hwp} -hw $proj_name/rflan_${argv}.xsa\
+platform create -name {hwp} -hw $proj_name/${proj_name}_${argv}.xsa\
 -proc {psu_cortexr5_0} -os {freertos10_xilinx} -fsbl-target {psu_cortexa53_0} -out $proj_name/
 
 platform write

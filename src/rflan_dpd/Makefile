@@ -25,4 +25,4 @@ sd_card:
   
 rflan_xsa:
 	mkdir $(PROJECT)
-	cp -rf rflan/rflan_$(DEV).xsa $(PROJECT)/
+	cp -rf rflan/rflan_$(DEV).xsa $(PROJECT)/$(PROJECT)_$(DEV).xsa
