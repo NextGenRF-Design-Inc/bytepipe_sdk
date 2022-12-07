@@ -42,7 +42,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "tca9548.h"
-#include "mem.h"
 
 
 int32_t Tca9548_GetChannel(tca9548_t *Instance, uint8_t *Channel)
