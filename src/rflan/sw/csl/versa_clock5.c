@@ -47,7 +47,6 @@
 #ifdef VERSA_CLOCK5_ENABLE
 
 #include "xparameters.h"
-#include "mem.h"
 #include "math.h"
 #include "sleep.h"
 
