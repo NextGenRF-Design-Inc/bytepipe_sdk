@@ -71,9 +71,9 @@ agc_config()
 fh_config()
 {
 	rm -rf tmp.txt		
-
-  FILE=$outDir/initializefhConfig*.c
-  if file $FILE; then   
+  
+  if [ -e $outDir/initializefhConfig*.c ] 
+  then
 
     grep -A 999 'adi_adrv9001_FhCfg_t' $outDir/initializefhConfig*.c >> tmp.txt || true
     sed -i 's/adi_adrv9001_FhCfg_t.*/.FhConfig = {/g' tmp.txt 
@@ -83,6 +83,9 @@ fh_config()
     sed -i 's/}\;/ /g' tmp.txt
     echo '},' >> tmp.txt	
     cat tmp.txt >> $outDir/initializeinit7.c
+    
+  else
+  	echo "$(printf '\033')[0;35mNo Frequency Hopping Table found $(printf '\033')[0m"    
   fi  
 }
   
