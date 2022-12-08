@@ -8,7 +8,7 @@ DEV := $(shell bash -c 'read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu
 all: clean rflan_xsa sw
 
 sw:
-	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk; \
+	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk
 	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $(DEV)
   
 clean:
