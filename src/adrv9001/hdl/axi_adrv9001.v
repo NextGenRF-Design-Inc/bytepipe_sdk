@@ -289,6 +289,18 @@ generate
   end  
   
   if( ENABLE_SPI_ILA) begin     
+  
+    reg  [9:0]  capture_control_cntr = 0;
+
+    wire capture_control_trig = (capture_control_cntr >= capture_control_cnt); 
+
+    always @(posedge s_axi_aclk) begin
+      if( capture_control_trig )
+        capture_control_cntr <= 0;
+      else
+        capture_control_cntr <= capture_control_cntr + 1;
+    end
+  
     ila_spi ila_spi_i (
       .clk(s_axi_aclk), // input wire clk
       .probe0(spi_csn), // input wire [0:0]  probe0  
@@ -301,7 +313,8 @@ generate
       .probe7(sspi_axis_tvalid), // input wire [0:0]  probe7 
       .probe8(sspi_axis_tready), // input wire [0:0]  probe8 
       .probe9(sspi_axis_tdata), // input wire [7:0]  probe9        
-      .probe10(spi_irq) // input wire [0:0]  probe10
+      .probe10(spi_irq), // input wire [0:0]  probe10
+      .probe11(capture_control_trig) // input wire [0:0]  probe11      
     );      
   end      
     
