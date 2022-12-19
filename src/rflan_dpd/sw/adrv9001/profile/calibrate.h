@@ -25,6 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_spi.h"
 #include "adi_adrv9001_ssi.h"

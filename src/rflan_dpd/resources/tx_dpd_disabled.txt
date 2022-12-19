@@ -1,7 +1,7 @@
 // This script enables the transmitter with DPD disabled
 
 // Set Attenuation to 0dB
-Adrv9001SetParam Tx2Attn 0
+Adrv9001SetParam Tx2Attn 7000
 
 // Enable Tx Boost
 Adrv9001SetParam Tx2Boost 1
@@ -10,7 +10,7 @@ Adrv9001SetParam Tx2Boost 1
 Adrv9001SetParam Tx2DpdEnable 0
 
 // Set SSI enable delay
-Adrv9001SetParam Tx2EnableDly 500
+Adrv9001SetParam Tx2EnableDly 10
 
 // Set SSI disable delay
 Adrv9001SetParam Tx2DisableDly 200

@@ -48,6 +48,14 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	AUTOGENERATOR_ERROR_HANDLER(error_code);
 	error_code = adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, false);
 	AUTOGENERATOR_ERROR_HANDLER(error_code);
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC0, false);
+	AUTOGENERATOR_ERROR_HANDLER(error_code);
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC1, false);
+	AUTOGENERATOR_ERROR_HANDLER(error_code);
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC2, false);
+	AUTOGENERATOR_ERROR_HANDLER(error_code);
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC3, false);
+	AUTOGENERATOR_ERROR_HANDLER(error_code);
 	AUTOGENERATOR_ERROR_HANDLER(error_code);
 
 	return error_code;
