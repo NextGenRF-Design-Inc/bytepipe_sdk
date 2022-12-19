@@ -11,39 +11,6 @@ download_sdk()
 	chmod -R 777 adrv9001-sdk
 }
   
-# This function builds the ADRV9001 programmable logic
-# Inputs: none
-#
-# Prerequisites:
-#	Cygwin: export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
-#	Linux: source /cygdrive/c/Xilinx/Vivado/2021.1/settings64.sh
-build_hdl()
-{
-	# Get Directories
-	projDir="$(dirname "$BASH_SOURCE")"	 
-  wrkDir=$(pwd)
-
-  # Create project directory
-	mkdir -p $wrkDir/adrv9001
-  
-	# Cleanup
-	rm -rf $wrkDir/adrv9001/vivado
-  rm -rf $wrkDir/adrv9001/*.xml
-  rm -rf $wrkDir/adrv9001/xgui  
-  
-	# Indicate Build
-	echo "$(printf '\033')[0;33mBuilding adrv9001 Programmable Logic $(printf '\033')[0m"
-	
-  # Remove cygwin if applicable
-	if [[ $projDir == *"cygdrive"* ]]; then
-		projDir=$(cygpath -w $projDir)
-	fi
-  
-	# Build with Vivado
-	vivado -mode batch -nojournal -quiet -source $projDir/hdl/make_hdl.tcl -notrace 
-}
-
-
 agc_config()
 {
 	rm -rf tmp.txt		 

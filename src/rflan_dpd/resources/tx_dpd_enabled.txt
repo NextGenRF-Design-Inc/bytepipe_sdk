@@ -7,7 +7,7 @@ Adrv9001SetParam Tx2Attn 0
 Adrv9001SetParam Tx2Boost 1
 
 // Set SSI enable delay
-Adrv9001SetParam Tx2SsiEnableDly 500
+Adrv9001SetParam Tx2EnableDly 500
 
 // Set SSI disable delay
 Adrv9001SetParam Tx2DisableDly 200

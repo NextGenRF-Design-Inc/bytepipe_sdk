@@ -1,12 +1,13 @@
 PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
+SRCDIR := $(realpath $(dir $(PROJECT_DIR)/../))
+SDK_SRCDIR := $(SRCDIR)
 
 .PHONY: all
 all: clean profile sdk hdl
 
-hdl: | $(PROJECT)/vivado
-$(PROJECT)/vivado:
-	source $(PROJECT_DIR)/adrv9001.sh; build_hdl
+hdl:
+	source $(SDK_SRCDIR)/include.sh; build_ip $(SRCDIR) $(PROJECT)
   
 profile:
 	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \
