@@ -124,6 +124,53 @@ build_hdl()
   
 }
 
+# This function abstracts a programmable logic build using Vivado.  The project 
+# and details of the build are defined in "$srcDir/$project/sw/make_sw.tcl" and 
+# executed by Vivado.
+#
+#  $1 = Source Directory
+#  $2 = project (ie. rflan)
+#
+# Prerequisites:
+#	  Cygwin: export PATH=/cygdrive/c/Xilinx/Vivado/2021.1/bin/:$PATH
+#	  Linux: source ~/home/Xilinx/Vivado/2021.1/settings64.sh
+#
+build_ip()
+{	
+  # Abstract Script Directory
+  scriptDir="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
+  if [[ $scriptDir == *"cygdrive"* ]]; then
+    scriptDir=$(realpath $(cygpath -w $scriptDir))
+  fi 
+  
+  # Abstract Source Directory
+  srcDir=$1
+  if [[ $srcDir == *"cygdrive"* ]]; then
+    srcDir=$(realpath $(cygpath -w $srcDir))
+  fi
+  
+  # Define project
+  project=$2
+    
+  # Abstract working directory
+  wrkDir=$(pwd)  
+   
+  # Make projct directory
+  mkdir -p $wrkDir/$project
+  
+	# Cleanup
+	rm -rf $wrkDir/$project/vivado
+  rm -rf $wrkDir/$project/*.xml
+  rm -rf $wrkDir/$project/xgui    
+  
+	# Indicate Build
+	echo "$(printf '\033')[0;33mBuilding $project Programmable Logic $(printf '\033')[0m"
+	    
+  # Build with Vivado    
+  vivado -mode batch -nojournal -quiet -source $scriptDir/make_ip.tcl -notrace -tclargs $project $srcDir/$project/hdl
+  
+}
+
 # This function programs flash using Vitis tools. 
 #
 #  $1 = project (ie. rflan)
