@@ -20,7 +20,7 @@ set_property ip_repo_paths . [current_fileset]
 update_ip_catalog
 
 # Create Source List
-set src_list [glob $srcDir/*.v $srcDir/*.xdc $srcDir/*.xci]
+set src_list [glob $srcDir/*.v $srcDir/*.xdc $srcDir/*.xci $srcDir/*.coe]
 
 # Import Sources
 import_files -norecurse -fileset [get_filesets sources_1] $src_list
