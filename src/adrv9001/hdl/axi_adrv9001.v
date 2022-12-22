@@ -71,6 +71,7 @@ module axi_adrv9001#(
   output wire [31:0]    rx1_axis_tdata,    
   output wire           rx1_axis_tvalid, 
   input  wire           rx1_axis_tready,  
+  output wire           rx1_axis_tlast,
   output wire           rx1_axis_aclk, 
     
   input  wire           rx2_dclk_p,          
@@ -85,6 +86,7 @@ module axi_adrv9001#(
   output wire [31:0]    rx2_axis_tdata,    
   output wire           rx2_axis_tvalid, 
   input  wire           rx2_axis_tready,
+  output wire           rx2_axis_tlast,  
   output wire           rx2_axis_aclk, 
 
   input  wire           tx1_ref_clk_p,     
@@ -466,6 +468,7 @@ adrv9001_rx#(
     
     .m_axis_tdata(rx1_axis_tdata),
     .m_axis_tvalid(rx1_axis_tvalid),
+    .m_axis_tlast(rx1_axis_tlast),    
     .m_axis_aclk(rx1_axis_aclk),
     
     .m_axi_data( rx1_ps_data),
@@ -510,6 +513,7 @@ adrv9001_rx #(
     
     .m_axis_tdata(rx2_axis_tdata),
     .m_axis_tvalid(rx2_axis_tvalid),
+    .m_axis_tlast(rx2_axis_tlast),
     .m_axis_aclk(rx2_axis_aclk),
     
     .m_axi_data( rx2_ps_data),    

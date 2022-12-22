@@ -49,11 +49,13 @@ always @(posedge clk) begin
   else
     valid_out <= valid_in;
   
-  if(valid_in) begin
+  if( rst ) begin
+    iReg <= 16'h0;
+    qReg <= 16'h0;    
+  end else if(valid_in) begin
     iReg <= i_in;
     qReg <= q_in;
-  end
-  else begin
+  end else begin
     iReg <= iReg;
     qReg <= qReg;
   end

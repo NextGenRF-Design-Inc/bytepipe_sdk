@@ -35,7 +35,7 @@ pkg_ip_core $proj_name
 # Run optional scripts
 package require fileutil
 foreach script [fileutil::findByPattern $srcDir *.tcl] {
-  source $script
+    source $script
 }
 
 # Create IP files and save

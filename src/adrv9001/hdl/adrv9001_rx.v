@@ -43,6 +43,7 @@ module adrv9001_rx#(
 // User data interface      
   output wire [31:0]  m_axis_tdata,          // Received IQ data sample
   output wire         m_axis_tvalid,         // IQ data sample valid  
+  output wire         m_axis_tlast,          // Last IQ sample before disable delay
   output wire         m_axis_aclk,
   output wire         m_axis_rstn,
   
@@ -166,6 +167,7 @@ enable_delay_cdc_i (
 
 reg  [15:0] ssi_enable_cnt = 0;
 reg  [15:0] ssi_disable_cnt = 0;
+reg         last = 0;
 
 always @( posedge dclk_div ) begin   
   
@@ -189,6 +191,13 @@ always @( posedge dclk_div ) begin
     ssi_enable <= 1'b1;
   else 
     ssi_enable <= 1'b0;  
+    
+  if( (ssi_enable_cnt == 16'h0) && (ssi_disable_cnt == 16'h1) && ( valid_aligned == 1'b1))
+    last <= 1'b1;
+  else 
+    last <= 1'b0;      
+    
+    
     
   m_axi_data <= {i_aligned, q_aligned};
     
@@ -230,7 +239,7 @@ adrv9001_serdes_aligner align(
 assign m_axis_tvalid = valid_aligned;
 assign m_axis_tdata = {i_aligned, q_aligned};
 assign m_axis_aclk = dclk_div;
-
+assign m_axis_tlast = last;
 
 generate
 
