@@ -69,6 +69,18 @@ ipx::remove_bus_interface rx2_axis [ipx::current_core]
 ipx::remove_bus_interface tx1_axis [ipx::current_core]
 ipx::remove_bus_interface tx2_axis [ipx::current_core]
 
+ipx::remove_bus_interface rx1_pl [ipx::current_core]
+ipx::remove_bus_interface rx2 [ipx::current_core]
+ipx::remove_bus_interface rx1 [ipx::current_core]
+ipx::remove_bus_interface tx1 [ipx::current_core]
+ipx::remove_bus_interface rx2_pl [ipx::current_core]
+ipx::remove_bus_interface tx1_pl [ipx::current_core]
+ipx::remove_bus_interface tx2 [ipx::current_core]
+ipx::remove_bus_interface tx2_pl [ipx::current_core]
+ipx::remove_bus_interface pl_irq [ipx::current_core]
+ipx::remove_bus_interface spi_irq [ipx::current_core]
+ipx::merge_project_changes ports [ipx::current_core]
+
 # Map adrv9001 Interfaces 
 ipx::add_bus_interface adrv9001 [ipx::current_core]
 set_property abstraction_type_vlnv nextgenrf.com:user:adrv9001_rtl:1.0 [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]

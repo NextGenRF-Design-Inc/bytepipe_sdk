@@ -35,8 +35,10 @@ pkg_ip_core $proj_name
 # Run optional scripts
 package require fileutil
 foreach script [fileutil::findByPattern $srcDir *.tcl] {
-    source $script
+  source $script
 }
+
+ipx::merge_project_changes ports [ipx::current_core]
 
 # Create IP files and save
 set_property core_revision 2 [ipx::current_core]
