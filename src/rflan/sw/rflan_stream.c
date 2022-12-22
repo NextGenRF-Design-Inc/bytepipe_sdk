@@ -45,7 +45,6 @@
 #include "rflan_stream.h"
 #include "xil_cache.h"
 #include <xil_io.h>
-#include "mem.h"
 #include "sleep.h"
 
 #ifdef RFLAN_STREAM_ENABLE
