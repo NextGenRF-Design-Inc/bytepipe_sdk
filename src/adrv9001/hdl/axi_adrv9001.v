@@ -49,6 +49,8 @@ module axi_adrv9001#(
   parameter ENABLE_PL_TX1_ENABLE    = 0,   
   parameter ENABLE_PL_TX2_ENABLE    = 0
   )(
+  input  wire           dev_clk_in,
+  output wire           dev_clk,
   output wire           rx1_en,
   output wire           rx2_en,
   output wire           tx1_en,
@@ -205,6 +207,7 @@ wire [31:0]   rx2_dbg;
 
 wire [9:0]    capture_control_cnt;
 
+assign dev_clk = dev_clk_in;
 
 assign dgpio_t = dgpio_ps_t;
 assign dgpio_ps_i = dgpio_i;
@@ -264,6 +267,7 @@ generate
       .s_axis_tdata(rx1_axis_tdata),
       .s_axis_tvalid(rx1_axis_tvalid),
       .s_axis_tready(rx1_axis_tready),
+      .s_axis_tlast(rx1_axis_tlast),           
       .dgpio_i(dgpio_i),
       .dgpio_o(dgpio_o),
       .dgpio_t(dgpio_t),
@@ -281,6 +285,7 @@ generate
       .s_axis_tdata(rx2_axis_tdata),
       .s_axis_tvalid(rx2_axis_tvalid),
       .s_axis_tready(rx2_axis_tready),
+      .s_axis_tlast(rx2_axis_tlast),      
       .dgpio_i(dgpio_i),
       .dgpio_o(dgpio_o),
       .dgpio_t(dgpio_t),

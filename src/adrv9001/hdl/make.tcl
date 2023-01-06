@@ -11,6 +11,7 @@
 
 # Create adrv9001 Interface
 create_bus_interface adrv9001 $proj_name
+add_interface_ports dev_clk_in in 1
 add_interface_ports rx1_en out 1
 add_interface_ports rx2_en out 1
 add_interface_ports tx1_en out 1
@@ -87,6 +88,7 @@ set_property abstraction_type_vlnv nextgenrf.com:user:adrv9001_rtl:1.0 [ipx::get
 set_property bus_type_vlnv nextgenrf.com:user:adrv9001:1.0 [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
 set_property interface_mode master [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
 set_property display_name adrv9001 [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+map_port adrv9001 dev_clk_in
 map_port adrv9001 rx1_en
 map_port adrv9001 rx2_en
 map_port adrv9001 tx1_en
@@ -146,6 +148,9 @@ ipx::associate_bus_interfaces -busif rx1_axis -clock rx1_axis_aclk [ipx::current
 ipx::associate_bus_interfaces -busif rx2_axis -clock rx2_axis_aclk [ipx::current_core]
 ipx::associate_bus_interfaces -busif tx1_axis -clock tx1_axis_aclk [ipx::current_core]
 ipx::associate_bus_interfaces -busif tx2_axis -clock tx2_axis_aclk [ipx::current_core]
+
+#ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces dev_clk -of_objects [ipx::current_core]]
+#set_property value 19200000 [ipx::get_bus_parameters FREQ_HZ -of_objects [ipx::get_bus_interfaces dev_clk -of_objects [ipx::current_core]]]
 
 # Update Parameter Types
 set_property widget {checkBox} [ipgui::get_guiparamspec -name "SWAP_DIFF_RX1_DCLK" -component [ipx::current_core] ]

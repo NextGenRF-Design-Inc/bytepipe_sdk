@@ -51,6 +51,12 @@
 #include "pib.h"
 #include "adrv9001.h"
 
+ typedef struct {
+   adrv9001_t	      *Adrv9001;            ///< ADRV9001 Instance
+   pib_t               Pib;                 ///< Pib Instance
+ }adrv9001_pib_t;
+
+
 /***************************************************************************//**
 *
 * \details  Initialize Driver
@@ -60,7 +66,7 @@
 * \return   status
 *
 *******************************************************************************/
-int32_t Adrv9001Pib_Initialize( adrv9001_t *Instance );
+ int32_t Adrv9001Pib_Initialize( adrv9001_pib_t *Instance, adrv9001_t *Adrv9001 );
 
 /***************************************************************************//**
 *
@@ -73,7 +79,7 @@ int32_t Adrv9001Pib_Initialize( adrv9001_t *Instance );
 * \return   status
 *
 *******************************************************************************/
-int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *str );
+int32_t Adrv9001Pib_SetByNameByString( adrv9001_pib_t *Instance, char *name, char *str );
 
 /***************************************************************************//**
 *
@@ -86,7 +92,7 @@ int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *s
 * \return   status
 *
 *******************************************************************************/
-int32_t Adrv9001Pib_GetStringByName( adrv9001_t *Instance, char *name, char *str );
+int32_t Adrv9001Pib_GetStringByName( adrv9001_pib_t *Instance, char *name, char *str );
 
 #ifdef __cplusplus
 }

@@ -46,7 +46,6 @@
  extern "C" {
 #endif
 
-#include "cli.h"
 #include "pib.h"
 
 #ifdef VERSA_CLOCK5_ENABLE

@@ -66,7 +66,6 @@
 #ifdef ADRV9001_USE_FS
 #include "ff.h"
 #endif
-#include "pib.h"
 #include "axi_adrv9001.h"
 
 #ifndef ADRV9001_STATUS_OFFSET
@@ -148,15 +147,15 @@ typedef struct {
   uint32_t                              Tx2TestModeData;
   uint32_t                              Rx1TestModeData;
   uint32_t                              Rx2TestModeData;
-  adi_adrv9001_ChannelEnableMode_e		  Tx1EnableMode;
-  adi_adrv9001_ChannelEnableMode_e		  Tx2EnableMode;
-  adi_adrv9001_ChannelEnableMode_e		  Rx1EnableMode;
-  adi_adrv9001_ChannelEnableMode_e		  Rx2EnableMode;
-  adi_adrv9001_GpioPin_e				        Rx1FrontendEnablePin;
-  adi_adrv9001_GpioPin_e				        Rx2FrontendEnablePin;
-  adi_adrv9001_GpioPin_e				        Tx1FrontendEnablePin;
-  adi_adrv9001_GpioPin_e				        Tx2FrontendEnablePin;
-  adi_adrv9001_GpioPin_e				        TcxoEnablePin;
+  adi_adrv9001_ChannelEnableMode_e      Tx1EnableMode;
+  adi_adrv9001_ChannelEnableMode_e      Tx2EnableMode;
+  adi_adrv9001_ChannelEnableMode_e      Rx1EnableMode;
+  adi_adrv9001_ChannelEnableMode_e      Rx2EnableMode;
+  adi_adrv9001_GpioPin_e                Rx1FrontendEnablePin;
+  adi_adrv9001_GpioPin_e                Rx2FrontendEnablePin;
+  adi_adrv9001_GpioPin_e                Tx1FrontendEnablePin;
+  adi_adrv9001_GpioPin_e                Tx2FrontendEnablePin;
+  adi_adrv9001_GpioPin_e                TcxoEnablePin;
   adi_adrv9001_AuxDac_e                 TcxoDacChannel;
 #ifdef ADRV9001_USE_FS
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
@@ -167,24 +166,23 @@ typedef struct {
 extern adrv9001_params_t Adrv9001Params;
 
 typedef struct {
-	adi_adrv9001_Device_t	      Device;            ///< ADI ADRV9001 Instance
+  adi_adrv9001_Device_t	      Device;            ///< ADI ADRV9001 Instance
   adrv9001_params_t          *Params;            ///< ADRV9001 Parameters
-  axi_adrv9001_t 			        Axi;               ///< AXI Instance
+  axi_adrv9001_t              Axi;               ///< AXI Instance
 #ifdef ADRV9001_USE_FS
   FIL                         LogFil;            ///< Log File
 #endif
-  pib_t                       Pib;               ///< Parameter information base
   uint8_t                     PendingReboot;     ///< ADRV9001 requires reboot due to profile changes
   XScuGic                    *IrqInstance;       ///< Processor Interrupt Controller Instance
 }adrv9001_t;
 
 typedef struct {
-	adi_adrv9001_GpioPin_e		  Rx1FrontendEnablePin;
-	adi_adrv9001_GpioPin_e		  Rx2FrontendEnablePin;
-	adi_adrv9001_GpioPin_e		  Tx1FrontendEnablePin;
-	adi_adrv9001_GpioPin_e		  Tx2FrontendEnablePin;
-	adi_adrv9001_GpioPin_e		  TcxoEnablePin;
-	uint8_t								      TcxoDacChannel;
+  adi_adrv9001_GpioPin_e      Rx1FrontendEnablePin;
+  adi_adrv9001_GpioPin_e      Rx2FrontendEnablePin;
+  adi_adrv9001_GpioPin_e      Tx1FrontendEnablePin;
+  adi_adrv9001_GpioPin_e      Tx2FrontendEnablePin;
+  adi_adrv9001_GpioPin_e      TcxoEnablePin;
+  uint8_t                     TcxoDacChannel;
 #ifdef ADRV9001_USE_FS
   char                       *LogFilename;           ///< Log Filename
 #endif

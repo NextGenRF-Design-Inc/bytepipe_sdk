@@ -22,6 +22,7 @@ module adrv9001_axis_ila(
   input  wire [31:0]  s_axis_tdata,
   input  wire         s_axis_tvalid,
   input  wire         s_axis_tready,
+  input  wire         s_axis_tlast,
   input  wire [15:0]  dgpio_i,
   input  wire [15:0]  dgpio_o,
   input  wire [15:0]  dgpio_t,
@@ -35,6 +36,7 @@ wire        adrv9001_enable_cdc;
 wire        pl_en_cdc;
 wire        s_axis_tvalid_cdc;
 wire        s_axis_tready_cdc;
+wire        s_axis_tlast_cdc;
 wire [15:0] dgpio_monitor_cdc;
 wire [15:0] dgpio_monitor;
 wire [15:0] enable_cnt_cdc;
@@ -80,11 +82,11 @@ disable_cnt_cdc_i (
 );
 
 cdc #(
-  .DATA_WIDTH(4) )
+  .DATA_WIDTH(5) )
 ctrl_cdc_i (
-  .s_cdc_tdata  ( { pl_en, adrv9001_enable, s_axis_tvalid, s_axis_tready } ),
+  .s_cdc_tdata  ( { pl_en, adrv9001_enable, s_axis_tvalid, s_axis_tready, s_axis_tlast } ),
   .m_cdc_clk    (clk),
-  .m_cdc_tdata  ( { pl_en_cdc, adrv9001_enable_cdc, s_axis_tvalid_cdc, s_axis_tready_cdc }  )
+  .m_cdc_tdata  ( { pl_en_cdc, adrv9001_enable_cdc, s_axis_tvalid_cdc, s_axis_tready_cdc, s_axis_tlast_cdc }  )
 );
 
 reg  [9:0]  capture_control_cntr = 0;
@@ -109,7 +111,8 @@ ila_axis ila_axis_i (
   .probe6(pl_en_cdc),
   .probe7(enable_cnt_cdc),
   .probe8(disable_cnt_cdc),
-  .probe9(capture_control_trig)
+  .probe9(capture_control_trig),
+  .probe10(s_axis_tlast_cdc)
 );
 
 endmodule

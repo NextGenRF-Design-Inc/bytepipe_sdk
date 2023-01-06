@@ -47,7 +47,6 @@
 #include "prime.h"
 #include "configure.h"
 #include "sleep.h"
-#include "adrv9001_pib.h"
 
 #define ADI_CHANNEL_RX1_INIT_MASK               (0x40)
 #define ADI_CHANNEL_RX2_INIT_MASK               (0x80)
@@ -223,10 +222,6 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   else
     Instance->Params->LogPath[0] = 0;
 #endif
-
-  /* Initialize PIB */
-  if((status = Adrv9001Pib_Initialize( Instance )) != 0)
-    return status;
 
   axi_adrv9001_init_t AxiInit = {
       .Base = Init->AxiBase,

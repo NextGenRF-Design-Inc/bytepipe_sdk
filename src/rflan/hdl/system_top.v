@@ -52,8 +52,8 @@ module system_top (
   output wire             adrv9001_tx2_qdata_n,
   output wire             adrv9001_tx2_qdata_p,
   output wire             adrv9001_tx2_strobe_n,
-  output wire             adrv9001_tx2_strobe_p
-    
+  output wire             adrv9001_tx2_strobe_p,
+  input  wire             adrv9001_dev_clk_in
 );       
           
 wire [15:0] dgpio_i;
@@ -86,6 +86,7 @@ system system_i
     .adrv9001_spi_miso(adrv9001_miso),
     .adrv9001_spi_mosi(adrv9001_mosi),
     .adrv9001_rstn(adrv9001_rstn),
+    .adrv9001_dev_clk_in(adrv9001_dev_clk_in),   
     .adrv9001_rx1_dclk_n(adrv9001_rx1_dclk_n),
     .adrv9001_rx1_dclk_p(adrv9001_rx1_dclk_p),
     .adrv9001_rx1_en(adrv9001_rx1_en),

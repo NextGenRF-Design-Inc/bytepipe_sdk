@@ -88,6 +88,7 @@ static rflan_uart_t   RflanUart;
 static XGpioPs        RflanGpio;
 static rflan_pib_t    RflanPib;
 static adrv9001_t     RflanAdrv9001;
+static adrv9001_pib_t Adrv9001Pib;
 static QueueHandle_t  RflanEvtQueue;
 static XIicPs         RflanIic0;
 
@@ -341,8 +342,12 @@ static int32_t Rflan_Initialize( void )
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
     printf("%s\r\n",StatusString(status));
 
+  /* Initialize ADRV9001 PIB */
+  if((status = Adrv9001Pib_Initialize( &Adrv9001Pib, &RflanAdrv9001 )) != 0)
+    printf("Adrv9001Cli %s\r\n",StatusString(status));
+
   /* Initialize ADRV9001 CLI */
-  if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001 )) != 0)
+  if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001, &Adrv9001Pib )) != 0)
     printf("Adrv9001Cli %s\r\n",StatusString(status));
 
   /* Execute Init Script */

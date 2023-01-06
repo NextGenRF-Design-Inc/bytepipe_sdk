@@ -167,7 +167,6 @@ enable_delay_cdc_i (
 
 reg  [15:0] ssi_enable_cnt = 0;
 reg  [15:0] ssi_disable_cnt = 0;
-reg         last = 0;
 
 always @( posedge dclk_div ) begin   
   
@@ -190,14 +189,7 @@ always @( posedge dclk_div ) begin
   if( (ssi_enable_cnt == 16'h0) && (ssi_disable_cnt > 16'h0) )
     ssi_enable <= 1'b1;
   else 
-    ssi_enable <= 1'b0;  
-    
-  if( (ssi_enable_cnt == 16'h0) && (ssi_disable_cnt == 16'h1) && ( valid_aligned == 1'b1))
-    last <= 1'b1;
-  else 
-    last <= 1'b0;      
-    
-    
+    ssi_enable <= 1'b0;     
     
   m_axi_data <= {i_aligned, q_aligned};
     
@@ -210,6 +202,7 @@ wire        valid_packed;
 wire [15:0] i_aligned;
 wire [15:0] q_aligned;
 wire        valid_aligned;
+wire        last_aligned;
 
 /* Pack Signals */
 adrv9001_serdes_pack pack(
@@ -233,13 +226,14 @@ adrv9001_serdes_aligner align(
   .valid_in(valid_packed),        // Valid input data
   .i_out(i_aligned),              // Packed output data
   .q_out(q_aligned),              // Packed output data
-  .valid_out(valid_aligned)       // Output data valid
+  .valid_out(valid_aligned),      // Output data valid
+  .last_out(last_aligned) 
 );
 
 assign m_axis_tvalid = valid_aligned;
 assign m_axis_tdata = {i_aligned, q_aligned};
 assign m_axis_aclk = dclk_div;
-assign m_axis_tlast = last;
+assign m_axis_tlast = last_aligned;
 
 generate
 

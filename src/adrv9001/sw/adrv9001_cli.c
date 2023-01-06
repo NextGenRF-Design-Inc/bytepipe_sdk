@@ -87,7 +87,7 @@ static void Adrv9001Cli_GetPortChannelParameter(cli_t *CliInstance, const char *
   }
 }
 
-static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t *Adrv9001)
+static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_pib_t *Adrv9001Pib)
 {
   char *name;
   char *value;
@@ -110,7 +110,7 @@ static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   Cli_GetParameter(cmd, 1, CliParamTypeStr, name);
 
   /* Get Value */
-  if((status = Adrv9001Pib_GetStringByName( Adrv9001, name, value )) != 0)
+  if((status = Adrv9001Pib_GetStringByName( Adrv9001Pib, name, value )) != 0)
   {
 	  Cli_Printf(CliInstance,"GetParam Error - %s\r\n",StatusString(status));
   }
@@ -123,7 +123,7 @@ static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   free(value);
 }
 
-static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_t *Adrv9001)
+static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_pib_t *Adrv9001Pib)
 {
   char *name;
   char *str;
@@ -148,7 +148,7 @@ static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   Cli_GetParameter(cmd, 2, CliParamTypeStr, str);
 
   /* Set parameter */
-  int32_t status = Adrv9001Pib_SetByNameByString( Adrv9001, name, str );
+  int32_t status = Adrv9001Pib_SetByNameByString( Adrv9001Pib, name, str );
 
   Cli_Printf(CliInstance,"SetParam %s\r\n",StatusString(status));
 
@@ -156,7 +156,7 @@ static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   free(str);
 }
 
-static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001_t *Adrv9001)
+static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001_pib_t *Adrv9001Pib)
 {
   Cli_Printf(CliInstance,"ADRV9001 Parameter Names:\r\n");
 
@@ -172,16 +172,16 @@ static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001
 
     Cli_GetParameter(cmd, 1, CliParamTypeStr, key);    
 
-    for(int i = 0; i < Adrv9001->Pib.PibLen; i++)
+    for(int i = 0; i < Adrv9001Pib->Pib.PibLen; i++)
     {
-      if(strstr( Adrv9001->Pib.Def[i].name, key ))
+      if(strstr( Adrv9001Pib->Pib.Def[i].name, key ))
       {
-        Cli_Printf(CliInstance,"  - %s", Adrv9001->Pib.Def[i].name);
+        Cli_Printf(CliInstance,"  - %s", Adrv9001Pib->Pib.Def[i].name);
         
-        for( int j = strlen(Adrv9001->Pib.Def[i].name); j < 42; j++ )
+        for( int j = strlen(Adrv9001Pib->Pib.Def[i].name); j < 42; j++ )
           Cli_Printf(CliInstance," ");
         
-        const char *str = Pib_TypeName( Adrv9001->Pib.Def[i].var_type );
+        const char *str = Pib_TypeName( Adrv9001Pib->Pib.Def[i].var_type );
 
         Cli_Printf(CliInstance,"%s\r\n", str);
       }
@@ -189,14 +189,14 @@ static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001
   }
   else
   {
-    for(int i = 0; i < Adrv9001->Pib.PibLen; i++)
+    for(int i = 0; i < Adrv9001Pib->Pib.PibLen; i++)
     {
-      Cli_Printf(CliInstance,"  - %s", Adrv9001->Pib.Def[i].name);
+      Cli_Printf(CliInstance,"  - %s", Adrv9001Pib->Pib.Def[i].name);
 
-      for( int j = strlen(Adrv9001->Pib.Def[i].name); j < 42; j++ )
+      for( int j = strlen(Adrv9001Pib->Pib.Def[i].name); j < 42; j++ )
         Cli_Printf(CliInstance," ");
 
-      const char *str = Pib_TypeName( Adrv9001->Pib.Def[i].var_type );
+      const char *str = Pib_TypeName( Adrv9001Pib->Pib.Def[i].var_type );
 
       Cli_Printf(CliInstance,"%s\r\n", str);
     }
@@ -377,13 +377,13 @@ cli_cmd_t Adrv9001CliGetParamDef =
     NULL
 };
 
-int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001 )
+int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001, adrv9001_pib_t *Adrv9001Pib )
 {
   Cli->CallbackRef = Cli;
 
-  Adrv9001CliGetParamDef.userData = Adrv9001;
-  Adrv9001CliSetParamDef.userData = Adrv9001;
-  Adrv9001CliListParamsDef.userData = Adrv9001;
+  Adrv9001CliGetParamDef.userData = Adrv9001Pib;
+  Adrv9001CliSetParamDef.userData = Adrv9001Pib;
+  Adrv9001CliListParamsDef.userData = Adrv9001Pib;
   Adrv9001CliToRfCalibratedDef.userData = Adrv9001;
   Adrv9001CliToRfPrimedDef.userData = Adrv9001;
   Adrv9001CliToRfEnabledDef.userData = Adrv9001;

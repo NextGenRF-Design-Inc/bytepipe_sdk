@@ -51,6 +51,7 @@ extern "C"
 #include <stdint.h>
 #include "cli.h"
 #include "adrv9001.h"
+#include "adrv9001_pib.h"
 
 /***************************************************************************//**
 *
@@ -62,7 +63,7 @@ extern "C"
 * \return   status
 *
 *******************************************************************************/
-int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001 );
+int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_t *Adrv9001, adrv9001_pib_t *Adrv9001Pib );
 
 
 #endif /* PHY_CLI_H_ */

@@ -23,17 +23,18 @@ module adrv9001_serdes_aligner(
   input   wire  [15:0]  i_in,           // 16-bit serdes data
   input   wire  [15:0]  q_in,           // 16-bit serdes data
   input   wire  [15:0]  strb_in,        // 16-bit serdes data  
-  input   wire			valid_in,       // Input data valid
+  input   wire          valid_in,       // Input data valid
   output  reg   [15:0]  i_out = 0,      // Shifted i/q data aligning with strobe
   output  reg   [15:0]  q_out = 0,      // Shifted i/q data aligning with strobe
-  output  reg           valid_out = 0   // dout valid
+  output  reg           valid_out = 0,  // dout valid
+  output  reg           last_out = 0    // last  
 );
     
 
 wire  [3:0] phase;
 reg  [15:0] iReg = 0;
 reg  [15:0] qReg = 0;
-
+reg         rstReg0 = 0;
 
 /* Determine Serdes Phase */
 adrv9001_rx_serdes_phase serdes_phase(
@@ -44,12 +45,25 @@ adrv9001_rx_serdes_phase serdes_phase(
 );
 
 always @(posedge clk) begin
-  if( rst )
+
+  if( rst == 1'b0 )
+    rstReg0 <= 1'b0;
+  else if( rst & valid_in )
+    rstReg0 <= 1'b1;
+  else
+    rstReg0 <= rstReg0;
+  
+  if( rst & valid_in & ~rstReg0 )
+    last_out <= 1'b1;
+  else
+    last_out <= 1'b0;
+
+  if( rstReg0 )
     valid_out <= 1'b0;
   else
     valid_out <= valid_in;
   
-  if( rst ) begin
+  if( rstReg0 ) begin
     iReg <= 16'h0;
     qReg <= 16'h0;    
   end else if(valid_in) begin

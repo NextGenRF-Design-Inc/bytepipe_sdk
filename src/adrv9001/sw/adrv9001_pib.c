@@ -220,7 +220,7 @@ static pib_def_t Adrv9001PibDef[] =
   { "TcxoDacChannel",                       offsetof(adrv9001_params_t, TcxoDacChannel),                                              PibTypeU8,        PIB_FLAGS_DEFAULT | ADRV9001_PIB_FLAG_SET_ACTION },
 };
 
-static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *name, char *str )
+static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_pib_t *Instance, char *name, char *str )
 {
   int32_t status = 0;
   adi_common_ChannelNumber_e Channel;
@@ -255,36 +255,36 @@ static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *
   if( strcmp( &name[3], "Attn") == 0 )
   {
     if( Channel == ADI_CHANNEL_1 )
-      status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, Channel, Instance->Params->Tx1Attn);
+      status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Adrv9001->Device, Channel, Instance->Adrv9001->Params->Tx1Attn);
     else
-      status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, Channel, Instance->Params->Tx2Attn);
+      status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Adrv9001->Device, Channel, Instance->Adrv9001->Params->Tx2Attn);
   }
 
   else if( strcmp( &name[3], "Boost") == 0 )
   {
     if( Channel == ADI_CHANNEL_1 )
-      status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, Channel, Instance->Params->Tx1Boost);
+      status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Adrv9001->Device, Channel, Instance->Adrv9001->Params->Tx1Boost);
     else
-      status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, Channel, Instance->Params->Tx2Boost);
+      status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Adrv9001->Device, Channel, Instance->Adrv9001->Params->Tx2Boost);
   }
 
   else if( strcmp( &name[3], "EnableMode") == 0 )
   {
 	  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
 	  {
-		  status = Adrv9001_SetEnableMode(Instance, Port, Channel, Instance->Params->Tx1EnableMode);
+		  status = Adrv9001_SetEnableMode(Instance->Adrv9001, Port, Channel, Instance->Adrv9001->Params->Tx1EnableMode);
 	  }
 	  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
 	  {
-		  status = Adrv9001_SetEnableMode(Instance, Port, Channel, Instance->Params->Tx2EnableMode);
+		  status = Adrv9001_SetEnableMode(Instance->Adrv9001, Port, Channel, Instance->Adrv9001->Params->Tx2EnableMode);
 	  }
 	  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
 	  {
-		  status = Adrv9001_SetEnableMode(Instance, Port, Channel, Instance->Params->Rx1EnableMode);
+		  status = Adrv9001_SetEnableMode(Instance->Adrv9001, Port, Channel, Instance->Adrv9001->Params->Rx1EnableMode);
 	  }
 	  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
 	  {
-		  status = Adrv9001_SetEnableMode(Instance, Port, Channel, Instance->Params->Rx2EnableMode);
+		  status = Adrv9001_SetEnableMode(Instance->Adrv9001, Port, Channel, Instance->Adrv9001->Params->Rx2EnableMode);
 	  }
 	  else
 	  {
@@ -295,26 +295,26 @@ static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *
   {
     if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
     {
-      if( Instance->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+      if( Instance->Adrv9001->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Adrv9001->Device, Instance->Adrv9001->Params->Tx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
           return Adrv9001Status_GpioErr;
     }
     else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
     {
-      if( Instance->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+      if( Instance->Adrv9001->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Adrv9001->Device, Instance->Adrv9001->Params->Tx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
           return Adrv9001Status_GpioErr;
     }
     else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
     {
-      if( Instance->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+      if( Instance->Adrv9001->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Adrv9001->Device, Instance->Adrv9001->Params->Rx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
           return Adrv9001Status_GpioErr;
     }
     else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
     {
-      if( Instance->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
+      if( Instance->Adrv9001->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+        if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Adrv9001->Device, Instance->Adrv9001->Params->Rx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
           return Adrv9001Status_GpioErr;
     }
     else
@@ -324,13 +324,13 @@ static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *
   }
   else if( strcmp( &name[3], "TcxoEnablePin") == 0 )
   {
-    if( Instance->Params->TcxoEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->TcxoEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
+    if( Instance->Adrv9001->Params->TcxoEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
+      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Adrv9001->Device, Instance->Adrv9001->Params->TcxoEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
         return Adrv9001Status_GpioErr;
   }
   else if( strcmp( &name[3], "TcxoDacChannel") == 0 )
   {
-    if(( status = Adrv9001_EnableDac(Instance, Instance->Params->TcxoDacChannel, true )) != 0 )
+    if(( status = Adrv9001_EnableDac(Instance->Adrv9001, Instance->Adrv9001->Params->TcxoDacChannel, true )) != 0 )
       return status;
   }
   
@@ -342,7 +342,7 @@ static int32_t Adrv9001Pib_SetActionByNameByString( adrv9001_t *Instance, char *
   return Adrv9001Status_Success;
 }
 
-static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char *name, char *str )
+static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_pib_t *Instance, char *name, char *str )
 {
   int32_t status = 0;
   adi_common_ChannelNumber_e Channel;
@@ -380,41 +380,41 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     adi_adrv9001_Carrier_t *tmp;
 
     if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
-      if( Instance->Params->clocks.tx1LoSelect == ADI_ADRV9001_LOSEL_LO1 )
-        tmp = &Instance->Params->Lo1Carrier;
+      if( Instance->Adrv9001->Params->clocks.tx1LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Adrv9001->Params->Lo1Carrier;
       else
-        tmp = &Instance->Params->Lo2Carrier;
+        tmp = &Instance->Adrv9001->Params->Lo2Carrier;
     else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
-      if( Instance->Params->clocks.tx2LoSelect == ADI_ADRV9001_LOSEL_LO1 )
-        tmp = &Instance->Params->Lo1Carrier;
+      if( Instance->Adrv9001->Params->clocks.tx2LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Adrv9001->Params->Lo1Carrier;
       else
-        tmp = &Instance->Params->Lo2Carrier;
+        tmp = &Instance->Adrv9001->Params->Lo2Carrier;
     else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
-      if( Instance->Params->clocks.rx1LoSelect == ADI_ADRV9001_LOSEL_LO1 )
-        tmp = &Instance->Params->Lo1Carrier;
+      if( Instance->Adrv9001->Params->clocks.rx1LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Adrv9001->Params->Lo1Carrier;
       else
-        tmp = &Instance->Params->Lo2Carrier;
+        tmp = &Instance->Adrv9001->Params->Lo2Carrier;
     else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
-      if( Instance->Params->clocks.rx2LoSelect == ADI_ADRV9001_LOSEL_LO1 )
-        tmp = &Instance->Params->Lo1Carrier;
+      if( Instance->Adrv9001->Params->clocks.rx2LoSelect == ADI_ADRV9001_LOSEL_LO1 )
+        tmp = &Instance->Adrv9001->Params->Lo1Carrier;
       else
-        tmp = &Instance->Params->Lo2Carrier;
+        tmp = &Instance->Adrv9001->Params->Lo2Carrier;
     else
       return Adrv9001Status_InvalidPib;
 
-    if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, tmp ) != 0)
+    if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Adrv9001->Device, Port, Channel, tmp ) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
     adi_adrv9001_ChannelState_e State;
 
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp->carrierFrequency_Hz);
 
-    if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &State ) != 0)
+    if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Adrv9001->Device, Port, Channel, &State ) != 0)
       return Adrv9001Status_InvalidState;
 
     if( State == ADI_ADRV9001_CHANNEL_CALIBRATED )
     {
-      if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, Port, Channel, tmp) != 0)
+      if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Adrv9001->Device, Port, Channel, tmp) != 0)
         return Adrv9001Status_CarrierFreqErr;
     }
     else
@@ -427,35 +427,35 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetTxData(&Instance->Axi, Channel, tmp);
+    AxiAdrv9001_SetTxData(&Instance->Adrv9001->Axi, Channel, tmp);
   }
 
   else if( strcmp( &name[3], "IqDataPath") == 0 )
   {
     axi_adrv9001_data_path_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetTxDataPath(&Instance->Axi, Channel, tmp);
+    AxiAdrv9001_SetTxDataPath(&Instance->Adrv9001->Axi, Channel, tmp);
   }
 
   else if( strcmp( name, "Dgpio") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetDgpio(&Instance->Axi, tmp);
+    AxiAdrv9001_SetDgpio(&Instance->Adrv9001->Axi, tmp);
   }
 
   else if( strcmp( name, "DgpioDir") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetDgpioDir(&Instance->Axi, tmp);
+    AxiAdrv9001_SetDgpioDir(&Instance->Adrv9001->Axi, tmp);
   }
 
   else if( strcmp( name, "VcTcxo") == 0 )
   {
     float tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    if((status = Adrv9001_SetVcTcxo(Instance, tmp)) != 0)
+    if((status = Adrv9001_SetVcTcxo(Instance->Adrv9001, tmp)) != 0)
       return status;
   }
 
@@ -466,11 +466,11 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &State);
 
     if( State == ADI_ADRV9001_CHANNEL_CALIBRATED )
-      status = Adrv9001_ToCalibrated(Instance, Port, Channel);
+      status = Adrv9001_ToCalibrated(Instance->Adrv9001, Port, Channel);
     else if( State == ADI_ADRV9001_CHANNEL_PRIMED )
-      status = Adrv9001_ToPrimed(Instance, Port, Channel);
+      status = Adrv9001_ToPrimed(Instance->Adrv9001, Port, Channel);
     else if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
-      status = Adrv9001_ToRfEnabled(Instance, Port, Channel );
+      status = Adrv9001_ToRfEnabled(Instance->Adrv9001, Port, Channel );
     else
       status = Adrv9001Status_InvalidState;
 
@@ -482,7 +482,7 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, tmp) != 0)
+    if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Adrv9001->Device, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, tmp) != 0)
       return Adrv9001Status_SsiSetErr;
   }
 
@@ -490,7 +490,7 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, tmp) != 0)
+    if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Adrv9001->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, tmp) != 0)
       return Adrv9001Status_SsiSetErr;
   }
 
@@ -503,20 +503,20 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     if( Port == ADI_TX )
     {
       adi_adrv9001_TxSsiTestModeCfg_t Cfg = {
-          .fixedDataPatternToCheck = (Channel == ADI_CHANNEL_1) ? Instance->Params->Tx1TestModeData : Instance->Params->Tx2TestModeData,
+          .fixedDataPatternToCheck = (Channel == ADI_CHANNEL_1) ? Instance->Adrv9001->Params->Tx1TestModeData : Instance->Adrv9001->Params->Tx2TestModeData,
           .testData = tmp };
 
-      if( adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
+      if( adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Adrv9001->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
         return Adrv9001Status_SsiTestModeErr;
     }
     else
     {
       adi_adrv9001_RxSsiTestModeCfg_t Cfg = {
-          .fixedDataPatternToTransmit = (Channel == ADI_CHANNEL_1) ? Instance->Params->Rx1TestModeData : Instance->Params->Rx2TestModeData,
+          .fixedDataPatternToTransmit = (Channel == ADI_CHANNEL_1) ? Instance->Adrv9001->Params->Rx1TestModeData : Instance->Adrv9001->Params->Rx2TestModeData,
           .testData = tmp
       };
 
-      if( adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
+      if( adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Adrv9001->Device, Channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
         return Adrv9001Status_SsiTestModeErr;
     }
   }
@@ -525,35 +525,35 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   {
     uint16_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);    
-		AxiAdrv9001_SetEnableDelay(&Instance->Axi, Port, Channel, tmp);
+		AxiAdrv9001_SetEnableDelay(&Instance->Adrv9001->Axi, Port, Channel, tmp);
   }
   
   else if( strcmp( &name[3], "DisableDly") == 0 )
   {
     uint16_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);    
-    AxiAdrv9001_SetDisableDelay(&Instance->Axi, Port, Channel, tmp);
+    AxiAdrv9001_SetDisableDelay(&Instance->Adrv9001->Axi, Port, Channel, tmp);
   } 
 
   else if( strcmp( name, "CaptureControlCount") == 0 )
   {
     uint16_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    AxiAdrv9001_SetCaptureControlCnt(&Instance->Axi, (uint32_t)tmp);
+    AxiAdrv9001_SetCaptureControlCnt(&Instance->Adrv9001->Axi, (uint32_t)tmp);
   }
 
   else if( strcmp( &name[3], "TestData") == 0 )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);    
-    AxiAdrv9001_SetTxData(&Instance->Axi, Channel, tmp);
+    AxiAdrv9001_SetTxData(&Instance->Adrv9001->Axi, Channel, tmp);
   }   
 
   else if( strcmp( &name[3], "CurGainIndex") == 0 )
   {
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
-    if( adi_adrv9001_Rx_Gain_Set(&Instance->Device, Channel, tmp) != 0)
+    if( adi_adrv9001_Rx_Gain_Set(&Instance->Adrv9001->Device, Channel, tmp) != 0)
       return Adrv9001Status_RxGainSetErr;
   }
 
@@ -562,7 +562,7 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
 
-    if((status = Adrv9001_SetSsiDataDelay( Instance, Port, Channel, tmp )) != 0 )
+    if((status = Adrv9001_SetSsiDataDelay( Instance->Adrv9001, Port, Channel, tmp )) != 0 )
       return status;
   }
 
@@ -571,7 +571,7 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
     uint8_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
 
-    if((status = Adrv9001_SetSsiClkDelay( Instance, Port, Channel, tmp )) != 0 )
+    if((status = Adrv9001_SetSsiClkDelay( Instance->Adrv9001, Port, Channel, tmp )) != 0 )
       return status;
   }
 
@@ -583,7 +583,7 @@ static int32_t Adrv9001Pib_SetVirtualByNameByString( adrv9001_t *Instance, char 
   return Adrv9001Status_Success;
 }
 
-static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *name, char *str )
+static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_pib_t *Instance, char *name, char *str )
 {
   int32_t status = 0;
   adi_common_ChannelNumber_e Channel;
@@ -619,7 +619,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   if( strcmp( &name[3], "CarrierFrequency") == 0 )
   {
     adi_adrv9001_Carrier_t AdiCarrier;
-    if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, Port, Channel, &AdiCarrier ) != 0)
+    if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Adrv9001->Device, Port, Channel, &AdiCarrier ) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&AdiCarrier.carrierFrequency_Hz, str );
@@ -628,42 +628,42 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "IqData") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetRxData(&Instance->Axi, Channel, &tmp );
+    AxiAdrv9001_GetRxData(&Instance->Adrv9001->Axi, Channel, &tmp );
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( &name[3], "IqDataPath") == 0 )
   {
     axi_adrv9001_data_path_t tmp;
-    AxiAdrv9001_GetTxDataPath(&Instance->Axi, Channel, &tmp );
+    AxiAdrv9001_GetTxDataPath(&Instance->Adrv9001->Axi, Channel, &tmp );
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( name, "Dgpio") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetDgpio(&Instance->Axi, &tmp);
+    AxiAdrv9001_GetDgpio(&Instance->Adrv9001->Axi, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( name, "DgpioDir") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetDgpioDir(&Instance->Axi, &tmp);
+    AxiAdrv9001_GetDgpioDir(&Instance->Adrv9001->Axi, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( name, "CaptureControlCount") == 0 )
   {
     uint32_t tmp;
-    AxiAdrv9001_GetCaptureControlCnt(&Instance->Axi, &tmp);
+    AxiAdrv9001_GetCaptureControlCnt(&Instance->Adrv9001->Axi, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
 
   else if( strcmp( &name[3], "RadioState") == 0 )
   {
     adi_adrv9001_ChannelState_e tmp;
-    if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, Port, Channel, &tmp ) != 0)
+    if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Adrv9001->Device, Port, Channel, &tmp ) != 0)
       return Adrv9001Status_InvalidState;
 
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
@@ -672,7 +672,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( name, "SiliconVersion") == 0 )
   {
     adi_adrv9001_SiliconVersion_t tmp;
-    if( adi_adrv9001_SiliconVersion_Get( &Instance->Device, &tmp ) != 0)
+    if( adi_adrv9001_SiliconVersion_Get( &Instance->Adrv9001->Device, &tmp ) != 0)
       return Adrv9001Status_ReadErr;
 
     sprintf(str, "%X%X", tmp.major, tmp.minor);
@@ -681,7 +681,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( name, "FirmwareVersion") == 0 )
   {
     adi_adrv9001_ArmVersion_t tmp;
-    if( adi_adrv9001_arm_Version( &Instance->Device, &tmp ) != 0)
+    if( adi_adrv9001_arm_Version( &Instance->Adrv9001->Device, &tmp ) != 0)
       return Adrv9001Status_ReadErr;
 
     sprintf(str,"%u.%u.%u.%u", tmp.majorVer, tmp.minorVer, tmp.maintVer, tmp.rcVer );
@@ -690,7 +690,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( name, "APIVersion") == 0 )
   {
     adi_common_ApiVersion_t tmp;
-    if( adi_adrv9001_ApiVersion_Get( &Instance->Device, &tmp ) != 0)
+    if( adi_adrv9001_ApiVersion_Get( &Instance->Adrv9001->Device, &tmp ) != 0)
       return Adrv9001Status_ReadErr;
 
     sprintf(str,"%lu.%lu.%lu\r\n\r\n", tmp.major, tmp.minor, tmp.patch);
@@ -699,7 +699,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( name, "Temp") == 0 )
   {
     int16_t tmp;
-    if( adi_adrv9001_Temperature_Get(&Instance->Device, &tmp) != 0 )
+    if( adi_adrv9001_Temperature_Get(&Instance->Adrv9001->Device, &tmp) != 0 )
       return Adrv9001Status_ReadErr;
 
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
@@ -708,7 +708,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "Rssi") == 0 )
   {
     uint32_t tmp;
-    if( adi_adrv9001_Rx_Rssi_Read( &Instance->Device, Channel, &tmp ) != 0)
+    if( adi_adrv9001_Rx_Rssi_Read( &Instance->Adrv9001->Device, Channel, &tmp ) != 0)
       return Adrv9001Status_ReadErr;
 
     float tmpf = ((float)tmp) / 1000;
@@ -718,7 +718,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( name, "VcTcxo") == 0 )
   {
     float tmp;
-    if( Adrv9001_GetVcTcxo(Instance, &tmp) != 0)
+    if( Adrv9001_GetVcTcxo(Instance->Adrv9001, &tmp) != 0)
       return Adrv9001Status_ReadErr;
 
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
@@ -727,7 +727,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "CurGainIndex") == 0 )
   {
     uint8_t tmp;
-    if( adi_adrv9001_Rx_Gain_Get(&Instance->Device, Channel, &tmp) != 0)
+    if( adi_adrv9001_Rx_Gain_Get(&Instance->Adrv9001->Device, Channel, &tmp) != 0)
       return Adrv9001Status_ReadErr;
 
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
@@ -736,29 +736,29 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   else if( strcmp( &name[3], "EnableDly") == 0 )
   {
     uint16_t tmp;    
-		AxiAdrv9001_GetEnableDelay(&Instance->Axi, Port, Channel, &tmp);
+		AxiAdrv9001_GetEnableDelay(&Instance->Adrv9001->Axi, Port, Channel, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }
   
   else if( strcmp( &name[3], "DisableDly") == 0 )
   {
     uint16_t tmp;    
-    AxiAdrv9001_GetDisableDelay(&Instance->Axi, Port, Channel, &tmp);
+    AxiAdrv9001_GetDisableDelay(&Instance->Adrv9001->Axi, Port, Channel, &tmp);
     Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }    
 
   else if( strcmp( &name[3], "TestData") == 0 )
   {
     uint32_t tmp;    
-    AxiAdrv9001_GetRxData(&Instance->Axi, Channel, &tmp);
-    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );    
+    AxiAdrv9001_GetRxData(&Instance->Adrv9001->Axi, Channel, &tmp);
+    Pib_ValueToString( &Instance->Pib, id, (uint8_t*)&tmp, str );
   }  
   
   else if( strcmp( &name[3], "SsiClockDelay") == 0 )
   {
     adi_adrv9001_SsiCalibrationCfg_t cal;
 
-    if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
+    if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Adrv9001->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
       return Adrv9001Status_SsiSetErr;
 
     if((Port == ADI_RX) && (Channel == ADI_CHANNEL_1))
@@ -784,7 +784,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   {
     adi_adrv9001_SsiCalibrationCfg_t cal;
 
-    if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
+    if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Adrv9001->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
       return Adrv9001Status_SsiSetErr;
 
     if((Port == ADI_RX) && (Channel == ADI_CHANNEL_1))
@@ -808,7 +808,7 @@ static int32_t Adrv9001Pib_GetVirtualStringByName( adrv9001_t *Instance, char *n
   return status;
 }
 
-int32_t Adrv9001Pib_GetStringByName( adrv9001_t *Instance, char *name, char *str )
+int32_t Adrv9001Pib_GetStringByName( adrv9001_pib_t *Instance, char *name, char *str )
 {
   int32_t id;
   int32_t status;
@@ -829,7 +829,7 @@ int32_t Adrv9001Pib_GetStringByName( adrv9001_t *Instance, char *name, char *str
   return status;
 }
 
-int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *str )
+int32_t Adrv9001Pib_SetByNameByString( adrv9001_pib_t *Instance, char *name, char *str )
 {
   int32_t id;
   int32_t status;
@@ -839,7 +839,7 @@ int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *s
     return status;
 
   if( (Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_REBOOT ) == ADRV9001_PIB_FLAG_REBOOT )
-    Instance->PendingReboot = 1;
+    Instance->Adrv9001->PendingReboot = 1;
 
   if( ( Instance->Pib.Def[id].flags & ADRV9001_PIB_FLAG_VIRTUAL ) == ADRV9001_PIB_FLAG_VIRTUAL )
   {
@@ -856,9 +856,12 @@ int32_t Adrv9001Pib_SetByNameByString( adrv9001_t *Instance, char *name, char *s
   return status;
 }
 
-int32_t Adrv9001Pib_Initialize( adrv9001_t *Instance )
+int32_t Adrv9001Pib_Initialize( adrv9001_pib_t *Instance, adrv9001_t *Adrv9001 )
 {
   int32_t status;
+
+  /* Copy Init */
+  Instance->Adrv9001 = Adrv9001;
 
   /* Create PIB Config */
   pib_init_t PibInit = {
