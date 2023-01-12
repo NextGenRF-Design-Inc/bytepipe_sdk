@@ -12,12 +12,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v67.1.1*/
-/* Firmware: v0.21.0.8*/
-/* Profile Generator: v0.50.11.0*/
+/* Device Driver Client: v68.0.6*/
+/* Firmware: v0.21.0.9*/
+/* Profile Generator: v0.51.3.0*/
 /* Stream Generator Assembly: v0.7.9.0*/
-/* Transceiver Evaluation Software: v0.21.0*/
-/* ADRV9001 Plugin: v0.21.0*/
+/* Transceiver Evaluation Software: v0.22.0*/
+/* ADRV9001 Plugin: v0.22.0*/
 
 #include "prime.h"
 
@@ -25,15 +25,10 @@ int prime(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 
-	AUTOGENERATOR_ERROR_HANDLER(error_code);
 	error_code = adi_adrv9001_Radio_Channel_ToPrimed(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1);
-	AUTOGENERATOR_ERROR_HANDLER(error_code);
 	error_code = adi_adrv9001_Radio_Channel_ToPrimed(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2);
-	AUTOGENERATOR_ERROR_HANDLER(error_code);
 	error_code = adi_adrv9001_Radio_Channel_ToPrimed(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1);
-	AUTOGENERATOR_ERROR_HANDLER(error_code);
 	error_code = adi_adrv9001_Radio_Channel_ToPrimed(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2);
-	AUTOGENERATOR_ERROR_HANDLER(error_code);
 
 	return error_code;
 }

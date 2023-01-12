@@ -1,3 +1,4 @@
+#include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_rx.h"
 #include "adi_adrv9001_rx_gaincontrol.h"

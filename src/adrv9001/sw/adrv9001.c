@@ -320,6 +320,14 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
 {
   int32_t status;
 
+  adi_adrv9001_ChannelEnableMode_e mode;
+
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
+    return Adrv9001Status_ReadErr;
+
+  if( Adrv9001_SetEnableMode(Instance, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+    return Adrv9001Status_EnableModeErr;
+
   if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
     return status;
 
@@ -418,6 +426,9 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
   if( adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &TxCfg ) != 0)
     return Adrv9001Status_SsiTestModeErr;
 
+  if( Adrv9001_SetEnableMode(Instance, port, channel, mode) != 0)
+    return Adrv9001Status_EnableModeErr;
+
   return status;
 }
 
@@ -505,14 +516,6 @@ int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port
   if( Adrv9001_IsPortEnabled( Instance, port, channel ) == false )
     return Adrv9001Status_Success;
 
-  adi_adrv9001_ChannelEnableMode_e mode;
-
-  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
-    return Adrv9001Status_ReadErr;
-
-  if( Adrv9001_SetEnableMode(Instance, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
-    return Adrv9001Status_EnableModeErr;
-
   if((status = Adrv9001_PerformSsiSweep( Instance, port, channel, results )) != 0)
     return status;
 
@@ -524,9 +527,6 @@ int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port
 
   if((status = Adrv9001_SetSsiClkDelay( Instance, port, channel, clkMax )) != 0)
     return status;
-
-  if( Adrv9001_SetEnableMode(Instance, port, channel, mode) != 0)
-    return Adrv9001Status_EnableModeErr;
 
   return Adrv9001Status_Success;
 }

@@ -10,7 +10,7 @@ h.Open('COM16');
 %% Enable Stream
 
 % Select Transmit Port
-TxPort = h.Tx1;
+TxPort = h.Tx2;
 
 % Transmit burst or continous using cyclic flag
 cyclic = 1;

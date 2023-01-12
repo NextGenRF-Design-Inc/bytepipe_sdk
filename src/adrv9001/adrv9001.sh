@@ -19,13 +19,13 @@ agc_config()
   echo ".Rx$1Agc = {" >> tmp.txt  
 
   if [[ $var == *"configure_agcCfg_1"* ]]; then
-   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg1.c -A 66 | tail -n66 >> tmp.txt || true
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg1.c -A 64 | tail -n64 >> tmp.txt || true
   elif [[ $var == *"configure_agcCfg_2"* ]]; then
-   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg2.c -A 66 | tail -n66 >> tmp.txt || true   
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg2.c -A 64 | tail -n64 >> tmp.txt || true   
   elif [[ $var == *"configure_agcCfg_3"* ]]; then
-   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg3.c -A 66 | tail -n66 >> tmp.txt || true     
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg3.c -A 64 | tail -n64 >> tmp.txt || true     
   elif [[ $var == *"configure_agcCfg_4"* ]]; then
-   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg4.c -A 66 | tail -n66 >> tmp.txt || true     
+   	grep -m 1 'adi_adrv9001_GainControlCfg_t' $outDir/configureagcCfg4.c -A 64 | tail -n64 >> tmp.txt || true     
   else
   	echo "$(printf '\033')[0;35mMising channel $1 AGC configuration $(printf '\033')[0m"
   fi

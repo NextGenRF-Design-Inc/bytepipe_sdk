@@ -1384,8 +1384,6 @@ adrv9001_params_t Adrv9001Params = {
 		.feedback_apd_high_hb_high = ADI_ADRV9001_GPIO_PIN_CRUMB_UNASSIGNED}
 , 
 		.extLna = {
-		.gpio = 0, 
-		.powerDown = 0, 
 		.settlingDelay = 0}
 , 
 		.rxQecFreezeEnable = true, 
@@ -1452,8 +1450,6 @@ adrv9001_params_t Adrv9001Params = {
 		.feedback_apd_high_hb_high = ADI_ADRV9001_GPIO_PIN_CRUMB_UNASSIGNED}
 , 
 		.extLna = {
-		.gpio = 0, 
-		.powerDown = 0, 
 		.settlingDelay = 0}
 , 
 		.rxQecFreezeEnable = true, 
