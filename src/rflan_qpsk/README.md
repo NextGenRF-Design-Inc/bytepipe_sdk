@@ -11,6 +11,15 @@ The example follows these steps:
 6. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
 
 ### 1. Navigate to QPSK simulink file and simulate
+  1. Run the following command in the matlab command window:
+```
+openExample('comm_hdlcoder/QPSKTxRxHDLExample')
+```
+  2. Double-click on "commhdlQPSKTxRx.slx" to open the simulink model associated with this example
+  3. Enter the following text in the matlab command window and hit "Enter" to run the example simulation script:
+```
+QPSKTxRxHDLExample
+```
 ### 2. Generate HDL
 ### 3. Simulate TX and RX blocks in Vivado
 ### 4. Generate IP
