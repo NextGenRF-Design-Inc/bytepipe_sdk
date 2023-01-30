@@ -23,12 +23,12 @@ QPSKTxRxHDLExample
 ### 2. Generate HDL
 We'll be generating two sets of HDL code. One for the QPSK Tx block and one for the QPSK Rx block. Let's start with Tx.
   1. Double click on the QPSK Tx block to see the system inside
-![image](https://user-images.githubusercontent.com/122583249/215589241-69d8ac15-4ebf-479c-8d40-476930ab5a0f.png)
   2. Click somewhere in the blank background to make sure no individual block in this scope is selected
-  3. Click the thumbtack button next to the "Code for" field to make sure you're generating code for the QPSK Tx block. 
+  3. Click the thumbtack button next to the "Code for" field to make sure you're generating code for the QPSK Tx block 
   It should look like this when you're done:<br>
  ![image](https://user-images.githubusercontent.com/122583249/215590267-54345150-1b8c-4d64-9408-0e6275ce6ba1.png)
-
+  4. Click the workflow advisor Icon to open the workflow advisor wizard
+  *A small window
 ### 3. Simulate TX and RX blocks in Vivado
 ### 4. Generate IP
 ### 5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
