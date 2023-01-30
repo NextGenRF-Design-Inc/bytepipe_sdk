@@ -15,20 +15,22 @@ The example follows these steps:
 ```
 openExample('comm_hdlcoder/QPSKTxRxHDLExample')
 ```
-  2. Double-click on "commhdlQPSKTxRx.slx" to open the simulink model associated with this example
+  2. Double-click on "commhdlQPSKTxRx.slx" to open the simulink model associated with this example.
   3. Enter the following text in the matlab command window and hit "Enter" to run the example simulation script:
 ```
 QPSKTxRxHDLExample
 ```
 ### 2. Generate HDL
 We'll be generating two sets of HDL code. One for the QPSK Tx block and one for the QPSK Rx block. Let's start with Tx.
-  1. Double click on the QPSK Tx block to see the system inside
-  2. Click somewhere in the blank background to make sure no individual block in this scope is selected
-  3. Click the thumbtack button next to the "Code for" field to make sure you're generating code for the QPSK Tx block 
+  1. Double click on the QPSK Tx block to see the system inside.
+  2. Click somewhere in the blank background to make sure no individual block in this scope is selected.
+  3. Click the thumbtack button next to the "Code for" field to make sure you're generating code for the QPSK Tx block .
   It should look like this when you're done:<br>
  ![image](https://user-images.githubusercontent.com/122583249/215590267-54345150-1b8c-4d64-9408-0e6275ce6ba1.png)
-  4. Click the workflow advisor Icon to open the workflow advisor wizard
-  *A small window
+  4. Click the workflow advisor Icon.
+  5. A small window will open so you can select the system/subsystem you'd like the workflow advisor to focus on. Choose the name that matches what shows up in the "Code for" field. The workflow advisor opens after your selection.<br>
+ ![image](https://user-images.githubusercontent.com/122583249/215621680-cc484861-7188-411e-83e1-e6a82db46dcb.png)
+
 ### 3. Simulate TX and RX blocks in Vivado
 ### 4. Generate IP
 ### 5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
