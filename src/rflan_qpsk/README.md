@@ -5,17 +5,17 @@
 The example follows these steps:
 1. Navigate to QPSK simulink file and simulate
 2. Generate HDL
-4. Simulate TX and RX blocks in Vivado
-5. Generate IP
-6. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
-7. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
+3. Simulate TX and RX blocks in Vivado
+4. Generate IP
+5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
+6. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
 
 ### 1. Navigate to QPSK simulink file and simulate
 ### 2. Generate HDL
-### 4. Simulate TX and RX blocks in Vivado
-### 5. Generate IP
-### 6. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
-### 7. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
+### 3. Simulate TX and RX blocks in Vivado
+### 4. Generate IP
+### 5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
+### 6. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
 
 <!--The rflan qpsk example utilizes the basic [rflan build](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/src/rflan/README.md) to send baseband information over a bandpass channel. 
 
