@@ -21,6 +21,8 @@ openExample('comm_hdlcoder/QPSKTxRxHDLExample')
 QPSKTxRxHDLExample
 ```
 ### 2. Generate HDL
+We'll be generating two sets of HDL code. One for the QPSK Tx block and one for the QPSK Rx block. Let's start with Tx.
+  1. Double click on the QPSK Tx block to see the system inside
 ### 3. Simulate TX and RX blocks in Vivado
 ### 4. Generate IP
 ### 5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
