@@ -1,7 +1,16 @@
 ![logo](../../docs/BytePipe_Logo.png)
 
 # RFLAN QPSK Example
-The rflan qpsk example utilizes the basic [rflan build](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/src/rflan/README.md) to send baseband information over a bandpass channel. 
+
+The example follows these steps:
+1. Navigate to QPSK simulink file and simulate
+2. Generate HDL
+3. Simulate TX and RX in Vivado
+4. Integrate TX and RX into basic bytepipe project
+
+
+
+<!--The rflan qpsk example utilizes the basic [rflan build](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/src/rflan/README.md) to send baseband information over a bandpass channel. 
 
 The example follows these steps:
 1. Generate input bits
@@ -45,4 +54,4 @@ We'll do this by streaming I and Q samples to the bytepipe through it's CLI. The
 ### 8. transform I and Q samples into output bits
 
 
-### 9. Compare received and transmitted symbols
+### 9. Compare received and transmitted symbols-->
