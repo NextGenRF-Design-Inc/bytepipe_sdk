@@ -34,8 +34,8 @@ The HDK uses the MIO pins combined with dual GTR channels to support a 4K Displa
 | DP_OE             | MIO29         | AUX channel output enable       |
 | DP_AUX_OUT        | MIO27         | AUX channel output              |
 | DP_AUX_IN         | MIO30         | AUX channel input               |
-| DP_HPD            | MIO28         | Data Pairs                      |
-| DP_LANE0_P        | GTR_TX[2]_P   | Hot-plug detect                 |
+| DP_HPD            | MIO28         | Hot-plug detect                 |
+| DP_LANE0_P        | GTR_TX[2]_P   | Data Pairs                      |
 | DP_LANE0_N        | GTR_TX[2]_N   | Data Pairs                      |
 | DP_LANE1_P        | GTR_TX[3]_P   | Data Pairs                      |
 | DP_LANE1_N        | GTR_TX[3]_N   | Data Pairs                      |
@@ -122,8 +122,8 @@ The HDK supports a 3pin 5V fan connection using J1.
 
 |  Signal    | J1 Pin  | Description     |
 |------------|---------|-----------------|
-| VCC5V0     | 1       | Fan Supply      |
-| GND        | 2       | Ground          |
+| GND        | 1       | Ground          |
+| VCC5V0     | 2       | Fan Supply      |
 |            | NC      | No Connect      |
 
 # RF SMA Ports
@@ -137,13 +137,13 @@ The HDK provides direct access to the SOM transmit and receive RF ports.  In add
 | RX1A        | J7          | Receive channel 1 with LNA            |
 | RX2A        | J13         | Receive channel 2 with LNA            |
 | RX1B        | J5          | Receive channel 1 direct connection   |
-| RX2B        | J9          | Receive channel 2 with LNA            |
+| RX2B        | J9          | Receive channel 2 direct connection   |
 
 ![lna_gain](lna_gain.png)
 
 # LNA
 
-The HDK includes an LNA connected to RX1A and RX2A.  Currently IIO-Oscilloscope does not support the enabling of the LNAs.  By default the LNAs are powered down resulting in roughly 20dB of insertion loss.  The LNAs can be enabled by applying a jumper between the LNA enable pin and 1.8V from the HDK J22 and J23.
+The HDK includes LNAs connected to RX1A and RX2A.  Currently IIO-Oscilloscope does not support the enabling of the LNAs.  By default the LNAs are powered down resulting in roughly 20dB of insertion loss.  The LNAs can be enabled by applying a jumper between the LNA enable pin and 1.8V from the HDK J22 and J23.
 
 |  LNA Enable Pin  | Receive Port  | Connector |Description                              |
 |------------------|---------------|-----------|-----------------------------------------|
