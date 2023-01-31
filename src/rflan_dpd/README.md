@@ -2,4 +2,4 @@
 
 # RFLAN DPD
 
-See [RFLAN](../rflan/README.md)
+See [RFLAN_DPD](../../../dpd_branch/src/rflan_dpd/README.md) in the dpd_branch.
