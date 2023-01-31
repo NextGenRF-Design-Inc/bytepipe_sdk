@@ -5,10 +5,10 @@
 The example follows these steps:
 1. Navigate to QPSK simulink file and simulate
 2. Generate HDL
-3. Simulate TX and RX blocks in Vivado
+3. Simulate Tx and Rx blocks in Vivado
 4. Generate IP
-5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
-6. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
+5. Integrate Tx and Rx blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
+6. Integrate Tx and Rx into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
 
 ### 1. Navigate to QPSK simulink file and simulate
   1. Run the following command in the matlab command window:
@@ -31,10 +31,16 @@ We'll be generating two sets of HDL code. One for the QPSK Tx block and one for 
   5. A small window will open so you can select the system/subsystem you'd like the workflow advisor to focus on. Choose the name that matches what shows up in the "Code for" field. The workflow advisor opens after your selection.<br>
  ![image](https://user-images.githubusercontent.com/122583249/215621680-cc484861-7188-411e-83e1-e6a82db46dcb.png)
 
-### 3. Simulate TX and RX blocks in Vivado
-### 4. Generate IP
-### 5. Integrate TX and RX blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
-### 6. Integrate TX and RX into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
+### 3. Generate IP
+### 4. Simulate Tx and Rx blocks in Vivado
+  1. Open new Vivado project and call it "QPSKTxRxDirectConnect". <br> ` (not done - include more steps and/or pictures) `
+  2. Import both blocks and connect the outputs of Tx to the inputs of Rx. <br>`(not done - include more steps and/or pictures)`
+  3. Clone the rflan project<br>`(not done - include simulation testbench in rflan source files - also include specific cloning commands)`
+  4. Import `(testbench_filename)` as a simulation source <br>`(not done - include more steps and/or pictures)`
+  5. Run Simulation <br>`(not done - include more steps and/or pictures)`
+### 5. Integrate Tx and Rx blocks into basic bytepipe project and simulate (excluding interaction with ADRV9002)
+
+### 6. Integrate Tx and Rx into basic bytepipe project and perform live test (including interaction with ADRV9002 - basic loopback configuration)
 
 <!--The rflan qpsk example utilizes the basic [rflan build](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/src/rflan/README.md) to send baseband information over a bandpass channel. 
 
@@ -66,7 +72,10 @@ Now it's time to take the baseband signal produced in step 2 and modulate it to 
 We'll do this by streaming I and Q samples to the bytepipe through it's CLI. The attached model will handle this. (!!attach model!!)
 
 ### 4. Bytepipe streams samples to ADRV9002 RF IC for modulation
-
+```javascript
+var s = "JavaScript syntax highlighting";
+alert(s);
+```
 
 ### 5. Bandpass signal interacts with communication channel
 
