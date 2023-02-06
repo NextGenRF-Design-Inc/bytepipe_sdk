@@ -1,7 +1,7 @@
 [![logo](../BytePipe_Logo.png)](../../README.md)
 
 # Overview
-In order to boot the BytePipe SOM from a micro-SD card on a carrier board such as the [HDK](../main/docs/hardware/hdk/hdk.md) or [RadioCarbon](../main/docs/hardware/RadioCarbon/RadioCarbon.md), the card needs to be properly formatted and contain the appropriate files.
+In order to boot the BytePipe SOM from a micro-SD card on a carrier board such as the [HDK](../hardware/hdk/hdk.md) or [RadioCarbon](../hardware/RadioCarbon/RadioCarbon.md), the card needs to be properly formatted and contain the appropriate files.
 
 If you purchased the HDK Kit with SOM, a pre-formatted micro-SD card was included which contained a release of the RFLAN application.  To boot using a different version of RFLAN simply insert the micro-SD card into a laptop or PC, delete the existing files on the card, and copy the new files to the root folder.
 
