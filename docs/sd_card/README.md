@@ -83,44 +83,47 @@ If using Microsoft Windows (Windows 10), follow the steps below:
 If using a Linux OS (Ubuntu 22.04 LTS), follow the steps below:
 
 1. Insert the micro-SD card into the PC, using an adapter if required.
-2. If the card is already formatted, skip to step 3.  If the card is not formatted, the card may not be mounted automatically.  Open "Disks" from the Application menu (located in the "Utilities" folder or by searching for "disks").
-![usd01](./usd01.png)
+2. If the card is already formatted, skip to step 3.  If the card is not formatted, the card may not be mounted automatically.
 
-  - On the left-hand side, select the device containing the micro-SD card.
-
-    ![usd02](./usd02.png)
+    - Open "Disks" from the Application menu (located in the "Utilities" folder or by searching for "disks").
   
-  - Click the "Additional partition options" button (the small gear icon) in the lower-left corner of the "Volumes" detail.
+      ![usd01](./usd01.png)
 
-    ![usd03](./usd03.png)
+    - On the left-hand side, select the device containing the micro-SD card.
 
-  - Then select "Format Partition..."
+      ![usd02](./usd02.png)
+  
+    - Click the "Additional partition options" button (the small gear icon) in the lower-left corner of the "Volumes" detail.
 
-    ![usd04](./usd04.png)
+      ![usd03](./usd03.png)
 
-  - A window will pop up with options.  If the card is 32GB or less, it should default to FAT for the file system.  Ensure this is the case, leave the other settings at default, and then click "Next".  For larger cards, see [Additional Details](#additional-details) below.
+    - Then select "Format Partition..."
 
-    ![usd05](./usd05.png)
+      ![usd04](./usd04.png)
 
-  - On the next screen, click "Format".
+    - A window will pop up with options.  If the card is 32GB or less, it should default to FAT for the file system.  Ensure this is the case, leave the other settings at default, and then click "Next".  For larger cards, see [Additional Details](#additional-details) below.
 
-    ![usd06](./usd06.png)
+      ![usd05](./usd05.png)
 
-  - When it is complete, the volume should now show the formatting details.
+    - On the next screen, click "Format".
 
-    ![usd07](./usd07.png)
+      ![usd06](./usd06.png)
 
-  - Click the "Mount selected partition" button (the small play icon) in the lower-left corner of the "Volumes" detail to mount the drive.
+    - When it is complete, the volume should now show the formatting details.
 
-    ![usd08](./usd08.png)
+      ![usd07](./usd07.png)
 
-  - Next, open "Files" from the Application menu by searching for "files".
+    - Click the "Mount selected partition" button (the small play icon) in the lower-left corner of the "Volumes" detail to mount the drive.
 
-    ![usd09](./usd09.png)
+      ![usd08](./usd08.png)
 
-  - Select the card volume in the navigation pane on the left-hand side.  It should appear empty.  **Note:** If the card was originally formatted using Windows, a folder titled "System Volume Information" may exist.  These files should be left as-is.
+    - Next, open "Files" from the Application menu by searching for "files".
 
-    ![usd10](./usd10.png)
+      ![usd09](./usd09.png)
+
+    - Select the card volume in the navigation pane on the left-hand side.  It should appear empty.  **Note:** If the card was originally formatted using Windows, a folder titled "System Volume Information" may exist.  These files should be left as-is.
+
+      ![usd10](./usd10.png)
 
 3. Download the desired files from the GitHub repo using Firefox.  These will be in a .zip file.  If downloading from the latest releases link, click on the desired .zip file hyperlink.
 
