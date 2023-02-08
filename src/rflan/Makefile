@@ -16,6 +16,9 @@ sw:
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk
 	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $(DEV)
    
+fsbl:
+	cp $(SDK_SRCDIR)/fsbl/sw/xfsbl_main.c $(PROJECT)/hwp/zynqmp_fsbl   
+  
 clean:
 	rm -rf $(PROJECT)
   
