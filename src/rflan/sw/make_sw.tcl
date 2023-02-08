@@ -29,6 +29,8 @@ setws $projDir
 platform create -name {hwp} -hw $proj_name/${proj_name}_${argv}.xsa\
 -proc {psu_cortexr5_0} -os {freertos10_xilinx} -fsbl-target {psu_cortexa53_0} -out $proj_name/
 
+importsources -name hwp -path $srcDir/fsbl/sw/xfsbl_main.c -target-path zynqmp_fsbl
+
 platform write
 platform generate -domains 
 platform active {hwp}
@@ -51,6 +53,9 @@ bsp write
 bsp reload
 catch {bsp regenerate}
 platform generate
+
+
+
 
 # Create RPU Application
 app create -name rpu -platform hwp -os {freertos10_xilinx} -proc {psu_cortexr5_0} -template {Empty Application(C)}
@@ -97,4 +102,5 @@ app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/thir
 app config -name rpu include-path $srcDir/axi_dma/sw
 
 app config -name rpu libraries m
+
 app build all
