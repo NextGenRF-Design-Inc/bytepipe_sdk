@@ -52,9 +52,6 @@ bsp reload
 catch {bsp regenerate}
 platform generate
 
-# Copy custom FSBL
-cp $srcDir/fsbl/sw/xfsbl_main.c $wrkDir/$proj_name/hwp/zynqmp_fsbl
-
 # Create RPU Application
 app create -name rpu -platform hwp -os {freertos10_xilinx} -proc {psu_cortexr5_0} -template {Empty Application(C)}
 

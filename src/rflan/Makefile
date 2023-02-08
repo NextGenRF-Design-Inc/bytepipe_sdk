@@ -5,7 +5,7 @@ SDK_SRCDIR := $(SRCDIR)
 DEV := $(shell bash -c 'read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " dev; echo $$dev-sbva484-1-e')
 
 .PHONY: all
-all: clean hdl sw
+all: clean hdl sw fsbl
 
 hdl:
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl
