@@ -133,7 +133,7 @@ If using a Linux OS (Ubuntu 22.04 LTS), follow the steps below:
 
 ![ugit02](./ugit02.png)
 
-5. Click on the up arrow by the file in the lower-left and select "Show in Folder".  Alternatively, open Files and navigate to the "Downloads" folder.
+5. Alternatively, open Files and navigate to the "Downloads" folder.
 
 ![uzip01](./uzip01.png)
 
