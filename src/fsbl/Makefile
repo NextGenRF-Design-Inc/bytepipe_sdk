@@ -5,7 +5,7 @@ SDK_SRCDIR := $(SRCDIR)
 DEV := $(shell bash -c 'read -p "Select Device [ xczu3cg, xczu3eg, xczu2cg, xczu2eg ]: " dev; echo $$dev-sbva484-1-e')
 
 .PHONY: all
-all: clean hdl sw fsbl
+all: clean hdl sw
 
 hdl:
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl
@@ -16,9 +16,6 @@ sw:
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk
 	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $(DEV)
    
-fsbl:
-	cp $(SDK_SRCDIR)/fsbl/sw/xfsbl_main.c $(PROJECT)/hwp/zynqmp_fsbl   
-  
 clean:
 	rm -rf $(PROJECT)
   

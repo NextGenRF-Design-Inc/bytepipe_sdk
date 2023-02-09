@@ -1,0 +1,10 @@
+/include/ "system-conf.dtsi"
+
+&sdhci1{
+	status = "okay";
+	disable-wp;
+	max-frequency = <50000000>;
+	no-1-8-v;
+};
+
+
