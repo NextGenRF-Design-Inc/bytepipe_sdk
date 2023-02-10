@@ -5,11 +5,11 @@ SDK_SRCDIR := $(SRCDIR)
 xsa_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired .xsa (ie. rflan/): " xsafile; echo $$xsafile')
 fsbl_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired fsbl.elf (ie. rflan/artifacts/fsbl_a53.elf): " fsblfile; echo $$fsblfile')
 rpu_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired rpu.elf (ie. rflan/artifacts/rpu.elf): " rpufile; echo $$rpufile')
-SD_DIR := $(shell bash -c 'read -p "Enter relative or absolute path to SD card (ie. /media/ngrf/BOOT): " sddir; echo $$sddir')
+SD_DIR ?= $(shell bash -c 'read -p "Enter relative or absolute path to SD card (ie. /media/ngrf/BOOT): " sddir; echo $$sddir')
 
 .PHONY:	all
 
-all: clean kernel device_tree custom_fsbl package_apu&rpu
+all: clean kernel device_tree custom_fsbl package_apu_rpu sdcard
 
 clean:
 	rm -rf bpLinux
@@ -34,10 +34,11 @@ package_apu_rpu:
 	petalinux-package -p bpLinux/ --force --boot --fsbl --fpga --add $(rpu_file) --cpu=r5-0 --u-boot
 
 sdcard:
-	cp -f bpLinux/images/linux/BOOT.BIN $(SD_DIR)
-	cp -f bpLinux/images/linux/boot.scr $(SD_DIR)
-	cp -f bpLinux/images/linux/Image $(SD_DIR)
-	cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot $(SD_DIR)
-	#sudo tar -xf bpLinux/images/linux/rootfs.tar.gz -C $(SD_DIR)
+	mysd=$(SD_DIR) ;\
+	cp -f bpLinux/images/linux/BOOT.BIN $$mysd ;\
+	cp -f bpLinux/images/linux/boot.scr $$mysd ;\
+	cp -f bpLinux/images/linux/Image $$mysd ;\
+	cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot $$mysd ;\
+	#sudo tar -xf bpLinux/images/linux/rootfs.tar.gz -C $$mysd ;\
 
 
