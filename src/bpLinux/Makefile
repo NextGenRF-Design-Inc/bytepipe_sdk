@@ -2,10 +2,10 @@ PROJECT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PROJECT := $(shell basename $(PROJECT_DIR))
 SRCDIR := $(realpath $(dir $(PROJECT_DIR)/../))
 SDK_SRCDIR := $(SRCDIR)
-xsa_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired .xsa: " xsafile; echo $$xsafile')
-fsbl_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired fsbl.elf: " fsblfile; echo $$fsblfile')
-rpu_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired rpu.elf: " rpufile; echo $$rpufile')
-SD_DIR= $(shell bash -c 'read -p "Enter relative or absolute path to SD card (ie. /media/ngrf/BOOT): " sddir; echo $$sddir')
+xsa_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired .xsa (ie. rflan/): " xsafile; echo $$xsafile')
+fsbl_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired fsbl.elf (ie. rflan/artifacts/fsbl_a53.elf): " fsblfile; echo $$fsblfile')
+rpu_file = $(shell bash -c 'read -p "Enter relative or absolute path of desired rpu.elf (ie. rflan/artifacts/rpu.elf): " rpufile; echo $$rpufile')
+SD_DIR := $(shell bash -c 'read -p "Enter relative or absolute path to SD card (ie. /media/ngrf/BOOT): " sddir; echo $$sddir')
 
 .PHONY:	all
 
@@ -30,7 +30,7 @@ custom_fsbl:
 package_apu:
 	petalinux-package -p bpLinux/ --force --boot --fsbl --fpga --u-boot
 
-package_apu&rpu:
+package_apu_rpu:
 	petalinux-package -p bpLinux/ --force --boot --fsbl --fpga --add $(rpu_file) --cpu=r5-0 --u-boot
 
 sdcard:
