@@ -9,7 +9,7 @@ SD_DIR ?= $(shell bash -c 'read -p "Enter relative or absolute path to SD card (
 
 .PHONY:	all
 
-all: clean kernel device_tree custom_fsbl package_apu_rpu sdcard
+all: clean kernel device_tree custom_fsbl package_apu sdcard
 
 clean:
 	rm -rf bpLinux
@@ -35,10 +35,9 @@ package_apu_rpu:
 
 sdcard:
 	mysd=$(SD_DIR) ;\
-	cp -f bpLinux/images/linux/BOOT.BIN $$mysd ;\
-	cp -f bpLinux/images/linux/boot.scr $$mysd ;\
-	cp -f bpLinux/images/linux/Image $$mysd ;\
-	cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot $$mysd ;\
-	#sudo tar -xf bpLinux/images/linux/rootfs.tar.gz -C $$mysd ;\
+	sudo cp -f bpLinux/images/linux/BOOT.BIN $$mysd ;\
+	sudo cp -f bpLinux/images/linux/boot.scr $$mysd ;\
+	sudo cp -f bpLinux/images/linux/Image $$mysd ;\
+	sudo cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot $$mysd
 
 
