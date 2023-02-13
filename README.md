@@ -24,7 +24,7 @@ If you are new to the BytePipe start with the [rflan](src/rflan/README.md) appli
 | [petalinux](src/petalinux/README.md)                                | Petalinux build                                               | 
 | [radio_carbon](docs/hardware/RadioCarbon/RadioCarbon.md)            | Radio Carbon RF Front End User Guide                          | 
 | [rflan](src/rflan/README.md)                                        | Production example streaming IQ data to RPU                   | 
-| [rflan_dpd](src/rflan_dpd/README.md)                           | Digital Pre-Distortion example using Radio Carbon and BytePipe SOM | 
+| [rflan_dpd](src/rflan_dpd)                                     | Digital Pre-Distortion example using Radio Carbon and BytePipe SOM | 
 | [rflan_qpsk](src/rflan_qpsk/README.md)                              | QPSK modem example using RPU and Mathworks HDL Coder          | 
 | [sd_card](docs/sd_card/README.md)                                   | Detailed information on supported micro-SD cards and formats  | 
 | [Video Tutorials](https://www.youtube.com/playlist?list=PL1O6z4HXixy3uAJCNkjg2Hvm9Dcu4XAUr) | Playlist of video tutorials           | 
