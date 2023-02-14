@@ -19,7 +19,7 @@ The changes to the FSBL include programming of the versa clock5 clock device on 
 
 | ZynqMp Port | 5P49V5935 Port | Clock Frequency |
 |-------------|----------------|-----------------|
-| GTR_REFCLK0 | OUT3           | 100MHz          |
-| GTR_REFCLK1 | OUT4           | 100MHz          |
+| GTR_REFCLK0 | OUT3           | 52MHz           |
+| GTR_REFCLK1 | OUT4           | 125MHz          |
 | GTR_REFCLK2 | OUT2           | 27MHz           |
 | GTR_REFCLK3 | OUT1           | 300MHz          |
