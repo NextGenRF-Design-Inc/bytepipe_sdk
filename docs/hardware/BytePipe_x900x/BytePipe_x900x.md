@@ -20,68 +20,128 @@ The following shows a block diagram of the BytePipe_x900x Hardware Architecture.
 J600 is a board to board connector which provides access to all of the digital signals on the SOM.  Some of these signals provide hardcoded functionality while others can be configured by the BBP.  The mating connector used on the host board is JAE Electronics WR-120S-VHF30-N1.  For additional information see the datasheet on [NextGen RF Design's website.](https://www.nextgenrf.com/products/rf-system-on-a-module/) 
 
 
-|       Description             |    Signal      | Pin | Pin |    Signal      |       Description             |
-|-------------------------------|----------------|-----|-----|----------------|-------------------------------|
-| Gigabit transceiver data      | GTR_TX3_P      | 1   | 2   | GTR_RX3_P      | Gigabit transceiver data      |
-| Gigabit transceiver data      | GTR_TX3_N      | 3   | 4   | GTR_RX3_N      | Gigabit transceiver data      |
-| Ground                        | GND            | 5   | 6   | GND            | Ground                        |
-| Gigabit transceiver data      | GTR_TX2_P      | 7   | 8   | GTR_RX2_P      | Gigabit transceiver data      |
-| Gigabit transceiver data      | GTR_TX2_N      | 9   | 10  | GTR_RX2_N      | Gigabit transceiver data      |
-| Ground                        | GND            | 11  | 12  | GND            | Ground                        |
-| Gigabit transceiver data      | GTR_TX1_P      | 13  | 14  | GTR_RX1_P      | Gigabit transceiver data      |
-| Gigabit transceiver data      | GTR_TX1_N      | 15  | 16  | GTR_RX1_N      | Gigabit transceiver data      |
-| Ground                        | GND            | 17  | 18  | GND            | Ground                        |
-| Gigabit transceiver data      | GTR_TX0_P      | 19  | 20  | GTR_RX0_P      | Gigabit transceiver data      |
-| Gigabit transceiver data      | GTR_TX0_N      | 21  | 22  | GTR_RX0_N      | Gigabit transceiver data      |
-| Ground                        | GND            | 23  | 24  | GND            | Ground                        |
-| Gigabit transceiver clock     | GTR_REFCLK3_N  | 25  | 26  | GTR_REFCLK2_P  | Gigabit transceiver clock     |
-| Gigabit transceiver clock     | GTR_REFCLK3_P  | 27  | 28  | GTR_REFCLK2_N  | Gigabit transceiver clock     |
-| Ground                        | GND            | 29  | 30  | GND            | Ground                        |
-| Gigabit transceiver clock     | GTR_REFCLK1_N  | 31  | 32  | GTR_REFCLK0_P  | Gigabit transceiver clock     |
-| Gigabit transceiver clock     | GTR_REFCLK1_P  | 33  | 34  | GTR_REFCLK0_N  | Gigabit transceiver clock     |
-| Ground                        | GND            | 35  | 36  | GND            | Ground                        |
-| Ethernet Pair                 | ETH_MD3_N      | 37  | 38  | USB_N          | USB2.0                        |
-| Ethernet Pair                 | ETH_MD3_P      | 39  | 40  | USB_P          | USB2.0                        |
-| Ground                        | GND            | 41  | 42  | GND            | Ground                        |
-| Ethernet Pair                 | ETH_MD2_N      | 43  | 44  | ETH_MD4_N      | Ethernet Pair                 |
-| Ethernet Pair                 | ETH_MD2_P      | 45  | 46  | ETH_MD4_P      | Ethernet Pair                 |
-| Ground                        | GND            | 47  | 48  | GND            | Ground                        |
-| BPP PL I/O                    | IO_L3_P        | 49  | 50  | ETH_MD1_N      | Ethernet Pair                 |
-| BPP PL I/O                    | IO_L3_N        | 51  | 52  | ETH_MD1_P      | Ethernet Pair                 |
-| Ground                        | GND            | 53  | 54  | GND            | Ground                        |
-| BPP PL I/O                    | IO_L2_P        | 55  | 56  | IO_L12_N       | BPP PL I/O                    |
-| BPP PL I/O                    | IO_L2_N        | 57  | 58  | IO_L12_P       | BPP PL I/O                    |
-| Ground                        | GND            | 59  | 60  | GND            | Ground                        |
-| BPP PL I/O                    | IO_L1_N        | 61  | 62  | IO_L11_P       | BPP PL I/O                    |
-| BPP PL I/O                    | IO_L1_P        | 63  | 64  | IO_L11_N       | BPP PL I/O                    |
-| Ground                        | GND            | 65  | 66  | GND            | Ground                        |
-| BPP PL I/O                    | IO_L4_P        | 67  | 68  | IO_L10_P       | BPP PL I/O                    |
-| BPP PL I/O                    | IO_L4_N        | 69  | 70  | IO_L10_N       | BPP PL I/O                    |
-| Ground                        | GND            | 71  | 72  | GND            | Ground                        |
-| BPP PL I/O                    | IO_L5_P        | 73  | 74  | USB_VBUS       | USB Bus Voltage               |
-| BPP PL I/O                    | IO_L5_N        | 75  | 76  | USB_CPEN       | USB Output Enable             |
-| Ground                        | GND            | 77  | 78  | USB_ID         | USB ID                        |
-| Ethernet Activity Indicator   | ETH_PHY_LED1   | 79  | 80  | UART0_TX       | UART0 Output                  |
-| Ethernet Speed Indicator      | ETH_PHY_LED0   | 81  | 82  | UART1_TX       | UART1  Output                 |
-| I2C data (VCCO_PSIO_501)      | I2C1_SDA       | 83  | 84  | UART0_RX       | UART0 Input                   |
-| I2C clock (VCCO_PSIO_501)     | I2C1_SCL       | 85  | 86  | UART1_RX       | UART1 Input                   |
-| Multiplexed I/O               | MIO37          | 87  | 88  | MIO38          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO46          | 89  | 90  | MIO41          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO28          | 91  | 92  | MIO39          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO33          | 93  | 94  | MIO45          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO26          | 95  | 96  | MIO44          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO29          | 97  | 98  | MIO40          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO30          | 99  | 100 | MIO42          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO35          | 101 | 102 | MIO34          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO36          | 103 | 104 | MIO47          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO27          | 105 | 106 | MIO48          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO31          | 107 | 108 | MIO43          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO49          | 109 | 110 | MIO50          | Multiplexed I/O               |
-| Multiplexed I/O               | MIO32          | 111 | 112 | MIO51          | Multiplexed I/O               |
-| Done Booting                  | PS_DONE        | 113 | 114 | PS_JTAG_TCK    | JTAG                          |
-| BBP Reset                     | PS_SRST_N      | 115 | 116 | PS_JTAG_TDI    | JTAG                          |
-| Power Good                    | PWR_GOOD       | 117 | 118 | PS_JTAG_TDO    | JTAG                          |
-| 1.8V JTAG power reference.    | PS_JTAG_PWR    | 119 | 120 | PS_JTAG_TMS    | JTAG                          |
+|Pin|Signal|Description|FPGA Pin Name|FPGA Pin|
+|-----|----------------|-------------------------------|----------------|-----|
+|1|GTR_TX3_P|Gigabit transceiver data|PS_MGTRTXP3_505|A19|
+|2|GTR_RX3_P|Gigabit transceiver data|PS_MGTRRXP3_505|B21|
+|3|GTR_TX3_N|Gigabit transceiver data|PS_MGTRTXN3_505|A20|
+|4|GTR_RX3_N|Gigabit transceiver data|PS_MGTRRXN3_505|B22|
+|5|GND|Ground|||
+|6|GND|Ground|||
+|7|GTR_TX2_P|Gigabit transceiver data|PS_MGTRTXP2_505|C19|
+|8|GTR_RX2_P|Gigabit transceiver data|PS_MGTRRXP2_505|D21|
+|9|GTR_TX2_N|Gigabit transceiver data|PS_MGTRTXN2_505|C20|
+|10|GTR_RX2_N|Gigabit transceiver data|PS_MGTRRXN2_505|D22|
+|11|GND|Ground|||
+|12|GND|Ground|||
+|13|GTR_TX1_P|Gigabit transceiver data|PS_MGTRTXP1_505|F21|
+|14|GTR_RX1_P|Gigabit transceiver data|PS_MGTRRXP1_505|H21|
+|15|GTR_TX1_N|Gigabit transceiver data|PS_MGTRTXN1_505|F22|
+|16|GTR_RX1_N|Gigabit transceiver data|PS_MGTRRXN1_505|H22|
+|17|GND|Ground|||
+|18|GND|Ground|||
+|19|GTR_TX0_P|Gigabit transceiver data|PS_MGTRTXP0_505|K21|
+|20|GTR_RX0_P|Gigabit transceiver data|PS_MGTRRXP0_505|M21|
+|21|GTR_TX0_N|Gigabit transceiver data|PS_MGTRTXN0_505|K22|
+|22|GTR_RX0_N|Gigabit transceiver data|PS_MGTRRXN0_505|M22|
+|23|GND|Ground|||
+|24|GND|Ground|||
+|25|GTR_REFCLK3_N|Gigabit transceiver clock|PS_MGTREFCLK3N_505|E20|
+|26|GTR_REFCLK2_P|Gigabit transceiver clock|PS_MGTREFCLK2P_505|G19|
+|27|GTR_REFCLK3_P|Gigabit transceiver clock|PS_MGTREFCLK3P_505|E19|
+|28|GTR_REFCLK2_N|Gigabit transceiver clock|PS_MGTREFCLK2N_505|G20|
+|29|GND|Ground|||
+|30|GND|Ground|||
+|31|GTR_REFCLK1_N|Gigabit transceiver clock|PS_MGTREFCLK1N_505|J20|
+|32|GTR_REFCLK0_P|Gigabit transceiver clock|PS_MGTREFCLK0P_505|L19|
+|33|GTR_REFCLK1_P|Gigabit transceiver clock|PS_MGTREFCLK1P_505|J19|
+|34|GTR_REFCLK0_N|Gigabit transceiver clock|PS_MGTREFCLK0N_505|L20|
+|35|GND|Ground|||
+|36|GND|Ground|||
+|37|ETH_MD3_N|Ethernet Pair|N/A|N/A|
+|38|USB_N|USB2.0|N/A|N/A|
+|39|ETH_MD3_P|Ethernet Pair|N/A|N/A|
+|40|USB_P|USB2.0|N/A|N/A|
+|41|GND|Ground|||
+|42|GND|Ground|||
+|43|ETH_MD2_N|Ethernet Pair|N/A|N/A|
+|44|ETH_MD4_N|Ethernet Pair|N/A|N/A|
+|45|ETH_MD2_P|Ethernet Pair|N/A|N/A|
+|46|ETH_MD4_P|Ethernet Pair|N/A|N/A|
+|47|GND|Ground|||
+|48|GND|Ground|||
+|49|IO_L3_P|BPP PL I/O|IO_L3P_T0L_N4_AD15P_65|U2|
+|50|ETH_MD1_N|Ethernet Pair|N/A|N/A|
+|51|IO_L3_N|BPP PL I/O|IO_L3N_T0L_N5_AD15N_65|U1|
+|52|ETH_MD1_P|Ethernet Pair|N/A|N/A|
+|53|GND|Ground|||
+|54|GND|Ground|||
+|55|IO_L2_P|BPP PL I/O|IO_L2P_T0L_N2_65|P3|
+|56|IO_L12_N|BPP PL I/O|IO_L12N_T1U_N11_GC_65|L3|
+|57|IO_L2_N|BPP PL I/O|IO_L2N_T0L_N3_65|R3|
+|58|IO_L12_P|BPP PL I/O|IO_L12P_T1U_N10_GC_65|L4|
+|59|GND|Ground|||
+|60|GND|Ground|||
+|61|IO_L1_N|BPP PL I/O|IO_L1N_T0L_N1_DBC_65|T2|
+|62|IO_L11_P|BPP PL I/O|IO_L11P_T1U_N8_GC_65|L2|
+|63|IO_L1_P|BPP PL I/O|IO_L1P_T0L_N0_DBC_65|T3|
+|64|IO_L11_N|BPP PL I/O|IO_L11N_T1U_N9_GC_65|L1|
+|65|GND|Ground|||
+|66|GND|Ground|||
+|67|IO_L4_P|BPP PL I/O|IO_L4P_T0U_N6_DBC_AD7P_SMBALERT_65|R4|
+|68|IO_L10_P|BPP PL I/O|IO_L10P_T1U_N6_QBC_AD4P_65|M5|
+|69|IO_L4_N|BPP PL I/O|IO_L4N_T0U_N7_DBC_AD7N_65|T4|
+|70|IO_L10_N|BPP PL I/O|IO_L10N_T1U_N7_QBC_AD4N_65|M4|
+|71|GND|Ground|||
+|72|GND|Ground|||
+|73|IO_L5_P|BPP PL I/O|IO_L5P_T0U_N8_AD14P_65|R1|
+|74|USB_VBUS|USB Bus Voltage|N/A|N/A|
+|75|IO_L5_N|BPP PL I/O|IO_L5N_T0U_N9_AD14N_65|T1|
+|76|USB_CPEN|USB Output Enable|N/A|N/A|
+|77|GND|Ground|||
+|78|USB_ID|USB ID|N/A|N/A|
+|79|ETH_PHY_LED1|Ethernet Activity Indicator|N/A|N/A|
+|80|UART0_TX|UART0 Output|N/A|N/A|
+|81|ETH_PHY_LED0|Ethernet Speed Indicator|N/A|N/A|
+|82|UART1_TX|UART1 Output|N/A|N/A|
+|83|I2C1_SDA|I2C data (VCCO_PSIO_501)|N/A|N/A|
+|84|UART0_RX|UART0 Input|N/A|N/A|
+|85|I2C1_SCL|I2C clock (VCCO_PSIO_501)|N/A|N/A|
+|86|UART1_RX|UART1 Input|N/A|N/A|
+|87|MIO37|Multiplexed I/O|PS_MIO37|E11|
+|88|MIO38|Multiplexed I/O|PS_MIO38|C9|
+|89|MIO46|Multiplexed I/O|PS_MIO46|C12|
+|90|MIO41|Multiplexed I/O|PS_MIO41|B10|
+|91|MIO28|Multiplexed I/O|PS_MIO28|G12|
+|92|MIO39|Multiplexed I/O|PS_MIO39|C10|
+|93|MIO33|Multiplexed I/O|PS_MIO33|E9|
+|94|MIO45|Multiplexed I/O|PS_MIO45|A11|
+|95|MIO26|Multiplexed I/O|PS_MIO26|G9|
+|96|MIO44|Multiplexed I/O|PS_MIO44|B11|
+|97|MIO29|Multiplexed I/O|PS_MIO29|F9|
+|98|MIO40|Multiplexed I/O|PS_MIO40|D11|
+|99|MIO30|Multiplexed I/O|PS_MIO30|G10|
+|100|MIO42|Multiplexed I/O|PS_MIO42|D12|
+|101|MIO35|Multiplexed I/O|PS_MIO35|E10|
+|102|MIO34|Multiplexed I/O|PS_MIO34|F13|
+|103|MIO36|Multiplexed I/O|PS_MIO36|D10|
+|104|MIO47|Multiplexed I/O|PS_MIO47|B12|
+|105|MIO27|Multiplexed I/O|PS_MIO27|G11|
+|106|MIO48|Multiplexed I/O|PS_MIO48|A12|
+|107|MIO31|Multiplexed I/O|PS_MIO31|F11|
+|108|MIO43|Multiplexed I/O|PS_MIO43|E13|
+|109|MIO49|Multiplexed I/O|PS_MIO49|D13|
+|110|MIO50|Multiplexed I/O|PS_MIO50|A13|
+|111|MIO32|Multiplexed I/O|PS_MIO32|F12|
+|112|MIO51|Multiplexed I/O|PS_MIO51|C13|
+|113|PS_DONE|Done Booting|PS_DONE|L12|
+|114|PS_JTAG_TCK|JTAG|PS_JTAG_TCK|H13|
+|115|PS_SRST_N|BBP Reset|PS_SRST_B|K13|
+|116|PS_JTAG_TDI|JTAG|PS_JTAG_TDI|H12|
+|117|PWR_GOOD|Power Good|N/A|N/A|
+|118|PS_JTAG_TDO|JTAG|PS_JTAG_TDO|J13|
+|119|PS_JTAG_PWR|1.8V JTAG power reference.|VCCO_PSIO0_500|AA5|
+|120|PS_JTAG_TMS|JTAG|PS_JTAG_TMS|J12|
 
 # J601
 
