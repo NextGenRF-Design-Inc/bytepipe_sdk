@@ -1,6 +1,10 @@
 [![logo](../../BytePipe_Logo.png)](../../../README.md)
 ---
 
+# BytePipe Hardware Development Kit - Quick Start Guide
+
+The BytePipe HDK Quick Start Guide can be found [HERE](../../hdk_qsg/).
+
 # BytePipe Hardware Development Kit
 
 The BytePipe SOM requires a carrier board to supply power and provide access to its peripherals.  NextGen RF Design provides a hardware development kit (HDK) described in following sections.

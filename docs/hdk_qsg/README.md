@@ -163,7 +163,9 @@ Figure 16: Serial Command Line Interface (CLI)
 
 # Additional Information
 Additional information and more detailed instructions can be found on NextGen RF Design’s website and GitHub page:
+
 https://www.nextgenrf.com/products/bytepipe-x9002-system-on-module/
+
 https://github.com/NextGenRF-Design-Inc/bytepipe_sdk
 
 If needed, additional or replacement SMPM adapters can be ordered from most distributors.  The following manufacturer part numbers can be used:
