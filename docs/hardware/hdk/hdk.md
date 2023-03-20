@@ -1,4 +1,4 @@
-[![logo](../../BytePipe_Logo.png)](../../README.md)
+[![logo](../../BytePipe_Logo.png)](../../../README.md)
 ---
 
 # BytePipe Hardware Development Kit
@@ -198,5 +198,4 @@ The HDK provides serial port access through the UART0 signals via the [digilent]
 The HDK connects PS_SRST_N to SW1 providing a push button reset to the user.
 
 # DISCLAIMER
-
-THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/blob/main/DISCLAIMER.md).

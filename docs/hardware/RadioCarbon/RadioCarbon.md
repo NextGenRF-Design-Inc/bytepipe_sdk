@@ -1,4 +1,4 @@
-[![logo](../../BytePipe_Logo.png)](../../README.md)
+[![logo](../../BytePipe_Logo.png)](../../../README.md)
 
 ---
 
@@ -380,5 +380,4 @@ For support, please refer to Analog Device’s Partner Zone https://ez.analog.co
 
 
 # DISCLAIMER
-
-THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](../../DISCLAIMER.md).
+THIS SOFTWARE IS COVERED BY A DISCLAIMER FOUND [HERE](https://github.com/NextGenRF-Design-Inc/bytepipe_sdk/blob/main/DISCLAIMER.md).
