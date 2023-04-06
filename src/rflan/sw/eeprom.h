@@ -1,11 +1,16 @@
+#ifndef EEPROM_H_
+#define EEPROM_H_
 /***************************************************************************//**
-*  \addtogroup RFLAN_GPIO
-*   @{
+*  \ingroup    RFLAN
+*  \defgroup   EEPROM Eeeprom Driver
+*  @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       rflan_gpio.c
+*  \file       eeprom.h
 *
-*  \details    This file contains the RFLAN gpio.
+*  \details
+*
+*  This file contains the Versa Clock5 driver.
 *
 *  \copyright
 *
@@ -39,72 +44,25 @@
 *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *******************************************************************************/
-#include <stdlib.h>
-#include <stdio.h>
-#include "xstatus.h"
-#include "rflan_gpio.h"
 
+#include <stdint.h>
+#include "xiicps.h"
 
-
-int32_t RflanGpio_WritePin( XGpioPs *Instance, u32 pin, u32 value )
+typedef struct
 {
-  XGpioPs_WritePin(Instance, pin, value);
+  XIicPs                 *Iic;
+  uint8_t                 Addr;
+} eeprom_t;
 
-  return XST_SUCCESS;
-}
-
-int32_t RflanGpio_ReadPin( XGpioPs *Instance, u32 pin )
+typedef struct
 {
-  return XGpioPs_ReadPin(Instance, pin);
-}
+  XIicPs                 *Iic;
+  uint8_t                 Addr;
+} eeprom_init_t;
 
-int32_t RflanGpio_TogglePin( XGpioPs *Instance, u32 pin )
-{
-  if(XGpioPs_ReadPin(Instance, pin))
-  {
-    XGpioPs_WritePin(Instance, pin, 0);
-  }
-  else
-  {
-    XGpioPs_WritePin(Instance, pin, 1);
-  }
+int32_t Eeprom_Initialize( eeprom_t *Instance, eeprom_init_t *Init );
+int32_t Eeprom_GetEUI64(eeprom_t *Instance, uint64_t *Value);
 
-  return XST_SUCCESS;
-}
+#endif
 
-int32_t RflanGpio_Initialize( XGpioPs *Instance, uint32_t DeviceId )
-{
-	XGpioPs_Config *Config;
-
-  /* Lookup Configuration */
-  if((Config = XGpioPs_LookupConfig(DeviceId)) == NULL)
-    return XST_FAILURE;
-
-  /* Initialize Driver */
-  if(XGpioPs_CfgInitialize(Instance, Config, Config->BaseAddr) != XST_SUCCESS)
-	  return XST_FAILURE;
-
-  /* Perform Self test */
-  if(XGpioPs_SelfTest(Instance) != XST_SUCCESS) return XST_FAILURE;
-
-  /* Set Default Direction */
-  XGpioPs_SetDirectionPin(Instance, GPIO_LED_PIN, 1);
-  XGpioPs_SetDirectionPin(Instance, GPIO_HWV2_PIN, 0);
-  XGpioPs_SetDirectionPin(Instance, GPIO_HWV1_PIN, 0);
-  XGpioPs_SetDirectionPin(Instance, GPIO_HWV0_PIN, 0);
-  XGpioPs_SetDirectionPin(Instance, GPIO_EEPROM_A0_PIN, 1);
-  XGpioPs_SetDirectionPin(Instance, GPIO_EEPROM_A1_PIN, 1);
-
-  /* Write Default Values */
-  XGpioPs_WritePin(Instance, GPIO_LED_PIN, 1);
-  XGpioPs_WritePin(Instance, GPIO_EEPROM_A0_PIN, 0);
-  XGpioPs_WritePin(Instance, GPIO_EEPROM_A1_PIN, 0);
-
-  /* Enable Outputs */
-  XGpioPs_SetOutputEnablePin(Instance, GPIO_LED_PIN, 1);
-  XGpioPs_SetOutputEnablePin(Instance, GPIO_EEPROM_A0_PIN, 1);
-  XGpioPs_SetOutputEnablePin(Instance, GPIO_EEPROM_A1_PIN, 1);
-
-  return XST_SUCCESS;
-}
 

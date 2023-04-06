@@ -1,11 +1,11 @@
 /***************************************************************************//**
-*  \addtogroup RFLAN_GPIO
+*  \addtogroup EEPROM
 *   @{
 *******************************************************************************/
 /***************************************************************************//**
-*  \file       rflan_gpio.c
+*  \file       eeprom.c
 *
-*  \details    This file contains the RFLAN gpio.
+*  \details    This file contains the eeprom driver.
 *
 *  \copyright
 *
@@ -41,70 +41,68 @@
 *******************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
-#include "xstatus.h"
-#include "rflan_gpio.h"
+#include "eeprom.h"
+#include "rflan.h"
+
+
+#define EEPROM_EUI64_START_ADDR     (0xf8)
 
 
 
-int32_t RflanGpio_WritePin( XGpioPs *Instance, u32 pin, u32 value )
+int32_t Eeprom_Read(eeprom_t *Instance, uint8_t Address, uint8_t *Buf, uint16_t Length)
 {
-  XGpioPs_WritePin(Instance, pin, value);
+  int32_t status;
 
-  return XST_SUCCESS;
+  XIicPs_SetOptions(Instance->Iic, XIICPS_REP_START_OPTION);
+
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, &Address, 1, Instance->Addr)) != 0)
+    return RflanStatus_IicError;
+
+  XIicPs_ClearOptions(Instance->Iic, XIICPS_REP_START_OPTION);
+
+  if((status = XIicPs_MasterRecvPolled(Instance->Iic, Buf, Length, Instance->Addr)) != 0)
+    return RflanStatus_IicError;
+
+  while (XIicPs_BusIsBusy(Instance->Iic));
+
+  return RflanStatus_Success;
 }
 
-int32_t RflanGpio_ReadPin( XGpioPs *Instance, u32 pin )
+int32_t Eeprom_Write(eeprom_t *Instance, uint8_t Address, uint8_t *Buf, uint16_t Length)
 {
-  return XGpioPs_ReadPin(Instance, pin);
+  int32_t status;
+
+  XIicPs_SetOptions(Instance->Iic, XIICPS_REP_START_OPTION);
+
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, &Address, 1, Instance->Addr)) != 0)
+    return RflanStatus_IicError;
+
+  XIicPs_ClearOptions(Instance->Iic, XIICPS_REP_START_OPTION);
+
+  if((status = XIicPs_MasterSendPolled(Instance->Iic, Buf, Length, Instance->Addr)) != 0)
+    return RflanStatus_IicError;
+
+  while (XIicPs_BusIsBusy(Instance->Iic));
+
+  return RflanStatus_Success;
 }
 
-int32_t RflanGpio_TogglePin( XGpioPs *Instance, u32 pin )
+int32_t Eeprom_GetEUI64(eeprom_t *Instance, uint64_t *Value)
 {
-  if(XGpioPs_ReadPin(Instance, pin))
-  {
-    XGpioPs_WritePin(Instance, pin, 0);
-  }
-  else
-  {
-    XGpioPs_WritePin(Instance, pin, 1);
-  }
+  int32_t status;
 
-  return XST_SUCCESS;
+  if((status = Eeprom_Read(Instance, EEPROM_EUI64_START_ADDR, (uint8_t*)Value, sizeof( uint64_t))) != 0)
+    return RflanStatus_IicError;
+
+  return RflanStatus_Success;
 }
 
-int32_t RflanGpio_Initialize( XGpioPs *Instance, uint32_t DeviceId )
+int32_t Eeprom_Initialize( eeprom_t *Instance, eeprom_init_t *Init )
 {
-	XGpioPs_Config *Config;
+  Instance->Iic = Init->Iic;
+  Instance->Addr = Init->Addr;
 
-  /* Lookup Configuration */
-  if((Config = XGpioPs_LookupConfig(DeviceId)) == NULL)
-    return XST_FAILURE;
-
-  /* Initialize Driver */
-  if(XGpioPs_CfgInitialize(Instance, Config, Config->BaseAddr) != XST_SUCCESS)
-	  return XST_FAILURE;
-
-  /* Perform Self test */
-  if(XGpioPs_SelfTest(Instance) != XST_SUCCESS) return XST_FAILURE;
-
-  /* Set Default Direction */
-  XGpioPs_SetDirectionPin(Instance, GPIO_LED_PIN, 1);
-  XGpioPs_SetDirectionPin(Instance, GPIO_HWV2_PIN, 0);
-  XGpioPs_SetDirectionPin(Instance, GPIO_HWV1_PIN, 0);
-  XGpioPs_SetDirectionPin(Instance, GPIO_HWV0_PIN, 0);
-  XGpioPs_SetDirectionPin(Instance, GPIO_EEPROM_A0_PIN, 1);
-  XGpioPs_SetDirectionPin(Instance, GPIO_EEPROM_A1_PIN, 1);
-
-  /* Write Default Values */
-  XGpioPs_WritePin(Instance, GPIO_LED_PIN, 1);
-  XGpioPs_WritePin(Instance, GPIO_EEPROM_A0_PIN, 0);
-  XGpioPs_WritePin(Instance, GPIO_EEPROM_A1_PIN, 0);
-
-  /* Enable Outputs */
-  XGpioPs_SetOutputEnablePin(Instance, GPIO_LED_PIN, 1);
-  XGpioPs_SetOutputEnablePin(Instance, GPIO_EEPROM_A0_PIN, 1);
-  XGpioPs_SetOutputEnablePin(Instance, GPIO_EEPROM_A1_PIN, 1);
-
-  return XST_SUCCESS;
+  return RflanStatus_Success;
 }
+
 

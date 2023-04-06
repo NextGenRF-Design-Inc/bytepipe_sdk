@@ -56,6 +56,7 @@
 #include "rflan_pib.h"
 #include "status.h"
 #include "xiicps.h"
+#include "eeprom.h"
 
 extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
@@ -90,13 +91,14 @@ static rflan_pib_t    RflanPib;
 static adrv9001_t     RflanAdrv9001;
 static adrv9001_pib_t Adrv9001Pib;
 static QueueHandle_t  RflanEvtQueue;
-static XIicPs         RflanIic0;
+static XIicPs         RflanIic1;
+static eeprom_t       RflanEeprom;
 
-static int32_t RflanIic_Initialize( XIicPs *Instance )
+static int32_t RflanIic_Initialize( XIicPs *Instance, uint32_t DeviceId )
 {
   XIicPs_Config *Config;
 
-  Config = XIicPs_LookupConfig(XPAR_PSU_I2C_1_DEVICE_ID);
+  Config = XIicPs_LookupConfig(DeviceId);
   if (NULL == Config) {
     return RflanStatus_IicError;
   }
@@ -270,20 +272,29 @@ static int32_t Rflan_Initialize( void )
     printf("Rflan Reset %s\r\n",StatusString(status));
 
   /* Initialize I2C*/
-  if((status = RflanIic_Initialize( &RflanIic0 )) != 0)
+  if((status = RflanIic_Initialize( &RflanIic1, XPAR_PSU_I2C_1_DEVICE_ID )) != 0)
     printf("I2C Initialize %s\r\n",StatusString(status));
 
 #ifdef VERSA_CLOCK5_ENABLE
 
   versa_clock5_init_t VersaClock5Init = {
       .Addr = 0x6A,
-      .Iic = &RflanIic0 };
+      .Iic = &RflanIic1 };
 
   /* Initialize Versa Clock */
   if((status = VersaClock5_Initialize( &RflanVersaClock5, &VersaClock5Init )) != 0)
     printf("VersaClock5 Initialize %s\r\n",StatusString(status));
 
 #endif
+
+  eeprom_init_t EepromInit = {
+      .Addr = RFLAN_EEPROM_I2C_ADDR >> 1,
+      .Iic = &RflanIic1
+  };
+
+  /* Initialize IIC */
+  if((status = Eeprom_Initialize( &RflanEeprom, &EepromInit )) != 0)
+	printf("Eeprom %s\r\n",StatusString(status));
 
   /* Initialize File System*/
   if((status = f_mount(&FatFs, FILE_SYSTEM_BASE_PATH, 1)) != FR_OK)
@@ -386,12 +397,14 @@ static int32_t Rflan_Initialize( void )
         .CallbackRef = &Cli,
         .RxBufSize = RFLAN_LWIP_RECV_BUF_SIZE,
         .CliPort = RFLAN_LWIP_CLI_PORT,
-        .MacAddr = RFLAN_LWIP_MAC_ADDR,
         .BaseAddr = XPAR_XEMACPS_0_BASEADDR,
         .IpAddr = RflanPib.Params.IpAddr,
         .IpMask = RflanPib.Params.IpMask,
         .IpGw = RflanPib.Params.IpGwAddr
     };
+
+    if((status = Eeprom_GetEUI64(&RflanEeprom, (uint64_t*)LwipInit.MacAddr )) != 0)
+        printf("Eeprom Get EUI64 %s\r\n",StatusString(status));
 
     if((status = RflanLwip_Initialize( &RflanLwip, &LwipInit )) != 0)
       printf("Lwip %s\r\n",StatusString(status));

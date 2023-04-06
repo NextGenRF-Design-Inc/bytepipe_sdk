@@ -64,6 +64,7 @@
 #define RFLAN_UART_BAUDRATE             115200                  ///< UART Baudrate
 #define RFLAN_STATUS_OFFSET             (-500)                  ///< Status offset
 
+#define RFLAN_EEPROM_I2C_ADDR           (0xA0)
 /***************************************************************************//**
 *
 * \details  Reboot Processor

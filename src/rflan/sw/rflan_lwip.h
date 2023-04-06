@@ -61,7 +61,6 @@ extern "C"
 #define RFLAN_LWIP_STATUS_OFFSET        (-4000)
 #define RFLAN_LWIP_STACK_SIZE           1024
 #define RFLAN_LWIP_TASK_PRIORITY        tskIDLE_PRIORITY + 3
-#define RFLAN_LWIP_MAC_ADDR             { 0x00, 0x00, 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 }
 #define RFLAN_LWIP_CLI_PORT             (2233)
 #define RFLAN_LWIP_RECV_BUF_SIZE        (1500)
 

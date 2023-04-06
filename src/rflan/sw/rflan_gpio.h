@@ -49,6 +49,8 @@
 #define GPIO_HWV0_PIN                   (0)
 #define GPIO_HWV1_PIN                   (2)
 #define GPIO_HWV2_PIN                   (3)
+#define GPIO_EEPROM_A0_PIN              (6)
+#define GPIO_EEPROM_A1_PIN              (5)
 
 /***************************************************************************//**
 *
