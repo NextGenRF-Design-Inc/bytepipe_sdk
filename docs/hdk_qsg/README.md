@@ -22,18 +22,6 @@ The SOM Development Kit can be used as an evaluation tool and prototyping platfo
   - Square Form Factor – 4.25” x 4.25” (PCB Only)
 
 
-
-
-
-•	Developer Kit Main Board
-•	6 – SOM RF Interconnects
-•	SOM Heatsink and Fan
-•	Power Supply
-•	USB Cables
-•	Ethernet Cable
-•	Micro-SD Card (Blank)
-•	6 Hours NextGen RF Engineering Support
-
 # Kit Contents – HDK Only
 The HDK can be purchased with or without a SOM.  If purchased without a SOM, the kit will arrive with everything needed to install a SOM, but the SOM will need to be properly installed on the HDK prior to use.  Instructions for installation are included later in this document.
 
