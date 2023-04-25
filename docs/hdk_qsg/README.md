@@ -186,6 +186,7 @@ https://github.com/NextGenRF-Design-Inc/bytepipe_sdk
 
 # Distributor Links
 NextGen RF Design BytePipe products can be purchased through Richardson RFPD.
+
 HDK (without SOM): https://shop.richardsonrfpd.com/Products/Product/BP-KIT
 
 SOM Heatsink and Fan: https://shop.richardsonrfpd.com/Products/Product/BP-9002-FAN
