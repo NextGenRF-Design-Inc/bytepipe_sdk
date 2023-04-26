@@ -187,11 +187,16 @@ https://github.com/NextGenRF-Design-Inc/bytepipe_sdk
 # Distributor Links
 NextGen RF Design BytePipe products can be purchased through Richardson RFPD.
 
-HDK (without SOM): https://shop.richardsonrfpd.com/Products/Product/BP-KIT
+All products:  https://shop.richardsonrfpd.com/Supplier/Index/NextGen__RF__Design
 
-SOM Heatsink and Fan: https://shop.richardsonrfpd.com/Products/Product/BP-9002-FAN
+[HDK (without SOM)](https://shop.richardsonrfpd.com/Products/Product/BP-KIT)
 
-Combo Kits and SOMs: https://shop.richardsonrfpd.com/Supplier/Index/NextGen__RF__Design
+[HDK + SOM Kits](https://shop.richardsonrfpd.com/Products/Search?endCategory=Software%20Defined%20Radio%20Eval%20Kit&attributesToSearch=mfg~NextGen%20RF%20Design)
+
+[SOMs](https://shop.richardsonrfpd.com/Products/Search?endCategory=Software%20Defined%20Radio%20SoM&attributesToSearch=mfg~NextGen%20RF%20Design)
+
+[SOM Heatsink and Fan](https://shop.richardsonrfpd.com/Products/Product/BP-9002-FAN)
+
 
 Additional or replacement SMPM RF adapters can also be ordered.  Use only the following MPN’s to ensure compatibility.
   - Molex 73300-0220 https://shop.richardsonrfpd.com/Products/Product/0733000220
