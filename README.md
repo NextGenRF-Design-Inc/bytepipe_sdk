@@ -20,13 +20,13 @@ If you are new to the BytePipe start with the [rflan](src/rflan/README.md) appli
 |  Document                                                           | Description                                                   |
 |---------------------------------------------------------------------|---------------------------------------------------------------|
 | [adrv9001](src/adrv9001/README.md)                                  | Production optimized ADRV9001 interface for BytePipe          | 
-| [bpToolbox](src/bpToolbox/README.md)                                | Matlab toolbox for interfacing to BytePipe                    | 
+| [bpToolbox](src/bpToolbox/README.md)                                | MATLAB toolbox for interfacing to BytePipe                    | 
 | [hdk_qsg](docs/hdk_qsg/README.md)                                   | Hardware Development Kit Quick Start Guide                    | 
 | [petalinux](src/petalinux/README.md)                                | Petalinux build                                               | 
 | [radio_carbon](docs/hardware/RadioCarbon/RadioCarbon.md)            | Radio Carbon RF Front End User Guide                          | 
 | [rflan](src/rflan/README.md)                                        | Production example streaming IQ data to RPU                   | 
 | [rflan_dpd](src/rflan_dpd)                                     | Digital Pre-Distortion example using Radio Carbon and BytePipe SOM | 
-| [rflan_qpsk](src/rflan_qpsk/README.md)                              | QPSK modem example using RPU and Mathworks HDL Coder          | 
+| [rflan_qpsk](src/rflan_qpsk/README.md)                              | QPSK modem example using RPU and HDL Coder from MathWorks          | 
 | [sd_card](docs/sd_card/README.md)                                   | Detailed information on supported micro-SD cards and formats  | 
 | [som_id](docs/som_id/README.md)                                     | Detailed information on identifying SOM models (2CG or 3CG)   | 
 | [Video Tutorials](https://www.youtube.com/playlist?list=PL1O6z4HXixy3uAJCNkjg2Hvm9Dcu4XAUr) | Playlist of video tutorials           | 
