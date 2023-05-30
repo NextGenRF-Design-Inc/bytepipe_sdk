@@ -200,8 +200,7 @@ All products:  https://shop.richardsonrfpd.com/Supplier/Index/NextGen__RF__Desig
 
 Additional or replacement SMPM RF adapters can also be ordered.  Use only the following MPN’s to ensure compatibility.
   - Molex 73300-0220 https://shop.richardsonrfpd.com/Products/Product/0733000220
-  - Amphenol 1132-4010
-
+ 
 
 
 # DISCLAIMER
