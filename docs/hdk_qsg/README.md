@@ -184,6 +184,9 @@ https://www.nextgenrf.com/products/bytepipe-x9002-system-on-module/
 
 https://github.com/NextGenRF-Design-Inc/bytepipe_sdk
 
+https://www.nextgenrf.com/assets/uploads/2021/10/BytePipe_x9002_HDK_Design_Files.zip
+
+
 # Distributor Links
 NextGen RF Design BytePipe products can be purchased through Richardson RFPD.
 
