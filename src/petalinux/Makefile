@@ -10,7 +10,7 @@ clean:
 
 project:
 	petalinux-create -t project --template zynqMP --name bpLinux
-	petalinux-config -p bpLinux/ --get-hw-description=$(wrkDir) --silentconfig
+	petalinux-config -p bpLinux/ --get-hw-description=$(wrkDir)/rflan --silentconfig
 
 config:
 	cp -f $(srcDir)sw/rootfs_config $(wrkDir)/bpLinux/project-spec/configs/
