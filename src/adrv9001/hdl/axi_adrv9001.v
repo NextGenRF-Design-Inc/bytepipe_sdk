@@ -18,8 +18,6 @@
 
 module axi_adrv9001#(
   parameter DEFAULT_DGPIO_DIR       = 16'hffff,
-  parameter TX1_REF_CLK_SRC         = "TX1_CLK",
-  parameter TX2_REF_CLK_SRC         = "TX2_CLK",  
   parameter SWAP_DIFF_TX1_IDATA     = 1,        
   parameter SWAP_DIFF_TX1_QDATA     = 0,       
   parameter SWAP_DIFF_TX1_STROBE    = 1,       
@@ -38,29 +36,37 @@ module axi_adrv9001#(
   parameter SWAP_DIFF_RX2_QDATA     = 1,    
   parameter SWAP_DIFF_RX2_STROBE    = 1,       
   parameter SWAP_DIFF_RX2_DCLK      = 0,
-  parameter ENABLE_TX1_ILA          = 0,
-  parameter ENABLE_TX2_ILA          = 0,
-  parameter ENABLE_RX1_ILA          = 0,
-  parameter ENABLE_RX2_ILA          = 0,
-  parameter ENABLE_SPI_ILA          = 0,
-  parameter ENABLE_PL_DGPIO         = 0,    
+  parameter ENABLE_PL_DGPIO         = 0,
   parameter ENABLE_PL_RX1_ENABLE    = 0,   
   parameter ENABLE_PL_RX2_ENABLE    = 0,   
   parameter ENABLE_PL_TX1_ENABLE    = 0,   
-  parameter ENABLE_PL_TX2_ENABLE    = 0
+  parameter ENABLE_PL_TX2_ENABLE    = 0,
+  parameter ENABLE_RX1_AXIS         = 1,
+  parameter ENABLE_RX2_AXIS         = 1,
+  parameter ENABLE_TX1_AXIS         = 1,
+  parameter ENABLE_TX2_AXIS         = 1,  
+  parameter ENABLE_OTX1_AXIS        = 1,  
+  parameter ENABLE_OTX2_AXIS        = 1,
+  parameter ENABLE_HOP_TRIG_PIN     = 0,
+  parameter ENABLE_HOP_IRQ          = 0,  
+  parameter ENABLE_HOPPING_SUPPORT  = 0,
+  parameter ENABLE_HOPPING_DEBUG    = 0,
+  parameter ENABLE_SPI_DEBUG        = 0,
+  parameter ENABLE_DEV_CLOCK_OUT    = 0
   )(
   input  wire           dev_clk_in,
   output wire           dev_clk,
-  output wire           rx1_en,
-  output wire           rx2_en,
-  output wire           tx1_en,
-  output wire           tx2_en,
+  output reg            rx1_en = 'd0,
+  output reg            rx2_en = 'd0,
+  output reg            tx1_en = 'd0,
+  output reg            tx2_en = 'd0,
   output wire           rstn,
   input  wire           irq,
   output wire [15:0]    dgpio_o,
   input  wire [15:0]    dgpio_i,
   output wire [15:0]    dgpio_t,
-    
+  input  wire           hop_trig,
+      
   input  wire           rx1_dclk_p,          
   input  wire           rx1_dclk_n,       
   input  wire           rx1_strobe_p, 
@@ -72,8 +78,6 @@ module axi_adrv9001#(
   
   output wire [31:0]    rx1_axis_tdata,    
   output wire           rx1_axis_tvalid, 
-  input  wire           rx1_axis_tready,  
-  output wire           rx1_axis_tlast,
   output wire           rx1_axis_aclk, 
     
   input  wire           rx2_dclk_p,          
@@ -86,9 +90,7 @@ module axi_adrv9001#(
   input  wire           rx2_qdata_n,     
   
   output wire [31:0]    rx2_axis_tdata,    
-  output wire           rx2_axis_tvalid, 
-  input  wire           rx2_axis_tready,
-  output wire           rx2_axis_tlast,  
+  output wire           rx2_axis_tvalid,  
   output wire           rx2_axis_aclk, 
 
   input  wire           tx1_ref_clk_p,     
@@ -137,7 +139,14 @@ module axi_adrv9001#(
   output wire           spi_csn,
   output wire           spi_irq,  
   
-  output wire           pl_irq,  
+  output wire           pl_irq,   
+  output reg            hop_irq = 'd0,
+  
+  output wire [31:0]    otx1_axis_tdata,
+  output wire           otx1_axis_tvalid,
+  
+  output wire [31:0]    otx2_axis_tdata,
+  output wire           otx2_axis_tvalid,    
   
   input  wire           s_axi_aclk,
   input  wire           s_axi_aresetn,
@@ -159,13 +168,532 @@ module axi_adrv9001#(
   output wire [31:0]    s_axi_rdata,
   output wire [1:0]     s_axi_rresp,
   output wire           s_axi_rvalid,
-  input  wire           s_axi_rready
+  input  wire           s_axi_rready,
+  
+  output wire           HopDbg_HopPin,
+  output wire           HopDbg_Rx1EnPin,
+  output wire           HopDbg_Rx2EnPin,
+  output wire           HopDbg_Tx1EnPin,
+  output wire           HopDbg_Tx2EnPin,
+  output wire           HopDbg_HopIrq,
+  output wire           HopDbg_HopIrqClear,
+  output wire           HopDbg_HopTrig,
+  
+  output wire           SpiDbg_Sclk,
+  output wire           SpiDbg_Csn,
+  output wire           SpiDbg_Mosi,
+  output wire           SpiDbg_Miso
+  
 );
 
+generate
 
+  if( ENABLE_DEV_CLOCK_OUT ) begin
+  
+    assign dev_clk = dev_clk_in;
+  
+  end else begin
+  
+    assign dev_clk = 0;
+  
+  end
+
+endgenerate
+
+assign pl_irq = irq;
+
+/**** Dgpio ***************************************************************************************/
+
+reg           hop_dgpio = 'd0;
 wire [15:0]   dgpio_ps_t;
 wire [15:0]   dgpio_ps_o;
 wire [15:0]   dgpio_ps_i;
+
+assign dgpio_t = dgpio_ps_t;
+assign dgpio_ps_i = dgpio_i;
+
+generate
+
+  if( ENABLE_PL_DGPIO ) begin
+    assign dgpio_o[15] = dgpio_ps_o[15] | dgpio_pl_o[15];
+    assign dgpio_o[14] = dgpio_ps_o[14] | dgpio_pl_o[14];
+    assign dgpio_o[13] = dgpio_ps_o[13] | dgpio_pl_o[13];
+    assign dgpio_o[12] = dgpio_ps_o[12] | dgpio_pl_o[12];
+    assign dgpio_o[11] = dgpio_ps_o[11] | dgpio_pl_o[11];
+    assign dgpio_o[10] = dgpio_ps_o[10] | dgpio_pl_o[10];
+    assign dgpio_o[9] = dgpio_ps_o[9] | dgpio_pl_o[9];
+    assign dgpio_o[8] = dgpio_ps_o[8] | dgpio_pl_o[8];
+    assign dgpio_o[7] = dgpio_ps_o[7] | dgpio_pl_o[7];
+    assign dgpio_o[6] = dgpio_ps_o[6] | dgpio_pl_o[6];
+    assign dgpio_o[5] = dgpio_ps_o[5] | dgpio_pl_o[5]; 
+    assign dgpio_o[4] = dgpio_ps_o[4] | dgpio_pl_o[4];
+    assign dgpio_o[3] = dgpio_ps_o[3] | dgpio_pl_o[3];
+    assign dgpio_o[2] = dgpio_ps_o[2] | dgpio_pl_o[2];
+    assign dgpio_o[1] = dgpio_ps_o[1] | dgpio_pl_o[1];
+    assign dgpio_o[0] = dgpio_ps_o[0] | dgpio_pl_o[0] | hop_dgpio;     
+    assign dgpio_pl_i = dgpio_i;
+  end else begin
+    assign dgpio_o[15] = dgpio_ps_o[15];
+    assign dgpio_o[14] = dgpio_ps_o[14];
+    assign dgpio_o[13] = dgpio_ps_o[13];
+    assign dgpio_o[12] = dgpio_ps_o[12];
+    assign dgpio_o[11] = dgpio_ps_o[11];
+    assign dgpio_o[10] = dgpio_ps_o[10];
+    assign dgpio_o[9] = dgpio_ps_o[9];
+    assign dgpio_o[8] = dgpio_ps_o[8];
+    assign dgpio_o[7] = dgpio_ps_o[7];
+    assign dgpio_o[6] = dgpio_ps_o[6];
+    assign dgpio_o[5] = dgpio_ps_o[5]; 
+    assign dgpio_o[4] = dgpio_ps_o[4];
+    assign dgpio_o[3] = dgpio_ps_o[3];
+    assign dgpio_o[2] = dgpio_ps_o[2];
+    assign dgpio_o[1] = dgpio_ps_o[1];
+    assign dgpio_o[0] = dgpio_ps_o[0] | hop_dgpio;  
+    assign dgpio_pl_i = 'h0;
+  end     
+  
+endgenerate
+
+
+/**** Enable ***************************************************************************************/
+
+wire tx1_ps_en;
+wire tx2_ps_en;
+wire rx1_ps_en;
+wire rx2_ps_en;
+wire tx1_enable;
+wire tx2_enable;
+wire rx1_enable;
+wire rx2_enable;
+
+generate
+ 
+  if( ENABLE_PL_RX1_ENABLE ) begin
+    assign rx1_enable = rx1_pl_en | rx1_ps_en;
+  end else begin
+    assign rx1_enable = rx1_ps_en;     
+  end  
+  
+  if( ENABLE_PL_RX2_ENABLE ) begin
+    assign rx2_enable = rx2_pl_en | rx2_ps_en;
+  end else begin
+    assign rx2_enable = rx2_ps_en;     
+  end  
+
+  if( ENABLE_PL_TX1_ENABLE ) begin
+    assign tx1_enable = tx1_pl_en | tx1_ps_en;
+  end else begin
+    assign tx1_enable = tx1_ps_en;     
+  end  
+  
+  if( ENABLE_PL_TX2_ENABLE ) begin
+    assign tx2_enable = tx2_pl_en | tx2_ps_en;
+  end else begin
+    assign tx2_enable = tx2_ps_en;     
+  end     
+  
+endgenerate
+
+
+/**** Hopping ***************************************************************************************/
+
+wire          hop_mode;
+wire [23:0]   rx1_hop_setup_delay_cnt;
+wire [23:0]   rx2_hop_setup_delay_cnt;
+wire [23:0]   tx1_hop_setup_delay_cnt;
+wire [23:0]   tx2_hop_setup_delay_cnt;
+wire [23:0]   hop_dgpio_delay_cnt;
+wire [3:0]    next_hop_enable_mask;
+wire          hop_ps_trig;  
+wire          enable_pl_hop_trig;
+wire          rx1_ps_setup;
+wire          rx2_ps_setup;
+wire          tx1_ps_setup;
+wire          tx2_ps_setup;
+wire          hop_trig_enable;
+wire          hop_trig_clear;
+wire          hop_trig_rising;
+  
+generate
+
+if( ENABLE_HOPPING_SUPPORT ) begin
+
+  reg           rx1_setup = 'd0;
+  reg           rx2_setup = 'd0;
+  reg           tx1_setup = 'd0;
+  reg           tx2_setup = 'd0;
+  reg           hop_trig_reg0 = 0;
+  reg           hop_trig_reg1 = 0;
+  reg  [23:0]   hop_delay_cnt = 'd0;
+  reg           hop_pl_trig = 'd0;
+  
+  assign hop_trig_rising = hop_trig_reg0 & ~hop_trig_reg1;
+  
+  always @(posedge s_axi_aclk) begin
+
+    if( ENABLE_HOP_TRIG_PIN )
+      hop_pl_trig <= hop_trig & enable_pl_hop_trig;
+    else
+      hop_pl_trig <= 'd0;
+    
+    hop_trig_reg0 <= hop_pl_trig | hop_ps_trig;
+      
+    hop_trig_reg1 <= hop_trig_reg0;
+    
+    if( hop_trig_rising )
+      hop_delay_cnt <= 'd0;
+    else if( hop_delay_cnt < 24'hfffffE )
+      hop_delay_cnt <= hop_delay_cnt + 'd1;
+    else
+      hop_delay_cnt <= hop_delay_cnt;
+      
+    if( hop_delay_cnt == hop_dgpio_delay_cnt )
+      hop_dgpio <= ~hop_dgpio;
+    else
+      hop_dgpio <= hop_dgpio;
+      
+    if( hop_trig_clear )
+      hop_irq <= 1'b0;
+    else if( (hop_delay_cnt == hop_dgpio_delay_cnt) && hop_trig_enable )
+      hop_irq <= 1'b1;
+    else
+      hop_irq <= hop_irq;    
+                  
+    if( rx1_ps_setup )
+      rx1_setup <= 1'b1;        
+    else if( hop_delay_cnt == 'd1 )
+      rx1_setup <= next_hop_enable_mask[0];
+    else if( hop_delay_cnt == rx1_hop_setup_delay_cnt )
+      rx1_setup <= 'd0;      
+    else
+      rx1_setup <= rx1_setup;
+      
+    if( rx2_ps_setup )
+      rx2_setup <= 1'b1;        
+    else if( hop_delay_cnt == 'd1 )
+      rx2_setup <= next_hop_enable_mask[1];
+    else if( hop_delay_cnt == rx2_hop_setup_delay_cnt )
+      rx2_setup <= 'd0;      
+    else
+      rx2_setup <= rx2_setup;
+      
+    if( tx1_ps_setup )
+      tx1_setup <= 1'b1;        
+    else if( hop_delay_cnt == 'd1 )
+      tx1_setup <= next_hop_enable_mask[2];
+    else if( hop_delay_cnt == tx1_hop_setup_delay_cnt )
+      tx1_setup <= 'd0;      
+    else
+      tx1_setup <= tx1_setup;
+      
+    if( tx2_ps_setup )
+      tx2_setup <= 1'b1;    
+    else if( hop_delay_cnt == 'd1 )
+      tx2_setup <= next_hop_enable_mask[3];
+    else if( hop_delay_cnt == tx2_hop_setup_delay_cnt )
+      tx2_setup <= 'd0;      
+    else
+      tx2_setup <= tx2_setup;      
+    
+    if( hop_mode )
+      rx1_en <= rx1_setup;
+    else
+      rx1_en <= rx1_enable;
+      
+    if( hop_mode )
+      rx2_en <= rx2_setup;
+    else
+      rx2_en <= rx2_enable;
+
+    if( hop_mode )
+      tx1_en <= tx1_setup;
+    else
+      tx1_en <= tx1_enable;
+      
+    if( hop_mode )
+      tx2_en <= tx2_setup;
+    else
+      tx2_en <= tx2_enable;    
+      
+  end      
+  
+end else begin
+  
+  always @(posedge s_axi_aclk) begin
+
+    rx1_en <= rx1_enable;     
+    rx2_en <= rx2_enable;  
+    tx1_en <= tx1_enable;     
+    tx2_en <= tx2_enable;   
+
+  end
+  
+  assign hop_trig_rising = 0;  
+
+end
+endgenerate
+
+
+/**** Swap IQ ***************************************************************************************/
+
+wire          tx1_swap_iq;
+wire          tx2_swap_iq;
+wire          rx1_swap_iq;
+wire          rx2_swap_iq;
+wire          tx1_swap_iq_cdc;
+wire          tx2_swap_iq_cdc;
+wire          rx1_swap_iq_cdc;
+wire          rx2_swap_iq_cdc;
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+tx1_swap_iq_cdc_i (
+  .dest_out(tx1_swap_iq_cdc), 
+  .dest_clk(tx1_axis_aclk), 
+  .src_clk(s_axi_aclk), 
+  .src_in(tx1_swap_iq) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+tx2_swap_iq_cdc_i (
+  .dest_out(tx2_swap_iq_cdc), 
+  .dest_clk(tx2_axis_aclk), 
+  .src_clk(s_axi_aclk), 
+  .src_in(tx2_swap_iq) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx1_swap_iq_cdc_i (
+  .dest_out(rx1_swap_iq_cdc), 
+  .dest_clk(rx1_axis_aclk), 
+  .src_clk(s_axi_aclk), 
+  .src_in(rx1_swap_iq) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx2_swap_iq_cdc_i (
+  .dest_out(rx2_swap_iq_cdc), 
+  .dest_clk(rx2_axis_aclk), 
+  .src_clk(s_axi_aclk), 
+  .src_in(rx2_swap_iq) 
+);
+
+/**** Pattern detection ***************************************************************************************/
+
+wire rx1_ramp_detected;
+wire rx2_ramp_detected;
+wire rx1_ramp_detected_cdc;
+wire rx2_ramp_detected_cdc;
+wire rx1_pn15_detected;
+wire rx2_pn15_detected;
+wire rx1_pn15_detected_cdc;
+wire rx2_pn15_detected_cdc;
+wire rx1_fixed_detected;
+wire rx2_fixed_detected;
+wire rx1_fixed_detected_cdc;
+wire rx2_fixed_detected_cdc;
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx1_ramp_detected_cdc_i (
+  .dest_out(rx1_ramp_detected_cdc), 
+  .dest_clk(s_axi_aclk), 
+  .src_clk(rx1_axis_aclk), 
+  .src_in(rx1_ramp_detected) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx2_ramp_detected_cdc_i (
+  .dest_out(rx2_ramp_detected_cdc), 
+  .dest_clk(s_axi_aclk), 
+  .src_clk(rx2_axis_aclk), 
+  .src_in(rx2_ramp_detected) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx1_pn15_detected_cdc_i (
+  .dest_out(rx1_pn15_detected_cdc), 
+  .dest_clk(s_axi_aclk), 
+  .src_clk(rx1_axis_aclk), 
+  .src_in(rx1_pn15_detected) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx2_pn15_detected_cdc_i (
+  .dest_out(rx2_pn15_detected_cdc), 
+  .dest_clk(s_axi_aclk), 
+  .src_clk(rx2_axis_aclk), 
+  .src_in(rx2_pn15_detected) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx1_fixed_detected_cdc_i (
+  .dest_out(rx1_fixed_detected_cdc), 
+  .dest_clk(s_axi_aclk), 
+  .src_clk(rx1_axis_aclk), 
+  .src_in(rx1_fixed_detected) 
+);
+
+xpm_cdc_single #(
+  .DEST_SYNC_FF(3),   
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1)  
+)
+rx2_fixed_detected_cdc_i (
+  .dest_out(rx2_fixed_detected_cdc), 
+  .dest_clk(s_axi_aclk), 
+  .src_clk(rx2_axis_aclk), 
+  .src_in(rx2_fixed_detected) 
+);
+
+/**** Fixed Pattern ***************************************************************************************/
+
+wire [31:0]   rx1_fixed_pattern;
+wire [31:0]   rx2_fixed_pattern;
+wire [31:0]   tx1_fixed_pattern;
+wire [31:0]   tx2_fixed_pattern;
+wire [31:0]   rx1_fixed_pattern_cdc;
+wire [31:0]   rx2_fixed_pattern_cdc;
+wire [31:0]   tx1_fixed_pattern_cdc;
+wire [31:0]   tx2_fixed_pattern_cdc;
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx1_fixed_pattern_cdc_i (
+  .dest_out(rx1_fixed_pattern_cdc),
+  .dest_clk(rx1_axis_aclk),
+  .src_clk(s_axi_aclk), 
+  .src_in(rx1_fixed_pattern) 
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx2_fixed_pattern_cdc_i (
+  .dest_out(rx2_fixed_pattern_cdc),
+  .dest_clk(rx2_axis_aclk),
+  .src_clk(s_axi_aclk), 
+  .src_in(rx2_fixed_pattern) 
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+tx1_fixed_pattern_cdc_i (
+  .dest_out(tx1_fixed_pattern_cdc),
+  .dest_clk(tx1_axis_aclk),
+  .src_clk(s_axi_aclk), 
+  .src_in(tx1_fixed_pattern) 
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+tx2_fixed_pattern_cdc_i (
+  .dest_out(tx2_fixed_pattern_cdc),
+  .dest_clk(tx2_axis_aclk),
+  .src_clk(s_axi_aclk), 
+  .src_in(tx2_fixed_pattern) 
+);
+
+
+/**** Transmit Data Source ***************************************************************************************/
+
+wire [2:0]    tx1_data_src;
+wire [2:0]    tx2_data_src; 
+wire [2:0]    tx1_data_src_cdc;
+wire [2:0]    tx2_data_src_cdc; 
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(3)         
+)
+tx1_data_src_cdc_i (
+  .dest_out(tx1_data_src_cdc),
+  .dest_clk(tx1_axis_aclk),
+  .src_clk(s_axi_aclk), 
+  .src_in(tx1_data_src) 
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(3)         
+)
+tx2_data_src_cdc_i (
+  .dest_out(tx2_data_src_cdc),
+  .dest_clk(tx2_axis_aclk),
+  .src_clk(s_axi_aclk), 
+  .src_in(tx2_data_src) 
+);
+
+/**** SPI ***************************************************************************************/
 
 wire [7:0]    mspi_axis_tdata;
 wire          mspi_axis_tvalid;
@@ -174,183 +702,6 @@ wire [7:0]    sspi_axis_tdata;
 wire          sspi_axis_tvalid;
 wire          sspi_axis_tready;
 wire          mspi_axis_enable;
-
-wire          rx1_enable;
-wire          rx2_enable;
-wire          tx1_enable;
-wire          tx2_enable;
-
-wire          tx1_enable_mode;
-wire          tx2_enable_mode;
-wire          rx1_enable_mode;
-wire          rx2_enable_mode;
-
-wire [15:0]   tx1_enable_delay;
-wire [15:0]   tx2_enable_delay;
-wire [15:0]   rx1_enable_delay;
-wire [15:0]   rx2_enable_delay;
-wire [15:0]   tx1_disable_delay;
-wire [15:0]   tx2_disable_delay;
-wire [15:0]   rx1_disable_delay;
-wire [15:0]   rx2_disable_delay;
-wire          tx1_data_src;
-wire          tx2_data_src;
-wire [31:0]   tx1_ps_data;
-wire [31:0]   tx2_ps_data;
-wire [31:0]   rx1_ps_data;
-wire [31:0]   rx2_ps_data;
-
-wire [63:0]   tx1_dbg;
-wire [63:0]   tx2_dbg;
-wire [31:0]   rx1_dbg;
-wire [31:0]   rx2_dbg;
-
-wire [9:0]    capture_control_cnt;
-
-assign dev_clk = dev_clk_in;
-
-assign dgpio_t = dgpio_ps_t;
-assign dgpio_ps_i = dgpio_i;
-
-assign pl_irq = irq;
-
-generate
-
-  if( ENABLE_PL_DGPIO ) begin
-    assign dgpio_o = dgpio_ps_o | dgpio_pl_o;
-    assign dgpio_pl_i = dgpio_i;
-  end else begin
-    assign dgpio_o = dgpio_ps_o;
-    assign dgpio_pl_i = 'h0;
-  end  
-  
-  if( ENABLE_TX1_ILA) begin
-      
-    adrv9001_axis_ila tx1_ila(  
-      .clk(s_axi_aclk),
-      .pl_en(tx1_pl_en),      
-      .adrv9001_enable(tx1_en),      
-      .s_axis_tdata(tx1_dbg[31:0]),
-      .s_axis_tvalid(tx1_axis_tvalid),
-      .s_axis_tready(tx1_axis_tready),
-      .dgpio_i(dgpio_i),
-      .dgpio_o(dgpio_o),
-      .dgpio_t(dgpio_t),
-      .enable_cnt(tx1_dbg[63:48]),
-      .disable_cnt(tx1_dbg[47:32]),
-      .capture_control_cnt(capture_control_cnt)      
-      );  
-  end
-  
-  if( ENABLE_TX2_ILA) begin
-    adrv9001_axis_ila tx2_ila(  
-      .clk(s_axi_aclk),
-      .pl_en(tx2_pl_en),      
-      .adrv9001_enable(tx2_en),      
-      .s_axis_tdata(tx2_dbg[31:0]),
-      .s_axis_tvalid(tx2_axis_tvalid),
-      .s_axis_tready(tx2_axis_tready),
-      .dgpio_i(dgpio_i),
-      .dgpio_o(dgpio_o),
-      .dgpio_t(dgpio_t),
-      .enable_cnt(tx2_dbg[63:48]),
-      .disable_cnt(tx2_dbg[47:32]),
-      .capture_control_cnt(capture_control_cnt)              
-      ); 
-  end  
-  
-  if( ENABLE_RX1_ILA) begin
-    adrv9001_axis_ila rx1_ila(  
-      .clk(s_axi_aclk),
-      .pl_en(rx1_pl_en),      
-      .adrv9001_enable(rx1_en),      
-      .s_axis_tdata(rx1_axis_tdata),
-      .s_axis_tvalid(rx1_axis_tvalid),
-      .s_axis_tready(rx1_axis_tready),
-      .s_axis_tlast(rx1_axis_tlast),           
-      .dgpio_i(dgpio_i),
-      .dgpio_o(dgpio_o),
-      .dgpio_t(dgpio_t),
-      .enable_cnt(rx1_dbg[31:16]),
-      .disable_cnt(rx1_dbg[15:0]),
-      .capture_control_cnt(capture_control_cnt)        
-      ); 
-  end 
-  
-  if( ENABLE_RX2_ILA) begin
-    adrv9001_axis_ila rx2_ila(  
-      .clk(s_axi_aclk),
-      .pl_en(rx2_pl_en),      
-      .adrv9001_enable(rx2_en),      
-      .s_axis_tdata(rx2_axis_tdata),
-      .s_axis_tvalid(rx2_axis_tvalid),
-      .s_axis_tready(rx2_axis_tready),
-      .s_axis_tlast(rx2_axis_tlast),      
-      .dgpio_i(dgpio_i),
-      .dgpio_o(dgpio_o),
-      .dgpio_t(dgpio_t),
-      .enable_cnt(rx2_dbg[31:16]),
-      .disable_cnt(rx2_dbg[15:0]),
-      .capture_control_cnt(capture_control_cnt)        
-      );
-  end  
-  
-  if( ENABLE_SPI_ILA) begin     
-  
-    reg  [9:0]  capture_control_cntr = 0;
-
-    wire capture_control_trig = (capture_control_cntr >= capture_control_cnt); 
-
-    always @(posedge s_axi_aclk) begin
-      if( capture_control_trig )
-        capture_control_cntr <= 0;
-      else
-        capture_control_cntr <= capture_control_cntr + 1;
-    end
-  
-    ila_spi ila_spi_i (
-      .clk(s_axi_aclk), // input wire clk
-      .probe0(spi_csn), // input wire [0:0]  probe0  
-      .probe1(spi_mosi), // input wire [0:0]  probe1 
-      .probe2(spi_miso), // input wire [0:0]  probe2 
-      .probe3(spi_clk), // input wire [0:0]  probe3
-      .probe4(mspi_axis_tvalid), // input wire [0:0]  probe4 
-      .probe5(mspi_axis_tready), // input wire [0:0]  probe5 
-      .probe6(mspi_axis_tdata), // input wire [7:0]  probe6 
-      .probe7(sspi_axis_tvalid), // input wire [0:0]  probe7 
-      .probe8(sspi_axis_tready), // input wire [0:0]  probe8 
-      .probe9(sspi_axis_tdata), // input wire [7:0]  probe9        
-      .probe10(spi_irq), // input wire [0:0]  probe10
-      .probe11(capture_control_trig) // input wire [0:0]  probe11      
-    );      
-  end      
-    
-  if( ENABLE_PL_RX1_ENABLE ) begin
-    assign rx1_enable = rx1_pl_en;
-  end else begin
-    assign rx1_enable = 0;     
-  end  
-  
-  if( ENABLE_PL_RX2_ENABLE ) begin
-    assign rx2_enable = rx2_pl_en;
-  end else begin
-    assign rx2_enable = 0;     
-  end  
-
-  if( ENABLE_PL_TX1_ENABLE ) begin
-    assign tx1_enable = tx1_pl_en;
-  end else begin
-    assign tx1_enable = 0;     
-  end  
-  
-  if( ENABLE_PL_TX2_ENABLE ) begin
-    assign tx2_enable = tx2_pl_en;
-  end else begin
-    assign tx2_enable = 0;     
-  end   
-  
-endgenerate
-
 
 adrv9001_mspi adrv9001_mspi_inst (
   .clk(s_axi_aclk),                
@@ -367,6 +718,8 @@ adrv9001_mspi adrv9001_mspi_inst (
   .m_axis_tvalid(sspi_axis_tvalid),
   .m_axis_tready(sspi_axis_tready)
 );
+   
+/**** Registers ***************************************************************************************/
    
 adrv9001_regs#(
     .DEFAULT_DGPIO_DIR(DEFAULT_DGPIO_DIR)
@@ -394,39 +747,56 @@ adrv9001_regs#(
     .s_axi_rvalid(s_axi_rvalid),
     .s_axi_rready(s_axi_rready),
     
-    .tx1_enable_mode(tx1_enable_mode),
-    .tx2_enable_mode(tx2_enable_mode),
-    .rx1_enable_mode(rx1_enable_mode),
-    .rx2_enable_mode(rx2_enable_mode),    
+    .tx1_enable(tx1_ps_en),
+    .tx2_enable(tx2_ps_en),
+    .rx1_enable(rx1_ps_en),
+    .rx2_enable(rx2_ps_en),        
     
+    .hopping_mode(hop_mode),
+    .rx1_hop_setup_delay_cnt(rx1_hop_setup_delay_cnt),
+    .rx2_hop_setup_delay_cnt(rx2_hop_setup_delay_cnt),
+    .tx1_hop_setup_delay_cnt(tx1_hop_setup_delay_cnt),
+    .tx2_hop_setup_delay_cnt(tx2_hop_setup_delay_cnt),
+    .hop_dgpio_delay_cnt(hop_dgpio_delay_cnt),
+
+    .rx1_ps_setup(rx1_ps_setup),
+    .rx2_ps_setup(rx2_ps_setup),
+    .tx1_ps_setup(tx1_ps_setup),    
+    .tx2_ps_setup(tx2_ps_setup),
+    
+    .hop_trig(hop_ps_trig),
+    .next_hop_enable_mask(next_hop_enable_mask),
+    .enable_pl_hop_trig(enable_pl_hop_trig),
+    .hop_trig_enable(hop_trig_enable),
+    .hop_trig_clear(hop_trig_clear),
+    .hop_trig_status(hop_irq),
+    
+    .tx1_swap_iq(tx1_swap_iq),
+    .tx2_swap_iq(tx2_swap_iq),
+    .rx1_swap_iq(rx1_swap_iq),
+    .rx2_swap_iq(rx2_swap_iq),
+        
+    .tx1_data_src(tx1_data_src),
+    .tx2_data_src(tx2_data_src),
+    
+    .rx1_ramp_detected(rx1_ramp_detected_cdc),
+    .rx2_ramp_detected(rx2_ramp_detected_cdc),
+    .rx1_pn15_detected(rx1_pn15_detected_cdc),
+    .rx2_pn15_detected(rx2_pn15_detected_cdc),    
+    .rx1_fixed_detected(rx1_fixed_detected_cdc),   
+    .rx2_fixed_detected(rx2_fixed_detected_cdc),       
+    
+    .rx1_fixed_pattern(rx1_fixed_pattern),        
+    .rx2_fixed_pattern(rx2_fixed_pattern),   
+    .tx1_fixed_pattern(tx1_fixed_pattern),        
+    .tx2_fixed_pattern(tx2_fixed_pattern),       
     
     .adrv9001_rstn(rstn),
-    
-    .tx1_enable_delay(tx1_enable_delay),
-    .tx2_enable_delay(tx2_enable_delay),
-    .rx1_enable_delay(rx1_enable_delay),      
-    .rx2_enable_delay(rx2_enable_delay),
-    
-    .tx1_disable_delay(tx1_disable_delay),
-    .tx2_disable_delay(tx2_disable_delay),
-    .rx1_disable_delay(rx1_disable_delay),      
-    .rx2_disable_delay(rx2_disable_delay),
     
     .dgpio_ps_t(dgpio_ps_t),
     .dgpio_ps_i(dgpio_ps_i),
     .dgpio_ps_o(dgpio_ps_o),    
-    
-    .tx1_data_src(tx1_data_src),
-    .tx2_data_src(tx2_data_src),
-    
-    .tx1_ps_data(tx1_ps_data),
-    .tx2_ps_data(tx2_ps_data),
-    
-    .rx1_ps_data(rx1_ps_data),
-    .rx2_ps_data(rx2_ps_data),
-    
-    .capture_control_cnt(capture_control_cnt),
-    
+            
     .mspi_axis_tdata(mspi_axis_tdata),
     .mspi_axis_tvalid(mspi_axis_tvalid),
     .mspi_axis_tready(mspi_axis_tready),  
@@ -435,237 +805,177 @@ adrv9001_regs#(
     .sspi_axis_tvalid(sspi_axis_tvalid),
     .sspi_axis_tready(sspi_axis_tready)    
 );
-  
-wire rx1_dclk;
-wire rx1_dclk_div;
-  
-adrv9001_clk_in#(
-  .SWAP_DIFF_CLK_IN(SWAP_DIFF_RX1_DCLK)      
-  )
-rx1_clk_inst(  
-  .rst(1'b0),              
-  .clk_p(rx1_dclk_p),
-  .clk_n(rx1_dclk_n),   
-  .clk(rx1_dclk),                   
-  .clk_div(rx1_dclk_div)         
-);  
- 
+    
+/**** Rx ***************************************************************************************/
+    
 adrv9001_rx#(
-    .DBG_EN( ENABLE_RX1_ILA ),
+    .SWAP_DIFF_CLK(SWAP_DIFF_RX1_DCLK),
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX1_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX1_STROBE)
 ) adrv9001_rx1_inst (
-    .dclk(rx1_dclk),
-    .dclk_div(rx1_dclk_div),
-    .adrv9001_strobe_p(rx1_strobe_p),
-    .adrv9001_strobe_n(rx1_strobe_n),
-    .adrv9001_idata_p(rx1_idata_p),
-    .adrv9001_idata_n(rx1_idata_n),
-    .adrv9001_qdata_p(rx1_qdata_p),
-    .adrv9001_qdata_n(rx1_qdata_n),
-    .adrv9001_enable(rx1_en),
+    .adrv9001_rx_clk_p(rx1_dclk_p),
+    .adrv9001_rx_clk_n(rx1_dclk_n), 
+    .adrv9001_rx_strobe_p(rx1_strobe_p),
+    .adrv9001_rx_strobe_n(rx1_strobe_n),
+    .adrv9001_rx_idata_p(rx1_idata_p),
+    .adrv9001_rx_idata_n(rx1_idata_n),
+    .adrv9001_rx_qdata_p(rx1_qdata_p),
+    .adrv9001_rx_qdata_n(rx1_qdata_n),
     
-    .enable(rx1_enable),
-    .enable_mode(rx1_enable_mode),
-    .enable_delay(rx1_enable_delay),
-    .disable_delay(rx1_disable_delay),     
-    
+    .enable(rx1_enable),           
+    .swap_iq(rx1_swap_iq_cdc),
+    .fixed_pattern(rx1_fixed_pattern_cdc),     
+    .ramp_detected_out(rx1_ramp_detected),
+    .pn15_detected_out(rx1_pn15_detected), 
+    .fixed_detected_out(rx1_fixed_detected),   
+  
     .m_axis_tdata(rx1_axis_tdata),
-    .m_axis_tvalid(rx1_axis_tvalid),
-    .m_axis_tlast(rx1_axis_tlast),    
-    .m_axis_aclk(rx1_axis_aclk),
-    
-    .m_axi_data( rx1_ps_data),
-    .dbg( rx1_dbg ) 
+    .m_axis_tvalid(rx1_axis_tvalid),   
+    .m_axis_aclk(rx1_axis_aclk)
 );
-  
-  
-wire rx2_dclk;
-wire rx2_dclk_div;
-  
-adrv9001_clk_in#(
-  .SWAP_DIFF_CLK_IN(SWAP_DIFF_RX2_DCLK)      
-  )
-rx2_clk_inst(  
-  .rst(1'b0),              
-  .clk_p(rx2_dclk_p),
-  .clk_n(rx2_dclk_n),   
-  .clk(rx2_dclk),                   
-  .clk_div(rx2_dclk_div)         
-);   
-  
+    
 adrv9001_rx #(
-    .DBG_EN( ENABLE_RX2_ILA ),
+    .SWAP_DIFF_CLK(SWAP_DIFF_RX2_DCLK),
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX2_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX2_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX2_STROBE)
 ) adrv9001_rx2_inst (
-    .dclk(rx2_dclk),
-    .dclk_div(rx2_dclk_div),
-    .adrv9001_strobe_p(rx2_strobe_p),
-    .adrv9001_strobe_n(rx2_strobe_n),
-    .adrv9001_idata_p(rx2_idata_p),
-    .adrv9001_idata_n(rx2_idata_n),
-    .adrv9001_qdata_p(rx2_qdata_p),
-    .adrv9001_qdata_n(rx2_qdata_n),
-    .adrv9001_enable(rx2_en),
+    .adrv9001_rx_clk_p(rx2_dclk_p),
+    .adrv9001_rx_clk_n(rx2_dclk_n), 
+    .adrv9001_rx_strobe_p(rx2_strobe_p),
+    .adrv9001_rx_strobe_n(rx2_strobe_n),
+    .adrv9001_rx_idata_p(rx2_idata_p),
+    .adrv9001_rx_idata_n(rx2_idata_n),
+    .adrv9001_rx_qdata_p(rx2_qdata_p),
+    .adrv9001_rx_qdata_n(rx2_qdata_n),
     
-    .enable(rx2_enable),
-    .enable_mode(rx2_enable_mode),    
-    .enable_delay(rx2_enable_delay),
-    .disable_delay(rx2_disable_delay),     
+    .enable(rx2_enable),       
+    .swap_iq(rx2_swap_iq_cdc),    
+    .fixed_pattern(rx2_fixed_pattern_cdc),     
+    .ramp_detected_out(rx2_ramp_detected),
+    .pn15_detected_out(rx2_pn15_detected),     
+    .fixed_detected_out(rx2_fixed_detected),           
     
     .m_axis_tdata(rx2_axis_tdata),
     .m_axis_tvalid(rx2_axis_tvalid),
-    .m_axis_tlast(rx2_axis_tlast),
-    .m_axis_aclk(rx2_axis_aclk),
-    
-    .m_axi_data( rx2_ps_data),    
-    .dbg( rx2_dbg )  
+    .m_axis_aclk(rx2_axis_aclk) 
 );  
 
-
-wire tx1_dclk;
-wire tx1_dclk_div;
-
-generate
-
-  if (TX1_REF_CLK_SRC == "TX1_CLK") begin
-  
-    adrv9001_clk_in#(
-      .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX1_DCLK_IN)      
-      )
-    tx1_clk_inst(  
-      .rst(1'b0),              
-      .clk_p(tx1_ref_clk_p),
-      .clk_n(tx1_ref_clk_n),   
-      .clk(tx1_dclk),                   
-      .clk_div(tx1_dclk_div)         
-    );  
-   
-  end else if (TX1_REF_CLK_SRC == "RX1_CLK") begin
-  
-    assign tx1_dclk     = rx1_dclk;
-    assign tx1_dclk_div = rx1_dclk_div;
-    
-  end else if (TX1_REF_CLK_SRC == "RX2_CLK") begin
-  
-    assign tx1_dclk     = rx2_dclk;
-    assign tx1_dclk_div = rx2_dclk_div;
-
-  end    
-  
-endgenerate 
+/**** Tx ***************************************************************************************/
 
 adrv9001_tx #(
-    .LVDS_OUTPUT(1),
-    .DBG_EN( ENABLE_TX1_ILA ),
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX1_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_TX1_STROBE),
-    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX1_DCLK_OUT)
+    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX1_DCLK_OUT),
+    .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX1_DCLK_IN),
+    .ENABLE_OTX_AXIS(ENABLE_OTX1_AXIS)
 ) adrv9001_tx1_inst (
-    .dclk(tx1_dclk),
-    .dclk_div(tx1_dclk_div),
-    .adrv9001_dclk_p(tx1_dclk_p),
-    .adrv9001_dclk_n(tx1_dclk_n),
-    .adrv9001_strobe_p(tx1_strobe_p),
-    .adrv9001_strobe_n(tx1_strobe_n),
-    .adrv9001_idata_p(tx1_idata_p),
-    .adrv9001_idata_n(tx1_idata_n),
-    .adrv9001_qdata_p(tx1_qdata_p),
-    .adrv9001_qdata_n(tx1_qdata_n),
-    .adrv9001_enable(tx1_en),
+    .adrv9001_tx_refclk_p(tx1_ref_clk_p),
+    .adrv9001_tx_refclk_n(tx1_ref_clk_n),
+    .adrv9001_tx_dclk_p(tx1_dclk_p),
+    .adrv9001_tx_dclk_n(tx1_dclk_n),
+    .adrv9001_tx_strobe_p(tx1_strobe_p),
+    .adrv9001_tx_strobe_n(tx1_strobe_n),
+    .adrv9001_tx_idata_p(tx1_idata_p),
+    .adrv9001_tx_idata_n(tx1_idata_n),
+    .adrv9001_tx_qdata_p(tx1_qdata_p),
+    .adrv9001_tx_qdata_n(tx1_qdata_n),
     
     .enable(tx1_enable),
-    .enable_mode(tx1_enable_mode),    
-    .enable_delay(tx1_enable_delay),
-    .disable_delay(tx1_disable_delay),
+    .swap_iq(tx1_swap_iq_cdc),
+    .data_src(tx1_data_src_cdc),    
+    .fixed_pattern(tx1_fixed_pattern_cdc), 
+
+    .otx_axis_tdata(otx1_axis_tdata),
+    .otx_axis_tvalid(otx1_axis_tvalid),        
   
     .s_axis_tdata(tx1_axis_tdata),
     .s_axis_tready(tx1_axis_tready),
     .s_axis_tvalid(tx1_axis_tvalid),
-    .s_axis_aclk(tx1_axis_aclk),
-    
-    .s_axi_data(tx1_ps_data),
-    .data_src(tx1_data_src), 
-
-    .dbg( tx1_dbg )     
+    .s_axis_aclk(tx1_axis_aclk)   
 );
-  
-  
-  
-  
-wire tx2_dclk;
-wire tx2_dclk_div;
-
-generate
-
-  if (TX2_REF_CLK_SRC == "TX2_CLK") begin
-  
-    adrv9001_clk_in#(
-      .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX2_DCLK_IN)      
-      )
-    tx2_clk_inst(  
-      .rst(1'b0),              
-      .clk_p(tx2_ref_clk_p),
-      .clk_n(tx2_ref_clk_n),   
-      .clk(tx2_dclk),                   
-      .clk_div(tx2_dclk_div)         
-    );  
-   
-  end else if (TX2_REF_CLK_SRC == "RX1_CLK") begin
-  
-    assign tx2_dclk     = rx1_dclk;
-    assign tx2_dclk_div = rx1_dclk_div;
     
-  end else if (TX2_REF_CLK_SRC == "RX2_CLK") begin
-  
-    assign tx2_dclk     = rx2_dclk;
-    assign tx2_dclk_div = rx2_dclk_div;
-
-  end    
-  
-endgenerate 
-  
-adrv9001_tx #(
-    .LVDS_OUTPUT(1),
-    .DBG_EN( ENABLE_TX2_ILA ),    
+adrv9001_tx #(  
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX2_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX2_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_TX2_STROBE),
-    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX2_DCLK_OUT) 
+    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX2_DCLK_OUT), 
+    .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX2_DCLK_IN),
+    .ENABLE_OTX_AXIS(ENABLE_OTX2_AXIS)
 ) adrv9001_tx2_inst (
-    .dclk(tx2_dclk),
-    .dclk_div(tx2_dclk_div),
-    .adrv9001_dclk_p(tx2_dclk_p),
-    .adrv9001_dclk_n(tx2_dclk_n),    
-    .adrv9001_strobe_p(tx2_strobe_p),
-    .adrv9001_strobe_n(tx2_strobe_n),
-    .adrv9001_idata_p(tx2_idata_p),
-    .adrv9001_idata_n(tx2_idata_n),
-    .adrv9001_qdata_p(tx2_qdata_p),
-    .adrv9001_qdata_n(tx2_qdata_n),
-    .adrv9001_enable(tx2_en),   
+    .adrv9001_tx_refclk_p(tx2_ref_clk_p),
+    .adrv9001_tx_refclk_n(tx2_ref_clk_n),
+    .adrv9001_tx_dclk_p(tx2_dclk_p),
+    .adrv9001_tx_dclk_n(tx2_dclk_n),    
+    .adrv9001_tx_strobe_p(tx2_strobe_p),
+    .adrv9001_tx_strobe_n(tx2_strobe_n),
+    .adrv9001_tx_idata_p(tx2_idata_p),
+    .adrv9001_tx_idata_n(tx2_idata_n),
+    .adrv9001_tx_qdata_p(tx2_qdata_p),
+    .adrv9001_tx_qdata_n(tx2_qdata_n),
 
-    .enable(tx2_enable),
-    .enable_mode(tx2_enable_mode),    
-    .enable_delay(tx2_enable_delay),
-    .disable_delay(tx2_disable_delay),
+    .enable(tx2_enable),    
+    .swap_iq(tx2_swap_iq_cdc),    
+    .data_src(tx2_data_src_cdc),  
+    .fixed_pattern(tx2_fixed_pattern_cdc),    
+    
+    .otx_axis_tdata(otx2_axis_tdata),
+    .otx_axis_tvalid(otx2_axis_tvalid),    
     
     .s_axis_tdata(tx2_axis_tdata),
     .s_axis_tready(tx2_axis_tready),
     .s_axis_tvalid(tx2_axis_tvalid),
-    .s_axis_aclk(tx2_axis_aclk),
-    
-    .s_axi_data(tx2_ps_data),
-    .data_src(tx2_data_src),
-
-    .dbg( tx2_dbg )    
+    .s_axis_aclk(tx2_axis_aclk) 
 );
 
 
+/**** Debug ***************************************************************************************/
 
+generate
+
+  if( ENABLE_HOPPING_DEBUG ) begin
+
+    assign HopDbg_HopPin = hop_dgpio;
+    assign HopDbg_Rx1EnPin = rx1_en;
+    assign HopDbg_Rx2EnPin = rx2_en;
+    assign HopDbg_Tx1EnPin = tx1_en;
+    assign HopDbg_Tx2EnPin = tx2_en;
+    assign HopDbg_HopIrq = hop_irq;
+    assign HopDbg_HopIrqClear = hop_trig_clear;
+    assign HopDbg_HopTrig = hop_trig_rising;
+
+  end else begin
+      
+    assign HopDbg_HopPin = 0;
+    assign HopDbg_Rx1EnPin = 0;
+    assign HopDbg_Rx2EnPin = 0;
+    assign HopDbg_Tx1EnPin = 0;
+    assign HopDbg_Tx2EnPin = 0;  
+    assign HopDbg_HopIrq = 0;
+    assign HopDbg_HopIrqClear = 0;
+    assign HopDbg_HopTrig = 0;    
+  
+  end
+  
+  if( ENABLE_SPI_DEBUG ) begin
+  
+    assign SpiDbg_Sclk = spi_clk;
+    assign SpiDbg_Csn = spi_csn;
+    assign SpiDbg_Mosi = spi_mosi;
+    assign SpiDbg_Miso = spi_miso;
+    
+  end else begin
+
+    assign SpiDbg_Sclk = 0;
+    assign SpiDbg_Csn = 0;
+    assign SpiDbg_Mosi = 0;
+    assign SpiDbg_Miso = 0;  
+  
+  end
+  
+  
+endgenerate  
   
 endmodule

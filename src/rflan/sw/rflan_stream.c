@@ -200,14 +200,8 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-  if((status = Adrv9001_ToPrimed( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
-    return status;
-
   if((status = AxiDma_StartTransfer( Dma, Addr, (WordCnt << 2), Cyclic )) != 0)
     return status;
-
-  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
-	  return status;
 
   return RflanStreamStatus_Success;
 }

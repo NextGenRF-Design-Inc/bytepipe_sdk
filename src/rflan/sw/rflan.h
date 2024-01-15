@@ -64,6 +64,12 @@
 #define RFLAN_UART_BAUDRATE             115200                  ///< UART Baudrate
 #define RFLAN_STATUS_OFFSET             (-500)                  ///< Status offset
 
+#define RFLAN_ADRV9001_AXI_CLOCK_FREQ_HZ        (100e6)
+
+#define FF_FILENAME_MAX_LEN              (FF_LFN_BUF)
+#define PRIMARY_FILE_SYSTEM_BASE_PATH    ("0:/")
+#define SECONDARY_FILE_SYSTEM_BASE_PATH  ("1:/")
+
 #define RFLAN_EEPROM_I2C_ADDR           (0xA0)
 /***************************************************************************//**
 *
@@ -102,6 +108,7 @@ uint32_t Rflan_GetHwVer( void );
    RflanStatus_Success                 = (0),                        ///< Success
    RflanStatus_InvalidPib              = (RFLAN_STATUS_OFFSET - 1),  ///< Invalid Parameter
    RflanStatus_IicError                = (RFLAN_STATUS_OFFSET - 2),  ///< I2C Error
+   RflanStatus_FileSystemErr           = (RFLAN_STATUS_OFFSET - 3),  ///< I2C Error
  } rflan_status_t;
 
 /******************************************************************************/

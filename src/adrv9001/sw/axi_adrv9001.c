@@ -44,41 +44,7 @@
 #include <xil_io.h>
 #include "axi_adrv9001.h"
 #include "adrv9001.h"
-
-
-
-/* Register Address */
-#define ADRV9001_TX1_MODE_ADDR            ((0 ) << 2)    ///< TX1 Mode register address offset
-#define ADRV9001_TX2_MODE_ADDR            ((1 ) << 2)    ///< TX2 Mode register address offset
-#define ADRV9001_RX1_MODE_ADDR            ((2 ) << 2)    ///< RX1 Mode register address offset
-#define ADRV9001_RX2_MODE_ADDR            ((3 ) << 2)    ///< RX2 Mode register address offset
-#define ADRV9001_RSTN_ADDR                ((4 ) << 2)    ///< Reset pin register address offset
-
-#define ADRV9001_TX1_ENABLE_DLY_ADDR      ((5 ) << 2)    ///< TX1 enable delay register address offset
-#define ADRV9001_TX2_ENABLE_DLY_ADDR      ((6 ) << 2)    ///< TX2 enable delay register address offset
-#define ADRV9001_RX1_ENABLE_DLY_ADDR      ((7 ) << 2)    ///< RX1 enable delay register address offset
-#define ADRV9001_RX2_ENABLE_DLY_ADDR      ((8 ) << 2)    ///< RX2 enable delay register address offset
-
-#define ADRV9001_TX1_DISABLE_DLY_ADDR     ((9 ) << 2)    ///< TX1 disable delay register address offset
-#define ADRV9001_TX2_DISABLE_DLY_ADDR     ((10) << 2)    ///< TX2 disable delay register address offset
-#define ADRV9001_RX1_DISABLE_DLY_ADDR     ((11) << 2)    ///< RX1 disable delay register address offset
-#define ADRV9001_RX2_DISABLE_DLY_ADDR     ((12) << 2)    ///< RX2 disable delay register address offset
-
-#define ADRV9001_DGPIO_DIR_ADDR           ((13) << 2)    ///< DGPIO direction register address offset
-#define ADRV9001_DGPIO_IO_ADDR            ((14) << 2)    ///< DGPIO value register address offset
-
-#define ADRV9001_CH1_DATA_ADDR            ((15) << 2)    ///< TX1/RX1 IQ data register offset
-#define ADRV9001_CH2_DATA_ADDR            ((16) << 2)    ///< TX2/RX2 IQ data register offset
-
-#define ADRV9001_TX1_DATA_PATH_ADDR       ((17) << 2)    ///< TX1 data path register offset
-#define ADRV9001_TX2_DATA_PATH_ADDR       ((18) << 2)    ///< TX2 data path register offset
-
-#define ADRV9001_CAPTURE_CONTROL_CNT_ADDR ((19) << 2)    ///< Capture control count register offset
-
-#define ADRV9001_MSPI_ADDR                ((21) << 2)    ///< SPI data register offset
-
-#define ADRV9001_ID_ADDR                  ((31) << 2)    ///< Driver id register offset
-
+#include "sleep.h"
 
 
 /***************************************************************************//**
@@ -169,118 +135,425 @@ int32_t AxiAdrv9001_MspiTransfer(axi_adrv9001_t *Instance, uint8_t *TxBuf, uint8
   return Adrv9001Status_Success;
 }
 
-void AxiAdrv9001_SetDisableDelay(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt )
+void AxiAdrv9001_SetNextHopEnableMask(axi_adrv9001_t *Instance, uint8_t mask )
 {
-  uint32_t tmp = (uint32_t)SampleCnt;
+  Xil_Out32(Instance->Base + ADRV9001_NEXT_HOP_ENABLE_MASK_ADDR, (uint32_t)mask);
+}
+
+uint8_t AxiAdrv9001_GetNextHopEnableMask(axi_adrv9001_t *Instance )
+{
+  return (uint8_t)Xil_In32(Instance->Base + ADRV9001_NEXT_HOP_ENABLE_MASK_ADDR);
+}
+
+bool AxiAdrv9001_GetNextHopEnable(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel )
+{
+  uint8_t mask = AxiAdrv9001_GetNextHopEnableMask( Instance);
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+  {
+    return ((mask & ADRV9001_TX1_HOP_ENABLE_MASK) == ADRV9001_TX1_HOP_ENABLE_MASK);
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+    return ((mask & ADRV9001_TX2_HOP_ENABLE_MASK) == ADRV9001_TX2_HOP_ENABLE_MASK);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+    return ((mask & ADRV9001_RX1_HOP_ENABLE_MASK) == ADRV9001_RX1_HOP_ENABLE_MASK);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+  {
+    return ((mask & ADRV9001_RX2_HOP_ENABLE_MASK) == ADRV9001_RX2_HOP_ENABLE_MASK);
+  }
+
+  return false;
+}
+
+void AxiAdrv9001_SetNextHopEnable(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enable )
+{
+  uint8_t mask = AxiAdrv9001_GetNextHopEnableMask( Instance);
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+  {
+    if( Enable )
+    {
+      mask |= ADRV9001_TX1_HOP_ENABLE_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_TX1_HOP_ENABLE_MASK;
+    }
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+    if( Enable )
+    {
+      mask |= ADRV9001_TX2_HOP_ENABLE_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_TX2_HOP_ENABLE_MASK;
+    }
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+    if( Enable )
+    {
+      mask |= ADRV9001_RX1_HOP_ENABLE_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_RX1_HOP_ENABLE_MASK;
+    }
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+  {
+    if( Enable )
+    {
+      mask |= ADRV9001_RX2_HOP_ENABLE_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_RX2_HOP_ENABLE_MASK;
+    }
+  }
+
+  AxiAdrv9001_SetNextHopEnableMask( Instance, mask );
+}
+
+void AxiAdrv9001_SetHoppingMode(axi_adrv9001_t *Instance, bool Enable )
+{
+  uint32_t tmp = (uint32_t)Enable;
+
+  Xil_Out32(Instance->Base + ADRV9001_HOPPING_MODE_ENABLE_ADDR, tmp);
+}
+
+bool AxiAdrv9001_GetHoppingMode(axi_adrv9001_t *Instance )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_HOPPING_MODE_ENABLE_ADDR);
+
+  return tmp > 0;
+}
+
+void AxiAdrv9001_SetHopDelay(axi_adrv9001_t *Instance, float Value )
+{
+  uint32_t tmp = (uint32_t)(Value * (float)Instance->ClockFreqHz);
+
+  Xil_Out32(Instance->Base + ADRV9001_HOP_DGPIO_SETUP_CNT_ADDR, tmp);
+}
+
+void AxiAdrv9001_GetHopDelay(axi_adrv9001_t *Instance, float *Value )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_HOP_DGPIO_SETUP_CNT_ADDR);
   
-  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
-  {
-    Xil_Out32(Instance->Base + ADRV9001_TX1_DISABLE_DLY_ADDR, tmp);
-  }
-  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
-  {
-    Xil_Out32(Instance->Base + ADRV9001_TX2_DISABLE_DLY_ADDR, tmp);
-  }
-  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
-  {
-    Xil_Out32(Instance->Base + ADRV9001_RX1_DISABLE_DLY_ADDR, tmp);
-  }
-  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
-  {
-    Xil_Out32(Instance->Base + ADRV9001_RX2_DISABLE_DLY_ADDR, tmp);
-  }
+  *Value = (float)tmp / (float)Instance->ClockFreqHz;
 }
 
-void AxiAdrv9001_SetEnableDelay(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t SampleCnt )
+void AxiAdrv9001_SetSetupPin(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel )
 {
-  uint32_t tmp = (uint32_t)SampleCnt;
-    
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Instance->Base + ADRV9001_TX1_ENABLE_DLY_ADDR, tmp);
+    Xil_Out32(Instance->Base + ADRV9001_PS_SETUP_PIN_ADDR, ADRV9001_TX1_SETUP_PIN_MASK);
   }
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Instance->Base + ADRV9001_TX2_ENABLE_DLY_ADDR, tmp);
+    Xil_Out32(Instance->Base + ADRV9001_PS_SETUP_PIN_ADDR, ADRV9001_TX2_SETUP_PIN_MASK);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    Xil_Out32(Instance->Base + ADRV9001_RX1_ENABLE_DLY_ADDR, tmp);
+    Xil_Out32(Instance->Base + ADRV9001_PS_SETUP_PIN_ADDR, ADRV9001_RX1_SETUP_PIN_MASK);
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    Xil_Out32(Instance->Base + ADRV9001_RX2_ENABLE_DLY_ADDR, tmp);
+    Xil_Out32(Instance->Base + ADRV9001_PS_SETUP_PIN_ADDR, ADRV9001_RX2_SETUP_PIN_MASK);
   }
 }
 
-void AxiAdrv9001_GetDisableDelay(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt )
+void AxiAdrv9001_SetHopSetupDelay(axi_adrv9001_t *Instance,adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, float Value )
+{
+  uint32_t tmp = (uint32_t)(Value * (float)Instance->ClockFreqHz);
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+  {
+	  Xil_Out32(Instance->Base + ADRV9001_TX1_HOP_SETUP_CNT_ADDR, tmp);
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+	  Xil_Out32(Instance->Base + ADRV9001_TX2_HOP_SETUP_CNT_ADDR, tmp);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+	  Xil_Out32(Instance->Base + ADRV9001_RX1_HOP_SETUP_CNT_ADDR, tmp);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+  {
+	  Xil_Out32(Instance->Base + ADRV9001_RX2_HOP_SETUP_CNT_ADDR, tmp);
+  }
+}
+
+void AxiAdrv9001_GetHopSetupDelay(axi_adrv9001_t *Instance,adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, float *Value )
+{
+  uint32_t tmp = 0;
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+  {
+	  tmp = Xil_In32(Instance->Base + ADRV9001_TX1_HOP_SETUP_CNT_ADDR);
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+	  tmp = Xil_In32(Instance->Base + ADRV9001_TX2_HOP_SETUP_CNT_ADDR);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+	  tmp = Xil_In32(Instance->Base + ADRV9001_RX1_HOP_SETUP_CNT_ADDR);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+  {
+	  tmp = Xil_In32(Instance->Base + ADRV9001_RX2_HOP_SETUP_CNT_ADDR);
+  }
+
+  *Value = (float)tmp / (float)Instance->ClockFreqHz;
+}
+
+void AxiAdrv9001_TriggerSingleHop(axi_adrv9001_t *Instance )
+{
+  uint32_t tmp = 0x01;
+
+  Xil_Out32(Instance->Base + ADRV9001_PS_HOP_TRIG_ADDR, tmp);
+}
+
+void AxiAdrv9001_SetEnablePlHopTrig(axi_adrv9001_t *Instance, bool Enable )
+{
+  uint32_t tmp = (uint32_t)Enable;
+
+  Xil_Out32(Instance->Base + ADRV9001_ENABLE_PL_HOP_TRIG_ADDR, tmp);
+}
+
+uint8_t AxiAdrv9001_GetEnablePlHopTrig(axi_adrv9001_t *Instance )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_ENABLE_PL_HOP_TRIG_ADDR);
+
+  return tmp > 0;
+}
+
+void AxiAdrv9001_ClearHopIrq( axi_adrv9001_t *Instance )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_HOP_IRQ_ADDR);
+
+  tmp |= ADRV9001_HOP_TRIG_CLEAR_MASK;
+
+  Xil_Out32(Instance->Base + ADRV9001_HOP_IRQ_ADDR, tmp);
+}
+
+void AxiAdrv9001_SetHopIrqEnable( axi_adrv9001_t *Instance, bool Enable )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_HOP_IRQ_ADDR);
+
+  if( Enable )
+    tmp |= ADRV9001_HOP_TRIG_ENABLE_MASK;
+  else
+    tmp &= ~ADRV9001_HOP_TRIG_ENABLE_MASK;
+
+  Xil_Out32(Instance->Base + ADRV9001_HOP_IRQ_ADDR, tmp);
+}
+
+bool AxiAdrv9001_GetHopIrqEnable( axi_adrv9001_t *Instance )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_HOP_IRQ_ADDR);
+
+  return ((tmp & ADRV9001_HOP_TRIG_ENABLE_MASK ) == ADRV9001_HOP_TRIG_ENABLE_MASK);
+}
+
+bool AxiAdrv9001_GetHopIrqStatus( axi_adrv9001_t *Instance )
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_HOP_IRQ_ADDR);
+
+  return ((tmp & ADRV9001_HOP_TRIG_STATUS_MASK ) == ADRV9001_HOP_TRIG_STATUS_MASK);
+}
+
+void AxiAdrv9001_SetPsEnable(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint8_t Enable )
+{
+  uint32_t tmp = (uint32_t)Enable;
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+    Xil_Out32(Instance->Base + ADRV9001_TX1_PS_ENABLE_ADDR, tmp);
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+    Xil_Out32(Instance->Base + ADRV9001_TX2_PS_ENABLE_ADDR, tmp);
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+    Xil_Out32(Instance->Base + ADRV9001_RX1_PS_ENABLE_ADDR, tmp);
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+    Xil_Out32(Instance->Base + ADRV9001_RX2_PS_ENABLE_ADDR, tmp);
+}
+
+bool AxiAdrv9001_GetPsEnable(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel)
 {
   uint32_t tmp;
-  
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+    tmp = Xil_In32(Instance->Base + ADRV9001_TX1_PS_ENABLE_ADDR);
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+    tmp = Xil_In32(Instance->Base + ADRV9001_TX2_PS_ENABLE_ADDR);
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+    tmp = Xil_In32(Instance->Base + ADRV9001_RX1_PS_ENABLE_ADDR);
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+    tmp = Xil_In32(Instance->Base + ADRV9001_RX2_PS_ENABLE_ADDR);
+
+  return tmp > 0;
+}
+
+void AxiAdrv9001_SetSwapIq(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, bool Enable )
+{
+  uint32_t mask = Xil_In32(Instance->Base + ADRV9001_SWAP_IQ_ADDR);
+
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
   {
-    tmp = Xil_In32(Instance->Base + ADRV9001_TX1_DISABLE_DLY_ADDR);
+    if( Enable )
+    {
+      mask |= ADRV9001_TX1_SWAP_IQ_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_TX1_SWAP_IQ_MASK;
+    }
   }
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
   {
-    tmp = Xil_In32(Instance->Base + ADRV9001_TX2_DISABLE_DLY_ADDR);
+    if( Enable )
+    {
+      mask |= ADRV9001_TX2_SWAP_IQ_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_TX2_SWAP_IQ_MASK;
+    }
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
   {
-    tmp = Xil_In32(Instance->Base + ADRV9001_RX1_DISABLE_DLY_ADDR);
+    if( Enable )
+    {
+      mask |= ADRV9001_RX1_SWAP_IQ_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_RX1_SWAP_IQ_MASK;
+    }
   }
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
   {
-    tmp = Xil_In32(Instance->Base + ADRV9001_RX2_DISABLE_DLY_ADDR);
+    if( Enable )
+    {
+      mask |= ADRV9001_RX2_SWAP_IQ_MASK;
+    }
+    else
+    {
+      mask &= ~ADRV9001_RX2_SWAP_IQ_MASK;
+    }
   }
-  
-  *SampleCnt = (uint16_t)tmp;
+
+  Xil_Out32(Instance->Base + ADRV9001_SWAP_IQ_ADDR, mask );
 }
 
-void AxiAdrv9001_GetEnableDelay(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint16_t *SampleCnt )
+bool AxiAdrv9001_GetSwapIq(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel)
+{
+  uint32_t mask = Xil_In32(Instance->Base + ADRV9001_SWAP_IQ_ADDR);
+
+  if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
+  {
+    return ((mask & ADRV9001_TX1_SWAP_IQ_MASK) == ADRV9001_TX1_SWAP_IQ_MASK);
+  }
+  else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
+  {
+    return ((mask & ADRV9001_TX2_SWAP_IQ_MASK) == ADRV9001_TX2_SWAP_IQ_MASK);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
+  {
+    return ((mask & ADRV9001_RX1_SWAP_IQ_MASK) == ADRV9001_RX1_SWAP_IQ_MASK);
+  }
+  else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
+  {
+    return ((mask & ADRV9001_RX2_SWAP_IQ_MASK) == ADRV9001_RX2_SWAP_IQ_MASK);
+  }
+
+  return false;
+}
+
+axi_adrv9001_data_src_t AxiAdrv9001_GetTxDataSrc(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel)
 {
   uint32_t tmp;
-  
+
+  if( Channel == ADI_CHANNEL_1 )
+    tmp = Xil_In32(Instance->Base + ADRV9001_TX1_DATA_SRC_ADDR);
+  else if( Channel == ADI_CHANNEL_2 )
+    tmp = Xil_In32(Instance->Base + ADRV9001_TX2_DATA_SRC_ADDR);
+
+  return (axi_adrv9001_data_src_t)tmp;
+}
+
+void AxiAdrv9001_SetTxDataSrc(axi_adrv9001_t *Instance, axi_adrv9001_data_src_t DataSrc, adi_common_ChannelNumber_e Channel )
+{
+  uint32_t tmp = (uint32_t)DataSrc;
+
+  if( Channel == ADI_CHANNEL_1 )
+    Xil_Out32(Instance->Base + ADRV9001_TX1_DATA_SRC_ADDR, tmp);
+  else if( Channel == ADI_CHANNEL_2 )
+    Xil_Out32(Instance->Base + ADRV9001_TX2_DATA_SRC_ADDR, tmp);
+}
+
+bool AxiAdrv9001_GetRampMonDet(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel)
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_RX_RAMP_DET_ADDR);
+
+  uint32_t mask = (Channel == ADI_CHANNEL_1)? 0x01 : 0x02;
+
+  return ((tmp & mask) == mask);
+}
+
+bool AxiAdrv9001_GetPn15MonDet(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel)
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_RX_PN15_DET_ADDR);
+
+  uint32_t mask = (Channel == ADI_CHANNEL_1)? 0x01 : 0x02;
+
+  return ((tmp & mask) == mask);
+}
+
+bool AxiAdrv9001_GetFixedPatternMonDet(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel)
+{
+  uint32_t tmp = Xil_In32(Instance->Base + ADRV9001_RX_FIXED_PATTERN_DET_ADDR);
+
+  uint32_t mask = (Channel == ADI_CHANNEL_1)? 0x01 : 0x02;
+
+  return ((tmp & mask) == mask);
+}
+
+uint32_t AxiAdrv9001_GetFixedPattern(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel)
+{
+  uint32_t tmp;
+
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
-  {
-    tmp = Xil_In32(Instance->Base + ADRV9001_TX1_ENABLE_DLY_ADDR);
-  }
+    tmp = Xil_In32(Instance->Base + ADRV9001_TX1_FIXED_PATTERN_ADDR);
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
-  {
-    tmp = Xil_In32(Instance->Base + ADRV9001_TX2_ENABLE_DLY_ADDR);
-  }
+    tmp = Xil_In32(Instance->Base + ADRV9001_TX2_FIXED_PATTERN_ADDR);
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
-  {
-    tmp = Xil_In32(Instance->Base + ADRV9001_RX1_ENABLE_DLY_ADDR);
-  }
+    tmp = Xil_In32(Instance->Base + ADRV9001_RX1_FIXED_PATTERN_ADDR);
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
-  {
-    tmp = Xil_In32(Instance->Base + ADRV9001_RX2_ENABLE_DLY_ADDR);
-  }
-  
-  *SampleCnt = (uint16_t)tmp;  
+    tmp = Xil_In32(Instance->Base + ADRV9001_RX2_FIXED_PATTERN_ADDR);
+
+  return tmp;
 }
 
-void AxiAdrv9001_SetEnableMode(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, adi_adrv9001_ChannelEnableMode_e mode )
+void AxiAdrv9001_SetFixedPattern(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t Value)
 {
+
   if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_1) )
-    Xil_Out32(Instance->Base + ADRV9001_TX1_MODE_ADDR, (uint32_t)mode);
+    Xil_Out32(Instance->Base + ADRV9001_TX1_FIXED_PATTERN_ADDR, Value);
   else if( (Port == ADI_TX) && (Channel == ADI_CHANNEL_2) )
-    Xil_Out32(Instance->Base + ADRV9001_TX2_MODE_ADDR, (uint32_t)mode);
+    Xil_Out32(Instance->Base + ADRV9001_TX2_FIXED_PATTERN_ADDR, Value);
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_1) )
-    Xil_Out32(Instance->Base + ADRV9001_RX1_MODE_ADDR, (uint32_t)mode);
+    Xil_Out32(Instance->Base + ADRV9001_RX1_FIXED_PATTERN_ADDR, Value);
   else if( (Port == ADI_RX) && (Channel == ADI_CHANNEL_2) )
-    Xil_Out32(Instance->Base + ADRV9001_RX2_MODE_ADDR, (uint32_t)mode);
-}
+    Xil_Out32(Instance->Base + ADRV9001_RX2_FIXED_PATTERN_ADDR, Value);
 
-void AxiAdrv9001_SetCaptureControlCnt(axi_adrv9001_t *Instance, uint32_t Value )
-{
-  Xil_Out32(Instance->Base + ADRV9001_CAPTURE_CONTROL_CNT_ADDR, Value);
-}
-
-void AxiAdrv9001_GetCaptureControlCnt(axi_adrv9001_t *Instance, uint32_t *Value )
-{
-  *Value = Xil_In32(Instance->Base + ADRV9001_CAPTURE_CONTROL_CNT_ADDR);
 }
 
 void AxiAdrv9001_SetDgpioPin(axi_adrv9001_t *Instance, uint8_t Pin, uint8_t Level )
@@ -333,38 +606,6 @@ void AxiAdrv9001_GetDgpioDir(axi_adrv9001_t *Instance, uint32_t *Value )
   *Value = Xil_In32(Instance->Base + ADRV9001_DGPIO_DIR_ADDR);
 }
 
-void AxiAdrv9001_SetTxDataPath(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t Value )
-{
-  if( Channel == ADI_CHANNEL_1 )
-    Xil_Out32(Instance->Base + ADRV9001_TX1_DATA_PATH_ADDR, (uint32_t)Value);
-  else
-    Xil_Out32(Instance->Base + ADRV9001_TX2_DATA_PATH_ADDR, (uint32_t)Value);
-}
-
-void AxiAdrv9001_GetTxDataPath(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, axi_adrv9001_data_path_t *Value )
-{
-  if( Channel == ADI_CHANNEL_1 )
-    *Value = Xil_In32(Instance->Base + ADRV9001_TX1_DATA_PATH_ADDR);
-  else
-    *Value = Xil_In32(Instance->Base + ADRV9001_TX2_DATA_PATH_ADDR);
-}
-
-void AxiAdrv9001_SetTxData(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t Value )
-{
-  if( Channel == ADI_CHANNEL_1 )
-    Xil_Out32(Instance->Base + ADRV9001_CH1_DATA_ADDR, Value);
-  else
-    Xil_Out32(Instance->Base + ADRV9001_CH2_DATA_ADDR, Value);
-}
-
-void AxiAdrv9001_GetRxData(axi_adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, uint32_t *Value )
-{
-  if( Channel == ADI_CHANNEL_1 )
-    *Value = Xil_In32(Instance->Base + ADRV9001_CH1_DATA_ADDR);
-  else
-    *Value = Xil_In32(Instance->Base + ADRV9001_CH2_DATA_ADDR);
-}
-
 void AxiAdrv9001_ResetbPinSet(axi_adrv9001_t *Instance, uint8_t Level )
 {
   Xil_Out32(Instance->Base + ADRV9001_RSTN_ADDR, Level);
@@ -375,6 +616,10 @@ int32_t AxiAdrv9001_Initialize(axi_adrv9001_t *Instance, axi_adrv9001_init_t *In
   Instance->Base = Init->Base;
   Instance->IrqId = Init->IrqId;
   Instance->IrqInstance = Init->IrqInstance;
+  Instance->ClockFreqHz = Init->ClockFreqHz;
+
+  if( Instance->ClockFreqHz == 0 )
+    return Adrv9001Status_InvalidParameter;
 
   uint32_t regVal = Xil_In32(Instance->Base + ADRV9001_ID_ADDR);
 

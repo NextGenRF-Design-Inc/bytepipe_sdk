@@ -49,7 +49,7 @@ wire [7:0]  mosiData;
 reg  [7:0]  misoData;
 reg         misoWrite;
 wire        mosiEmpty;
-    
+wire        misoEmpty;    
     
 assign sclkFalling = spi_clk & ~cnt[1] & ~cnt[0];
 assign sclkRising = ~spi_clk & ~cnt[1] & ~cnt[0];
@@ -108,7 +108,6 @@ always @(posedge clk) begin
 end
 
 wire mosiFull;
-wire misoEmpty;
 
 assign s_axis_tready = !mosiFull;
 assign m_axis_tvalid = ~misoEmpty;

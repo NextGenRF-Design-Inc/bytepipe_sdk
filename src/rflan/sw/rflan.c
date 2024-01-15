@@ -60,11 +60,7 @@
 
 extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
-#if FILE_SYSTEM_LOGICAL_DRIVE == 0
-#define FILE_SYSTEM_BASE_PATH "0:/"
-#else
-#define FILE_SYSTEM_BASE_PATH "1:/"
-#endif
+char *BasePath;
 
 #ifdef VERSA_CLOCK5_ENABLE
 #include "versa_clock5.h"
@@ -89,7 +85,6 @@ static rflan_uart_t   RflanUart;
 static XGpioPs        RflanGpio;
 static rflan_pib_t    RflanPib;
 static adrv9001_t     RflanAdrv9001;
-static adrv9001_pib_t Adrv9001Pib;
 static QueueHandle_t  RflanEvtQueue;
 static XIicPs         RflanIic1;
 static eeprom_t       RflanEeprom;
@@ -225,6 +220,32 @@ static int32_t Rflan_SetupScript( cli_t *cli, char *Filename )
   return status;
 }
 
+static int32_t RflanFs_Initialize( void )
+{
+  if( f_mount(&FatFs, PRIMARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
+  {
+    printf("Primary File System Failed\r\n");
+
+    if( f_mount(&FatFs, SECONDARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK)
+    {
+      printf("Secondary File System Failed\r\n");
+      return RflanStatus_FileSystemErr;
+    }
+    else
+    {
+      printf("Using Secondary File System\r\n");
+    }
+
+    BasePath = SECONDARY_FILE_SYSTEM_BASE_PATH;
+  }
+  else
+  {
+    BasePath = PRIMARY_FILE_SYSTEM_BASE_PATH;
+  }
+
+  return RflanStatus_Success;
+}
+
 static int32_t Rflan_Initialize( void )
 {
   int32_t status;
@@ -297,7 +318,7 @@ static int32_t Rflan_Initialize( void )
 	printf("Eeprom %s\r\n",StatusString(status));
 
   /* Initialize File System*/
-  if((status = f_mount(&FatFs, FILE_SYSTEM_BASE_PATH, 1)) != FR_OK)
+  if((status = RflanFs_Initialize()) != FR_OK)
     printf("FatFs %s\r\n",StatusString(status));
 
   rflan_pib_init_t PibInit = {
@@ -311,10 +332,6 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanPib_Initialize( &RflanPib, &PibInit )) != 0)
     printf("Rflan Pib Init %s\r\n",StatusString(status));
 
-  /* Execute Init Script */
-  if((status = Rflan_SetupScript( &Cli, (FILE_SYSTEM_BASE_PATH "rflan_setup.txt"))) != 0 )
-    printf("Rflan Setup Script %s\r\n",StatusString(status));
-
 
   printf("\r\n\r\n\r\n" );
   printf("************************************************\r\n");
@@ -324,46 +341,31 @@ static int32_t Rflan_Initialize( void )
   printf("\r\nType help for a list of commands\r\n\r\n");
 
   adrv9001_init_t Adrv9001Init = {
-		  .AxiBase = XPAR_ADRV9001_0_BASEADDR,
-		  .AxiIrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
-		  .TcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07,
-		  .LogFilename = (FILE_SYSTEM_BASE_PATH "adi_adrv9001_log.txt"),
-	      .IrqInstance = &xInterruptController
+      .AxiBase = XPAR_ADRV9001_0_BASEADDR,
+      .AxiClockFreqHz = RFLAN_ADRV9001_AXI_CLOCK_FREQ_HZ,
+      .AxiIrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
+      .BasePath = BasePath,
+      .HopIrqCallback = NULL,
+      .HopIrqCallbackRef = NULL,
+      .IrqInstance = &xInterruptController,
+      .LogFilename = "adi_adrv9001_log.txt",
+      .Rx1ChfCoeff = NULL,
+      .Rx2ChfCoeff = NULL,
+      .RxEnableMode = ADI_ADRV9001_SPI_MODE,
+      .StateCallback = NULL,
+      .StateCallbackRef = NULL,
+      .TxAttn = { 0, 0 },
+      .TxBoost = { true, true },
+      .TxEnableMode = ADI_ADRV9001_SPI_MODE
   };
-
-  if( Rflan_GetHwVer( ) == 2 )
-  {
-    Adrv9001Init.Rx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_06;
-    Adrv9001Init.Rx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_05;
-    Adrv9001Init.Tx1FrontendEnablePin = ADI_ADRV9001_GPIO_UNASSIGNED;
-    Adrv9001Init.Tx2FrontendEnablePin = ADI_ADRV9001_GPIO_UNASSIGNED;
-    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_AUXDAC0;
-  }
-  else if( Rflan_GetHwVer( ) == 3 )
-  {
-
-    Adrv9001Init.Rx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_01;
-    Adrv9001Init.Rx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_09;
-    Adrv9001Init.Tx1FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_00;
-    Adrv9001Init.Tx2FrontendEnablePin = ADI_ADRV9001_GPIO_ANALOG_08;
-    Adrv9001Init.TcxoDacChannel = ADI_ADRV9001_AUXDAC3;
-  }
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
     printf("%s\r\n",StatusString(status));
 
-  /* Initialize ADRV9001 PIB */
-  if((status = Adrv9001Pib_Initialize( &Adrv9001Pib, &RflanAdrv9001 )) != 0)
-    printf("Adrv9001Cli %s\r\n",StatusString(status));
-
   /* Initialize ADRV9001 CLI */
-  if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001, &Adrv9001Pib )) != 0)
+  if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001 )) != 0)
     printf("Adrv9001Cli %s\r\n",StatusString(status));
-
-  /* Execute Init Script */
-  if((status = Rflan_SetupScript( &Cli, (FILE_SYSTEM_BASE_PATH "adrv9001_setup.txt"))) != 0 )
-    printf("Adrv9001 Setup Script %s\r\n",StatusString(status));
 
 #ifdef RFLAN_STREAM_ENABLE
 
@@ -431,22 +433,18 @@ static void Rflan_Task( void *pvParameters )
 #ifdef RFLAN_STREAM_ENABLE
 
         case RflanEvt_Rx1StreamDone:
-          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_RX, ADI_CHANNEL_1 );
           printf("%s Stream Done\r\n", "Rx1");
           break;
 
         case RflanEvt_Rx2StreamDone:
-          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_RX, ADI_CHANNEL_2 );
           printf("%s Stream Done\r\n", "Rx2");
           break;
 
         case RflanEvt_Tx1StreamDone:
-          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_TX, ADI_CHANNEL_1 );
           printf("%s Stream Done\r\n", "Tx1");
           break;      
 
         case RflanEvt_Tx2StreamDone:
-          Adrv9001_ToPrimed( RflanStream.Adrv9001, ADI_TX, ADI_CHANNEL_2 );
           printf("%s Stream Done\r\n", "Tx2");
           break;      
 

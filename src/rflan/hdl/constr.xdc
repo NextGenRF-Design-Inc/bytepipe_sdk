@@ -92,18 +92,6 @@ set_property  -dict {PACKAGE_PIN N5     IOSTANDARD LVDS}                        
 
 
 
-# clocks
-
-create_clock -name adrv9001_rx1_dclk_out   -period  2.034 [get_ports adrv9001_rx1_dclk_p]
-create_clock -name adrv9001_rx2_dclk_out   -period  2.034 [get_ports adrv9001_rx2_dclk_p]
-create_clock -name adrv9001_tx1_dclk_out   -period  2.034 [get_ports adrv9001_tx1_ref_clk_p]
-create_clock -name adrv9001_tx2_dclk_out   -period  2.034 [get_ports adrv9001_tx2_ref_clk_p]
-
-# Allow max skew of 0.5 ns between input clocks
-set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx1_dclk_out]
-set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx2_dclk_out]
-set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx1_dclk_out]
-set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx2_dclk_out]
 
 
 

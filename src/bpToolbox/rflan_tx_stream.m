@@ -22,12 +22,6 @@ h.RflanStreamStop(TxPort);
 h.SetTxAttn(TxPort, 10);
 h.SetTxBoost(TxPort, 0);
 
-% Delay in samples between rising edge of enable and tx_axis_tready
-h.SetEnableDelay(TxPort, 500);
-
-% Delay in samples between falling edge of enable and adrv9001_tx_en 
-h.SetDisableDelay(TxPort, 200);
-
 % Get Sample Rate 
 fs = h.GetSampleRate(TxPort);
 
@@ -41,6 +35,9 @@ h.RflanStreamBufPut(TxPort,0,iq);
 
 % Enable continuous transmit of the iq data
 h.RflanStreamStart(TxPort, cyclic, length(iq));
+
+% Enable Transmitter
+h.Adrv9001ToRfEnabled( TxPort );
 
 % Get Carrier Frequency 
 fc = h.GetCarrierFrequency(TxPort) - f_tone;

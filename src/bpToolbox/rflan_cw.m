@@ -5,29 +5,36 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all; close all; clc;
 h = rflan();
-h.Open('COM16');
+h.Open('COM4');
 
 %% Enable CW 
 TxPort = h.Tx1;
 
-% Change to SPI mode
-h.SetEnableMode(TxPort,h.EnableModeSpi);
+% Set Carrier Frequency (optional)
+h.SetCarrierFrequency(TxPort, 2.1e9);
 
 % Set Tx Settings
 h.SetTxAttn(TxPort, 10);
 h.SetTxBoost(TxPort, 0);
 
-% Load constant IQ value
-h.SetTxIqConstant(TxPort, hex2dec('7fff0000'));
-
-% Change data path from DMA to Constant
-h.SetTxIqDataPath(TxPort, h.ADRV9001TxDataPath_Constant);
+% Set Data Source
+h.SetFixedPattern(h.Tx1, hex2dec('3ff03fff'));
+h.SetTxDataSrc(TxPort, h.TxDataSrcFixed);
+h.GetTxDataSrc(TxPort);
 
 % Enable Transmitter
 h.Adrv9001ToRfEnabled( TxPort );
 
+h.GetRadioState(TxPort);
+
+%% Change Attn
+
+h.SetTxAttn(TxPort, 2.55);
+
+h.GetTxAttn(TxPort)
+
 %% Disable CW
 
 h.Adrv9001ToRfPrimed( TxPort );
-h.SetTxIqDataPath(TxPort, h.Adrv9001TxDataPath_DMA);
-h.SetEnableMode(TxPort,h.EnableModePin);
+h.SetTxDataSrc(TxPort, h.TxDataSrcAxis);
+h.GetTxDataSrc(TxPort);

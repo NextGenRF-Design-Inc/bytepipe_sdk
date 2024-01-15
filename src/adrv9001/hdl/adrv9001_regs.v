@@ -3,38 +3,59 @@
 module adrv9001_regs #(
     parameter DEFAULT_DGPIO_DIR     = 'hffff
     )(
-    output reg            tx1_enable_mode = 0,   
-    output reg            tx2_enable_mode = 0, 
-    output reg            rx1_enable_mode = 0, 
-    output reg            rx2_enable_mode = 0, 
+    output reg            tx1_enable = 0,   
+    output reg            tx2_enable = 0, 
+    output reg            rx1_enable = 0, 
+    output reg            rx2_enable = 0, 
+    
+    output reg            hopping_mode = 0,
+    output reg            hop_trig_enable = 0,
+    output reg            hop_trig_clear = 0,
+    input  wire           hop_trig_status,
+    
+    output reg  [23:0]    rx1_hop_setup_delay_cnt,
+    output reg  [23:0]    rx2_hop_setup_delay_cnt,
+    output reg  [23:0]    tx1_hop_setup_delay_cnt,
+    output reg  [23:0]    tx2_hop_setup_delay_cnt,
+    output reg  [23:0]    hop_dgpio_delay_cnt,
+    
+    output reg            rx1_ps_setup = 0,
+    output reg            rx2_ps_setup = 0,
+    output reg            tx1_ps_setup = 0,
+    output reg            tx2_ps_setup = 0,    
+    
+    output reg            hop_trig = 'd0,
+    output reg  [3:0]     next_hop_enable_mask = 'd0,
+    output reg            enable_pl_hop_trig = 'd0,
+    
+    output reg            tx1_swap_iq = 0,   
+    output reg            tx2_swap_iq = 0, 
+    output reg            rx1_swap_iq = 0, 
+    output reg            rx2_swap_iq = 0,     
     
     output reg            adrv9001_rstn = 0, 
+        
+    input  wire           rx1_ramp_detected,
+    input  wire           rx2_ramp_detected,    
     
-    output reg  [15:0]    tx1_enable_delay = 10,
-    output reg  [15:0]    tx2_enable_delay = 10,
-    output reg  [15:0]    rx1_enable_delay = 10,
-    output reg  [15:0]    rx2_enable_delay = 10,    
+    input  wire           rx1_pn15_detected,  
+    input  wire           rx2_pn15_detected,   
     
-    output reg  [15:0]    tx1_disable_delay = 10,    
-    output reg  [15:0]    tx2_disable_delay = 10,    
-    output reg  [15:0]    rx1_disable_delay = 10,    
-    output reg  [15:0]    rx2_disable_delay = 10,  
+    input  wire           rx1_fixed_detected,  
+    input  wire           rx2_fixed_detected,      
+    
+    output reg  [31:0]    rx1_fixed_pattern = 'h12345678,
+    output reg  [31:0]    rx2_fixed_pattern = 'h12345678,  
+    output reg  [31:0]    tx1_fixed_pattern = 'h12345678,
+    output reg  [31:0]    tx2_fixed_pattern = 'h12345678,      
 
-    output reg  [31:0]    tx1_ps_data = 0,     
-    output reg  [31:0]    tx2_ps_data = 0,    
+    output reg  [2:0]     tx1_data_src = 0,    
+    output reg  [2:0]     tx2_data_src = 0,        
     
-    output reg            tx1_data_src = 0,
-    output reg            tx2_data_src = 0,
-
-    input  wire [31:0]    rx1_ps_data,
-    input  wire [31:0]    rx2_ps_data,
-    
-    output reg  [15:0]    dgpio_ps_o,
-    output reg  [15:0]    dgpio_ps_t,
+    output reg  [15:0]    dgpio_ps_o = 'd0,
+    output reg  [15:0]    dgpio_ps_t = 'd0,
     input  wire [15:0]    dgpio_ps_i,
-    
-    output reg  [9:0]     capture_control_cnt = 'd8,
-    
+        
     input  wire [7:0]     sspi_axis_tdata,
     input  wire           sspi_axis_tvalid,
     output reg            sspi_axis_tready = 1'b0,
@@ -68,27 +89,6 @@ module adrv9001_regs #(
 );
 
 
-
-
-
-wire [31:0] rx1_ps_data_cdc;
-wire [31:0] rx2_ps_data_cdc;
-
-cdc #(
-  .DATA_WIDTH(32))
-rx1_data_cdc_i (
-  .s_cdc_tdata(rx1_ps_data),
-  .m_cdc_clk  (s_axi_aclk),
-  .m_cdc_tdata(rx1_ps_data_cdc)
-);
-
-cdc #(
-  .DATA_WIDTH(32))
-rx2_data_cdc_i (
-  .s_cdc_tdata(rx2_ps_data),
-  .m_cdc_clk  (s_axi_aclk),
-  .m_cdc_tdata(rx2_ps_data_cdc)
-);
 
 // AXI4LITE signals
 reg [4:0]   axi_awaddr;
@@ -180,124 +180,176 @@ assign slv_reg_wren = axi_wready && s_axi_wvalid && axi_awready && s_axi_awvalid
 /* AXI Write */
 always @( posedge s_axi_aclk ) begin
   if ( s_axi_aresetn == 1'b0 ) begin                           
-      tx1_enable_mode <= 0;
-      tx2_enable_mode <= 0;
-      rx1_enable_mode <= 0;
-      rx2_enable_mode <= 0;      
+      tx1_enable <= 0;
+      tx2_enable <= 0;
+      rx1_enable <= 0;
+      rx2_enable <= 0;     
+      
+      tx1_swap_iq <= 0;
+      tx2_swap_iq <= 0;
+      rx1_swap_iq <= 0;
+      rx2_swap_iq <= 0;  
+      
+      rx1_fixed_pattern <= 32'h12345678;
+      rx2_fixed_pattern <= 32'h12345678;  
+      tx1_fixed_pattern <= 32'h12345678;
+      tx2_fixed_pattern <= 32'h12345678;        
       
       adrv9001_rstn <= 0;
-      
-      tx1_enable_delay <= 10;
-      tx2_enable_delay <= 10;
-      rx1_enable_delay <= 10;
-      rx2_enable_delay <= 10;
-
-      tx1_disable_delay <= 10;
-      tx2_disable_delay <= 10;
-      rx1_disable_delay <= 10;
-      rx2_disable_delay <= 10;
             
       dgpio_ps_t <= DEFAULT_DGPIO_DIR;
       dgpio_ps_o <= 0;    
       
-      capture_control_cnt <= 8;
+      tx1_data_src <= 'd0;
+      tx2_data_src <= 'd0;
       
-      tx1_ps_data <= 32'h12345678;
-      tx2_ps_data <= 32'hABCD1234;    
-
-      tx1_data_src <= 0;           
-      tx2_data_src <= 0;         
-
       mspi_axis_tdata <= 8'd0;
       mspi_axis_tvalid <= 1'b0;       
       mspi_axis_enable <= 1'b0;
+      
+      hopping_mode <= 'd0;      
+      hop_dgpio_delay_cnt <= 'd0;
+      hop_trig <= 'd0;      
+      next_hop_enable_mask <= 'd0;    
+      
+      rx1_hop_setup_delay_cnt <= 'd0;
+      rx2_hop_setup_delay_cnt <= 'd0; 
+      tx1_hop_setup_delay_cnt <= 'd0;
+      tx2_hop_setup_delay_cnt <= 'd0;       
+      
+      rx1_ps_setup <= 'd0;
+      rx2_ps_setup <= 'd0;
+      tx1_ps_setup <= 'd0;      
+      tx2_ps_setup <= 'd0;
+      
+      hop_trig_enable <= 'd0;
+      hop_trig_clear <= 'd0;
+    
   end else if (slv_reg_wren) begin
     case ( axi_awaddr )
-      5'd0 : tx1_enable_mode <= s_axi_wdata[0];
-      5'd1 : tx2_enable_mode <= s_axi_wdata[0];
-      5'd2 : rx1_enable_mode <= s_axi_wdata[0];
-      5'd3 : rx2_enable_mode <= s_axi_wdata[0];
+      5'd0 : tx1_enable <= s_axi_wdata[0];
+      5'd1 : tx2_enable <= s_axi_wdata[0];
+      5'd2 : rx1_enable <= s_axi_wdata[0];
+      5'd3 : rx2_enable <= s_axi_wdata[0];      
+      5'd4 : adrv9001_rstn <= s_axi_wdata[0];            
+      5'd5 : dgpio_ps_t <= s_axi_wdata[15:0];       
+      5'd6 : dgpio_ps_o <= s_axi_wdata[15:0];    
+      5'd7 : tx1_data_src <= s_axi_wdata[2:0];  
+      5'd8 : tx2_data_src <= s_axi_wdata[2:0];        
       
-      5'd4 : adrv9001_rstn <= s_axi_wdata[0];    
+      5'd12: rx1_fixed_pattern <= s_axi_wdata;
+      5'd13: rx2_fixed_pattern <= s_axi_wdata;  
+      5'd14: tx1_fixed_pattern <= s_axi_wdata;
+      5'd15: tx2_fixed_pattern <= s_axi_wdata;  
       
-      5'd5 : tx1_enable_delay <= s_axi_wdata[15:0];   
-      5'd6 : tx2_enable_delay <= s_axi_wdata[15:0];  
-      5'd7 : rx1_enable_delay <= s_axi_wdata[15:0];   
-      5'd8 : rx2_enable_delay <= s_axi_wdata[15:0];        
-      
-      5'd9 : tx1_disable_delay <= s_axi_wdata[15:0];         
-      5'd10: tx2_disable_delay <= s_axi_wdata[15:0];   
-      5'd11: rx1_disable_delay <= s_axi_wdata[15:0];   
-      5'd12: rx2_disable_delay <= s_axi_wdata[15:0];    
-      
-      5'd13: dgpio_ps_t <= s_axi_wdata[15:0];       
-      5'd14: dgpio_ps_o <= s_axi_wdata[15:0];   
-
-      5'd15: tx1_ps_data <= s_axi_wdata;
-      5'd16: tx2_ps_data <= s_axi_wdata;   
-      
-      5'd17: tx1_data_src <= s_axi_wdata[0];
-      5'd18: tx2_data_src <= s_axi_wdata[0];        
-      
-      5'd19: capture_control_cnt <= s_axi_wdata[9:0];
-  
-      
+      5'd16: rx1_hop_setup_delay_cnt <= s_axi_wdata[23:0];
+      5'd17: rx2_hop_setup_delay_cnt <= s_axi_wdata[23:0];
+      5'd18: tx1_hop_setup_delay_cnt <= s_axi_wdata[23:0]; 
+      5'd19: tx2_hop_setup_delay_cnt <= s_axi_wdata[23:0];     
+              
+      5'd20: hop_dgpio_delay_cnt <= s_axi_wdata[23:0];
+           
       5'd21: begin
         mspi_axis_tdata <= s_axi_wdata[7:0];
         mspi_axis_tvalid <= 1'b1;
         mspi_axis_enable <= s_axi_wdata[8];
       end
+            
+      5'd23: begin
+        hop_trig_clear <= s_axi_wdata[0];
+        hop_trig_enable <= s_axi_wdata[1];        
+      end             
+      
+      5'd24: hop_trig <= s_axi_wdata[0];
+      5'd25: next_hop_enable_mask <= s_axi_wdata[3:0];      
+      5'd26: enable_pl_hop_trig <= s_axi_wdata[0]; 
+
+      5'd27: begin
+        tx1_swap_iq <= s_axi_wdata[3];  
+        tx2_swap_iq <= s_axi_wdata[2];   
+        rx1_swap_iq <= s_axi_wdata[1];  
+        rx2_swap_iq <= s_axi_wdata[0];           
+      end
+
+      5'd28: hopping_mode <= s_axi_wdata[0];        
+      5'd30: begin
+        tx1_ps_setup <= s_axi_wdata[3];
+        tx2_ps_setup <= s_axi_wdata[2];
+        rx1_ps_setup <= s_axi_wdata[1];
+        rx2_ps_setup <= s_axi_wdata[0];
+      end
+      
                                                
       default: begin
-        tx1_enable_mode <= tx1_enable_mode; 
-        tx2_enable_mode <= tx2_enable_mode; 
-        rx1_enable_mode <= rx1_enable_mode; 
-        rx2_enable_mode <= rx2_enable_mode;         
-        adrv9001_rstn <= adrv9001_rstn;
-        tx1_enable_delay <= tx1_enable_delay;
-        tx2_enable_delay <= tx2_enable_delay;
-        rx1_enable_delay <= rx1_enable_delay;
-        rx2_enable_delay <= rx2_enable_delay;
-        tx1_disable_delay <= tx1_disable_delay;
-        tx2_disable_delay <= tx2_disable_delay;
-        rx1_disable_delay <= rx1_disable_delay;
-        rx2_disable_delay <= rx2_disable_delay;        
+        rx1_hop_setup_delay_cnt <= rx1_hop_setup_delay_cnt;
+        rx2_hop_setup_delay_cnt <= rx2_hop_setup_delay_cnt;
+        tx1_hop_setup_delay_cnt <= tx1_hop_setup_delay_cnt;
+        tx2_hop_setup_delay_cnt <= tx2_hop_setup_delay_cnt; 
+        tx1_enable <= tx1_enable; 
+        tx2_enable <= tx2_enable; 
+        rx1_enable <= rx1_enable; 
+        rx2_enable <= rx2_enable;
+        tx1_swap_iq <= tx1_swap_iq; 
+        tx2_swap_iq <= tx2_swap_iq; 
+        rx1_swap_iq <= rx1_swap_iq; 
+        rx2_swap_iq <= rx2_swap_iq;                
+        rx1_fixed_pattern <= rx1_fixed_pattern;
+        rx2_fixed_pattern <= rx2_fixed_pattern; 
+        tx1_fixed_pattern <= tx1_fixed_pattern;
+        tx2_fixed_pattern <= tx2_fixed_pattern;         
+        adrv9001_rstn <= adrv9001_rstn;      
         dgpio_ps_t <= dgpio_ps_t;
         dgpio_ps_o <= dgpio_ps_o;
-        capture_control_cnt <= capture_control_cnt;
-        tx1_ps_data <= tx1_ps_data;
-        tx2_ps_data <= tx2_ps_data;                
-        tx1_data_src <= tx1_data_src;
-        tx2_data_src <= tx2_data_src;
         mspi_axis_tdata <= mspi_axis_tdata;
         mspi_axis_tvalid <= 1'b0;       
         mspi_axis_enable <= mspi_axis_enable;
+        hopping_mode <= hopping_mode;
+        hop_dgpio_delay_cnt <= hop_dgpio_delay_cnt;
+        hop_trig <= 'd0;
+        next_hop_enable_mask <= next_hop_enable_mask;
+        enable_pl_hop_trig <= enable_pl_hop_trig;
+        rx1_ps_setup <= 'd0;
+        rx2_ps_setup <= 'd0;
+        tx1_ps_setup <= 'd0;      
+        tx2_ps_setup <= 'd0;        
+        hop_trig_clear <= 'd0;
+        hop_trig_enable <= hop_trig_enable;
       end
     endcase
   end else begin
-    tx1_enable_mode <= tx1_enable_mode; 
-    tx2_enable_mode <= tx2_enable_mode; 
-    rx1_enable_mode <= rx1_enable_mode; 
-    rx2_enable_mode <= rx2_enable_mode;                     
-    adrv9001_rstn <= adrv9001_rstn;
-    tx1_enable_delay <= tx1_enable_delay;
-    tx2_enable_delay <= tx2_enable_delay;
-    rx1_enable_delay <= rx1_enable_delay;
-    rx2_enable_delay <= rx2_enable_delay;
-    tx1_disable_delay <= tx1_disable_delay;
-    tx2_disable_delay <= tx2_disable_delay;
-    rx1_disable_delay <= rx1_disable_delay;
-    rx2_disable_delay <= rx2_disable_delay;        
+    rx1_hop_setup_delay_cnt <= rx1_hop_setup_delay_cnt;
+    rx2_hop_setup_delay_cnt <= rx2_hop_setup_delay_cnt;
+    tx1_hop_setup_delay_cnt <= tx1_hop_setup_delay_cnt;
+    tx2_hop_setup_delay_cnt <= tx2_hop_setup_delay_cnt;   
+    tx1_enable <= tx1_enable; 
+    tx2_enable <= tx2_enable; 
+    rx1_enable <= rx1_enable; 
+    rx2_enable <= rx2_enable;      
+    tx1_swap_iq <= tx1_swap_iq; 
+    tx2_swap_iq <= tx2_swap_iq; 
+    rx1_swap_iq <= rx1_swap_iq; 
+    rx2_swap_iq <= rx2_swap_iq;        
+    rx1_fixed_pattern <= rx1_fixed_pattern;
+    rx2_fixed_pattern <= rx2_fixed_pattern; 
+    tx1_fixed_pattern <= tx1_fixed_pattern;
+    tx2_fixed_pattern <= tx2_fixed_pattern;     
+    adrv9001_rstn <= adrv9001_rstn;      
     dgpio_ps_t <= dgpio_ps_t;
-    dgpio_ps_o <= dgpio_ps_o;
-    capture_control_cnt <= capture_control_cnt;    
-    tx1_ps_data <= tx1_ps_data;
-    tx2_ps_data <= tx2_ps_data;                
-    tx1_data_src <= tx1_data_src;
-    tx2_data_src <= tx2_data_src;  
+    dgpio_ps_o <= dgpio_ps_o; 
     mspi_axis_tdata <= mspi_axis_tdata;
     mspi_axis_tvalid <= 1'b0;              
     mspi_axis_enable <= mspi_axis_enable;    
+    hopping_mode <= hopping_mode;
+    hop_dgpio_delay_cnt <= hop_dgpio_delay_cnt;
+    hop_trig <= 'd0;    
+    next_hop_enable_mask <= next_hop_enable_mask;
+    enable_pl_hop_trig <= enable_pl_hop_trig;
+    rx1_ps_setup <= 'd0;
+    rx2_ps_setup <= 'd0;
+    tx1_ps_setup <= 'd0;      
+    tx2_ps_setup <= 'd0;    
+    hop_trig_clear <= 'd0;
+    hop_trig_enable <= hop_trig_enable;
   end  
 end    
 
@@ -382,36 +434,42 @@ assign slv_reg_rden = axi_arready & s_axi_arvalid & ~axi_rvalid;
 always @(*)
 begin
       case ( axi_araddr )
-        5'd0:  reg_data_out <= {31'h0, tx1_enable_mode};
-        5'd1:  reg_data_out <= {31'h0, tx2_enable_mode};
-        5'd2:  reg_data_out <= {31'h0, rx1_enable_mode};
-        5'd3:  reg_data_out <= {31'h0, rx2_enable_mode};        
-        5'd4:  reg_data_out <= {31'h0, adrv9001_rstn};    
-        
-        5'd5 : reg_data_out <= {16'h0, tx1_enable_delay}; 
-        5'd6 : reg_data_out <= {16'h0, tx2_enable_delay};
-        5'd7 : reg_data_out <= {16'h0, rx1_enable_delay};  
-        5'd8 : reg_data_out <= {16'h0, rx2_enable_delay};      
-      
-        5'd9 : reg_data_out <= {16'h0, tx1_disable_delay};      
-        5'd10: reg_data_out <= {16'h0, tx2_disable_delay};  
-        5'd11: reg_data_out <= {16'h0, rx1_disable_delay}; 
-        5'd12: reg_data_out <= {16'h0, rx2_disable_delay};        
-        
-        5'd13: reg_data_out <= {16'h0, dgpio_ps_t};     
-        5'd14: reg_data_out <= {16'h0, dgpio_ps_o}; 
+        5'd0:  reg_data_out <= {31'h0, tx1_enable};
+        5'd1:  reg_data_out <= {31'h0, tx2_enable};
+        5'd2:  reg_data_out <= {31'h0, rx1_enable};
+        5'd3:  reg_data_out <= {31'h0, rx2_enable};
+        5'd4:  reg_data_out <= {31'h0, adrv9001_rstn};
+        5'd5:  reg_data_out <= {16'h0, dgpio_ps_t};
+        5'd6:  reg_data_out <= {16'h0, dgpio_ps_i};
+        5'd7:  reg_data_out <= {29'h0, tx1_data_src};
+        5'd8:  reg_data_out <= {29'h0, tx2_data_src};
+        5'd9:  reg_data_out <= {30'h0, rx2_ramp_detected, rx1_ramp_detected};
+        5'd10: reg_data_out <= {30'h0, rx2_pn15_detected, rx1_pn15_detected};
+        5'd11: reg_data_out <= {30'h0, rx2_fixed_detected, rx1_fixed_detected};
 
-        5'd15: reg_data_out <= rx1_ps_data_cdc;
-        5'd16: reg_data_out <= rx2_ps_data_cdc;  
-      
-        5'd17: reg_data_out <= {31'h0, tx1_data_src};
-        5'd18: reg_data_out <= {31'h0, tx2_data_src};   
-
-        5'd19: reg_data_out <= {20'h0, capture_control_cnt};           
+        5'd12: reg_data_out <= rx1_fixed_pattern;
+        5'd13: reg_data_out <= rx2_fixed_pattern;
+        5'd14: reg_data_out <= tx1_fixed_pattern;
+        5'd15: reg_data_out <= tx2_fixed_pattern;
+                
+        5'd16: reg_data_out <= {8'h0, rx1_hop_setup_delay_cnt}; 
+        5'd17: reg_data_out <= {8'h0, rx2_hop_setup_delay_cnt};         
+        5'd18: reg_data_out <= {8'h0, tx1_hop_setup_delay_cnt}; 
+        5'd19: reg_data_out <= {8'h0, tx2_hop_setup_delay_cnt}; 
+        5'd20: reg_data_out <= {8'h0, hop_dgpio_delay_cnt};        
        
         5'd21: begin 
           reg_data_out <= {23'h0, sspi_axis_tvalid, sspi_axis_tdata};   
-        end                                                    
+        end                                       
+    
+        5'd23: reg_data_out <= {29'h0, hop_trig_status, hop_trig_enable, hop_trig_clear };   
+        5'd24: reg_data_out <= {31'h0, hop_trig};    
+        5'd25: reg_data_out <= {28'h0, next_hop_enable_mask};
+        5'd26: reg_data_out <= {31'h0, enable_pl_hop_trig};
+        5'd27: reg_data_out <= {28'h0, tx1_swap_iq, tx2_swap_iq, rx1_swap_iq, rx2_swap_iq};
+        5'd28: reg_data_out <= {31'h0, hopping_mode};                                  
+        5'd30: reg_data_out <= {28'h0, tx1_ps_setup, tx2_ps_setup, rx1_ps_setup, rx2_ps_setup};
+        
         5'd31  : reg_data_out <= 32'h12345678;             
         
         default : begin 

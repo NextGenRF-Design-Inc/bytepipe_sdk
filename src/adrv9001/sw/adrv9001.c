@@ -1,52 +1,54 @@
 /***************************************************************************//**
-*  \addtogroup ADRV9001
-*   @{
-*******************************************************************************/
+ *  \addtogroup ADRV9001
+ *   @{
+ *******************************************************************************/
 /***************************************************************************//**
-*  \file       adrv9001.c
-*
-*  \details    This file contains the ADRV9001 implementation
-*
-*  \copyright
-*
-*  Copyright 2021(c) NextGen RF Design, Inc.
-*
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions are met:
-*   - Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   - Redistributions in binary form must reproduce the above copyright notice,
-*     this list of conditions and the following disclaimer in the documentation
-*     and/or other materials provided with the distribution.
-*   - The use of this software may or may not infringe the patent rights of one
-*     or more patent holders.  This license does not release you from the
-*     requirement that you obtain separate licenses from these patent holders
-*     to use this software.
-*   - Use of the software either in source or binary form, must be run on or
-*     directly connected to a NextGen RF Design, Inc. product.
-*
-*  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
-*  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
-*  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-*  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-*  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-*  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*
-*******************************************************************************/
+ *  \file       adrv9001.c
+ *
+ *  \details    This file contains the ADRV9001 implementation
+ *
+ *  \copyright
+ *
+ *  Copyright 2021(c) NextGen RF Design, Inc.
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   - Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *   - The use of this software may or may not infringe the patent rights of one
+ *     or more patent holders.  This license does not release you from the
+ *     requirement that you obtain separate licenses from these patent holders
+ *     to use this software.
+ *   - Use of the software either in source or binary form, must be run on or
+ *     directly connected to a NextGen RF Design, Inc. product.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ *  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include "adrv9001.h"
 #include "initialize.h"
 #include "calibrate.h"
-#include "prime.h"
 #include "configure.h"
 #include "sleep.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
 #define ADI_CHANNEL_RX1_INIT_MASK               (0x40)
 #define ADI_CHANNEL_RX2_INIT_MASK               (0x80)
@@ -61,11 +63,38 @@ int32_t Adrv9001_ClearError( adrv9001_t *Instance )
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_LoadRxChannelFilter( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t *Coeff )
+{
+  adi_adrv9001_PfirWbNbBuffer_t pfirCoeff = {
+      .numCoeff = 128,
+      .symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC,
+      .tapsSel = ADI_ADRV9001_PFIR_128_TAPS,
+      .gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB,
+  };
+
+  memcpy((uint8_t*)pfirCoeff.coefficients, (uint8_t*)Coeff, sizeof( pfirCoeff.coefficients) );
+
+  uint8_t mask = 0;
+
+  if( channel == ADI_CHANNEL_1 )
+    mask = ADI_ADRV9001_RX1;
+  else
+    mask = ADI_ADRV9001_RX2;
+
+  if( adi_adrv9001_arm_NextPfir_Set( &Instance->Device, mask, &pfirCoeff ) != 0)
+    return Adrv9001Status_PfirErr;
+
+  if( adi_adrv9001_arm_Profile_Switch(&Instance->Device) != 0)
+    return Adrv9001Status_PfirErr;
+
+  return Adrv9001Status_Success;
+}
+
 int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
 {
   int32_t status;
 
-  Instance->PendingReboot = 0;
+  printf("\r\nAdrv9001 Load Profile\r\n\r\n");
 
   if((status = initialize( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileInitErr;
@@ -76,77 +105,30 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
   if((status = configure( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileCfgErr;
 
-  if((status = prime( &Instance->Device )) != 0)
+  if((status = Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_1 )) != 0)
     return Adrv9001Status_ToPrimedErr;
 
-  if((status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, ADI_CHANNEL_1, Instance->Params->Tx1Attn)) != 0)
-    return Adrv9001Status_TxAttnErr;
+  if((status = Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_2 )) != 0)
+    return Adrv9001Status_ToPrimedErr;
 
-  if((status = adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, ADI_CHANNEL_2, Instance->Params->Tx2Attn)) != 0)
-    return Adrv9001Status_TxAttnErr;
+  if((status = Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_1 )) != 0)
+    return Adrv9001Status_ToPrimedErr;
 
-  if((status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_1, Instance->Params->Tx1Boost)) != 0)
-    return Adrv9001Status_TxBoostErr;
+  if((status = Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_2 )) != 0)
+    return Adrv9001Status_ToPrimedErr;
 
-  if((status = adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_2, Instance->Params->Tx2Boost)) != 0)
-    return Adrv9001Status_TxBoostErr;
+  /* Calibrate SSI */
+  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT, ADRV9001_TEST_MODE_PATTERN )) != 0)
+    printf("Adrv9001 Tx1 Failed SSI Calibration\r\n");
 
-  /* Configure Analog Outputs */
-  if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00 ) != 0 )
-    return Adrv9001Status_GpioErr;
+  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT, ADRV9001_TEST_MODE_PATTERN )) != 0)
+    printf("Adrv9001 Tx2 Failed SSI Calibration\r\n");
 
-  /* Configure Analog Outputs */
-  if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04 ) != 0 )
-    return Adrv9001Status_GpioErr;
+  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15, ADRV9001_TEST_MODE_PATTERN )) != 0)
+    printf("Adrv9001 Rx1 Failed SSI Calibration\r\n");
 
-  /* Configure Analog Outputs */
-  if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08 ) != 0 )
-    return Adrv9001Status_GpioErr;
-
-  /* Enable TCXO */
-  if( Instance->Params->TcxoEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->TcxoEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH) != 0)
-		  return Adrv9001Status_GpioErr;
-
-  /* Disable Rx1A */
-  if( Instance->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-		  return Adrv9001Status_GpioErr;
-
-  /* Disable Rx2A */
-  if( Instance->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-		  return Adrv9001Status_GpioErr;
-
-  /* Disable Tx1 */
-  if( Instance->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-		  return Adrv9001Status_GpioErr;
-
-  /* Disable Tx2 */
-  if( Instance->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-	  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW) != 0)
-		  return Adrv9001Status_GpioErr;
-
-  /* Enable DAC */
-  if(( status = Adrv9001_EnableDac(Instance, Instance->Params->TcxoDacChannel, true )) != 0 )
-    return status;
-
-  /* Set TCXO to mid scale */
-  if(Adrv9001_SetVcTcxo( Instance, 0.9 ) != 0)
-    printf("Adrv9001 SetVcTcxo Failure\r\n");
-
-  if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_1, Instance->Params->Tx1EnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
-
-  if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_2, Instance->Params->Tx2EnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
-
-  if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_1, Instance->Params->Rx1EnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
-
-  if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_2, Instance->Params->Rx2EnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
+  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15, ADRV9001_TEST_MODE_PATTERN )) != 0)
+    printf("Adrv9001 Rx2 Failed SSI Calibration\r\n");
 
   printf("%s Version Information:\r\n","ADRV9002" );
 
@@ -158,7 +140,7 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
 
   adi_adrv9001_ArmVersion_t ArmVer;
   if(adi_adrv9001_arm_Version( &Instance->Device, &ArmVer) == 0)
-    printf("  -Firmware Version: %u.%u.%u.%u\r\n",ArmVer.majorVer, ArmVer.minorVer, ArmVer.maintVer, ArmVer.rcVer );
+    printf("  -Firmware Version: %u.%u.%u.%u\r\n",ArmVer.majorVer, ArmVer.minorVer, ArmVer.maintVer, ArmVer.armBuildType );
   else
     printf("  -Firmware Version: Failed\r\n");
 
@@ -168,30 +150,311 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
   else
     printf("  -API Version: Failed\r\n\r\n");
 
-  /* Calibrate SSI */
-  if(Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_1 ) != 0)
-    printf("ADRV9001 Tx1 SSI Calibration Failure\r\n");
+  Instance->Initialized = 1;
 
-  if(Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_2 ) != 0)
-    printf("ADRV9001 Tx2 SSI Calibration Failure\r\n");
+  return Adrv9001Status_Success;
+}
 
-  if( Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_1 ) != 0)
-    printf("ADRV9001 Rx1 SSI Calibration Failure\r\n");
+int32_t Adrv9001_GetRxRssi( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value )
+{
+  uint32_t rxRssiPower_mdB;
 
-  if(Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_2 ) != 0)
-    printf("ADRV9001 Rx2 SSI Calibration Failure\r\n");
+  if( adi_adrv9001_Rx_Rssi_Read( &Instance->Device, channel, &rxRssiPower_mdB ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  *Value = (float)rxRssiPower_mdB / 1000.0;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value )
+{
+  if( channel == ADI_CHANNEL_1 )
+    Instance->Tx1ToRx1Loopback = Value;
+  else
+    Instance->Tx2ToRx2Loopback = Value;
+
+  if( adi_adrv9001_Ssi_Loopback_Set( &Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, Value) != 0)
+    return Adrv9001Status_WriteErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value )
+{
+  if( channel == ADI_CHANNEL_1 )
+    *Value = Instance->Tx1ToRx1Loopback;
+  else
+    *Value = Instance->Tx2ToRx2Loopback;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetSiliconVersion( adrv9001_t *Instance, adi_adrv9001_SiliconVersion_t *Value )
+{
+  if( adi_adrv9001_SiliconVersion_Get( &Instance->Device, Value ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetFirmwareVersion( adrv9001_t *Instance, adi_adrv9001_ArmVersion_t *Value )
+{
+  if( adi_adrv9001_arm_Version( &Instance->Device, Value ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetApiVersion( adrv9001_t *Instance, adi_common_ApiVersion_t *Value )
+{
+  if( adi_adrv9001_ApiVersion_Get( &Instance->Device, Value ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetTemperature( adrv9001_t *Instance, int16_t *Value )
+{
+  if( adi_adrv9001_Temperature_Get( &Instance->Device, Value ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetSsiStatus( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool *Value )
+{
+  if( port == ADI_TX )
+  {
+    if( channel == ADI_CHANNEL_1 )
+      *Value = Instance->Tx1SsiSweepStatus;
+    else
+      *Value = Instance->Tx2SsiSweepStatus;
+  }
+  else
+  {
+    if( channel == ADI_CHANNEL_1 )
+      *Value = Instance->Rx1SsiSweepStatus;
+    else
+      *Value = Instance->Rx2SsiSweepStatus;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetSsiDataDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t *Value )
+{
+  adi_adrv9001_SsiCalibrationCfg_t cal;
+
+  if( adi_adrv9001_Ssi_Delay_Inspect( &Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  uint8_t delay;
+
+  if( port == ADI_TX )
+  {
+    if( channel == ADI_CHANNEL_1 )
+      delay = cal.txIDataDelay[0];
+    else
+      delay = cal.txIDataDelay[1];
+  }
+  else
+  {
+    if( channel == ADI_CHANNEL_1 )
+      delay = cal.rxIDataDelay[0];
+    else
+      delay = cal.rxIDataDelay[1];
+  }
+
+  *Value = (uint16_t)delay * 90;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t *Value )
+{
+  adi_adrv9001_SsiCalibrationCfg_t cal;
+
+  if( adi_adrv9001_Ssi_Delay_Inspect( &Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  uint8_t delay;
+
+  if( port == ADI_TX )
+  {
+    if( channel == ADI_CHANNEL_1 )
+      delay = cal.txClkDelay[0];
+    else
+      delay = cal.txClkDelay[1];
+  }
+  else
+  {
+    if( channel == ADI_CHANNEL_1 )
+      delay = cal.rxClkDelay[0];
+    else
+      delay = cal.rxClkDelay[1];
+  }
+
+  *Value = (uint16_t)delay * 90;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetTxBoost( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value )
+{
+  if( Adrv9001_IsPortEnabled(Instance, ADI_TX, channel ) == false )
+    return Adrv9001Status_Success;
+
+  Instance->TxBoost[channel -1] = Value;
+
+  if( adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, channel, Value) != 0)
+    return Adrv9001Status_TxAttnErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetTxDataSrc(adrv9001_t *Instance, adi_common_ChannelNumber_e Channel, adrv9001_tx_data_src_t Value )
+{
+
+  /* Configure Programmable Logic */
+  if( Value == Adrv9001TxDataSrc_Ones )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Ones, Channel );
+  }
+  else if( Value == Adrv9001TxDataSrc_Zeros )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Zeros, Channel );
+  }
+  else if( Value == Adrv9001TxDataSrc_Ramp )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Ramp, Channel );
+  }
+  else if( Value == Adrv9001TxDataSrc_Pn15 )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Pn15, Channel);
+  }
+  else if( Value == Adrv9001TxDataSrc_FixedPattern )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_FixedPattern, Channel );
+  }
+  else if( Value == Adrv9001TxDataSrc_Axis )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Axis, Channel );
+  }
+
+  /* Configure ADRV9001 */
+  if( Value == Adrv9001TxDataSrc_RxLoopback )
+  {
+    if( Adrv9001_SetTxToRxLoopBack( Instance, Channel, true) != 0 )
+      return Adrv9001Status_WriteErr;
+  }
+  else
+  {
+    if( Adrv9001_SetTxToRxLoopBack( Instance, Channel, false) != 0 )
+      return Adrv9001Status_WriteErr;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t *Value )
+{
+  axi_adrv9001_data_src_t AxiAdrv9001DataSrc = AxiAdrv9001_GetTxDataSrc( &Instance->Axi, channel);
+
+  bool Loopback;
+  if( Adrv9001_GetTxToRxLoopBack( Instance, channel, &Loopback ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  if( Loopback )
+  {
+    *Value = Adrv9001TxDataSrc_RxLoopback;
+  }
+  else if( AxiAdrv9001DataSrc == AxiAdrv9001TxDataSrc_Axis )
+  {
+    *Value = Adrv9001TxDataSrc_Axis;
+  }
+  else if( AxiAdrv9001DataSrc == AxiAdrv9001TxDataSrc_Zeros )
+  {
+    *Value = Adrv9001TxDataSrc_Zeros;
+  }
+  else if( AxiAdrv9001DataSrc == AxiAdrv9001TxDataSrc_Ones )
+  {
+    *Value = Adrv9001TxDataSrc_Ones;
+  }
+  else if( AxiAdrv9001DataSrc == AxiAdrv9001TxDataSrc_Ramp )
+  {
+    *Value = Adrv9001TxDataSrc_Ramp;
+  }
+  else if( AxiAdrv9001DataSrc == AxiAdrv9001TxDataSrc_Pn15 )
+  {
+    *Value = Adrv9001TxDataSrc_Pn15;
+  }
+  else if( AxiAdrv9001DataSrc == AxiAdrv9001TxDataSrc_FixedPattern )
+  {
+    *Value = Adrv9001TxDataSrc_FixedPattern;
+  }
+  else
+  {
+    return Adrv9001Status_InvalidParameter;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetTxBoost( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value )
+{
+  *Value = Instance->TxBoost[channel - 1];
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetTxAttn( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float Value )
+{
+  if( Adrv9001_IsPortEnabled(Instance, ADI_TX, channel ) == false )
+    return Adrv9001Status_Success;
+
+  Instance->TxAttn[channel - 1] = Value;
+
+  uint16_t attenuation_mdB = (uint16_t)(Value * 1000.0);
+
+  if( adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, channel, attenuation_mdB) != 0)
+    return Adrv9001Status_TxAttnErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetTxAttn( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value )
+{
+  *Value = Instance->TxAttn[channel - 1];
 
   return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_SetEnableMode( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_ChannelEnableMode_e mode )
 {
+  if( Adrv9001_IsPortEnabled(Instance, port, channel ) == false )
+    return Adrv9001Status_Success;
+
   if( adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, mode) != 0)
     return Adrv9001Status_EnableModeErr;
 
-  AxiAdrv9001_SetEnableMode( &Instance->Axi, port, channel, mode );
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetEnableMode( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_ChannelEnableMode_e *mode )
+{
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, mode) != 0)
+    return Adrv9001Status_ReadErr;
 
   return Adrv9001Status_Success;
+}
+
+static void Adrv9001_HopIrq( adrv9001_t *Instance )
+{
+  AxiAdrv9001_ClearHopIrq( &Instance->Axi );
+
+  if( Instance->HopIrqCallback != NULL )
+    Instance->HopIrqCallback( Instance->HopIrqCallbackRef );
 }
 
 int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
@@ -200,14 +463,16 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
 
   memset(Instance, 0, sizeof(adrv9001_t));
 
-  Instance->Params = &Adrv9001Params;
-  Instance->Params->Rx1FrontendEnablePin = Init->Rx1FrontendEnablePin;
-  Instance->Params->Rx2FrontendEnablePin = Init->Rx2FrontendEnablePin;
-  Instance->Params->Tx1FrontendEnablePin = Init->Tx1FrontendEnablePin;
-  Instance->Params->Tx2FrontendEnablePin = Init->Tx2FrontendEnablePin;
-  Instance->Params->TcxoEnablePin = Init->TcxoEnablePin;
-  Instance->Params->TcxoDacChannel = Init->TcxoDacChannel;
+  Instance->Params = &initialize_init_7;
   Instance->IrqInstance = Init->IrqInstance;
+  Instance->StateCallback = Init->StateCallback;
+  Instance->StateCallbackRef = Init->StateCallbackRef;
+  Instance->TxAttn[0] = Init->TxAttn[0];
+  Instance->TxAttn[1] = Init->TxAttn[1];
+  Instance->TxBoost[0] = Init->TxBoost[0];
+  Instance->TxBoost[1] = Init->TxBoost[1];
+  Instance->HopIrqCallback = Init->HopIrqCallback;
+  Instance->HopIrqCallbackRef = Init->HopIrqCallbackRef;
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
@@ -215,18 +480,22 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   /* Enable Logging */
   Instance->Device.common.error.logEnable = 1;
 
-#ifdef ADRV9001_USE_FS
   /* Initialize Log Path */
   if( Init->LogFilename != NULL )
-    strcpy( Instance->Params->LogPath, Init->LogFilename );
+  {
+    strcpy( Instance->LogPath, Init->BasePath );
+    strcpy( &Instance->LogPath[strlen(Instance->LogPath)], Init->LogFilename );
+  }
   else
-    Instance->Params->LogPath[0] = 0;
-#endif
+  {
+    Instance->LogPath[0] = 0;
+  }
 
   axi_adrv9001_init_t AxiInit = {
       .Base = Init->AxiBase,
       .IrqId = Init->AxiIrqId,
       .IrqInstance = Init->IrqInstance,
+      .ClockFreqHz = Init->AxiClockFreqHz
   };
 
   /* Initialize AXI ADRV9001 */
@@ -237,20 +506,168 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   if((status = Adrv9001_LoadProfile( Instance )) != 0)
     return status;
 
+  /* Set Enable Mode */
+  if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_1, Init->TxEnableMode) != 0)
+    return Adrv9001Status_EnableModeErr;
+
+  if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_2, Init->TxEnableMode) != 0)
+    return Adrv9001Status_EnableModeErr;
+
+  if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_1, Init->RxEnableMode) != 0)
+    return Adrv9001Status_EnableModeErr;
+
+  if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_2, Init->RxEnableMode) != 0)
+    return Adrv9001Status_EnableModeErr;
+
+
+  if( Instance->Params->sysConfig.fhModeOn )
+  {
+    Instance->HopTableSize = ADRV9001_MAX_HOP_TABLE_SIZE;
+
+    Instance->HopTable = calloc(1, sizeof(adi_adrv9001_FhHopFrame_t) * Instance->HopTableSize );
+
+    if( Instance->HopTable == NULL )
+      return Adrv9001Status_MemoryErr;
+
+    uint64_t HopFreq = ADRV9001_HOP_TABLE_START_FREQ;
+
+    for( int i = 0; i < ADRV9001_MAX_HOP_TABLE_SIZE; i++ )
+    {
+      Instance->HopTable[i].rx1GainIndex = 255;
+      Instance->HopTable[i].rx2GainIndex = 255;
+      Instance->HopTable[i].hopFrequencyHz = HopFreq;
+
+      HopFreq = HopFreq + ADRV9001_HOP_TABLE_STEP_FREQ;
+    }
+  }
+  else
+  {
+    Instance->HopTableSize = 0;
+  }
+
+  if( Init->Rx1ChfCoeff != NULL )
+  {
+    Adrv9001_LoadRxChannelFilter( Instance, ADI_CHANNEL_1, Init->Rx1ChfCoeff );
+  }
+
+  if( Init->Rx2ChfCoeff != NULL )
+  {
+    Adrv9001_LoadRxChannelFilter( Instance, ADI_CHANNEL_2, Init->Rx2ChfCoeff );
+  }
+
+  if( Init->HopIrqId != 0x00 )
+  {
+    if(XScuGic_Connect(Instance->IrqInstance, Init->HopIrqId, (XInterruptHandler)Adrv9001_HopIrq, Instance ) != 0)
+      return Adrv9001Status_IrqErr;
+
+    XScuGic_Enable(Instance->IrqInstance, Init->HopIrqId);
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetSampleRate( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint32_t *Value )
+{
+  if( (port != ADI_RX) && (port != ADI_TX) && (channel != ADI_CHANNEL_1) && (channel != ADI_CHANNEL_2))
+    return Adrv9001Status_InvalidParameter;
+
+  if( port == ADI_RX )
+  {
+    if( channel == ADI_CHANNEL_1 )
+      memcpy(Value, (uint8_t*)&Instance->Params->rx.rxChannelCfg[0].profile.rxInterfaceSampleRate_Hz, sizeof( uint32_t ));
+    else
+      memcpy(Value, (uint8_t*)&Instance->Params->rx.rxChannelCfg[1].profile.rxInterfaceSampleRate_Hz, sizeof( uint32_t ));
+  }
+  else
+  {
+    if( channel == ADI_CHANNEL_1 )
+      memcpy(Value, (uint8_t*)&Instance->Params->tx.txProfile[0].txInterfaceSampleRate_Hz, sizeof( uint32_t ));
+    else
+      memcpy(Value, (uint8_t*)&Instance->Params->tx.txProfile[1].txInterfaceSampleRate_Hz, sizeof( uint32_t ));
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetCarrierFrequency( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint64_t *FreqHz )
+{
+  adi_adrv9001_Carrier_t AdiCarrier;
+  if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, port, channel, &AdiCarrier ) != 0)
+    return Adrv9001Status_CarrierFreqErr;
+
+  memcpy((uint8_t*)FreqHz, (uint8_t*)&AdiCarrier.carrierFrequency_Hz, sizeof(uint64_t));
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetCarrierFrequency( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint64_t FreqHz )
+{
+  int32_t status;
+
+  adi_adrv9001_ChannelState_e State;
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  adi_adrv9001_ChannelEnableMode_e mode;
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
+    return Adrv9001Status_ReadErr;
+
+  if( mode == ADI_ADRV9001_PIN_MODE )
+  {
+    /* Set SPI Mode */
+    if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+      return Adrv9001Status_WriteErr;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+    if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+      return status;
+  }
+
+  adi_adrv9001_Carrier_t carrier;
+
+  if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, port, channel, &carrier ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  memcpy((uint8_t*)&carrier.carrierFrequency_Hz, (uint8_t*)&FreqHz, sizeof( carrier.carrierFrequency_Hz ) );
+
+  if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, port, channel, &carrier) != 0)
+    return Adrv9001Status_WriteErr;
+
+  if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+  {
+    if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+      return status;
+  }
+
+  if(mode == ADI_ADRV9001_PIN_MODE)
+  {
+    if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+      return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+    if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+      return status;
+  }
+
   return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_ToPrimed( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
 {
-  int32_t status;
-  adi_adrv9001_ChannelEnableMode_e mode;
+  if( Adrv9001_IsPortEnabled(Instance, port, channel ) == false )
+    return Adrv9001Status_Success;
 
+  adi_adrv9001_ChannelEnableMode_e mode;
   if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
     return Adrv9001Status_ReadErr;
 
-  /* Set PA/LNA Enable */
-  if((status = Adrv9001_SetPaEnable(Instance, port, channel, false)) != 0 )
-    return status;
+  /* Allow user to set RF frontend */
+  if( (Instance->StateCallback != NULL) && (Instance->Initialized != 0) )
+    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_RF_ENABLED, port, channel );
 
   if( mode == ADI_ADRV9001_SPI_MODE )
   {
@@ -259,64 +676,212 @@ int32_t Adrv9001_ToPrimed( adrv9001_t *Instance, adi_common_Port_e port, adi_com
       return Adrv9001Status_ToEnabledErr;
   }
 
+  AxiAdrv9001_SetPsEnable(&Instance->Axi, port, channel, 0);
+
   return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_ToCalibrated( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
 {
-  int32_t status;
-  adi_adrv9001_ChannelEnableMode_e mode;
+  if( Adrv9001_IsPortEnabled(Instance, port, channel ) == false )
+    return Adrv9001Status_Success;
 
+  adi_adrv9001_ChannelEnableMode_e mode;
   if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
     return Adrv9001Status_ReadErr;
 
-  /* Set PA/LNA Enable */
-  if((status = Adrv9001_SetPaEnable(Instance, port, channel, false)) != 0 )
-    return status;
+  /* Allow user to set RF frontend */
+  if( (Instance->StateCallback != NULL) && (Instance->Initialized != 0) )
+    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_RF_ENABLED, port, channel );
 
-  if( mode == ADI_ADRV9001_SPI_MODE )
+  if( mode == ADI_ADRV9001_PIN_MODE )
   {
-    /* Set Radio State */
-    if( adi_adrv9001_Radio_Channel_ToCalibrated(&Instance->Device, port, channel) != 0 )
-      return Adrv9001Status_ToCalErr;
+    /* Set SPI Mode */
+    if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+      return Adrv9001Status_WriteErr;
   }
-  else
-  {
-    return Adrv9001Status_InvalidEnableMode;
-  }
+
+  /* Set Radio State */
+  if( adi_adrv9001_Radio_Channel_ToCalibrated(&Instance->Device, port, channel) != 0 )
+    return Adrv9001Status_ToCalErr;
 
   return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_ToRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
 {
-  int32_t status;
-
-  if( Instance->PendingReboot > 0 )
-  {
-    printf("ADRV9001 Reboot Pending...\r\n");
-    Adrv9001_LoadProfile( Instance );
-  }
+  if( Adrv9001_IsPortEnabled(Instance, port, channel ) == false )
+    return Adrv9001Status_Success;
 
   adi_adrv9001_ChannelEnableMode_e mode;
   if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
     return Adrv9001Status_ReadErr;
 
-  /* Set PA/LNA Enable */
-  if((status = Adrv9001_SetPaEnable(Instance, port, channel, true)) != 0 )
-    return status;
+  /* Allow user to set RF frontend */
+  if( (Instance->StateCallback != NULL) && (Instance->Initialized != 0) )
+    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_RF_ENABLED, port, channel );
 
   if( mode == ADI_ADRV9001_SPI_MODE )
   {
     /* Set Radio State */
-    if( adi_adrv9001_Radio_Channel_ToRfEnabled(&Instance->Device, port, channel) != 0 )
+    if( adi_adrv9001_Radio_Channel_EnableRf(&Instance->Device, port, channel, true) != 0 )
       return Adrv9001Status_ToEnabledErr;
   }
+
+  AxiAdrv9001_SetPsEnable(&Instance->Axi, port, channel, 1);
 
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t results[8][8] )
+bool Adrv9001_IsRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
+{
+  adi_adrv9001_ChannelState_e State;
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
+    return false;
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+    return true;
+  else
+    return false;
+}
+
+int32_t Adrv9001_GetRxCurGainIndex( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value )
+{
+  if( adi_adrv9001_Rx_Gain_Get( &Instance->Device, channel, Value ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetRadioState( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_ChannelState_e *Value )
+{
+   if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, Value ) != 0)
+     return Adrv9001Status_ReadErr;
+
+   return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_RxSsiTest( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode, uint32_t fixedPattern )
+{
+  int32_t status;
+
+  if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_FIXED_PATTERN )
+  {
+    AxiAdrv9001_SetFixedPattern( &Instance->Axi, ADI_RX, channel, fixedPattern );
+  }
+
+  if((status = Adrv9001_ToPrimed( Instance, ADI_RX, channel )) != 0)
+    return status;
+
+  adi_adrv9001_RxSsiTestModeCfg_t Cfg = {
+      .testData = testMode,
+      .fixedDataPatternToTransmit = fixedPattern
+  };
+
+  if( adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
+    return Adrv9001Status_SsiTestModeErr;
+
+  if((status = Adrv9001_ToRfEnabled( Instance, ADI_RX, channel )) != 0)
+    return status;
+
+  usleep(10000);
+
+  if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_FIXED_PATTERN )
+  {
+    if( AxiAdrv9001_GetFixedPatternMonDet( &Instance->Axi, channel) == false )
+      status = Adrv9001Status_SsiTestModeErr;
+    else
+      status = Adrv9001Status_Success;
+  }
+  else if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT )
+  {
+    if( AxiAdrv9001_GetRampMonDet( &Instance->Axi, channel) == false )
+      status = Adrv9001Status_SsiTestModeErr;
+    else
+      status = Adrv9001Status_Success;
+  }
+  else if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15 )
+  {
+    if( AxiAdrv9001_GetPn15MonDet( &Instance->Axi, channel) == false )
+      status = Adrv9001Status_SsiTestModeErr;
+    else
+      status = Adrv9001Status_Success;
+  }
+  else
+  {
+    status = Adrv9001Status_InvalidParameter;
+  }
+
+  Adrv9001_ToPrimed( Instance, ADI_RX, channel );
+
+  return status;
+}
+
+int32_t Adrv9001_TxTestModeCheck( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode, uint32_t fixedPattern )
+{
+  adi_adrv9001_TxSsiTestModeCfg_t Cfg = {
+      .testData = testMode,
+      .fixedDataPatternToCheck = fixedPattern
+  };
+
+  if( adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
+    return Adrv9001Status_SsiTestModeErr;
+
+  usleep(5000);
+
+  /* Read Test Mode Status */
+  adi_adrv9001_TxSsiTestModeStatus_t s;
+  if( adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect( &Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg, &s ) != 0)
+    return Adrv9001Status_SsiTestModeErr;
+
+  if( s.dataError != 0 )
+    return Adrv9001Status_SsiTestModeErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_TxSsiTest( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode, uint32_t fixedPattern )
+{
+  int32_t status;
+
+  axi_adrv9001_data_src_t prevDataSrc = AxiAdrv9001_GetTxDataSrc(&Instance->Axi, channel);
+
+  if((status = Adrv9001_ToPrimed( Instance, ADI_TX, channel )) != 0)
+    return status;
+
+  if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_FIXED_PATTERN )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_FixedPattern, channel );
+    AxiAdrv9001_SetFixedPattern( &Instance->Axi, ADI_TX, channel, fixedPattern );
+  }
+  else if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Ramp, channel );
+  }
+  else if( testMode == ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15 )
+  {
+    AxiAdrv9001_SetTxDataSrc( &Instance->Axi, AxiAdrv9001TxDataSrc_Pn15, channel );
+  }
+  else
+  {
+    return Adrv9001Status_InvalidParameter;
+  }
+
+  if((status = Adrv9001_ToRfEnabled( Instance, ADI_TX, channel )) != 0)
+    return status;
+
+  usleep(1000);
+
+  status = Adrv9001_TxTestModeCheck( Instance, channel, testMode, fixedPattern );
+
+  Adrv9001_ToPrimed( Instance, ADI_TX, channel );
+
+  AxiAdrv9001_SetTxDataSrc( &Instance->Axi, prevDataSrc, channel );
+
+  return status;
+}
+
+int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode, uint32_t fixedPattern, uint16_t results[8][8] )
 {
   int32_t status;
 
@@ -328,94 +893,36 @@ int32_t Adrv9001_PerformSsiSweep( adrv9001_t *Instance, adi_common_Port_e port, 
   if( Adrv9001_SetEnableMode(Instance, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
     return Adrv9001Status_EnableModeErr;
 
-  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
-    return status;
-
-  if( port == ADI_TX )
-  {
-    AxiAdrv9001_SetTxDataPath( &Instance->Axi, channel, 1);
-
-    AxiAdrv9001_SetTxData( &Instance->Axi, channel, ADRV9001_TEST_MODE_PATTERN);
-  }
-
-  usleep(1000);
+  adrv9001_ssi_port_delay_t Delay;
 
   for(uint8_t clkDly = 0; clkDly < 8; clkDly++)
   {
-    if((status = Adrv9001_SetSsiClkDelay( Instance, port, channel, clkDly )) != 0 )
-      return status;
+    Delay.Clk = clkDly;
 
     for(uint8_t dataDly = 0; dataDly < 8; dataDly++)
     {
-      if((status = Adrv9001_SetSsiDataDelay( Instance, port, channel, dataDly )) != 0 )
+      Delay.Strobe = dataDly;
+      Delay.Idata = dataDly;
+      Delay.Qdata = dataDly;
+
+      if((status = Adrv9001_SetSsiDelay( Instance, port, channel, Delay)) != 0)
         return status;
 
       if(port == ADI_TX)
       {
-        adi_adrv9001_TxSsiTestModeCfg_t Cfg =
-        {
-            .fixedDataPatternToCheck = ADRV9001_TEST_MODE_PATTERN,
-            .testData = ADI_ADRV9001_SSI_TESTMODE_DATA_FIXED_PATTERN
-        };
-
-        if( adi_adrv9001_Ssi_Tx_TestMode_Configure(&Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
-          return Adrv9001Status_SsiTestModeErr;
-      }
-      else
-      {
-        adi_adrv9001_RxSsiTestModeCfg_t Cfg =
-        {
-            .fixedDataPatternToTransmit = ADRV9001_TEST_MODE_PATTERN,
-            .testData = ADI_ADRV9001_SSI_TESTMODE_DATA_FIXED_PATTERN
-        };
-
-        if( adi_adrv9001_Ssi_Rx_TestMode_Configure(&Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg ) != 0)
-          return Adrv9001Status_SsiTestModeErr;
-      }
-
-      if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
-        return status;
-
-      usleep(1000);
-
-      if( port == ADI_TX )
-      {
-        /* Read Test Mode Status */
-        adi_adrv9001_TxSsiTestModeCfg_t Cfg =
-        {
-            .fixedDataPatternToCheck = ADRV9001_TEST_MODE_PATTERN,
-            .testData = ADI_ADRV9001_SSI_TESTMODE_DATA_FIXED_PATTERN
-        };
-
-        adi_adrv9001_TxSsiTestModeStatus_t s;
-        if( adi_adrv9001_Ssi_Tx_TestMode_Status_Inspect( &Instance->Device, channel, ADI_ADRV9001_SSI_TYPE_LVDS, ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, &Cfg, &s ) != 0)
-          return Adrv9001Status_SsiTestModeErr;
-
-        if( s.dataError != 0 )
+        if( Adrv9001_TxSsiTest(Instance, channel, testMode, fixedPattern) != 0)
           results[clkDly][dataDly] = 0;
         else
           results[clkDly][dataDly] = 1;
       }
       else
       {
-        uint32_t Data;
-        AxiAdrv9001_GetRxData( &Instance->Axi, channel, &Data );
-        AxiAdrv9001_GetRxData( &Instance->Axi, channel, &Data );
-
-        if( Data == ADRV9001_TEST_MODE_PATTERN)
-          results[clkDly][dataDly] = 1;
-        else
+        if( Adrv9001_RxSsiTest(Instance, channel, testMode, fixedPattern ) != 0)
           results[clkDly][dataDly] = 0;
+        else
+          results[clkDly][dataDly] = 1;
       }
-
-      if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
-        return status;
     }
-  }
-
-  if( port == ADI_TX )
-  {
-	  AxiAdrv9001_SetTxDataPath( &Instance->Axi, channel, 0);
   }
 
   adi_adrv9001_RxSsiTestModeCfg_t RxCfg = { .testData = ADI_ADRV9001_SSI_TESTMODE_DATA_NORMAL };
@@ -506,67 +1013,80 @@ bool Adrv9001_IsPortEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_c
   return false;
 }
 
-int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
+int32_t Adrv9001_CalibrateSsiDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode, uint32_t fixedPattern )
 {
   int32_t status;
   uint16_t results[8][8];
   uint8_t clkMax = 0;
   uint8_t dataMax = 0;
 
+  uint8_t *Result;
+  uint8_t *SsiStatus;
+
+  if( (port == ADI_TX) && (channel == ADI_CHANNEL_1) )
+  {
+    Result = Instance->Tx1SsiSweep;
+    SsiStatus = &Instance->Tx1SsiSweepStatus;
+  }
+  else if((port == ADI_TX) && (channel == ADI_CHANNEL_2))
+  {
+    Result = Instance->Tx2SsiSweep;
+    SsiStatus = &Instance->Tx2SsiSweepStatus;
+  }
+  else if((port == ADI_RX) && (channel == ADI_CHANNEL_1))
+  {
+    Result = Instance->Rx1SsiSweep;
+    SsiStatus = &Instance->Rx1SsiSweepStatus;
+  }
+  else
+  {
+    Result = Instance->Rx2SsiSweep;
+    SsiStatus = &Instance->Rx2SsiSweepStatus;
+  }
+
+  *SsiStatus = 0;
+
   if( Adrv9001_IsPortEnabled( Instance, port, channel ) == false )
     return Adrv9001Status_Success;
 
-  if((status = Adrv9001_PerformSsiSweep( Instance, port, channel, results )) != 0)
+  if((status = Adrv9001_PerformSsiSweep( Instance, port, channel, testMode, fixedPattern, results )) != 0)
     return status;
+
+  if( Result != NULL )
+  {
+    uint8_t cnt = 0;
+    for( int i = 0; i < 8; i++)
+    {
+      for( int j = 0; j < 8; j++)
+      {
+        Result[cnt++] = results[i][j];
+      }
+    }
+  }
 
   if((status = Adrv9001_FindBestSsiDelay( results, &dataMax, &clkMax )) != 0)
     return status;
 
-  if((status = Adrv9001_SetSsiDataDelay( Instance, port, channel, dataMax )) != 0)
+  adrv9001_ssi_port_delay_t Delay = {
+      .Clk = clkMax,
+      .Strobe = dataMax,
+      .Idata = dataMax,
+      .Qdata = dataMax
+  };
+
+  if((status = Adrv9001_SetSsiDelay( Instance, port, channel, Delay)) != 0)
     return status;
 
-  if((status = Adrv9001_SetSsiClkDelay( Instance, port, channel, clkMax )) != 0)
-    return status;
+  *SsiStatus = 1;
 
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_SetPaEnable( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool Enable )
-{
-  adi_adrv9001_GpioPinLevel_e level = Enable? ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH : ADI_ADRV9001_GPIO_PIN_LEVEL_LOW;
-
-  /* Check if Rx */
-  if( (port == ADI_RX) && (channel == ADI_CHANNEL_1) )
-  {
-    if( Instance->Params->Rx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx1FrontendEnablePin, level) != 0)
-        return Adrv9001Status_GpioErr;
-  }
-  else if( (port == ADI_RX) && (channel == ADI_CHANNEL_2) )
-  {
-    if( Instance->Params->Rx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Rx2FrontendEnablePin, level) != 0)
-        return Adrv9001Status_GpioErr;
-  }
-  else if( (port == ADI_TX) && (channel == ADI_CHANNEL_1) )
-  {
-    if( Instance->Params->Tx1FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx1FrontendEnablePin, level) != 0)
-        return Adrv9001Status_GpioErr;
-  }
-  else
-  {
-    if( Instance->Params->Tx2FrontendEnablePin != ADI_ADRV9001_GPIO_UNASSIGNED )
-      if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Instance->Params->Tx2FrontendEnablePin, level) != 0)
-        return Adrv9001Status_GpioErr;
-  }
-
-  return Adrv9001Status_Success;
-}
-
-int32_t Adrv9001_SetSsiDataDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint8_t Delay )
+int32_t Adrv9001_SetSsiDataDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t Value )
 {
   adi_adrv9001_ChannelState_e State;
+
+  uint8_t Delay = (uint8_t)(Value / 90);
 
   if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
     return Adrv9001Status_SsiSetErr;
@@ -610,9 +1130,11 @@ int32_t Adrv9001_SetSsiDataDelay( adrv9001_t *Instance, adi_common_Port_e port, 
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_SetSsiClkDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint8_t Delay )
+int32_t Adrv9001_SetSsiClkDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t Value )
 {
   adi_adrv9001_ChannelState_e State;
+
+  uint8_t Delay = (uint8_t)(Value / 90);
 
   if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
     return Adrv9001Status_SsiSetErr;
@@ -648,7 +1170,57 @@ int32_t Adrv9001_SetSsiClkDelay( adrv9001_t *Instance, adi_common_Port_e port, a
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_EnableDac( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable )
+int32_t Adrv9001_SetSsiDelay( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adrv9001_ssi_port_delay_t Delay )
+{
+  adi_adrv9001_ChannelState_e State;
+
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
+    return Adrv9001Status_SsiSetErr;
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+    return Adrv9001Status_SsiSetErr;
+
+  adi_adrv9001_SsiCalibrationCfg_t cal;
+
+  if( adi_adrv9001_Ssi_Delay_Inspect(&Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal) != 0)
+    return Adrv9001Status_SsiSetErr;
+
+  if((port == ADI_RX) && (channel == ADI_CHANNEL_1))
+  {
+    cal.rxClkDelay[0] = Delay.Clk;
+    cal.rxStrobeDelay[0] = Delay.Strobe;
+    cal.rxIDataDelay[0] = Delay.Idata;
+    cal.rxQDataDelay[0] = Delay.Qdata;
+  }
+  else if((port == ADI_RX) && (channel == ADI_CHANNEL_2))
+  {
+    cal.rxClkDelay[1] = Delay.Clk;
+    cal.rxStrobeDelay[1] = Delay.Strobe;
+    cal.rxIDataDelay[1] = Delay.Idata;
+    cal.rxQDataDelay[1] = Delay.Qdata;
+  }
+  else if((port == ADI_TX) && (channel == ADI_CHANNEL_1))
+  {
+    cal.txClkDelay[0] = Delay.Clk;
+    cal.txStrobeDelay[0] = Delay.Strobe;
+    cal.txIDataDelay[0] = Delay.Idata;
+    cal.txQDataDelay[0] = Delay.Qdata;
+  }
+  else if((port == ADI_TX) && (channel == ADI_CHANNEL_2))
+  {
+    cal.txClkDelay[1] = Delay.Clk;
+    cal.txStrobeDelay[1] = Delay.Strobe;
+    cal.txIDataDelay[1] = Delay.Idata;
+    cal.txQDataDelay[1] = Delay.Qdata;
+  }
+
+  if( adi_adrv9001_Ssi_Delay_Configure(&Instance->Device, ADI_ADRV9001_SSI_TYPE_LVDS, &cal) != 0)
+    return Adrv9001Status_SsiSetErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetEnableDac( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable )
 {
   adi_adrv9001_GpioSignal_e signal;
 
@@ -675,21 +1247,38 @@ int32_t Adrv9001_EnableDac( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_SetVcTcxo( adrv9001_t *Instance, float Voltage )
+int32_t Adrv9001_GetEnableDac( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool *Enable )
 {
-  uint16_t Value = (uint16_t)((((Voltage - 0.900)/ 1.700) * 4096.000) + 2048);
+  if( adi_adrv9001_AuxDac_Inspect(&Instance->Device, Id, Enable) != 0 )
+    return Adrv9001Status_GpioErr;
 
-  if( adi_adrv9001_AuxDac_Code_Set(&Instance->Device, Instance->Params->TcxoDacChannel, Value) != 0)
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetDacVoltage(adrv9001_t *Instance, adi_adrv9001_AuxDac_e Channel, float Voltage )
+{
+  uint16_t Value;
+
+  if( Voltage >= ADRV9001_MAX_DAC_VOLTAGE )
+  {
+    Value = 4095;
+  }
+  else
+  {
+    Value = (uint16_t)((((Voltage - 0.900)/ 1.700) * 4096.000) + 2048);
+  }
+
+  if( adi_adrv9001_AuxDac_Code_Set(&Instance->Device, Channel, Value) != 0)
     return Adrv9001Status_DacErr;
 
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_GetVcTcxo( adrv9001_t *Instance, float *Voltage )
+int32_t Adrv9001_GetDacVoltage( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Channel, float *Voltage )
 {
   uint16_t Value;
 
-  if( adi_adrv9001_AuxDac_Code_Get(&Instance->Device, Instance->Params->TcxoDacChannel, &Value) != 0 )
+  if( adi_adrv9001_AuxDac_Code_Get(&Instance->Device, Channel, &Value) != 0 )
     return Adrv9001Status_DacErr;
 
   *Voltage = 0.9000 + (((float)Value - 2048.000) / 4096.000) * 1.7;
@@ -703,7 +1292,7 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  if( strlen(Adrv9001->Params->LogPath) > 0 )
+  if( strlen(Adrv9001->LogPath) > 0 )
   {
     UINT len = 0;
 
@@ -724,6 +1313,13 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 
 int32_t Adrv9001_DelayUs(void *devHalCfg, uint32_t time_us)
 {
+  //	while( time_us > 1000 )
+  //	{
+  //	  vTaskDelay( portTICK_PERIOD_MS );
+  //
+  //	  time_us -= 1000;
+  //	}
+
   usleep(time_us);
 
   return Adrv9001Status_Success;
@@ -734,13 +1330,13 @@ int32_t Adrv9001_Open( void *devHalCfg )
 #ifdef ADRV9001_USE_FS
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  if( strlen(Adrv9001->Params->LogPath) > 0 )
+  if( strlen(Adrv9001->LogPath) > 0 )
   {
     /* Delete PHY Log file */
-    f_unlink(Adrv9001->Params->LogPath);
+    f_unlink(Adrv9001->LogPath);
 
     /* Open File */
-    if( f_open(&Adrv9001->LogFil, Adrv9001->Params->LogPath, FA_CREATE_NEW | FA_WRITE | FA_READ) != FR_OK)
+    if( f_open(&Adrv9001->LogFil, Adrv9001->LogPath, FA_CREATE_NEW | FA_WRITE | FA_READ) != FR_OK)
       return ADI_COMMON_ACT_WARN_RESET_LOG;
 
     /* Point to beginning of file */
@@ -759,7 +1355,7 @@ int32_t Adrv9001_Close( void *devHalCfg )
 #ifdef ADRV9001_USE_FS
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
-  if( strlen(Adrv9001->Params->LogPath) > 0 )
+  if( strlen(Adrv9001->LogPath) > 0 )
   {
     f_sync(&Adrv9001->LogFil);
 
@@ -788,6 +1384,100 @@ int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )
   adrv9001_t *Adrv9001 = (adrv9001_t*)devHalCfg;
 
   AxiAdrv9001_ResetbPinSet( &Adrv9001->Axi, pinLevel );
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetHopFrequency( adrv9001_t *Instance, uint64_t *Value )
+{
+  adi_adrv9001_FhHopFrame_t hopFrame;
+
+  if( adi_adrv9001_fh_FrameInfo_Inspect(&Instance->Device, ADI_ADRV9001_FH_HOP_SIGNAL_1, ADI_ADRV9001_FHFRAMEINDEX_CURRENT_FRAME, &hopFrame) != 0)
+    return Adrv9001Status_ReadErr;
+
+  memcpy((uint8_t*)Value, (uint8_t*)&hopFrame.hopFrequencyHz, sizeof( hopFrame.hopFrequencyHz));
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetNextHopFrequency( adrv9001_t *Instance, uint64_t *Value )
+{
+  adi_adrv9001_FhHopFrame_t hopFrame;
+
+  if( adi_adrv9001_fh_FrameInfo_Inspect(&Instance->Device, ADI_ADRV9001_FH_HOP_SIGNAL_1, ADI_ADRV9001_FHFRAMEINDEX_CURRENT_FRAME, &hopFrame) != 0)
+    return Adrv9001Status_ReadErr;
+
+  for( int i = 0; i < Instance->HopTableSize; i++ )
+  {
+    if( Instance->HopTable[i].hopFrequencyHz == hopFrame.hopFrequencyHz )
+    {
+      if( i == (Instance->HopTableSize - 1))
+      {
+        memcpy((uint8_t*)Value, (uint8_t*)&Instance->HopTable[0].hopFrequencyHz, sizeof( uint64_t ));
+        return Adrv9001Status_Success;
+      }
+      else
+      {
+        memcpy((uint8_t*)Value, (uint8_t*)&Instance->HopTable[i + 1].hopFrequencyHz, sizeof( uint64_t ));
+        return Adrv9001Status_Success;
+      }
+    }
+  }
+
+  return Adrv9001Status_InvalidHopFreq;
+}
+
+int32_t Adrv9001_LoadHopTable( adrv9001_t *Instance, uint8_t size )
+{
+  Instance->HopTableSize = size;
+
+  return adi_adrv9001_fh_HopTable_Static_Configure(&Instance->Device, ADI_ADRV9001_FHMODE_LO_RETUNE_REALTIME_PROCESS, ADI_ADRV9001_FH_HOP_SIGNAL_1, ADI_ADRV9001_FHHOPTABLE_A, Instance->HopTable, size);
+}
+
+int32_t Adrv9001_SetHopTableFrequency( adrv9001_t *Instance, uint8_t index, uint64_t Freq )
+{
+  if( index > Instance->HopTableSize )
+    return Adrv9001Status_InvalidParameter;
+
+  memcpy((uint8_t*)&Instance->HopTable[index].hopFrequencyHz, (uint8_t*)&Freq, sizeof( Freq ));
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetHopTableAttn( adrv9001_t *Instance, uint8_t index, float Attn )
+{
+  if( index > Instance->HopTableSize )
+    return Adrv9001Status_InvalidParameter;
+
+  Attn = Attn * 5;
+
+  uint8_t attn_fifthdb = (uint8_t)Attn;
+
+  Instance->HopTable[index].tx1Attenuation_fifthdB = attn_fifthdb;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetHopTableAttn( adrv9001_t *Instance, uint8_t index, float *Attn )
+{
+  if( index > Instance->HopTableSize )
+    return Adrv9001Status_InvalidParameter;
+
+  float v = (float)Instance->HopTable[index].tx1Attenuation_fifthdB;
+
+  v = v / 5.0;
+
+  *Attn = v;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetHopTableFrequency( adrv9001_t *Instance, uint8_t index, uint64_t *Freq )
+{
+  if( index > Instance->HopTableSize )
+    return Adrv9001Status_InvalidParameter;
+
+  memcpy((uint8_t*)Freq, (uint8_t*)&Instance->HopTable[index].hopFrequencyHz, sizeof( uint64_t ));
 
   return Adrv9001Status_Success;
 }

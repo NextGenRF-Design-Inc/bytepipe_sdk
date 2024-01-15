@@ -1845,16 +1845,13 @@ proc create_root_design { parentCell } {
   # Create instance: adrv9002_0, and set properties
   set adrv9002_0 [ create_bd_cell -type ip -vlnv nextgenrf.com:user:adrv9001:1.0 adrv9002_0 ]
   set_property -dict [ list \
+   CONFIG.ENABLE_OTX1_AXIS {false} \
+   CONFIG.ENABLE_OTX2_AXIS {false} \
    CONFIG.ENABLE_PL_DGPIO {false} \
    CONFIG.ENABLE_PL_RX1_ENABLE {true} \
    CONFIG.ENABLE_PL_RX2_ENABLE {true} \
    CONFIG.ENABLE_PL_TX1_ENABLE {true} \
    CONFIG.ENABLE_PL_TX2_ENABLE {true} \
-   CONFIG.ENABLE_RX1_ILA {false} \
-   CONFIG.ENABLE_RX2_ILA {false} \
-   CONFIG.ENABLE_SPI_ILA {false} \
-   CONFIG.ENABLE_TX1_ILA {false} \
-   CONFIG.ENABLE_TX2_ILA {false} \
    CONFIG.SWAP_DIFF_RX1_DCLK {false} \
    CONFIG.SWAP_DIFF_RX1_IDATA {false} \
    CONFIG.SWAP_DIFF_RX1_QDATA {false} \
@@ -1874,6 +1871,38 @@ proc create_root_design { parentCell } {
    CONFIG.SWAP_DIFF_TX2_QDATA {false} \
    CONFIG.SWAP_DIFF_TX2_STROBE {false} \
  ] $adrv9002_0
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_intf_pins /adrv9002_0/rx1_axis]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_intf_pins /adrv9002_0/rx2_axis]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_intf_pins /adrv9002_0/tx1_axis]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_intf_pins /adrv9002_0/tx2_axis]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_pins /adrv9002_0/rx1_axis_aclk]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_pins /adrv9002_0/rx2_axis_aclk]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_pins /adrv9002_0/tx1_axis_aclk]
+
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {122880000} \
+ ] [get_bd_pins /adrv9002_0/tx2_axis_aclk]
 
   # Create instance: axi_cpu_interconnect, and set properties
   set axi_cpu_interconnect [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_cpu_interconnect ]

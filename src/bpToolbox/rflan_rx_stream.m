@@ -6,7 +6,7 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM16');
+h.Open('COM4');
 
 %% Enable Stream
 
@@ -19,22 +19,20 @@ RxBufLength = 2000;
 % Read Sample Rate
 fs = h.GetSampleRate(RxPort);
 
-% Delay in samples between rising edge of enable and rx_axis_tvalid
-h.SetEnableDelay(RxPort, 500);
-
-% Delay in samples between falling edge of enable and falling edge of rx_axis_tvalid 
-h.SetDisableDelay(RxPort, 10);
+% Enable Receiver
+h.Adrv9001ToRfEnabled( RxPort );
 
 % Read DMA buffer and plot data several times
 figure();
-for i = 1:15
+for i = 1:1
+    
 % Start DMA Burst
-h.RflanStreamStart(RxPort, 0, RxBufLength + 10);
+h.RflanStreamStart(RxPort, 0, RxBufLength);
 
 pause(1);
 
 % Read DMA Buffer
-iq = h.RflanStreamBufGet(RxPort,10,RxBufLength);
+iq = h.RflanStreamBufGet(RxPort,0,RxBufLength);
 
 bins = length(iq)/2; 
 h2 = spectrum.welch('Hamming',bins);

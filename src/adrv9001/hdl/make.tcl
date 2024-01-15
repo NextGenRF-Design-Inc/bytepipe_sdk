@@ -140,8 +140,8 @@ map_port adrv9001 spi_clk
 map_port adrv9001 spi_csn
 
 # Map axis data interface
-ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid rx1_axis_tready rx1_axis_tlast} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
-ipx::infer_bus_interface {rx2_axis_tdata rx2_axis_tvalid rx2_axis_tready rx2_axis_tlast} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface {rx2_axis_tdata rx2_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 ipx::infer_bus_interface {tx1_axis_tdata tx1_axis_tvalid tx1_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 ipx::infer_bus_interface {tx2_axis_tdata tx2_axis_tvalid tx2_axis_tready} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 ipx::associate_bus_interfaces -busif rx1_axis -clock rx1_axis_aclk [ipx::current_core]
@@ -243,41 +243,13 @@ set_property value true [ipx::get_user_parameters SWAP_DIFF_TX2_STROBE -of_objec
 set_property value true [ipx::get_hdl_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_user_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_hdl_parameters SWAP_DIFF_TX2_STROBE -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX1_ILA" -component [ipx::current_core] ]
-set_property value true [ipx::get_user_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
-set_property value true [ipx::get_hdl_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX1_ILA -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX2_ILA" -component [ipx::current_core] ]
-set_property value true [ipx::get_user_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
-set_property value true [ipx::get_hdl_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX2_ILA -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX1_ILA" -component [ipx::current_core] ]
-set_property value true [ipx::get_user_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
-set_property value true [ipx::get_hdl_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX1_ILA -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_ILA" -component [ipx::current_core] ]
-set_property value true [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property value true [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_ILA" -component [ipx::current_core] ]
-set_property value true [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property value true [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX2_ILA -of_objects [ipx::current_core]]
-set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_SPI_ILA" -component [ipx::current_core] ]
-set_property value true [ipx::get_user_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
-set_property value true [ipx::get_hdl_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_user_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
-set_property value_format bool [ipx::get_hdl_parameters ENABLE_SPI_ILA -of_objects [ipx::current_core]]
+
 set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_DGPIO" -component [ipx::current_core] ]
 set_property value true [ipx::get_user_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
 set_property value true [ipx::get_hdl_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_user_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_DGPIO -of_objects [ipx::current_core]]
+
 set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_PL_RX1_ENABLE" -component [ipx::current_core] ]
 set_property value true [ipx::get_user_parameters ENABLE_PL_RX1_ENABLE -of_objects [ipx::current_core]]
 set_property value true [ipx::get_hdl_parameters ENABLE_PL_RX1_ENABLE -of_objects [ipx::current_core]]
@@ -299,22 +271,41 @@ set_property value true [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_object
 set_property value_format bool [ipx::get_user_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_hdl_parameters ENABLE_PL_TX2_ENABLE -of_objects [ipx::current_core]]
 
-set_property widget {comboBox} [ipgui::get_guiparamspec -name "TX1_REF_CLK_SRC" -component [ipx::current_core] ]
-set_property value TX1_CLK [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value TX1_CLK [ipx::get_hdl_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_format string [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_format string [ipx::get_hdl_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_validation_type list [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_validation_list {TX1_CLK RX1_CLK RX2_CLK} [ipx::get_user_parameters TX1_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_RX1_AXIS -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_RX1_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX1_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX1_AXIS -of_objects [ipx::current_core]]
 
-set_property widget {comboBox} [ipgui::get_guiparamspec -name "TX2_REF_CLK_SRC" -component [ipx::current_core] ]
-set_property value TX2_CLK [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value TX2_CLK [ipx::get_hdl_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_format string [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_format string [ipx::get_hdl_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_validation_type list [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
-set_property value_validation_list {TX2_CLK RX1_CLK RX2_CLK} [ipx::get_user_parameters TX2_REF_CLK_SRC -of_objects [ipx::current_core]]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_RX2_AXIS -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_RX2_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_RX2_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_RX2_AXIS -of_objects [ipx::current_core]]
 
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_TX1_AXIS -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_TX1_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_TX1_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX1_AXIS -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_TX2_AXIS -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_TX2_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_TX2_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_TX2_AXIS -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_OTX1_AXIS" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_OTX1_AXIS -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_OTX1_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_OTX1_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_OTX1_AXIS -of_objects [ipx::current_core]]
+
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_OTX2_AXIS" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_OTX2_AXIS -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_OTX2_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_OTX2_AXIS -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_OTX2_AXIS -of_objects [ipx::current_core]]
 
 # Add parameters
 ipx::add_user_parameter ENABLE_PL_IRQ [ipx::current_core]
@@ -346,19 +337,91 @@ set_property driver_value 0 [ipx::get_ports dgpio_pl_i -of_objects [ipx::current
 set_property enablement_dependency {$ENABLE_PL_DGPIO > 0} [ipx::get_ports dgpio_pl_i -of_objects [ipx::current_core]]
 set_property enablement_dependency {$ENABLE_PL_IRQ > 0} [ipx::get_bus_interfaces pl_irq -of_objects [ipx::current_core]]
 
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_ref_clk_p -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_ref_clk_p -of_objects [ipx::current_core]]
-set_property enablement_dependency {$TX2_REF_CLK_SRC = "TX2_CLK"} [ipx::get_ports tx2_ref_clk_p -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx2_ref_clk_n -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx2_ref_clk_n -of_objects [ipx::current_core]]
-set_property enablement_dependency {$TX2_REF_CLK_SRC = "TX2_CLK"} [ipx::get_ports tx2_ref_clk_n -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_aclk -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx1_axis_aclk -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX1_AXIS > 0} [ipx::get_ports rx1_axis_aclk -of_objects [ipx::current_core]]
 
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_ref_clk_p -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_ref_clk_p -of_objects [ipx::current_core]]
-set_property enablement_dependency {$TX1_REF_CLK_SRC = "TX1_CLK"} [ipx::get_ports tx1_ref_clk_p -of_objects [ipx::current_core]]
-set_property enablement_resolve_type dependent [ipx::get_ports tx1_ref_clk_n -of_objects [ipx::current_core]]
-set_property driver_value 0 [ipx::get_ports tx1_ref_clk_n -of_objects [ipx::current_core]]
-set_property enablement_dependency {$TX1_REF_CLK_SRC = "TX1_CLK"} [ipx::get_ports tx1_ref_clk_n -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_tdata -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx1_axis_tdata -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX1_AXIS > 0} [ipx::get_ports rx1_axis_tdata -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports rx1_axis_tvalid -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx1_axis_tvalid -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX1_AXIS > 0} [ipx::get_ports rx1_axis_tvalid -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_RX1_AXIS > 0} [ipx::get_bus_interfaces rx1_axis -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_tdata -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx2_axis_tdata -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX2_AXIS > 0} [ipx::get_ports rx2_axis_tdata -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_tvalid -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx2_axis_tvalid -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX2_AXIS > 0} [ipx::get_ports rx2_axis_tvalid -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports rx2_axis_aclk -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports rx2_axis_aclk -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_RX2_AXIS > 0} [ipx::get_ports rx2_axis_aclk -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_RX2_AXIS > 0} [ipx::get_bus_interfaces rx2_axis -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_tdata -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_axis_tdata -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX1_AXIS > 0} [ipx::get_ports tx1_axis_tdata -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_tvalid -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_axis_tvalid -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX1_AXIS > 0} [ipx::get_ports tx1_axis_tvalid -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_tready -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_axis_tready -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX1_AXIS > 0} [ipx::get_ports tx1_axis_tready -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx1_axis_aclk -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx1_axis_aclk -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX1_AXIS > 0} [ipx::get_ports tx1_axis_aclk -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_TX1_AXIS > 0} [ipx::get_bus_interfaces tx1_axis -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_tdata -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_axis_tdata -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX2_AXIS > 0} [ipx::get_ports tx2_axis_tdata -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_tvalid -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_axis_tvalid -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX2_AXIS > 0} [ipx::get_ports tx2_axis_tvalid -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_tready -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_axis_tready -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX2_AXIS > 0} [ipx::get_ports tx2_axis_tready -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports tx2_axis_aclk -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports tx2_axis_aclk -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_TX2_AXIS > 0} [ipx::get_ports tx2_axis_aclk -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_TX2_AXIS > 0} [ipx::get_bus_interfaces tx2_axis -of_objects [ipx::current_core]]
+
+
+set_property enablement_resolve_type dependent [ipx::get_ports otx1_axis_tdata -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports otx1_axis_tdata -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_OTX1_AXIS > 0} [ipx::get_ports otx1_axis_tdata -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports otx1_axis_tvalid -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports otx1_axis_tvalid -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_OTX1_AXIS > 0} [ipx::get_ports otx1_axis_tvalid -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_OTX1_AXIS > 0} [ipx::get_bus_interfaces otx1_axis -of_objects [ipx::current_core]]
+
+
+set_property enablement_resolve_type dependent [ipx::get_ports otx2_axis_tdata -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports otx2_axis_tdata -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_OTX2_AXIS > 0} [ipx::get_ports otx2_axis_tdata -of_objects [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports otx2_axis_tvalid -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports otx2_axis_tvalid -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_OTX2_AXIS > 0} [ipx::get_ports otx2_axis_tvalid -of_objects [ipx::current_core]]
+
+set_property enablement_dependency {$ENABLE_OTX2_AXIS > 0} [ipx::get_bus_interfaces otx2_axis -of_objects [ipx::current_core]]
 
 # Add SSI Configuration Page
 ipgui::add_page -name {SSI Pins} -component [ipx::current_core] -display_name {SSI Pins}
@@ -387,23 +450,6 @@ ipgui::move_param -component [ipx::current_core] -order 17 [ipgui::get_guiparams
 ipgui::move_param -component [ipx::current_core] -order 18 [ipgui::get_guiparamspec -name "SWAP_DIFF_TX2_STROBE" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
 
 
-ipgui::add_static_text -name {Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core] ] -text {
-The following allows selction of the transmit SSI reference clock. If the receiver and transmitter are programmed to 
-use the same clock frequency the transmit reference clock pins are not required and can be used as digtal GPIO. 
-}
-
-ipgui::move_param -component [ipx::current_core] -order 20 [ipgui::get_guiparamspec -name "TX1_REF_CLK_SRC" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-ipgui::move_param -component [ipx::current_core] -order 21 [ipgui::get_guiparamspec -name "TX2_REF_CLK_SRC" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "SSI Pins" -component [ipx::current_core]]
-
-
-# Add ILA Configuration Page
-set_property display_name {ILA} [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ]
-set_property tooltip {Configure Integrated Logic Analyzers} [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ]
-ipgui::add_static_text -name {ILA Description} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ] -text {
-The following integrated logic analyzers can be enabled to facilitate evaluation of this module.
-}
-ipgui::move_text -component [ipx::current_core] -order 0 [ipgui::get_textspec -name "ILA Description" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core]]
-
 # Add PL Interface Page
 ipgui::add_page -name {PL Interface} -component [ipx::current_core] -display_name {PL Interface}
 set_property tooltip {Configure Programmable Logic Interface Signals} [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ]
@@ -431,3 +477,122 @@ set_property value 0xFFFF [ipx::get_hdl_parameters DEFAULT_DGPIO_DIR -of_objects
 set_property value_bit_string_length 16 [ipx::get_user_parameters DEFAULT_DGPIO_DIR -of_objects [ipx::current_core]]
 set_property value_bit_string_length 16 [ipx::get_hdl_parameters DEFAULT_DGPIO_DIR -of_objects [ipx::current_core]]
 
+ipgui::move_param -component [ipx::current_core] -order 9 [ipgui::get_guiparamspec -name "ENABLE_RX1_AXIS" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 10 [ipgui::get_guiparamspec -name "ENABLE_RX2_AXIS" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 11 [ipgui::get_guiparamspec -name "ENABLE_TX1_AXIS" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 12 [ipgui::get_guiparamspec -name "ENABLE_TX2_AXIS" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+
+ipgui::move_param -component [ipx::current_core] -order 13 [ipgui::get_guiparamspec -name "ENABLE_OTX1_AXIS" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 14 [ipgui::get_guiparamspec -name "ENABLE_OTX2_AXIS" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+
+
+# Remove Page 0
+ipgui::remove_page -component [ipx::current_core] [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core]]
+
+# Hopping
+set_property value true [ipx::get_user_parameters ENABLE_HOP_TRIG_PIN -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_HOP_TRIG_PIN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_HOP_TRIG_PIN -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_HOP_TRIG_PIN -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_HOP_TRIG_PIN} -component [ipx::current_core] -display_name {Enable Hop Trig Pin} -show_label {true} -show_range {true} -widget {}
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "ENABLE_HOP_TRIG_PIN" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+
+set_property value true [ipx::get_user_parameters ENABLE_HOPPING_SUPPORT -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_HOPPING_SUPPORT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_HOPPING_SUPPORT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_HOPPING_SUPPORT -of_objects [ipx::current_core]]
+ipgui::add_param -name {ENABLE_HOPPING_SUPPORT} -component [ipx::current_core] -display_name {Enable Hopping Support} -show_label {true} -show_range {true} -widget {}
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "ENABLE_HOPPING_SUPPORT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+
+set_property enablement_resolve_type dependent [ipx::get_ports hop_trig -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports hop_trig -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOP_TRIG_PIN>0} [ipx::get_ports hop_trig -of_objects [ipx::current_core]]
+
+ipgui::add_param -name {ENABLE_HOP_IRQ} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ]
+ipgui::move_param -component [ipx::current_core] -order 7 [ipgui::get_guiparamspec -name "ENABLE_HOP_IRQ" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_HOP_IRQ" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_HOP_IRQ -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_HOP_IRQ -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_HOP_IRQ -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_HOP_IRQ -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports hop_irq -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports hop_irq -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOP_IRQ>0} [ipx::get_ports hop_irq -of_objects [ipx::current_core]]
+
+# Associate clocks
+ipx::associate_bus_interfaces -busif rx1_axis -clock rx1_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif rx2_axis -clock rx2_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif tx1_axis -clock tx1_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif tx2_axis -clock tx2_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif otx1_axis -clock tx1_axis_aclk [ipx::current_core]
+ipx::associate_bus_interfaces -busif otx2_axis -clock tx2_axis_aclk [ipx::current_core]
+
+# Debug Page
+ipgui::add_page -name {Debug} -component [ipx::current_core] -display_name {Debug}
+set_property tooltip {Debug} [ipgui::get_pagespec -name "Debug" -component [ipx::current_core] ]
+ipgui::add_param -name {ENABLE_HOPPING_DEBUG} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core] ]
+ipgui::add_param -name {ENABLE_SPI_DEBUG} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Debug" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_HOPPING_DEBUG" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_HOPPING_DEBUG -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_HOPPING_DEBUG -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_HOPPING_DEBUG -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_HOPPING_DEBUG -of_objects [ipx::current_core]]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_SPI_DEBUG" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_SPI_DEBUG -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_SPI_DEBUG -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_SPI_DEBUG -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_SPI_DEBUG -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_HopPin -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_HopPin -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_HopPin -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_Rx1EnPin -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_Rx1EnPin -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_Rx1EnPin -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_Rx2EnPin -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_Rx2EnPin -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_Rx2EnPin -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_Tx1EnPin -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_Tx1EnPin -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_Tx1EnPin -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_Tx2EnPin -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_Tx2EnPin -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_Tx2EnPin -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_HopIrq -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_HopIrq -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_HopIrq -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_HopIrqClear -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_HopIrqClear -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_HopIrqClear -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports HopDbg_HopTrig -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports HopDbg_HopTrig -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_HOPPING_DEBUG>0} [ipx::get_ports HopDbg_HopTrig -of_objects [ipx::current_core]]
+
+
+set_property enablement_resolve_type dependent [ipx::get_ports SpiDbg_Sclk -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports SpiDbg_Sclk -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_SPI_DEBUG>0} [ipx::get_ports SpiDbg_Sclk -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports SpiDbg_Csn -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports SpiDbg_Csn -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_SPI_DEBUG>0} [ipx::get_ports SpiDbg_Csn -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports SpiDbg_Mosi -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports SpiDbg_Mosi -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_SPI_DEBUG>0} [ipx::get_ports SpiDbg_Mosi -of_objects [ipx::current_core]]
+set_property enablement_resolve_type dependent [ipx::get_ports SpiDbg_Miso -of_objects [ipx::current_core]]
+set_property driver_value 0 [ipx::get_ports SpiDbg_Miso -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_SPI_DEBUG>0} [ipx::get_ports SpiDbg_Miso -of_objects [ipx::current_core]]
+
+ipgui::add_param -name {ENABLE_DEV_CLOCK_OUT} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core] ]
+ipgui::move_param -component [ipx::current_core] -order 9 [ipgui::get_guiparamspec -name "ENABLE_DEV_CLOCK_OUT" -component [ipx::current_core]] -parent [ipgui::get_pagespec -name "PL Interface" -component [ipx::current_core]]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "ENABLE_DEV_CLOCK_OUT" -component [ipx::current_core] ]
+set_property value true [ipx::get_user_parameters ENABLE_DEV_CLOCK_OUT -of_objects [ipx::current_core]]
+set_property value true [ipx::get_hdl_parameters ENABLE_DEV_CLOCK_OUT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters ENABLE_DEV_CLOCK_OUT -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters ENABLE_DEV_CLOCK_OUT -of_objects [ipx::current_core]]
+set_property enablement_dependency {$ENABLE_DEV_CLOCK_OUT>0} [ipx::get_bus_interfaces dev_clk -of_objects [ipx::current_core]]
+
+
+# Finalize
+update_compile_order -fileset sources_1
+ipx::merge_project_changes files [ipx::current_core]
+ipx::merge_project_changes hdl_parameters [ipx::current_core]
+ipx::merge_project_changes ports [ipx::current_core]

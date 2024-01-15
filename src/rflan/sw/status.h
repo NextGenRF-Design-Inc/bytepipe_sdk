@@ -228,12 +228,6 @@ static const char *StatusString( int32_t status )
     case FR_INVALID_PARAMETER:
       return "Invalid Parameter";
 
-    case PibStatus_UnknownParameter:
-    	return "Unknown PIB Parameter";
-
-    case PibStatus_InvalidParameter:
-      return "PIB Invalid Parameter";
-
     case RflanStatus_InvalidPib:
       return "Rflan Invalid Pib";
 

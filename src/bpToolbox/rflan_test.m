@@ -5,7 +5,7 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM16');
+h.Open('COM4');
 
 %% Help
 clc;
@@ -14,17 +14,17 @@ h.Write('help');
 %% ADRV9001 Version Information
 clc;
 AdrvSiliconVersion = h.GetAdrvSiliconVersion( );
-if( ~strcmp(AdrvSiliconVersion,'C0'))
+if( ~strcmp(AdrvSiliconVersion,'c0'))
     error("Error");
 end
 
 AdrvFirmwareVersion = h.GetAdrvFirmwareVersion( );
-if( ~strcmp(AdrvFirmwareVersion,'0.21.0.8'))
+if( ~strcmp(AdrvFirmwareVersion,'0.22.27.0'))
     error("Error");
 end
 
 AdrvAPIVersion = h.GetAdrvAPIVersion( );
-if( ~strcmp(AdrvAPIVersion,'67.1.1'))
+if( ~strcmp(AdrvAPIVersion,'68.10.1'))
     error("Error");
 end
 
@@ -52,19 +52,13 @@ end
 clc;
 v = 2.899e9;
 
-mode = h.GetEnableMode(h.Tx1);
-h.SetEnableMode(h.Tx1,h.EnableModeSpi);
-
-h.SetRadioState(h.Tx1, h.Calibrated);
-
 h.SetCarrierFrequency(h.Tx1, v);
+
 v2 = h.GetCarrierFrequency(h.Tx1);
 if( abs(v2 - v) > 10 )
     error("Error");
 end
 
-h.SetRadioState(h.Tx1, h.Primed);
-h.SetEnableMode(h.Tx1,mode);
 
 %% Transmit Attenuation
 clc;
@@ -93,41 +87,6 @@ h.SetTxBoost(h.Tx1, v);
 if( h.GetTxBoost(h.Tx1) ~= v)
     error("Error");
 end
-
-%% Radio State
-
-% The following sets and reads the radio state.  To set calibrated mode the
-% enable mode must be SPI.
-clc;
-
-mode = h.GetEnableMode(h.Tx1);
-h.SetEnableMode(h.Tx1,h.EnableModeSpi);
-
-v = h.Calibrated;
-h.SetRadioState(h.Tx1, v);
-if(~strcmp(h.GetRadioState(h.Tx1),v))
-    error("Error");
-end
-
-v = h.Primed;
-h.SetRadioState(h.Tx1, v);
-if(~strcmp(h.GetRadioState(h.Tx1),v))
-    error("Error");
-end
-
-v = h.Enabled;
-h.SetRadioState(h.Tx1, v);
-if(~strcmp(h.GetRadioState(h.Tx1),v))
-    error("Error");
-end
-
-v = h.Primed;
-h.SetRadioState(h.Tx1, v);
-if(~strcmp(h.GetRadioState(h.Tx1),v))
-    error("Error");
-end
-
-h.SetEnableMode(h.Tx1,mode);
 
 %% RSSI
 h.GetRssi(h.Rx1);
