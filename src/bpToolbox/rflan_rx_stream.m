@@ -19,6 +19,9 @@ RxBufLength = 2000;
 % Read Sample Rate
 fs = h.GetSampleRate(RxPort);
 
+% Set Carrier Frequency (optional)
+h.SetCarrierFrequency(TxPort, 2.5e9);
+
 % Read Carrier Frequency
 h.GetCarrierFrequency(RxPort);
 

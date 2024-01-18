@@ -1,5 +1,5 @@
-// Set Attenuation to 5dB
-Adrv9001SetParam Tx1Attn 5000
+// Set Attenuation to 5.25dB
+Adrv9001SetParam Tx1Attn 5.25
 
 // Disable Boost
 Adrv9001SetParam Tx1Boost 0
@@ -7,11 +7,14 @@ Adrv9001SetParam Tx1Boost 0
 // Load DMA buffer with local file
 RflanStreamBufLoad Tx1 CFR_sample_rate_61p44M_bw_20M.csv
 
-// Set SSI enable delay
-Adrv9001SetParam Tx1SsiEnableDly 500
-
-// Set SSI disable delay
-Adrv9001SetParam Tx1DisableDly 200
-
 // Start Cyclic Stream
 RflanStreamStart Tx1 1 76800
+
+// Enable Transmitter
+Adrv9001ToRfEnabled Tx1
+
+// Delay for 20 seconds
+DelayMs 20000
+
+// Disable Radio
+Adrv9001ToRfPrimed Tx1

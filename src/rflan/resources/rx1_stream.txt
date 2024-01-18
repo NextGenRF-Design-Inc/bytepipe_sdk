@@ -1,8 +1,5 @@
-// Set SSI Enable Delay
-Adrv9001SetParam Rx1SsiEnableDly 500
-
-// Set SSI Disable Delay
-Adrv9001SetParam Rx1SsiDisableDly 200
+// Enbable Receiver
+Adrv9001ToRfEnabled Rx1
 
 // Enable DMA for 2000 samples
 RflanStreamStart Rx1 0 2000
