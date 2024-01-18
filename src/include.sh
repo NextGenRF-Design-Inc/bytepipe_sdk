@@ -46,6 +46,8 @@ build_sw()
   rm -rf $wrkDir/$project/*.log
   rm -rf $wrkDir/$project/*.bin
   rm -rf $wrkDir/$project/*.zip
+  rm -rf $wrkDir/$project/sd_card	
+  rm -rf $wrkDir/$project/artifacts
   
   # Indicate Build
   echo "$(printf '\033')[0;33mBuilding $project Software $(printf '\033')[0m"
@@ -56,7 +58,19 @@ build_sw()
     xsct.bat "$srcDir/$project/sw/make_sw.tcl" $device
   fi
     
+  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card $wrkDir/$project
+  cp -rf $srcDir/$project/resources/* $wrkDir/$project/sd_card    
   
+  mkdir $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/rpu/Debug/rpu.elf.size $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/hwp/zynqmp_fsbl/fsbl_a53.elf $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/hwp/zynqmp_pmufw/pmufw.elf $wrkDir/$project/artifacts
+  cp -rf $wrkDir/$project/rpu_system/Debug/sd_card/BOOT.BIN $wrkDir/$project/artifacts  
+  cp -rf $wrkDir/$project/${project}_${device}.xsa $wrkDir/$project/artifacts    
+  
+  zip -rj "$wrkDir/$project/${project}_${device}_sdcard.zip" $project/sd_card/
+  zip -rj "$wrkDir/$project/${project}_${device}_artifacts.zip" $project/artifacts/  
 }
 
 # This function abstracts a programmable logic build using Vivado.  The project 
