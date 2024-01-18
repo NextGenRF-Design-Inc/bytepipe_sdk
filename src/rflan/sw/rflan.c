@@ -1,44 +1,44 @@
 /***************************************************************************//**
-*  \addtogroup RFLAN
-*   @{
-*******************************************************************************/
+ *  \addtogroup RFLAN
+ *   @{
+ *******************************************************************************/
 /***************************************************************************//**
-*  \file       rflan.c
-*
-*  \details    This file contains the RFLAN application.
-*
-*  \copyright
-*
-*  Copyright 2021(c) NextGen RF Design, Inc.
-*
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions are met:
-*   - Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   - Redistributions in binary form must reproduce the above copyright notice,
-*     this list of conditions and the following disclaimer in the documentation
-*     and/or other materials provided with the distribution.
-*   - The use of this software may or may not infringe the patent rights of one
-*     or more patent holders.  This license does not release you from the
-*     requirement that you obtain separate licenses from these patent holders
-*     to use this software.
-*   - Use of the software either in source or binary form, must be run on or
-*     directly connected to a NextGen RF Design, Inc. product.
-*
-*  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
-*  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
-*  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-*  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-*  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-*  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*
-*******************************************************************************/
+ *  \file       rflan.c
+ *
+ *  \details    This file contains the RFLAN application.
+ *
+ *  \copyright
+ *
+ *  Copyright 2021(c) NextGen RF Design, Inc.
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   - Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *   - The use of this software may or may not infringe the patent rights of one
+ *     or more patent holders.  This license does not release you from the
+ *     requirement that you obtain separate licenses from these patent holders
+ *     to use this software.
+ *   - Use of the software either in source or binary form, must be run on or
+ *     directly connected to a NextGen RF Design, Inc. product.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ *  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -89,6 +89,10 @@ static QueueHandle_t  RflanEvtQueue;
 static XIicPs         RflanIic1;
 static eeprom_t       RflanEeprom;
 
+static adi_adrv9001_GpioPin_e RflanRx1LnaEnablePin;
+static adi_adrv9001_GpioPin_e RflanRx2LnaEnablePin;
+static adi_adrv9001_AuxDac_e  RflanVcTcxoDac;
+
 static int32_t RflanIic_Initialize( XIicPs *Instance, uint32_t DeviceId )
 {
   XIicPs_Config *Config;
@@ -123,7 +127,7 @@ static int32_t RflanReset_Initialize( XResetPs *Instance )
 static void Rflan_StreamCallback( uint32_t Buf, uint32_t Size, rflan_stream_channel_t Channel, void *CallbackRef )
 {
   rflan_evt_type_t evt;
-    
+
   if( Channel == RflanStreamChannel_Tx1)
     evt = RflanEvt_Tx1StreamDone;
   else if( Channel == RflanStreamChannel_Tx2)
@@ -246,6 +250,32 @@ static int32_t RflanFs_Initialize( void )
   return RflanStatus_Success;
 }
 
+static void Rflan_Adrv9001StateCallback( void *CallbackRef, adi_adrv9001_ChannelState_e state, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
+{
+  if( port == ADI_RX )
+  {
+    adi_adrv9001_GpioPinLevel_e Level;
+
+    if( state == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+    {
+      Level = ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH;
+    }
+    else
+    {
+      Level = ADI_ADRV9001_GPIO_PIN_LEVEL_LOW;
+    }
+
+    if( channel == ADI_CHANNEL_1 )
+    {
+      Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, Level );
+    }
+    else
+    {
+      Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, Level );
+    }
+  }
+}
+
 static int32_t Rflan_Initialize( void )
 {
   int32_t status;
@@ -255,8 +285,8 @@ static int32_t Rflan_Initialize( void )
     printf("%s\r\n",StatusString(status));
 
   cli_init_t CliInit = {
-    .Callback         = (cli_callback_t)Rflan_CliCallback,
-    .CallbackRef      = NULL
+      .Callback         = (cli_callback_t)Rflan_CliCallback,
+      .CallbackRef      = NULL
   };
 
   /* Initialize CLI */
@@ -264,11 +294,11 @@ static int32_t Rflan_Initialize( void )
     printf("%s\r\n",StatusString(status));
 
   rflan_cli_init_t RflanCliInit = {
-    .Cli           = &Cli,
-    .Gpio          = &RflanGpio,
-    .RflanPib      = &RflanPib,
+      .Cli           = &Cli,
+      .Gpio          = &RflanGpio,
+      .RflanPib      = &RflanPib,
 #ifdef RFLAN_STREAM_ENABLE
-    .RflanStream   = &RflanStream
+      .RflanStream   = &RflanStream
 #endif
   };
 
@@ -280,7 +310,7 @@ static int32_t Rflan_Initialize( void )
       .BaudRate           = RFLAN_UART_BAUDRATE,
       .DeviceId           = XPAR_PSU_UART_0_DEVICE_ID,
       .IntrId             = XPAR_XUARTPS_0_INTR,
-	  .IrqInstance        = &xInterruptController,
+      .IrqInstance        = &xInterruptController,
       .ParentCallback     = Rflan_UartCallback,
       .ParentCallbackRef  = &Cli };
 
@@ -315,7 +345,7 @@ static int32_t Rflan_Initialize( void )
 
   /* Initialize IIC */
   if((status = Eeprom_Initialize( &RflanEeprom, &EepromInit )) != 0)
-	printf("Eeprom %s\r\n",StatusString(status));
+    printf("Eeprom %s\r\n",StatusString(status));
 
   /* Initialize File System*/
   if((status = RflanFs_Initialize()) != FR_OK)
@@ -352,7 +382,7 @@ static int32_t Rflan_Initialize( void )
       .Rx1ChfCoeff = NULL,
       .Rx2ChfCoeff = NULL,
       .RxEnableMode = ADI_ADRV9001_SPI_MODE,
-      .StateCallback = NULL,
+      .StateCallback = Rflan_Adrv9001StateCallback,
       .StateCallbackRef = NULL,
       .TxAttn = { 0, 0 },
       .TxBoost = { true, true },
@@ -362,6 +392,38 @@ static int32_t Rflan_Initialize( void )
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
     printf("%s\r\n",StatusString(status));
+
+  /* Drive TCXO enable pin (pulled high on power up) */
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
+
+  /* Configure Analog GPIO as outputs */
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+
+  /* Drive TCXO enable pin (pulled high on power up) */
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
+
+  if( Rflan_GetHwVer() == 2 )
+  {
+    RflanRx1LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_06;
+    RflanRx2LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_05;
+    RflanVcTcxoDac = ADI_ADRV9001_AUXDAC0;
+  }
+  else
+  {
+    RflanRx1LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_01;
+    RflanRx2LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_09;
+    RflanVcTcxoDac = ADI_ADRV9001_AUXDAC3;
+  }
+
+  /* Disable Rx1/Rx2 LNAs */
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+
+  /* Configure VCTCXO DAC */
+  Adrv9001_SetEnableDac(&RflanAdrv9001, RflanVcTcxoDac, true );
+  Adrv9001_SetDacVoltage(&RflanAdrv9001, RflanVcTcxoDac, 0.9);
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001 )) != 0)
@@ -381,7 +443,7 @@ static int32_t Rflan_Initialize( void )
       .Tx2DmaIrqId = XPAR_FABRIC_TX2_DMA_IRQ_INTR,
       .Rx1DmaIrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR,
       .Rx2DmaIrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR,
-	  .IrqInstance = &xInterruptController
+      .IrqInstance = &xInterruptController
   };
 
   /* Initialize Stream */
@@ -406,7 +468,7 @@ static int32_t Rflan_Initialize( void )
     };
 
     if((status = Eeprom_GetEUI64(&RflanEeprom, (uint64_t*)LwipInit.MacAddr )) != 0)
-        printf("Eeprom Get EUI64 %s\r\n",StatusString(status));
+      printf("Eeprom Get EUI64 %s\r\n",StatusString(status));
 
     if((status = RflanLwip_Initialize( &RflanLwip, &LwipInit )) != 0)
       printf("Lwip %s\r\n",StatusString(status));
@@ -454,7 +516,7 @@ static void Rflan_Task( void *pvParameters )
           break;
       }
     }
-        
+
     RflanGpio_TogglePin( &RflanGpio, GPIO_LED_PIN );
   }
 }
@@ -463,14 +525,14 @@ int main()
 {
   /* Create Queue */
   RflanEvtQueue = xQueueCreate(RFLAN_EVT_QUEUE_SIZE, sizeof(uint32_t));
-  
+
   /* Create Rflan Task */
   xTaskCreate( Rflan_Task,
-              "rflan",
-              RFLAN_TASK_STACK_SIZE,
-              NULL,
-              RFLAN_TASK_PRIORITY,
-              NULL );
+      "rflan",
+      RFLAN_TASK_STACK_SIZE,
+      NULL,
+      RFLAN_TASK_PRIORITY,
+      NULL );
 
   /* Start RTOS */
   vTaskStartScheduler( );

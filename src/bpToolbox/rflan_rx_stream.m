@@ -6,18 +6,21 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM4');
-
-%% Enable Stream
+h.Open('COM12');
 
 % Select Receive Port
 RxPort = h.Rx1;
+
+%% Enable Stream
 
 % Select Capture Length of DMA
 RxBufLength = 2000;
 
 % Read Sample Rate
 fs = h.GetSampleRate(RxPort);
+
+% Read Carrier Frequency
+h.GetCarrierFrequency(RxPort);
 
 % Enable Receiver
 h.Adrv9001ToRfEnabled( RxPort );
@@ -67,6 +70,8 @@ title('Time Domain');
 
 end
 
+%% Disable Receiver
 
+h.Adrv9001ToRfPrimed( RxPort );
 
 

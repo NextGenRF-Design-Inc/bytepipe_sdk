@@ -155,6 +155,46 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance )
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_SetDgitalGpioDirection( adrv9001_t *Instance, adi_adrv9001_GpioPinCrumbSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir )
+{
+  if( Dir == ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT )
+  {
+    if( adi_adrv9001_gpio_ManualOutput_Configure(&Instance->Device, Bank ) != 0 )
+      return Adrv9001Status_GpioErr;
+  }
+  else
+  {
+    if( adi_adrv9001_gpio_ManualInput_Configure(&Instance->Device, Bank ) != 0 )
+      return Adrv9001Status_GpioErr;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetAnalogGpioDirection( adrv9001_t *Instance, adi_adrv9001_GpioAnalogPinNibbleSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir )
+{
+  if( Dir == ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT )
+  {
+    if( adi_adrv9001_gpio_ManualAnalogOutput_Configure(&Instance->Device, Bank ) != 0 )
+      return Adrv9001Status_GpioErr;
+  }
+  else
+  {
+    if( adi_adrv9001_gpio_ManualAnalogInput_Configure(&Instance->Device, Bank ) != 0 )
+      return Adrv9001Status_GpioErr;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetGpioPinLevel( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e Level )
+{
+  if( adi_adrv9001_gpio_OutputPinLevel_Set(&Instance->Device, Pin, Level) != 0)
+    return Adrv9001Status_GpioErr;
+
+  return Adrv9001Status_Success;
+}
+
 int32_t Adrv9001_GetRxRssi( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value )
 {
   uint32_t rxRssiPower_mdB;
@@ -667,7 +707,7 @@ int32_t Adrv9001_ToPrimed( adrv9001_t *Instance, adi_common_Port_e port, adi_com
 
   /* Allow user to set RF frontend */
   if( (Instance->StateCallback != NULL) && (Instance->Initialized != 0) )
-    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_RF_ENABLED, port, channel );
+    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_PRIMED, port, channel );
 
   if( mode == ADI_ADRV9001_SPI_MODE )
   {
@@ -692,7 +732,7 @@ int32_t Adrv9001_ToCalibrated( adrv9001_t *Instance, adi_common_Port_e port, adi
 
   /* Allow user to set RF frontend */
   if( (Instance->StateCallback != NULL) && (Instance->Initialized != 0) )
-    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_RF_ENABLED, port, channel );
+    Instance->StateCallback( Instance->StateCallbackRef, ADI_ADRV9001_CHANNEL_CALIBRATED, port, channel );
 
   if( mode == ADI_ADRV9001_PIN_MODE )
   {

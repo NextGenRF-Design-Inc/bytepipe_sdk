@@ -261,4 +261,8 @@ int32_t Adrv9001_GetSiliconVersion      ( adrv9001_t *Instance, adi_adrv9001_Sil
 int32_t Adrv9001_GetTxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t *Value );
 int32_t Adrv9001_SetTxDataSrc           (adrv9001_t *Instance,  adi_common_ChannelNumber_e Channel, adrv9001_tx_data_src_t Value );
 
+int32_t Adrv9001_SetDgitalGpioDirection ( adrv9001_t *Instance, adi_adrv9001_GpioPinCrumbSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir );
+int32_t Adrv9001_SetAnalogGpioDirection ( adrv9001_t *Instance, adi_adrv9001_GpioAnalogPinNibbleSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir );
+int32_t Adrv9001_SetGpioPinLevel        ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e Level );
+
 #endif
