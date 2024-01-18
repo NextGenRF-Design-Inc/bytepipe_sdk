@@ -109,7 +109,7 @@
   "DmaMasterTx": "False",
   "DmaMasterORx": "False",
   "McsInterface": "ADRV9001_SSI_TYPE_LVDS",
-  "McsClock_kHz": "0",
+  "McsClock_kHz": "38400",
   "ExpandedCustomSearch": "False",
   "NumSamples": "4096",
   "DeviceClockOutputEnabled": "True",
