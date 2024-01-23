@@ -214,6 +214,24 @@ static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
     Adrv9001_GetRxCurGainIndex( Adrv9001, Channel, &tmp );
     Cli_Printf(CliInstance, "%s = %hhu\r\n", name, tmp );
   }
+  else if( strcmp(&name[3], "GainMode") == 0 )
+  {
+    adi_adrv9001_RxGainControlMode_e tmp;
+    Adrv9001_GetRxGainMode( Adrv9001, Channel, &tmp );
+
+    if( tmp == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
+    {
+      Cli_Printf(CliInstance, "%s = %s\r\n", name, "Spi" );
+    }
+    else if( tmp == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_PIN )
+    {
+      Cli_Printf(CliInstance, "%s = %s\r\n", name, "Pin" );
+    }
+    else
+    {
+      Cli_Printf(CliInstance, "%s = %s\r\n", name, "Auto" );
+    }
+  }
   else if( strcmp(&name[3], "Rssi") == 0 )
   {
     float tmp;
@@ -350,6 +368,36 @@ static void Adrv9001Cli_GetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
       Cli_Printf(CliInstance, "%s = %s\r\n", name, "Spi" );
     }
   }
+  else if(strncmp(name, "Dgpio",5) == 0 )
+  {
+    adi_adrv9001_GpioPinLevel_e tmp;
+
+    uint8_t pin;
+    sscanf(&name[5], "%hhu", &pin);
+
+    Adrv9001_GetGpioPinLevel( Adrv9001, (adi_adrv9001_GpioPin_e)pin, &tmp );
+
+    if( tmp == ADI_ADRV9001_GPIO_PIN_LEVEL_LOW )
+      Cli_Printf(CliInstance, "%s = 0\r\n", name );
+    else
+      Cli_Printf(CliInstance, "%s = 1\r\n", name );
+  }
+  else if(strncmp(name, "Agpio",5) == 0 )
+  {
+    adi_adrv9001_GpioPinLevel_e tmp;
+
+    uint8_t pin;
+    sscanf(&name[5], "%hhu", &pin);
+
+    pin = pin + (uint8_t)ADI_ADRV9001_GPIO_ANALOG_00;
+
+    Adrv9001_GetGpioPinLevel( Adrv9001, (adi_adrv9001_GpioPin_e)pin, &tmp );
+
+    if( tmp == ADI_ADRV9001_GPIO_PIN_LEVEL_LOW )
+      Cli_Printf(CliInstance, "%s = 0\r\n", name );
+    else
+      Cli_Printf(CliInstance, "%s = 1\r\n", name );
+  }
   else
   {
     Cli_Printf(CliInstance, "Unknown Parameter %s\r\n", name );
@@ -447,7 +495,25 @@ static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   {
     uint8_t tmp;
     sscanf(Value, "%hhu", &tmp);
-    //    status = Adrv9001_SetRxCurGainIndex( Adrv9001, Channel, tmp );
+    status = Adrv9001_SetRxCurGainIndex( Adrv9001, Channel, tmp );
+  }
+  else if( strcmp(&name[3], "GainMode") == 0 )
+  {
+    adi_adrv9001_RxGainControlMode_e tmp;
+    if( strcmp(Value, "Spi") == 0 )
+    {
+      tmp = ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI;
+    }
+    else if( strcmp(Value, "Pin") == 0 )
+    {
+      tmp = ADI_ADRV9001_RX_GAIN_CONTROL_MODE_PIN;
+    }
+    else
+    {
+      tmp = ADI_ADRV9001_RX_GAIN_CONTROL_MODE_AUTO;
+    }
+
+    status = Adrv9001_SetRxGainMode( Adrv9001, Channel, tmp );
   }
   else if( strcmp(&name[3], "SwapIq") == 0 )
   {
@@ -579,6 +645,28 @@ static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
       status = Adrv9001_SetEnableMode( Adrv9001, Port, Channel, ADI_ADRV9001_SPI_MODE );
     }
   }
+  else if(strncmp(name, "Dgpio",5) == 0 )
+  {
+    uint8_t pin = 0;
+    sscanf(&name[5], "%hhu", &pin);
+
+    uint8_t tmp;
+    sscanf(Value, "%hhu", &tmp);
+
+    Adrv9001_SetGpioPinLevel( Adrv9001, (adi_adrv9001_GpioPin_e)pin, (adi_adrv9001_GpioPinLevel_e)tmp );
+  }
+  else if(strncmp(name, "Agpio",5) == 0 )
+  {
+    uint8_t pin = 0;
+    sscanf(&name[5], "%hhu", &pin);
+
+    uint8_t tmp;
+    sscanf(Value, "%hhu", &tmp);
+
+    pin = pin + (uint8_t)ADI_ADRV9001_GPIO_ANALOG_00;
+
+    Adrv9001_SetGpioPinLevel( Adrv9001, (adi_adrv9001_GpioPin_e)pin, (adi_adrv9001_GpioPinLevel_e)tmp );
+  }
   else
   {
     status = Adrv9001Status_InvalidParameter;
@@ -605,8 +693,9 @@ static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001
   Cli_Printf(CliInstance,"  Rx1SsiDataDelay\r\n" );
   Cli_Printf(CliInstance,"  Rx1SsiStatus\r\n" );
   Cli_Printf(CliInstance,"  Rx1RadioState\r\n" );
-  Cli_Printf(CliInstance,"  Rx1RxGainIndex\r\n" );
-  Cli_Printf(CliInstance,"  Rx1RxRssi\r\n" );
+  Cli_Printf(CliInstance,"  Rx1GainIndex\r\n" );
+  Cli_Printf(CliInstance,"  Rx1GainMode\r\n" );
+  Cli_Printf(CliInstance,"  Rx1Rssi\r\n" );
   Cli_Printf(CliInstance,"  Rx1SwapIq\r\n" );
   Cli_Printf(CliInstance,"  Rx1EnableMode\r\n" );
 
@@ -616,8 +705,9 @@ static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001
   Cli_Printf(CliInstance,"  Rx2SsiDataDelay\r\n" );
   Cli_Printf(CliInstance,"  Rx2SsiStatus\r\n" );
   Cli_Printf(CliInstance,"  Rx2RadioState\r\n" );
-  Cli_Printf(CliInstance,"  Rx2RxGainIndex\r\n" );
-  Cli_Printf(CliInstance,"  Rx2RxRssi\r\n" );
+  Cli_Printf(CliInstance,"  Rx2GainIndex\r\n" );
+  Cli_Printf(CliInstance,"  Rx2GainMode\r\n" );
+  Cli_Printf(CliInstance,"  Rx2Rssi\r\n" );
   Cli_Printf(CliInstance,"  Rx2SwapIq\r\n" );
   Cli_Printf(CliInstance,"  Rx2EnableMode\r\n" );
 
@@ -657,6 +747,30 @@ static void Adrv9001Cli_ListParams(cli_t *CliInstance, const char *cmd, adrv9001
   Cli_Printf(CliInstance,"  Dac2Enable\r\n" );
   Cli_Printf(CliInstance,"  Dac3Enable\r\n" );
 
+  Cli_Printf(CliInstance,"  Dgpio0\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio1\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio2\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio3\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio4\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio5\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio6\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio7\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio8\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio9\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio10\r\n" );
+  Cli_Printf(CliInstance,"  Dgpio11\r\n" );
+  Cli_Printf(CliInstance,"  Agpio0\r\n" );
+  Cli_Printf(CliInstance,"  Agpio1\r\n" );
+  Cli_Printf(CliInstance,"  Agpio2\r\n" );
+  Cli_Printf(CliInstance,"  Agpio3\r\n" );
+  Cli_Printf(CliInstance,"  Agpio4\r\n" );
+  Cli_Printf(CliInstance,"  Agpio5\r\n" );
+  Cli_Printf(CliInstance,"  Agpio6\r\n" );
+  Cli_Printf(CliInstance,"  Agpio7\r\n" );
+  Cli_Printf(CliInstance,"  Agpio8\r\n" );
+  Cli_Printf(CliInstance,"  Agpio9\r\n" );
+  Cli_Printf(CliInstance,"  Agpio10\r\n" );
+  Cli_Printf(CliInstance,"  Agpio11\r\n" );
 
 }
 

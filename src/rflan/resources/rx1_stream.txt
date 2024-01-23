@@ -1,5 +1,17 @@
+// Set Carrier Frequency (optional)
+Adrv9001SetParam Rx1CarrierFreq 2500.5
+Adrv9001GetParam Rx1CarrierFreq
+
+// Set Gain Mode to SPI (optional)
+Adrv9001SetParam Rx1GainMode Spi
+Adrv9001GetParam Rx1GainMode
+
 // Enbable Receiver
 Adrv9001ToRfEnabled Rx1
+
+// Set Gain Index (optional)
+Adrv9001SetParam Rx1GainIndex 250
+Adrv9001GetParam Rx1GainIndex
 
 // Enable DMA for 2000 samples
 RflanStreamStart Rx1 0 2000

@@ -195,6 +195,14 @@ int32_t Adrv9001_SetGpioPinLevel( adrv9001_t *Instance, adi_adrv9001_GpioPin_e P
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_GetGpioPinLevel( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e *Level )
+{
+  if( adi_adrv9001_gpio_OutputPinLevel_Get(&Instance->Device, Pin, Level) != 0)
+    return Adrv9001Status_GpioErr;
+
+  return Adrv9001Status_Success;
+}
+
 int32_t Adrv9001_GetRxRssi( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value )
 {
   uint32_t rxRssiPower_mdB;
@@ -783,6 +791,30 @@ bool Adrv9001_IsRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_com
     return true;
   else
     return false;
+}
+
+int32_t Adrv9001_SetRxGainMode( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e Value )
+{
+  if( adi_adrv9001_Rx_GainControl_Mode_Set( &Instance->Device, channel, Value ) != 0)
+    return Adrv9001Status_WriteErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetRxGainMode( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e *Value )
+{
+  if( adi_adrv9001_Rx_GainControl_Mode_Get( &Instance->Device, channel, Value ) != 0)
+    return Adrv9001Status_WriteErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetRxCurGainIndex( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t Value )
+{
+  if( adi_adrv9001_Rx_Gain_Set( &Instance->Device, channel, Value ) != 0)
+    return Adrv9001Status_WriteErr;
+
+  return Adrv9001Status_Success;
 }
 
 int32_t Adrv9001_GetRxCurGainIndex( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value )
