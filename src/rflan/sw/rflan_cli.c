@@ -337,7 +337,7 @@ static void RflanCli_CliLs(cli_t *CliInstance, const char *cmd, rflan_cli_t *Ins
   }
   else
   {
-	if((status = f_opendir(&dp, FILE_SYSTEM_BASE_PATH)) != XST_SUCCESS)
+	if((status = f_opendir(&dp, Instance->BasePath)) != XST_SUCCESS)
     {
       Cli_Printf(CliInstance,"Failure\r\n");
       return;
@@ -985,6 +985,7 @@ int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init )
   Instance->Cli = Init->Cli;
   Instance->Gpio = Init->Gpio;
   Instance->RflanPib = Init->RflanPib;
+  Instance->BasePath = Init->BasePath;
 
 #ifdef RFLAN_STREAM_ENABLE
   Instance->RflanStream = Init->RflanStream;

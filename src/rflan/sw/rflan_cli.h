@@ -69,6 +69,7 @@ typedef struct {
 #ifdef RFLAN_STREAM_ENABLE
   rflan_stream_t     *RflanStream;           ///< Reference to RFLAN Stream
 #endif
+  char               *BasePath;
 } rflan_cli_init_t;
 
 /**
@@ -85,6 +86,7 @@ typedef struct {
   XGpioPs            *Gpio;                  ///< Reference to RFLAN GPIO
 #ifdef RFLAN_STREAM_ENABLE
   rflan_stream_t     *RflanStream;           ///< Reference to RFLAN Stream
+  char               *BasePath;
 #endif
 } rflan_cli_t;
 

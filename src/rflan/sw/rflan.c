@@ -284,6 +284,10 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanGpio_Initialize( &RflanGpio, XPAR_PSU_GPIO_0_DEVICE_ID )) != 0)
     printf("%s\r\n",StatusString(status));
 
+  /* Initialize File System*/
+  if((status = RflanFs_Initialize()) != FR_OK)
+    printf("FatFs %s\r\n",StatusString(status));
+
   cli_init_t CliInit = {
       .Callback         = (cli_callback_t)Rflan_CliCallback,
       .CallbackRef      = NULL
@@ -298,8 +302,9 @@ static int32_t Rflan_Initialize( void )
       .Gpio          = &RflanGpio,
       .RflanPib      = &RflanPib,
 #ifdef RFLAN_STREAM_ENABLE
-      .RflanStream   = &RflanStream
+      .RflanStream   = &RflanStream,
 #endif
+      .BasePath      = BasePath
   };
 
   /* Initialize RFLAN Commands */
@@ -346,10 +351,6 @@ static int32_t Rflan_Initialize( void )
   /* Initialize IIC */
   if((status = Eeprom_Initialize( &RflanEeprom, &EepromInit )) != 0)
     printf("Eeprom %s\r\n",StatusString(status));
-
-  /* Initialize File System*/
-  if((status = RflanFs_Initialize()) != FR_OK)
-    printf("FatFs %s\r\n",StatusString(status));
 
   rflan_pib_init_t PibInit = {
       .HwVer = Rflan_GetHwVer( ),
