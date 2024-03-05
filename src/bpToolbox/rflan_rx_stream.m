@@ -6,8 +6,8 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM12');
-
+%h.Open('COM12');
+h.Open('COM4');
 % Select Receive Port
 RxPort = h.Rx1;
 
@@ -20,8 +20,8 @@ RxBufLength = 2000;
 fs = h.GetSampleRate(RxPort);
 
 % Set Carrier Frequency (optional)
-h.SetCarrierFrequency(TxPort, 2.5e9);
-
+%h.SetCarrierFrequency(TxPort, 2.5e9);
+h.SetCarrierFrequency(RxPort, 2.5e9);
 % Read Carrier Frequency
 h.GetCarrierFrequency(RxPort);
 
@@ -60,7 +60,7 @@ subplot(2,2,2);
 plot(real(iq),imag(iq));
 xlabel('In-Phase');
 ylabel('Quadrature-Phase');
-title('Constillation');
+title('typ');
 
 subplot(2,2,[3 4]);
 t = (1:length(iq))/(fs/1e6);

@@ -567,11 +567,11 @@ classdef rflan < handle
         
         function SetRadioState( obj, Port, v )
             if( strcmp(v, obj.Calibrated ))
-                obj.Adrv9001SetParam([Port 'RadioState'], '1');
+                obj.Adrv9001SetParam([Port 'RadioState'], 'Calibrated');%'1');
             elseif( strcmp(v, obj.Primed) )
-                obj.Adrv9001SetParam([Port 'RadioState'], '2');
+                obj.Adrv9001SetParam([Port 'RadioState'], 'Primed');%'2');
             elseif( strcmp(v, obj.Enabled) )
-                obj.Adrv9001SetParam([Port 'RadioState'], '3');
+                obj.Adrv9001SetParam([Port 'RadioState'], 'Enabled');%'3');
             end
         end
                 

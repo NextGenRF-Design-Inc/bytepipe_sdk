@@ -65,7 +65,7 @@ subplot(2,2,2);
 plot(real(iq),imag(iq));
 xlabel('In-Phase');
 ylabel('Quadrature-Phase');
-title('Constillation');
+title('Constellation');
 
 subplot(2,2,[3 4]);
 t = (1:length(iq))/(fs/1e6);
