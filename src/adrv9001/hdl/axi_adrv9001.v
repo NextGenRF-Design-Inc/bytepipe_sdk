@@ -182,7 +182,14 @@ module axi_adrv9001#(
   output wire           SpiDbg_Sclk,
   output wire           SpiDbg_Csn,
   output wire           SpiDbg_Mosi,
-  output wire           SpiDbg_Miso
+  output wire           SpiDbg_Miso,
+
+  //Debug
+  output wire [7:0]   s_serdes_in_dbg,
+  output wire [7:0]   i_serdes_in_dbg,
+  output wire [7:0]   q_serdes_in_dbg,
+  output wire         iq_packed_valid_dbg,
+  output reg  [31:0]  tx1_fixed_pattern_dbg
   
 );
 
@@ -657,6 +664,9 @@ tx2_fixed_pattern_cdc_i (
   .src_in(tx2_fixed_pattern) 
 );
 
+always @(posedge tx1_axis_aclk) begin
+  tx1_fixed_pattern_dbg <= tx1_fixed_pattern_cdc;
+end
 
 /**** Transmit Data Source ***************************************************************************************/
 
@@ -894,7 +904,12 @@ adrv9001_tx #(
     .s_axis_tdata(tx1_axis_tdata),
     .s_axis_tready(tx1_axis_tready),
     .s_axis_tvalid(tx1_axis_tvalid),
-    .s_axis_aclk(tx1_axis_aclk)   
+    .s_axis_aclk(tx1_axis_aclk),
+    //Debug
+    .s_serdes_in_dbg(s_serdes_in_dbg),
+    .i_serdes_in_dbg(i_serdes_in_dbg),
+    .q_serdes_in_dbg(q_serdes_in_dbg),
+    .iq_packed_valid_dbg(iq_packed_valid_dbg)   
 );
     
 adrv9001_tx #(  

@@ -537,7 +537,8 @@ static void Adrv9001Cli_SetParam(cli_t *CliInstance, const char *cmd, adrv9001_t
   else if( strcmp(&name[3], "FixedPattern") == 0 )
   {
     uint32_t tmp;
-    sscanf(Value, "%lu", &tmp);
+    //sscanf(Value, "%lu", &tmp);
+    sscanf(Value, "%lx", &tmp);
     AxiAdrv9001_SetFixedPattern( &Adrv9001->Axi, Port, Channel, tmp );
   }
   else if( strcmp(&name[3], "DataSrc") == 0 )

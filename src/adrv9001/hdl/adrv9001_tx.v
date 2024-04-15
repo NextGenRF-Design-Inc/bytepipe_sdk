@@ -50,7 +50,13 @@ module adrv9001_tx#(
   input  wire [31:0]  s_axis_tdata,          // IQ data to be transmitted
   output wire         s_axis_tready,         // Ready for new IQ data sample
   input  wire         s_axis_tvalid,         // Input IQ data valid
-  output wire         s_axis_aclk            // IQ data clock, 2x sample rate
+  output wire         s_axis_aclk,            // IQ data clock, 2x sample rate
+// Debug
+  output wire [7:0]   s_serdes_in_dbg,
+  output wire [7:0]   i_serdes_in_dbg,
+  output wire [7:0]   q_serdes_in_dbg,
+  output wire         iq_packed_valid_dbg
+
 
     );
     
@@ -190,6 +196,7 @@ reg  [31:0] pn15_packed = 'd0;
 reg  [31:0] iq_packed = 'd0;
 reg         iq_packed_valid = 'd0;
 reg  [31:0] iq_in_packed = 'd0;
+assign iq_packed_valid_dbg = iq_packed_valid;
 
 always @(posedge ssi_clk_div) begin
 
@@ -257,6 +264,9 @@ end
 reg  [7:0]  s_serdes_in = 'd0;
 reg  [7:0]  i_serdes_in = 'd0;
 reg  [7:0]  q_serdes_in = 'd0; 
+assign s_serdes_in_dbg = s_serdes_in;
+assign i_serdes_in_dbg = i_serdes_in;
+assign q_serdes_in_dbg = q_serdes_in; 
   
 always @(posedge ssi_clk_div) begin  
   
