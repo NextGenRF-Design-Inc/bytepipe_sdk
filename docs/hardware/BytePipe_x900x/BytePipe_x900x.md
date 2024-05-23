@@ -104,9 +104,9 @@ J600 is a board to board connector which provides access to all of the digital s
 |80|UART0_TX|UART0 Output|N/A|N/A|
 |81|ETH_PHY_LED0|Ethernet Speed Indicator|N/A|N/A|
 |82|UART1_TX|UART1 Output|N/A|N/A|
-|83|I2C1_SDA|I2C data (VCCO_PSIO_501)|N/A|N/A|
+|83|I2C1_SCL|I2C clock (VCCO_PSIO_501)|N/A|N/A|
 |84|UART0_RX|UART0 Input|N/A|N/A|
-|85|I2C1_SCL|I2C clock (VCCO_PSIO_501)|N/A|N/A|
+|85|I2C1_SDA|I2C data (VCCO_PSIO_501)|N/A|N/A|
 |86|UART1_RX|UART1 Input|N/A|N/A|
 |87|MIO37|Multiplexed I/O|PS_MIO37|E11|
 |88|MIO38|Multiplexed I/O|PS_MIO38|C9|
