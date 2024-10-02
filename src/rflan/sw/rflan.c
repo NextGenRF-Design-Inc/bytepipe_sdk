@@ -459,16 +459,7 @@ static int32_t Rflan_Initialize( void )
   rflan_stream_init_t StreamInit = {
       .Callback = Rflan_StreamCallback,
       .CallbackRef = &RflanStream,
-      .Adrv9001 = &RflanAdrv9001,
-      .Tx1DmaBase = XPAR_TX1_DMA_BASEADDR,
-      .Tx2DmaBase = XPAR_TX2_DMA_BASEADDR,
-      .Rx1DmaBase = XPAR_RX1_DMA_BASEADDR,
-      .Rx2DmaBase = XPAR_RX2_DMA_BASEADDR,
-      .Tx1DmaIrqId = XPAR_FABRIC_TX1_DMA_IRQ_INTR,
-      .Tx2DmaIrqId = XPAR_FABRIC_TX2_DMA_IRQ_INTR,
-      .Rx1DmaIrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR,
-      .Rx2DmaIrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR,
-      .IrqInstance = &xInterruptController
+      .Adrv9001 = &RflanAdrv9001
   };
 
   /* Initialize Stream */

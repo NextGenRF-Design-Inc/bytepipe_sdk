@@ -71,6 +71,27 @@
 #define SECONDARY_FILE_SYSTEM_BASE_PATH  ("1:/")
 
 #define RFLAN_EEPROM_I2C_ADDR           (0xA0)
+
+#define RFLAN_DMA_TX1_BASEADDR          (XPAR_TX1_DMA_BASEADDR)
+#define RFLAN_DMA_TX2_BASEADDR          (XPAR_TX2_DMA_BASEADDR)
+#define RFLAN_DMA_RX1_BASEADDR          (XPAR_RX1_DMA_DMA_BASEADDR)
+#define RFLAN_DMA_RX2_BASEADDR          (XPAR_RX2_DMA_DMA_BASEADDR)
+#define RFLAN_DMA_TX1_IRQ               (XPAR_FABRIC_TX1_DMA_IRQ_INTR)
+#define RFLAN_DMA_TX2_IRQ               (XPAR_FABRIC_TX2_DMA_IRQ_INTR)
+#define RFLAN_DMA_RX1_IRQ               (XPAR_FABRIC_RX1_DMA_IRQ_INTR)
+#define RFLAN_DMA_RX2_IRQ               (XPAR_FABRIC_RX2_DMA_IRQ_INTR)
+
+
+#define RFLAN_DMA_BUF_ADDR              (0x3f000000)
+#define RFLAN_DMA_TX1_BUF_ADDR          (RFLAN_DMA_BUF_ADDR)
+#define RFLAN_DMA_TX1_BUF_SIZE          (0x400000)
+#define RFLAN_DMA_TX2_BUF_ADDR          (RFLAN_DMA_TX1_BUF_ADDR + RFLAN_DMA_TX1_BUF_SIZE)
+#define RFLAN_DMA_TX2_BUF_SIZE          (0x400000)
+#define RFLAN_DMA_RX1_BUF_ADDR          (RFLAN_DMA_TX2_BUF_ADDR + RFLAN_DMA_TX2_BUF_SIZE)
+#define RFLAN_DMA_RX1_BUF_SIZE          (0x400000)
+#define RFLAN_DMA_RX2_BUF_ADDR          (RFLAN_DMA_RX1_BUF_ADDR + RFLAN_DMA_RX1_BUF_SIZE)
+#define RFLAN_DMA_RX2_BUF_SIZE          (0x400000)
+
 /***************************************************************************//**
 *
 * \details  Reboot Processor

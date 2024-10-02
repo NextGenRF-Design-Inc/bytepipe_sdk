@@ -43,11 +43,14 @@
 #include <stdio.h>
 #include <string.h>
 #include "rflan_stream.h"
+#include "rflan.h"
 #include "xil_cache.h"
 #include <xil_io.h>
 #include "sleep.h"
 
 #ifdef RFLAN_STREAM_ENABLE
+
+extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
 static void RflanStream_Tx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t evt )
 {
@@ -56,7 +59,7 @@ static void RflanStream_Tx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
   if( evt == EvtType_EndofTransfer)
   {
     if( stream->Callback != NULL )
-      stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Tx1, stream->CallbackRef );
+      stream->Callback( Instance->Addr, Instance->SampleCnt << 2, RflanStreamChannel_Tx1, stream->CallbackRef );
   }
 }
 
@@ -67,7 +70,7 @@ static void RflanStream_Tx2DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
   if( evt == EvtType_EndofTransfer)
   {
     if( stream->Callback != NULL )
-      stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Tx2, stream->CallbackRef );
+      stream->Callback( Instance->Addr, Instance->SampleCnt << 2, RflanStreamChannel_Tx2, stream->CallbackRef );
   }
 }
 
@@ -78,7 +81,7 @@ static void RflanStream_Rx1DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
   if( evt == EvtType_EndofTransfer)
   {
     if( stream->Callback != NULL )
-      stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Rx1, stream->CallbackRef );
+      stream->Callback( Instance->Addr, Instance->SampleCnt << 2, RflanStreamChannel_Rx1, stream->CallbackRef );
   }
 }
 
@@ -89,13 +92,12 @@ static void RflanStream_Rx2DmaCallback( axi_dma_t *Instance, axi_dma_evt_type_t 
   if( evt == EvtType_EndofTransfer)
   {
     if( stream->Callback != NULL )
-      stream->Callback( Instance->BigTransfer.Address, Instance->BigTransfer.Size, RflanStreamChannel_Rx2, stream->CallbackRef );
+      stream->Callback( Instance->Addr, Instance->SampleCnt << 2, RflanStreamChannel_Rx2, stream->CallbackRef );
   }
 }
 
 axi_dma_t *RflanStream_GetDma( rflan_stream_t *Instance, rflan_stream_channel_t Channel )
 {
-
   switch( Channel )
   {
     case RflanStreamChannel_Tx1: return &Instance->Tx1Dma;
@@ -139,7 +141,6 @@ static int32_t RflanStream_ChannelToAdrvPortChannel( rflan_stream_channel_t Stre
   return RflanStreamStatus_Success;
 }
 
-
 int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel )
 {
   int32_t status;
@@ -157,7 +158,7 @@ int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t 
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-  if((status = AxiDma_Transfer( Dma, Addr, (WordCnt << 2) )) != 0)
+  if((status = AxiDma_StartTransfer( Dma)) != 0)
     return status;
 
   if((status = Adrv9001_ToPrimed( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
@@ -168,6 +169,7 @@ int32_t RflanStream_Transfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t 
 
 int32_t RflanStream_StopTransfer( rflan_stream_t *Instance, rflan_stream_channel_t Channel )
 {
+
   int32_t status;
   adi_common_Port_e AdiPort;
   adi_common_ChannelNumber_e AdiChannel;
@@ -182,6 +184,7 @@ int32_t RflanStream_StopTransfer( rflan_stream_t *Instance, rflan_stream_channel
 
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
+
 
   return RflanStreamStatus_Success;
 }
@@ -194,14 +197,22 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
 
   axi_dma_t *Dma = RflanStream_GetDma(Instance, Channel);
 
+  AxiDma_SetCyclic(Dma, Cyclic);
+  AxiDma_SetSampleCnt(Dma, WordCnt);
+
   if((status = RflanStream_ChannelToAdrvPortChannel( Channel, &AdiPort, &AdiChannel )) != 0)
     return status;
 
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-  if((status = AxiDma_StartTransfer( Dma, Addr, (WordCnt << 2), Cyclic )) != 0)
+  if((status = AxiDma_StartTransfer(Dma)) != 0)
     return status;
+
+  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
+    return status;
+
+
 
   return RflanStreamStatus_Success;
 }
@@ -217,40 +228,56 @@ int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *In
   axi_dma_init_t DmaInit = {
       .CallbackRef = Instance,
       .Flags = 0,
-	  .IrqInstance = Init->IrqInstance
   };
-
-  DmaInit.Base = Init->Tx1DmaBase;
+  DmaInit.SampleSize = sizeof(uint32_t);
+  DmaInit.SampleCnt = 4096;
+  DmaInit.Addr = RFLAN_DMA_TX1_BUF_ADDR;
+  DmaInit.IrqInstance = &xInterruptController;
+  DmaInit.Base = XPAR_TX1_DMA_BASEADDR;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Tx1DmaCallback;
   DmaInit.Direction = AxiDmaDir_MemToDev;
-  DmaInit.IrqId = Init->Tx1DmaIrqId;
+  DmaInit.IrqId = XPAR_FABRIC_TX1_DMA_IRQ_INTR;
 
   if((status = AxiDma_Initialize( &Instance->Tx1Dma, &DmaInit )) != 0)
     return status;
 
-  DmaInit.Base = Init->Tx2DmaBase;
+  DmaInit.SampleSize = sizeof(uint32_t);
+  DmaInit.SampleCnt = 4096;
+  DmaInit.Addr = RFLAN_DMA_TX2_BUF_ADDR;
+  DmaInit.IrqInstance = &xInterruptController;
+  DmaInit.Base = XPAR_TX2_DMA_BASEADDR;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Tx2DmaCallback;
   DmaInit.Direction = AxiDmaDir_MemToDev;
-  DmaInit.IrqId = Init->Tx2DmaIrqId;
+  DmaInit.IrqId = XPAR_FABRIC_TX2_DMA_IRQ_INTR;
 
   if((status = AxiDma_Initialize( &Instance->Tx2Dma, &DmaInit )) != 0)
     return status;
 
-  DmaInit.Base = Init->Rx1DmaBase;
+  DmaInit.SampleSize = sizeof(uint32_t);
+  DmaInit.SampleCnt = 4096;
+  DmaInit.Addr = RFLAN_DMA_RX1_BUF_ADDR;
+  DmaInit.IrqInstance = &xInterruptController;
+  DmaInit.Base = XPAR_RX1_DMA_BASEADDR;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Rx1DmaCallback;
   DmaInit.Direction = AxiDmaDir_DevToMem;
-  DmaInit.IrqId = Init->Rx1DmaIrqId;
+  DmaInit.IrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR;
 
   if((status = AxiDma_Initialize( &Instance->Rx1Dma, &DmaInit )) != 0)
     return status;
 
-  DmaInit.Base = Init->Rx2DmaBase;
+  DmaInit.SampleSize = sizeof(uint32_t);
+  DmaInit.SampleCnt = 4096;
+  DmaInit.Addr = RFLAN_DMA_RX2_BUF_ADDR;
+  DmaInit.IrqInstance = &xInterruptController;
+  DmaInit.Base = XPAR_RX2_DMA_BASEADDR;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Rx2DmaCallback;
   DmaInit.Direction = AxiDmaDir_DevToMem;
-  DmaInit.IrqId = Init->Rx2DmaIrqId;
+  DmaInit.IrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR;
 
   if((status = AxiDma_Initialize( &Instance->Rx2Dma, &DmaInit )) != 0)
     return status;
+
+
 
   return RflanStreamStatus_Success;
 }
