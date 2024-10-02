@@ -2,7 +2,7 @@
  *   @file   axi_dma.c
  *   @brief  Driver for the Analog Devices AXI-DMAC core.
  *   @author DBogdan (dragos.bogdan@analog.com)
-********************************************************************************
+ ********************************************************************************
  * Copyright 2018(c) Analog Devices, Inc.
  *
  * All rights reserved.
@@ -35,7 +35,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -46,104 +46,235 @@
 #include "xil_cache.h"
 
 
-#define BIT(n)          (1 << (n))
 
-static int32_t AxiDma_Read(axi_dma_t *Instance, uint32_t Addr, uint32_t *Value)
+
+static void AxiDma_Read(axi_dma_t *Instance, uint32_t Addr, uint32_t *Value)
 {
-  *Value = Xil_In32(Instance->Base + Addr);
-
-  return XST_SUCCESS;
+	*Value = Xil_In32(Instance->Base + Addr);
 }
 
-static int32_t AxiDma_Write(axi_dma_t *Instance, uint32_t Addr, uint32_t Value)
+static void AxiDma_Write(axi_dma_t *Instance, uint32_t Addr, uint32_t Value)
 {
-  Xil_Out32(Instance->Base + Addr, Value);
-
-  return XST_SUCCESS;
+	Xil_Out32(Instance->Base + Addr, Value);
 }
 
-void AxiDma_Handler(axi_dma_t *Instance)
+static void AxiDma_Handler(axi_dma_t *Instance)
 {
-	uint32_t remaining_size, burst_size;
 	uint32_t reg_val;
 
 	/* Get interrupt sources and clear interrupts. */
 	AxiDma_Read(Instance, AXI_DMAC_REG_IRQ_PENDING, &reg_val);
 	AxiDma_Write(Instance, AXI_DMAC_REG_IRQ_PENDING, reg_val);
 
-	if ((reg_val & AXI_DMAC_IRQ_SOT) && (Instance->BigTransfer.Size != 0))
-	{
-		remaining_size = Instance->BigTransfer.Size  - Instance->BigTransfer.SizeDone;
-
-		burst_size = (remaining_size <= Instance->TransferMaxSize) ? remaining_size : Instance->TransferMaxSize;
-
-		Instance->BigTransfer.SizeDone += burst_size;
-		Instance->BigTransfer.Address += burst_size;
-
-		switch (Instance->Direction)
-		{
-		case AxiDmaDir_DevToMem:
-			AxiDma_Write(Instance, AXI_DMAC_REG_DEST_ADDRESS, Instance->BigTransfer.Address);
-			AxiDma_Write(Instance, AXI_DMAC_REG_DEST_STRIDE, 0x0);
-			break;
-
-		case AxiDmaDir_MemToDev:
-			AxiDma_Write(Instance, AXI_DMAC_REG_SRC_ADDRESS, Instance->BigTransfer.Address);
-			AxiDma_Write(Instance, AXI_DMAC_REG_SRC_STRIDE, 0x0);
-			break;
-
-		default:
-			return; // Other directions are not supported yet
-		}
-
-		/* The current transfer was started and a new one is queued. */
-		AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, burst_size);
-		AxiDma_Write(Instance, AXI_DMAC_REG_Y_LENGTH, 0x0);
-		AxiDma_Write(Instance, AXI_DMAC_REG_START_TRANSFER, 0x1);
-	}
-
-  axi_dma_evt_type_t evt;
+	axi_dma_evt_type_t evt;
 
 	if (reg_val & AXI_DMAC_IRQ_EOT)
 	{
-	  evt = EvtType_EndofTransfer;
-	  Instance->BigTransfer.TransferDone = true;
-	  Instance->BigTransfer.Address = 0;
-	  Instance->BigTransfer.Size = 0;
-	  Instance->BigTransfer.SizeDone = 0;
+		evt = EvtType_EndofTransfer;
 	}
 	else if(reg_val & AXI_DMAC_IRQ_SOT)
 	{
-    evt = EvtType_StartofTransfer;
+		evt = EvtType_StartofTransfer;
 	}
 
-  if( Instance->Callback != NULL )
-  {
-    Instance->Callback(Instance, evt);
-  }
+	if( Instance->Callback != NULL )
+	{
+		Instance->Callback(Instance->CallbackRef, evt);
+	}
 }
 
-int32_t AxiDma_Stop(axi_dma_t *Instance )
+int32_t AxiDma_GetTransferCnt( axi_dma_t *Instance, uint32_t *Value )
 {
-  AxiDma_Write(Instance, AXI_DMAC_REG_CTRL, 0x0);
-  return XST_SUCCESS;
-}
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
 
-int32_t AxiDma_StartTransfer(axi_dma_t *Instance, uint32_t address, uint32_t size, bool Cyclic)
-{
-	uint32_t reg_val;
+  uint32_t flags;
+  uint32_t xfrDone;
+  uint32_t length = 0;
 
-  if (size == 0)
+  AxiDma_Read( Instance, AXI_DMAC_REG_FLAGS, &flags);
+  AxiDma_Read( Instance, AXI_DMAC_REG_TRANSFER_DONE, &xfrDone);
+
+  if( (flags & AXI_DMAC_REG_FLAGS_PARTIAL) == AXI_DMAC_REG_FLAGS_PARTIAL)
   {
-    AxiDma_Write(Instance, AXI_DMAC_REG_CTRL, 0x0);
-    return XST_SUCCESS;
+	  if( (xfrDone & AXI_DMAC_REG_TRANSFER_DONE_PARTIAL) == AXI_DMAC_REG_TRANSFER_DONE_PARTIAL )
+	  {
+		  AxiDma_Read( Instance, AXI_DMAC_REG_PARTIAL_TRANSFER_LEN, &length);
+
+		  length = length / Instance->SampleSize;
+
+		  uint32_t tmp32;
+		  AxiDma_Read( Instance, AXI_DMAC_REG_PARTIAL_TRANSFER_ID, &tmp32);
+
+		  *Value = length;
+
+		  return AxiDmaStatus_Success;
+	  }
   }
 
-  /* Flush Cache */
-  Xil_DCacheFlush();
+  if( xfrDone > 0 )
+  {
+	  AxiDma_Read( Instance, AXI_DMAC_REG_X_LENGTH, &length);
 
-  Instance->Flags = Cyclic;
+	  length = (length + 1) / Instance->SampleSize;
+  }
 
+  *Value = length;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_Stop( axi_dma_t *Instance )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+	AxiDma_Write(Instance, AXI_DMAC_REG_CTRL, 0x0);
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_SetCyclic(axi_dma_t *Instance, bool Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  AxiDma_Stop( Instance );
+
+  if( Value )
+  {
+    Instance->Flags |= AXI_DMAC_REG_FLAGS_CYCLIC;
+  }
+  else
+  {
+    Instance->Flags &= ~AXI_DMAC_REG_FLAGS_CYCLIC;
+  }
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_SetAddr(axi_dma_t *Instance, uint32_t Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  AxiDma_Stop( Instance );
+
+  Instance->Addr = Value;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_SetSampleCnt(axi_dma_t *Instance, uint32_t Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  AxiDma_Stop( Instance );
+
+  Instance->SampleCnt = Value;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetCyclic(axi_dma_t *Instance, bool *Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  *Value = ( (Instance->Flags & AXI_DMAC_REG_FLAGS_CYCLIC) == AXI_DMAC_REG_FLAGS_CYCLIC );
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetDirection(axi_dma_t *Instance, axi_dma_direction_t *Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  *Value = Instance->Direction;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetAddr(axi_dma_t *Instance, uint32_t *Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  *Value = Instance->Addr;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetSampleCnt(axi_dma_t *Instance, uint32_t *Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  *Value = Instance->SampleCnt;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetSampleRate(axi_dma_t *Instance, uint32_t *Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  *Value = Instance->SampleRate;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_SetSampleRate(axi_dma_t *Instance, uint32_t Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  memcpy((uint8_t*)&Instance->SampleRate, (uint8_t*)&Value, sizeof(Value));
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetSampleSize(axi_dma_t *Instance, uint8_t *Value )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  *Value = Instance->SampleSize;
+
+  return AxiDmaStatus_Success;
+}
+
+int32_t AxiDma_GetEnabled( axi_dma_t *Instance, bool *Value )
+{
+  uint32_t reg_val;
+  AxiDma_Read(Instance, AXI_DMAC_REG_CTRL, &reg_val);
+  if (reg_val & AXI_DMAC_CTRL_ENABLE)
+  {
+    *Value = true;
+  }
+  else
+  {
+    *Value = false;
+  }
+
+  return AxiDmaStatus_Success;
+}
+int32_t AxiDma_StartTransfer( axi_dma_t *Instance )
+{
+  if( Instance == NULL )
+    return AxiDmaStatus_InvalidParameter;
+
+  AxiDma_Stop( Instance );
+
+	uint32_t size = Instance->SampleCnt * (uint32_t)Instance->SampleSize;
+
+	/* Flush Cache */
+	Xil_DCacheFlush();
+
+  uint32_t reg_val;
 	AxiDma_Read(Instance, AXI_DMAC_REG_CTRL, &reg_val);
 	if (!(reg_val & AXI_DMAC_CTRL_ENABLE))
 	{
@@ -158,160 +289,35 @@ int32_t AxiDma_StartTransfer(axi_dma_t *Instance, uint32_t address, uint32_t siz
 		switch (Instance->Direction)
 		{
 		case AxiDmaDir_DevToMem:
-			AxiDma_Write(Instance, AXI_DMAC_REG_DEST_ADDRESS, address);
+			AxiDma_Write(Instance, AXI_DMAC_REG_DEST_ADDRESS, Instance->Addr);
 			AxiDma_Write(Instance, AXI_DMAC_REG_DEST_STRIDE, 0x0);
 			break;
 
 		case AxiDmaDir_MemToDev:
-			AxiDma_Write(Instance, AXI_DMAC_REG_SRC_ADDRESS, address);
+			AxiDma_Write(Instance, AXI_DMAC_REG_SRC_ADDRESS, Instance->Addr);
 			AxiDma_Write(Instance, AXI_DMAC_REG_SRC_STRIDE, 0x0);
 			break;
 
 		default:
-			return XST_FAILURE; // Other directions are not supported yet
+			return AxiDmaStatus_InvalidParameter;
 		}
 
-		if ((size - 1) > Instance->TransferMaxSize)
-		{
-		  Instance->BigTransfer.Address = address;
-		  Instance->BigTransfer.Size = size - 1;
-		  Instance->BigTransfer.SizeDone = Instance->TransferMaxSize;
-
-			AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, Instance->TransferMaxSize);
-			AxiDma_Write(Instance, AXI_DMAC_REG_Y_LENGTH, 0x0);
-			AxiDma_Write(Instance, AXI_DMAC_REG_FLAGS, Instance->Flags);
-			AxiDma_Write(Instance, AXI_DMAC_REG_START_TRANSFER, 0x1);
-		}
-		else
-		{
-			AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, size - 1);
-			AxiDma_Write(Instance, AXI_DMAC_REG_Y_LENGTH, 0x0);
-			AxiDma_Write(Instance, AXI_DMAC_REG_FLAGS, Instance->Flags);
-			AxiDma_Write(Instance, AXI_DMAC_REG_START_TRANSFER, 0x1);
-		}
+		AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, size - 1);
+		AxiDma_Write(Instance, AXI_DMAC_REG_Y_LENGTH, 0x0);
+		AxiDma_Write(Instance, AXI_DMAC_REG_FLAGS, Instance->Flags);
+		AxiDma_Write(Instance, AXI_DMAC_REG_START_TRANSFER, 0x1);
 	}
 	else
 	{
-		return XST_FAILURE;
-	}
-	return XST_SUCCESS;
-}
-
-int32_t AxiDma_IsTransferReady(axi_dma_t *Instance, bool *rdy)
-{
-	*rdy = Instance->BigTransfer.TransferDone;
-
-	return XST_SUCCESS;
-}
-
-int32_t AxiDma_Transfer(axi_dma_t *Instance, uint32_t address, uint32_t size)
-{
-	uint32_t transfer_id;
-	uint32_t reg_val;
-	uint32_t timeout = 0;
-
-	if (size == 0)
-	{
-	  AxiDma_Write(Instance, AXI_DMAC_REG_CTRL, 0x0);
-		return XST_SUCCESS;
+		return AxiDmaStatus_RegErr;
 	}
 
-  /* Flush Cache */
-  Xil_DCacheFlush();
-
-  Instance->Flags = 0;
-
-	AxiDma_Write(Instance, AXI_DMAC_REG_CTRL, 0x0);
-	AxiDma_Write(Instance, AXI_DMAC_REG_CTRL, AXI_DMAC_CTRL_ENABLE);
-
-	AxiDma_Write(Instance, AXI_DMAC_REG_IRQ_MASK, 0x0);
-
-	AxiDma_Read(Instance, AXI_DMAC_REG_TRANSFER_ID, &transfer_id);
-	AxiDma_Read(Instance, AXI_DMAC_REG_IRQ_PENDING, &reg_val);
-	AxiDma_Write(Instance, AXI_DMAC_REG_IRQ_PENDING, reg_val);
-
-	switch (Instance->Direction)
-	{
-	case AxiDmaDir_DevToMem:
-		AxiDma_Write(Instance, AXI_DMAC_REG_DEST_ADDRESS, address);
-		AxiDma_Write(Instance, AXI_DMAC_REG_DEST_STRIDE, 0x0);
-		break;
-
-	case AxiDmaDir_MemToDev:
-		AxiDma_Write(Instance, AXI_DMAC_REG_SRC_ADDRESS, address);
-		AxiDma_Write(Instance, AXI_DMAC_REG_SRC_STRIDE, 0x0);
-		break;
-
-	default:
-		return XST_FAILURE; // Other directions are not supported yet
-	}
-
-	Instance->BigTransfer.TransferDone = false;
-
-	if ((size - 1) > Instance->TransferMaxSize)
-	{
-	  Instance->BigTransfer.Address = address;
-	  Instance->BigTransfer.Size = size - 1;
-	  Instance->BigTransfer.SizeDone = Instance->TransferMaxSize;
-
-		AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, Instance->TransferMaxSize);
-		AxiDma_Write(Instance, AXI_DMAC_REG_Y_LENGTH, 0x0);
-
-		AxiDma_Write(Instance, AXI_DMAC_REG_FLAGS, Instance->Flags);
-
-		AxiDma_Write(Instance, AXI_DMAC_REG_START_TRANSFER, 0x1);
-
-		while(!Instance->BigTransfer.TransferDone)
-		{
-			timeout++;
-			if (timeout == UINT32_MAX)
-				return XST_FAILURE;
-		}
-
-		Instance->BigTransfer.Address = 0;
-		Instance->BigTransfer.Size = 0;
-		Instance->BigTransfer.SizeDone = 0;
-
-		return XST_SUCCESS;
-	}
-
-	AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, size - 1);
-	AxiDma_Write(Instance, AXI_DMAC_REG_Y_LENGTH, 0x0);
-	AxiDma_Write(Instance, AXI_DMAC_REG_FLAGS, Instance->Flags);
-	AxiDma_Write(Instance, AXI_DMAC_REG_START_TRANSFER, 0x1);
-
-	if (Instance->Flags & AxiDmaFlags_Cyclic)
-		return XST_SUCCESS;
-
-	/* Wait until the new transfer is queued. */
-	do
-	{
-		AxiDma_Read(Instance, AXI_DMAC_REG_START_TRANSFER, &reg_val);
-	} while(reg_val == 1);
-
-	/* Wait until the current transfer is completed. */
-	do
-	{
-		AxiDma_Read(Instance, AXI_DMAC_REG_IRQ_PENDING, &reg_val);
-		if (reg_val == (AXI_DMAC_IRQ_SOT | AXI_DMAC_IRQ_EOT))
-			break;
-	} while(Instance->BigTransfer.TransferDone == false);
-
-	if (reg_val != (AXI_DMAC_IRQ_SOT | AXI_DMAC_IRQ_EOT))
-		AxiDma_Write(Instance, AXI_DMAC_REG_IRQ_PENDING, reg_val);
-
-	/* Wait until the transfer with the ID transfer_id is completed. */
-	do
-	{
-		AxiDma_Read(Instance, AXI_DMAC_REG_TRANSFER_DONE, &reg_val);
-	} while((reg_val & (1u << transfer_id)) != (1u << transfer_id));
-
-	return XST_SUCCESS;
+	return AxiDmaStatus_Success;
 }
 
 int32_t AxiDma_Initialize(axi_dma_t *Instance, axi_dma_init_t *Init)
 {
-  int32_t status;
+	int32_t status;
 
 	memset(Instance, 0, sizeof(axi_dma_t));
 
@@ -321,19 +327,15 @@ int32_t AxiDma_Initialize(axi_dma_t *Instance, axi_dma_init_t *Init)
 	Instance->CallbackRef           = Init->CallbackRef;
 	Instance->Direction             = Init->Direction;
 	Instance->Flags                 = Init->Flags;
-	Instance->TransferMaxSize       = -1;
-	Instance->BigTransfer.Address   = 0;
-	Instance->BigTransfer.Size      = 0;
-	Instance->BigTransfer.SizeDone  = 0;
+	Instance->SampleSize            = Init->SampleSize;
+  Instance->SampleCnt             = Init->SampleCnt;
+	Instance->Addr                  = Init->Addr;
+	Instance->SampleRate            = Init->SampleRate;
 
-	AxiDma_Write(Instance, AXI_DMAC_REG_X_LENGTH, Instance->TransferMaxSize);
-	AxiDma_Read(Instance, AXI_DMAC_REG_X_LENGTH, &Instance->TransferMaxSize);
-
-  if((status = XScuGic_Connect(Instance->IrqInstance, Init->IrqId, (XInterruptHandler)AxiDma_Handler, Instance )) != 0)
-    return status;
+	if((status = XScuGic_Connect(Instance->IrqInstance, Init->IrqId, (XInterruptHandler)AxiDma_Handler, Instance )) != 0)
+		return status;
 
 	XScuGic_Enable(Instance->IrqInstance, Init->IrqId);
-
 
 	return XST_SUCCESS;
 }
