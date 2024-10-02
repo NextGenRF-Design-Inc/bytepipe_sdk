@@ -47,6 +47,57 @@ classdef rflan < handle
         %         LoGen2Select;
         %
         %
+        %         Tx1DpdEnable;
+        %         Tx1DpdAmplifierType;
+        %         Tx1DpdLutSize;
+        %         Tx1DpdModel;
+        %         Tx1DpdChangeModelTapOrders;
+        %         Tx1DpdClgcEnable;
+        %         Tx1DpdPreLutScale;
+        %         Tx1DpdNumberofSamples;
+        %         Tx1DpdAdditionalPowerScale;
+        %         Tx1DpdCountsLessThanPowerThreshold;
+        %         Tx1DpdCountsGreaterThanPeakThreshold;
+        %         Tx1DpdImmediateLutSwitching;
+        %         Tx1DpdUseSpecialFrame;
+        %         Tx1DpdResetLuts;
+        %         Tx1DpdSamplingRate_Hz;
+        %         Tx1DpdRxTxNormalizationLowerThreshold;
+        %         Tx1DpdRxTxNormalizationUpperThreshold;
+        %         Tx1DpdDetectionPowerThreshold;
+        %         Tx1DpdDetectionPeakThreshold;
+        %         Tx1DpdTimeFilterCoefficient;
+        %         Tx1DpdClgcLoopOpen;
+        %         Tx1DpdClgcFilterAlpha;
+        %         Tx1DpdClgcGainTarget_HundredthdB;
+        %         Tx1DpdClgcLastGain_HundredthdB;
+        %         Tx1DpdClgcFilteredGain_HundredthdB;
+        %
+        %         Tx2DpdEnable;
+        %         Tx2DpdAmplifierType;
+        %         Tx2DpdLutSize;
+        %         Tx2DpdModel;
+        %         Tx2DpdChangeModelTapOrders;
+        %         Tx2DpdClgcEnable;
+        %         Tx2DpdPreLutScale;
+        %         Tx2DpdNumberofSamples;
+        %         Tx2DpdAdditionalPowerScale;
+        %         Tx2DpdCountsLessThanPowerThreshold;
+        %         Tx2DpdCountsGreaterThanPeakThreshold;
+        %         Tx2DpdImmediateLutSwitching;
+        %         Tx2DpdUseSpecialFrame;
+        %         Tx2DpdResetLuts;
+        %         Tx2DpdSamplingRate_Hz;
+        %         Tx2DpdRxTxNormalizationLowerThreshold;
+        %         Tx2DpdRxTxNormalizationUpperThreshold;
+        %         Tx2DpdDetectionPowerThreshold;
+        %         Tx2DpdDetectionPeakThreshold;
+        %         Tx2DpdTimeFilterCoefficient;
+        %         Tx2DpdClgcLoopOpen;
+        %         Tx2DpdClgcFilterAlpha;
+        %         Tx2DpdClgcGainTarget_HundredthdB;
+        %         Tx2DpdClgcLastGain_HundredthdB;
+        %         Tx2DpdClgcFilteredGain_HundredthdB;
         %
         %         Tx1SampleRate;
         %         Tx2SampleRate;
@@ -75,22 +126,20 @@ classdef rflan < handle
         Rx1 = 'Rx1';
         Rx2 = 'Rx2';
         
-        TxDataSrcOnes = 'Ones';
-        TxDataSrcZeros = 'Zeros';
-        TxDataSrcRamp = 'Ramp';
-        TxDataSrcPn15 = 'Pn15';
-        TxDataSrcFixed = 'Fixed';
-        TxDataSrcAxis = 'Axis';
-        TxDataSrcRxLoopback = 'RxLoopback';
-        
         MaxWriteIqLen = 64;
-        
+        RxSampleDelay = 20;
+                
+        Adrv9001TxDataSrc_Axis = 0;
+        Adrv9001TxDataSrc_Zeros = 1;
+        Adrv9001TxDataSrc_Ones = 2;
+        Adrv9001TxDataSrc_Ramp = 3;
+        Adrv9001TxDataSrc_Pn15 = 4;
+        Adrv9001TxDataSrc_FixedPattern = 5;
         
         Calibrated = 'Calibrated';
         Primed = 'Primed';
         Enabled = 'Enabled';
         Standby = 'Standby';
-        
         
         s;
         
@@ -201,23 +250,8 @@ classdef rflan < handle
     
     % Stream
     methods
-        
-        % Start Stream of IQ data to memory on the BytePipe.
-        % If Cyclic is 0 then the corresponding port will be enabled for
-        % SampleCnt number of samples.  If the Port is a transmit port IQ 
-        % data that has been previously loaded into memory will be streamed
-        % to the transmitter.  If the Port is a receiver port then
-        % SampleCnt number of samples will be streamed from the receiver to
-        % memory and availble for subsequent read out.  If Cyclic is 1 then
-        % the corresponding port will continuously stream SampleCnt number
-        % of samples to and from memory.
         function RflanStreamStart(obj, Port, Cyclic, SampleCnt)
-            
-            if( strcmp(Port, obj.Tx1) || strcmp(Port, obj.Tx2))
-                obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
-            else
-                obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt))]);
-            end
+            obj.Write(['RflanStreamStart ' char(Port) ' ' char(num2str(Cyclic)) ' ' char(num2str(SampleCnt + obj.RxSampleDelay))]);
         end
         
         function RflanStreamStop(obj, Port )
@@ -258,7 +292,7 @@ classdef rflan < handle
             configureCallback(obj.s, "off");
             obj.s.flush();
             
-            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset)) ' ' char(num2str(SampleCnt))]);
+            obj.Write(['RflanStreamBufGet ' char(Port) ' ' char(num2str(SampleOffset + obj.RxSampleDelay)) ' ' char(num2str(SampleCnt))]);
             
             tic;
             str = '';
@@ -420,27 +454,13 @@ classdef rflan < handle
             configureCallback(obj.s,"terminator",@obj.ConnectionCallback);
             
         end
-        
-        function v = GetFixedPattern( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'FixedPattern']);
-        end
-        
-        function v = GetEnableMode( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'EnableMode']);
-        end
-        
+                
         function v = GetTemp( obj )
             v = obj.Adrv9001GetParam('Temp');
-            v = strsplit(v,' ');
-            v = str2double(v{1});
         end
         
-        function v = GetTxDataSrc( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'DataSrc']);            
-        end  
-        
         function v = GetVcTcxo( obj )
-            v = obj.Adrv9001GetParam('Dac0Voltage');
+            v = obj.Adrv9001GetParam('VcTcxo');
         end
         
         function v = GetAdrvSiliconVersion( obj )
@@ -454,17 +474,127 @@ classdef rflan < handle
         function v = GetAdrvAPIVersion( obj )
             v = obj.Adrv9001GetParam('APIVersion');
         end
-              
+        
+        function v = GetDpdEnable( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdEnable']);
+        end
+        
+        function v = GetDpdAmplifierType( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdAmplifierType']);
+        end
+        
+        function v = GetDpdLutSize( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdLutSize']);
+        end
+        
+        function v = GetDpdModel( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdModel']);
+        end
+        
+        function v = GetDpdChangeModelTapOrders( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdChangeModelTapOrders']);
+        end
+        
+        function v = GetDpdClgcEnable( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcEnable']);
+        end
+        
+        function v = GetDpdPreLutScale( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdPreLutScale']);
+        end
+        
+        function v = GetDpdNumberofSamples( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdNumberofSamples']);
+        end
+        
+        function v = GetDpdAdditionalPowerScale( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdAdditionalPowerScale']);
+        end
+        
+        function v = GetDpdCountsLessThanPowerThreshold( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdCountsLessThanPowerThreshold']);
+        end
+        
+        function v = GetDpdCountsGreaterThanPeakThreshold( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdCountsGreaterThanPeakThreshold']);
+        end
+        
+        function v = GetDpdImmediateLutSwitching( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdImmediateLutSwitching']);
+        end
+        
+        function v = GetDpdUseSpecialFrame( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdUseSpecialFrame']);
+        end
+        
+        function v = GetDpdResetLuts( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdResetLuts']);
+        end
+        
+        function v = GetDpdSamplingRate_Hz( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdSamplingRate_Hz']);
+        end
+        
+        function v = GetDpdRxTxNormalizationLowerThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdRxTxNormalizationLowerThreshold']);
+            v = 10*log10(v / 2^30);
+        end
+        
+        function v = GetDpdRxTxNormalizationUpperThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdRxTxNormalizationUpperThreshold']);
+            v = 10*log10(v / 2^30);
+        end
+        
+        function v = GetDpdDetectionPowerThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdDetectionPowerThreshold']);
+            v = 10*log10(v / 2^31);
+        end
+        
+        function v = GetDpdDetectionPeakThreshold_dBm( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdDetectionPeakThreshold']);
+            v = 10*log10(v / 2^31);
+        end
+        
+        function v = GetDpdTimeFilterCoefficient( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdTimeFilterCoefficient']);
+            v = v / 2^31;
+        end
+        
+        function v = GetDpdClgcLoopOpen( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcLoopOpen']);
+        end
+        
+        function v = GetDpdClgcFilterAlpha( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcFilterAlpha']);
+            v = v / 2^31;
+        end
+        
+        function v = GetDpdClgcGainTarget_dB( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcGainTarget_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetDpdClgcLastGain_dB( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcLastGain_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetDpdClgcFilteredGain_dB( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcFilteredGain_HundredthdB']);
+            v = v / 100;
+        end
+        
+        function v = GetDpdCoefficients( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'DpdClgcFilteredGain_HundredthdB']);
+            v = v / 100;
+        end
+        
         function v = GetSampleRate( obj, Port )
             v = obj.Adrv9001GetParam([Port 'SampleRate']);
-            v = strsplit(v,' ');
-            v = str2double(v{1})*1e6;
         end
         
         function v = GetTxAttn( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'Attn']);
-            v = strsplit(v,' ');
-            v = str2double(v{1});
+            v = obj.Adrv9001GetParam([Port 'Attn'])/1000;
         end
         
         function v = GetTxBoost( obj, Port )
@@ -472,23 +602,39 @@ classdef rflan < handle
         end
         
         function v = GetCarrierFrequency( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'CarrierFreq']);
-            v = strsplit(v,' ');
-            v = str2double(v{1})*1e6;
+            v = obj.Adrv9001GetParam([Port 'CarrierFrequency']);
         end
         
         function v = GetRssi( obj, Port )
             v = obj.Adrv9001GetParam([Port 'Rssi']);
-            v = strsplit(v,' ');
-            v = str2double(v{1});
         end
         
-        function v = GetRxGainIndex( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'CurGainIndex']);
+        function v = GetRxGain( obj, Port )
+            v = obj.Adrv9001GetParam([Port 'Rssi']);
         end
-                    
+        
+        function v = GetExternalLoopbackPower(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackPower']);
+            v = v /10;
+        end
+        
+        function v = GetExternalLoopbackDelay(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'Gain']);
+            v = v * 100;
+        end
+        
         function v = GetRadioState( obj, Port )
-            v = obj.Adrv9001GetParam([Port 'RadioState']);           
+            v = obj.Adrv9001GetParam([Port 'RadioState']);
+            
+            if( v == 1 )
+                v = obj.Calibrated;
+            elseif( v == 2 )
+                v = obj.Primed;
+            elseif( v == 3)
+                v = obj.Enabled;
+            else
+                v = obj.Standby;
+            end
         end
         
         function v = GetSsiClockDelay( obj, Port )
@@ -497,8 +643,8 @@ classdef rflan < handle
         
         function v = GetSsiDataDelay( obj, Port )
             v = obj.Adrv9001GetParam([Port 'SsiDataDelay']);            
-        end     
-                
+        end        
+        
         function v = GetFileList( obj, filter)
             configureCallback(obj.s, "off");
             obj.s.flush();
@@ -535,34 +681,126 @@ classdef rflan < handle
         
         function Adrv9001SetParam( obj, p, v )
             obj.Write(['Adrv9001SetParam ' p ' ' num2str(v)]);
-        end
-        
-        function SetFixedPattern( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'FixedPattern'], num2str(v));
-        end
-        
-        function SetEnableMode( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'EnableMode'], num2str(v));
-        end
+        end        
         
         function SetVcTcxo( obj, v )
-            obj.Adrv9001SetParam('Dac0Voltage', num2str(v,"%.2f"));
+            obj.Adrv9001SetParam('VcTcxo', num2str(v,"%.2f"));
         end
-                                        
-        function SetTxAttn( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'Attn'], num2str(v));
+
+        function SetTestMode( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'TestMode'], num2str(v));
         end
         
-        function SetRxGainIndex( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'CurGainIndex'], num2str(v));
-        end        
+        function SetDpdEnable( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdEnable'], num2str(v));
+        end
+        
+        function SetDpdAmplifierType( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdAmplifierType'], num2str(v));
+        end
+        
+        function SetDpdLutSize( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdLutSize'], num2str(v));
+        end
+        
+        function SetDpdModel( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdModel'], num2str(v));
+        end
+        
+        function SetDpdChangeModelTapOrders( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdChangeModelTapOrders'], num2str(v));
+        end
+        
+        function SetDpdClgcEnable( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcEnable'], num2str(v));
+        end
+        
+        function SetDpdPreLutScale( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdPreLutScale'], num2str(v));
+        end
+        
+        function SetDpdNumberofSamples( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdNumberofSamples'], num2str(v));
+        end
+        
+        function SetDpdAdditionalPowerScale( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdAdditionalPowerScale'], num2str(v));
+        end
+        
+        function SetDpdCountsLessThanPowerThreshold( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdCountsLessThanPowerThreshold'], num2str(v));
+        end
+        
+        function SetDpdCountsGreaterThanPeakThreshold( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdCountsGreaterThanPeakThreshold'], num2str(v));
+        end
+        
+        function SetDpdImmediateLutSwitching( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdImmediateLutSwitching'], num2str(v));
+        end
+        
+        function SetDpdUseSpecialFrame( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdUseSpecialFrame'], num2str(v));
+        end
+        
+        function SetDpdResetLuts( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdResetLuts'], num2str(v));
+        end
+        
+        function SetDpdSamplingRate_Hz( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdSamplingRate_Hz'], num2str(v));
+        end
+        
+        function SetDpdRxTxNormalizationLowerThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationLowerThreshold ' num2str(10^(v/10)*2^30)]);
+        end
+        
+        function SetDpdRxTxNormalizationUpperThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdRxTxNormalizationUpperThreshold ' num2str(10^(v/10)*2^30)]);
+        end
+        
+        function SetDpdDetectionPowerThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdDetectionPowerThreshold ' num2str(10^(v/10)*2^31)]);
+        end
+        
+        function SetDpdDetectionPeakThreshold_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdDetectionPeakThreshold ' num2str(10^(v/10)*2^31)]);
+        end
+        
+        function SetDpdTimeFilterCoefficient( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdTimeFilterCoefficient'], num2str(v));
+        end
+        
+        function SetDpdClgcLoopOpen( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcLoopOpen'], num2str(v));
+        end
+        
+        function SetDpdClgcFilterAlpha( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcFilterAlpha'], num2str(v));
+        end
+        
+        function SetDpdClgcGainTarget_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcGainTarget_HundredthdB ' num2str(v * 100)]);
+        end
+        
+        function SetDpdClgcLastGain_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcLastGain_HundredthdB ' num2str(v * 100)]);
+        end
+        
+        function SetDpdClgcFilteredGain_dB( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'DpdClgcFilteredGain_HundredthdB ' num2str(v * 100)]);
+        end
+        
+        function SetTxAttn( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'Attn'], num2str(v*1000));
+        end
         
         function SetTxBoost( obj, Port, v )
             obj.Adrv9001SetParam([Port 'Boost'], num2str(v));
         end
         
         function SetCarrierFrequency( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'CarrierFreq'], num2str(v/1e6,"%.4f"));
+            obj.Adrv9001SetParam([Port 'CarrierFrequency'], num2str(v));
         end
         
         function SetRadioState( obj, Port, v )
@@ -574,7 +812,16 @@ classdef rflan < handle
                 obj.Adrv9001SetParam([Port 'RadioState'], '3');
             end
         end
-                
+        
+        function v = SetExternalLoopbackPower(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackPower']);
+            obj.Adrv9001SetParam([Port 'ExternalLoopbackPower ' num2str(v *10)]);
+        end
+        
+        function v = SetExternalLoopbackDelay(obj, Port)
+            v = obj.Adrv9001GetParam([Port 'ExternalLoopbackDelay']);
+        end
+        
         function SetSsiClockDelay( obj, Port, v )
             obj.Adrv9001SetParam([Port 'SsiClockDelay'], num2str(v));            
         end
@@ -583,22 +830,21 @@ classdef rflan < handle
             obj.Adrv9001SetParam([Port 'SsiDataDelay'], num2str(v));            
         end
            
-        function SetTx1Rx1SsiLoopBack( obj, v )
-            obj.Adrv9001SetParam('Tx1Rx1SsiLoopBack', num2str(v));            
+        function SetTxRx1SsiLoopBack( obj, v )
+            obj.Adrv9001SetParam('TxRx1SsiLoopBack', num2str(v));            
         end 
 
-        function SetTx2Rx2SsiLoopBack( obj, v )
-            obj.Adrv9001SetParam('Tx2Rx2SsiLoopBack', num2str(v));            
+        function SetTxRx2SsiLoopBack( obj, v )
+            obj.Adrv9001SetParam('TxRx2SsiLoopBack', num2str(v));            
         end    
         
         function SetTxIqConstant( obj, Port, v )
             obj.Adrv9001SetParam([Port 'IqData'], num2str(v));            
         end   
 
-        function SetTxDataSrc( obj, Port, v )
-            obj.Adrv9001SetParam([Port 'DataSrc'], v);            
-        end             
-        
+        function SetTxIqDataPath( obj, Port, v )
+            obj.Adrv9001SetParam([Port 'IqDataPath'], num2str(v));            
+        end           
     end
         
 end
