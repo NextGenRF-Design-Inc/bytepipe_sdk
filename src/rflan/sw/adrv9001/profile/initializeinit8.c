@@ -12,7 +12,7 @@
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
-adi_adrv9001_Init_t initialize_init_7 = { 
+adi_adrv9001_Init_t initialize_init_8 = { 
 		.clocks = { 
 		.deviceClock_kHz = 38400, 
 		.clkPllVcoFreq_daHz = 884736000, 
@@ -124,7 +124,7 @@ adi_adrv9001_Init_t initialize_init_7 = {
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_A, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 1 }
+		.rxWbNbCompPFirEn = 0 }
 						, 
 		.resamp = { 
 		.rxResampEn = 0, 
@@ -150,7 +150,7 @@ adi_adrv9001_Init_t initialize_init_7 = {
 				, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
-		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, 
+		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_15_BIT_I_Q_DATA_1_BIT_GAIN_CHANGE, 
 		.numLaneSel = ADI_ADRV9001_SSI_2_LANE, 
 		.strobeType = ADI_ADRV9001_SSI_SHORT_STROBE, 
 		.lsbFirst = 0, 
@@ -241,7 +241,7 @@ adi_adrv9001_Init_t initialize_init_7 = {
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_C, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 1 }
+		.rxWbNbCompPFirEn = 0 }
 						, 
 		.resamp = { 
 		.rxResampEn = 0, 
@@ -267,7 +267,7 @@ adi_adrv9001_Init_t initialize_init_7 = {
 				, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
-		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, 
+		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_15_BIT_I_Q_DATA_1_BIT_GAIN_CHANGE, 
 		.numLaneSel = ADI_ADRV9001_SSI_2_LANE, 
 		.strobeType = ADI_ADRV9001_SSI_SHORT_STROBE, 
 		.lsbFirst = 0, 
@@ -1186,7 +1186,7 @@ adi_adrv9001_Init_t initialize_init_7 = {
 		.mcsMode = ADI_ADRV9001_MCSMODE_DISABLED, 
 		.mcsInterfaceType = ADI_ADRV9001_SSI_TYPE_DISABLE, 
 		.adcTypeMonitor = ADI_ADRV9001_ADC_HP, 
-		.pllLockTime_us = 750, 
+		.pllLockTime_us = 380, 
 		.pllPhaseSyncWait_us = 0, 
 		.pllModulus = { 
 		.modulus = { 8388593, 8388593, 8388593, 8388593, 8388593  }, 

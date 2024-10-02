@@ -1,67 +1,463 @@
-# ******************************************************************************************
-# ******************************************************************************************
-#              Copyright 2022 (c) NextGen RF Design. All rights reserved.
-#
-#        This core is distributed WITHOUT ANY WARRANTY; without even the implied 
-#           warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# ******************************************************************************************
-# ******************************************************************************************
+#/***************************************************************************//**
+# *  \file       make.tcl
+# *
+# *  \details
+# *
+# *  \copyright
+# *
+# *  Copyright 2021(c) NextGen RF Design, Inc.  
+# *
+# *  All rights reserved.
+# *
+# *  Redistribution and use in source and binary forms, with or without
+# *  modification, are permitted provided that the following conditions are met:
+# *   - Redistributions of source code must retain the above copyright
+# *     notice, this list of conditions and the following disclaimer.
+# *   - Redistributions in binary form must reproduce the above copyright notice,
+# *     this list of conditions and the following disclaimer in the documentation
+# *     and/or other materials provided with the distribution.
+# *   - The use of this software may or may not infringe the patent rights of one
+# *     or more patent holders.  This license does not release you from the
+# *     requirement that you obtain separate licenses from these patent holders
+# *     to use this software.
+# *   - Use of the software either in source or binary form, must be run on or
+# *     directly connected to a NextGen RF Design, Inc. product.
+# *
+# *  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
+# *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+# *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# *  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# *  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# *
+# *******************************************************************************/
 
+# Create FIFO
+create_ip -name fifo_generator -vendor xilinx.com -library ip -version 13.2 -module_name fifo
+set_property -dict [list \
+  CONFIG.Component_Name {fifo} \
+  CONFIG.Input_Data_Width {8} \
+  CONFIG.Input_Depth {4096} \
+  CONFIG.Performance_Options {First_Word_Fall_Through} \
+] [get_ips fifo]
 
 # Create adrv9001 Interface
-create_bus_interface adrv9001 $proj_name
-add_interface_ports dev_clk_in in 1
-add_interface_ports rx1_en out 1
-add_interface_ports rx2_en out 1
-add_interface_ports tx1_en out 1
-add_interface_ports tx2_en out 1
-add_interface_ports rstn out 1
-add_interface_ports irq in 1
-add_interface_ports dgpio_o out 16
-add_interface_ports dgpio_i in 16
-add_interface_ports dgpio_t out 16
-add_interface_ports rx1_dclk_p in 1
-add_interface_ports rx1_dclk_n in 1
-add_interface_ports rx1_strobe_p in 1
-add_interface_ports rx1_strobe_n in 1
-add_interface_ports rx1_idata_p in 1
-add_interface_ports rx1_idata_n in 1
-add_interface_ports rx1_qdata_p in 1
-add_interface_ports rx1_qdata_n in 1
-add_interface_ports rx2_dclk_p in 1
-add_interface_ports rx2_dclk_n in 1
-add_interface_ports rx2_strobe_p in 1
-add_interface_ports rx2_strobe_n in 1
-add_interface_ports rx2_idata_p in 1
-add_interface_ports rx2_idata_n in 1
-add_interface_ports rx2_qdata_p in 1
-add_interface_ports rx2_qdata_n in 1
-add_interface_ports tx1_ref_clk_p in 1
-add_interface_ports tx1_ref_clk_n in 1
-add_interface_ports tx1_dclk_p out 1
-add_interface_ports tx1_dclk_n out 1
-add_interface_ports tx1_strobe_p out 1
-add_interface_ports tx1_strobe_n out 1
-add_interface_ports tx1_idata_p out 1
-add_interface_ports tx1_idata_n out 1
-add_interface_ports tx1_qdata_p out 1
-add_interface_ports tx1_qdata_n out 1
-add_interface_ports tx2_ref_clk_p in 1
-add_interface_ports tx2_ref_clk_n in 1
-add_interface_ports tx2_dclk_p out 1
-add_interface_ports tx2_dclk_n out 1
-add_interface_ports tx2_strobe_p out 1
-add_interface_ports tx2_strobe_n out 1
-add_interface_ports tx2_idata_p out 1
-add_interface_ports tx2_idata_n out 1
-add_interface_ports tx2_qdata_p out 1
-add_interface_ports tx2_qdata_n out 1
-add_interface_ports spi_mosi out 1
-add_interface_ports spi_miso in 1
-add_interface_ports spi_clk out 1
-add_interface_ports spi_csn out 1
-save_bus_interface adrv9001
+ipx::create_abstraction_definition nextgenrf.com user adrv9001_rtl 1.0
+ipx::create_bus_definition nextgenrf.com user adrv9001 1.0
+set_property xml_file_name $wrkDir/$proj_name/adrv9001_rtl.xml [ipx::current_busabs]
+set_property xml_file_name $wrkDir/$proj_name/adrv9001.xml [ipx::current_busdef]
+set_property bus_type_vlnv nextgenrf.com:user:adrv9001:1.0 [ipx::current_busabs]
+ipx::save_abstraction_definition [ipx::current_busabs]
+ipx::save_bus_definition [ipx::current_busdef]
+
+
+ipx::add_bus_abstraction_port dev_clk_in [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports dev_clk_in -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports dev_clk_in -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports dev_clk_in -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports dev_clk_in -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports dev_clk_in -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports dev_clk_in -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_en [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_en -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_en -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_en -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_en -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports rx1_en -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_en -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_en [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_en -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_en -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_en -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_en -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports rx2_en -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_en -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_en [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_en -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_en -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_en -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_en -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_en -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_en -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_en [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_en -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_en -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_en -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_en -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_en -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_en -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rstn [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rstn -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rstn -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rstn -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rstn -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports rstn -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rstn -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port spi_miso [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports spi_miso -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports spi_miso -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports spi_miso -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports spi_miso -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports spi_miso -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports spi_miso -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port spi_mosi [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports spi_mosi -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports spi_mosi -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports spi_mosi -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports spi_mosi -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports spi_mosi -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports spi_mosi -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port spi_csn [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports spi_csn -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports spi_csn -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports spi_csn -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports spi_csn -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports spi_csn -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports spi_csn -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port spi_clk [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports spi_clk -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports spi_clk -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports spi_clk -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports spi_clk -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports spi_clk -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports spi_clk -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port irq [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports irq -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports irq -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports irq -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports irq -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports irq -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports irq -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_dclk_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_dclk_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_dclk_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_dclk_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_strobe_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_strobe_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_strobe_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_strobe_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_idata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_idata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_idata_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_idata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_idata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_idata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_idata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_idata_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_idata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_idata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_qdata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_qdata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx1_qdata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx1_qdata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_dclk_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_dclk_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_dclk_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_dclk_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_strobe_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_strobe_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_strobe_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_strobe_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_idata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_idata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_idata_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_idata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_idata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_idata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_idata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_idata_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_idata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_idata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_qdata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_qdata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port rx2_qdata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports rx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports rx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports rx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports rx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports rx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports rx2_qdata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_ref_clk_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports tx1_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_ref_clk_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_ref_clk_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports tx1_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_ref_clk_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_dclk_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_dclk_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_dclk_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_dclk_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_strobe_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_strobe_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_strobe_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_strobe_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_idata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_idata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_idata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_idata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_idata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_idata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_idata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_idata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_qdata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_qdata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx1_qdata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx1_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx1_qdata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_ref_clk_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports tx2_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_ref_clk_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_ref_clk_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_ref_clk_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports tx2_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_ref_clk_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_ref_clk_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_dclk_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_dclk_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_dclk_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_dclk_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_dclk_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_dclk_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_strobe_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_strobe_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_strobe_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_strobe_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_strobe_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_strobe_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_idata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_idata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_idata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_idata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_idata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_idata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_idata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_idata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_idata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_idata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_qdata_p [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_qdata_p -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_qdata_p -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port tx2_qdata_n [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports tx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports tx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property master_width 1 [ipx::get_bus_abstraction_ports tx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports tx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports tx2_qdata_n -of_objects [ipx::current_busabs]]
+set_property slave_width 1 [ipx::get_bus_abstraction_ports tx2_qdata_n -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port dgpio_o [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports dgpio_o -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports dgpio_o -of_objects [ipx::current_busabs]]
+set_property master_width 16 [ipx::get_bus_abstraction_ports dgpio_o -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports dgpio_o -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports dgpio_o -of_objects [ipx::current_busabs]]
+set_property slave_width 16 [ipx::get_bus_abstraction_ports dgpio_o -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port dgpio_t [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports dgpio_t -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports dgpio_t -of_objects [ipx::current_busabs]]
+set_property master_width 16 [ipx::get_bus_abstraction_ports dgpio_t -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports dgpio_t -of_objects [ipx::current_busabs]]
+set_property slave_direction in [ipx::get_bus_abstraction_ports dgpio_t -of_objects [ipx::current_busabs]]
+set_property slave_width 16 [ipx::get_bus_abstraction_ports dgpio_t -of_objects [ipx::current_busabs]]
+
+ipx::add_bus_abstraction_port dgpio_i [ipx::current_busabs]
+set_property default_value 0 [ipx::get_bus_abstraction_ports dgpio_i -of_objects [ipx::current_busabs]]
+set_property master_presence required [ipx::get_bus_abstraction_ports dgpio_i -of_objects [ipx::current_busabs]]
+set_property master_direction in [ipx::get_bus_abstraction_ports dgpio_i -of_objects [ipx::current_busabs]]
+set_property master_width 16 [ipx::get_bus_abstraction_ports dgpio_i -of_objects [ipx::current_busabs]]
+set_property slave_presence required [ipx::get_bus_abstraction_ports dgpio_i -of_objects [ipx::current_busabs]]
+set_property slave_width 16 [ipx::get_bus_abstraction_ports dgpio_i -of_objects [ipx::current_busabs]]
+
+ipx::save_bus_definition [ipx::current_busdef]
+set_property bus_type_vlnv nextgenrf.com:user:adrv9001:1.0 [ipx::current_busabs]
+ipx::save_abstraction_definition [ipx::current_busabs]
 
 # Remove Incorrect Interfaces
 ipx::remove_bus_interface ext [ipx::current_core]
@@ -82,62 +478,110 @@ ipx::remove_bus_interface pl_irq [ipx::current_core]
 ipx::remove_bus_interface spi_irq [ipx::current_core]
 ipx::merge_project_changes ports [ipx::current_core]
 
-# Map adrv9001 Interfaces 
 ipx::add_bus_interface adrv9001 [ipx::current_core]
 set_property abstraction_type_vlnv nextgenrf.com:user:adrv9001_rtl:1.0 [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
 set_property bus_type_vlnv nextgenrf.com:user:adrv9001:1.0 [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
 set_property interface_mode master [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
-set_property display_name adrv9001 [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
-map_port adrv9001 dev_clk_in
-map_port adrv9001 rx1_en
-map_port adrv9001 rx2_en
-map_port adrv9001 tx1_en
-map_port adrv9001 tx2_en
-map_port adrv9001 rstn
-map_port adrv9001 irq
-map_port adrv9001 dgpio_i
-map_port adrv9001 dgpio_o
-map_port adrv9001 dgpio_t
-map_port adrv9001 rx1_dclk_p
-map_port adrv9001 rx1_dclk_n
-map_port adrv9001 rx1_strobe_p
-map_port adrv9001 rx1_strobe_n
-map_port adrv9001 rx1_idata_p
-map_port adrv9001 rx1_idata_n
-map_port adrv9001 rx1_qdata_p
-map_port adrv9001 rx1_qdata_n
-map_port adrv9001 rx2_dclk_p
-map_port adrv9001 rx2_dclk_n
-map_port adrv9001 rx2_strobe_p
-map_port adrv9001 rx2_strobe_n
-map_port adrv9001 rx2_idata_p
-map_port adrv9001 rx2_idata_n
-map_port adrv9001 rx2_qdata_p
-map_port adrv9001 rx2_qdata_n
-map_port adrv9001 tx1_ref_clk_p
-map_port adrv9001 tx1_ref_clk_n
-map_port adrv9001 tx1_dclk_p
-map_port adrv9001 tx1_dclk_n
-map_port adrv9001 tx1_strobe_p
-map_port adrv9001 tx1_strobe_n
-map_port adrv9001 tx1_idata_p
-map_port adrv9001 tx1_idata_n
-map_port adrv9001 tx1_qdata_p
-map_port adrv9001 tx1_qdata_n
-map_port adrv9001 tx2_ref_clk_p
-map_port adrv9001 tx2_ref_clk_n
-map_port adrv9001 tx2_dclk_p
-map_port adrv9001 tx2_dclk_n
-map_port adrv9001 tx2_strobe_p
-map_port adrv9001 tx2_strobe_n
-map_port adrv9001 tx2_idata_p
-map_port adrv9001 tx2_idata_n
-map_port adrv9001 tx2_qdata_p
-map_port adrv9001 tx2_qdata_n
-map_port adrv9001 spi_mosi
-map_port adrv9001 spi_miso
-map_port adrv9001 spi_clk
-map_port adrv9001 spi_csn
+ipx::add_port_map rx1_en [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_en [ipx::get_port_maps rx1_en -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_qdata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_qdata_p [ipx::get_port_maps rx1_qdata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_qdata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_qdata_n [ipx::get_port_maps rx1_qdata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map spi_csn [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name spi_csn [ipx::get_port_maps spi_csn -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_idata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_idata_n [ipx::get_port_maps rx1_idata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_en [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_en [ipx::get_port_maps rx2_en -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_idata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_idata_p [ipx::get_port_maps tx2_idata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_ref_clk_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_ref_clk_n [ipx::get_port_maps tx1_ref_clk_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_idata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_idata_n [ipx::get_port_maps tx2_idata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_ref_clk_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_ref_clk_p [ipx::get_port_maps tx1_ref_clk_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_dclk_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_dclk_p [ipx::get_port_maps tx1_dclk_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_qdata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_qdata_n [ipx::get_port_maps tx1_qdata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map dev_clk_in [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name dev_clk_in [ipx::get_port_maps dev_clk_in -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_qdata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_qdata_p [ipx::get_port_maps tx1_qdata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_qdata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_qdata_n [ipx::get_port_maps rx2_qdata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_qdata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_qdata_p [ipx::get_port_maps rx2_qdata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_idata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_idata_p [ipx::get_port_maps rx1_idata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_ref_clk_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_ref_clk_p [ipx::get_port_maps tx2_ref_clk_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_ref_clk_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_ref_clk_n [ipx::get_port_maps tx2_ref_clk_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rstn [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rstn [ipx::get_port_maps rstn -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_dclk_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_dclk_n [ipx::get_port_maps tx2_dclk_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map spi_mosi [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name spi_mosi [ipx::get_port_maps spi_mosi -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_dclk_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_dclk_n [ipx::get_port_maps tx1_dclk_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map dgpio_i [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name dgpio_i [ipx::get_port_maps dgpio_i -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_strobe_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_strobe_n [ipx::get_port_maps tx1_strobe_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_strobe_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_strobe_p [ipx::get_port_maps tx1_strobe_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_strobe_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_strobe_n [ipx::get_port_maps rx2_strobe_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_strobe_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_strobe_p [ipx::get_port_maps rx2_strobe_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_dclk_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_dclk_n [ipx::get_port_maps rx1_dclk_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_dclk_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_dclk_n [ipx::get_port_maps rx2_dclk_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_en [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_en [ipx::get_port_maps tx1_en -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_dclk_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_dclk_p [ipx::get_port_maps rx1_dclk_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_dclk_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_dclk_p [ipx::get_port_maps rx2_dclk_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_idata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_idata_p [ipx::get_port_maps rx2_idata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_idata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_idata_p [ipx::get_port_maps tx1_idata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map dgpio_t [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name dgpio_t [ipx::get_port_maps dgpio_t -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx1_idata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx1_idata_n [ipx::get_port_maps tx1_idata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map irq [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name irq [ipx::get_port_maps irq -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map dgpio_o [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name dgpio_o [ipx::get_port_maps dgpio_o -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map spi_clk [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name spi_clk [ipx::get_port_maps spi_clk -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_dclk_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_dclk_p [ipx::get_port_maps tx2_dclk_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_strobe_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_strobe_n [ipx::get_port_maps rx1_strobe_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_qdata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_qdata_n [ipx::get_port_maps tx2_qdata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx1_strobe_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx1_strobe_p [ipx::get_port_maps rx1_strobe_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_qdata_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_qdata_p [ipx::get_port_maps tx2_qdata_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_strobe_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_strobe_n [ipx::get_port_maps tx2_strobe_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map rx2_idata_n [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name rx2_idata_n [ipx::get_port_maps rx2_idata_n -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_en [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_en [ipx::get_port_maps tx2_en -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map tx2_strobe_p [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name tx2_strobe_p [ipx::get_port_maps tx2_strobe_p -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
+ipx::add_port_map spi_miso [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]
+set_property physical_name spi_miso [ipx::get_port_maps spi_miso -of_objects [ipx::get_bus_interfaces adrv9001 -of_objects [ipx::current_core]]]
 
 # Map axis data interface
 ipx::infer_bus_interface {rx1_axis_tdata rx1_axis_tvalid} xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
@@ -589,6 +1033,23 @@ set_property value true [ipx::get_hdl_parameters ENABLE_DEV_CLOCK_OUT -of_object
 set_property value_format bool [ipx::get_user_parameters ENABLE_DEV_CLOCK_OUT -of_objects [ipx::current_core]]
 set_property value_format bool [ipx::get_hdl_parameters ENABLE_DEV_CLOCK_OUT -of_objects [ipx::current_core]]
 set_property enablement_dependency {$ENABLE_DEV_CLOCK_OUT>0} [ipx::get_bus_interfaces dev_clk -of_objects [ipx::current_core]]
+
+
+#Clocks Page
+ipgui::add_page -name {Clocks} -component [ipx::current_core] -display_name {Clocks}
+set_property tooltip {Clocks} [ipgui::get_pagespec -name "Clocks" -component [ipx::current_core] ]
+ipgui::add_param -name {TX1_REF_CLK_USE_RX1} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Clocks" -component [ipx::current_core] ]
+ipgui::add_param -name {TX2_REF_CLK_USE_RX2} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Clocks" -component [ipx::current_core] ]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "TX1_REF_CLK_USE_RX1" -component [ipx::current_core] ]
+set_property value false [ipx::get_user_parameters TX1_REF_CLK_USE_RX1 -of_objects [ipx::current_core]]
+set_property value false [ipx::get_hdl_parameters TX1_REF_CLK_USE_RX1 -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters TX1_REF_CLK_USE_RX1 -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters TX1_REF_CLK_USE_RX1 -of_objects [ipx::current_core]]
+set_property widget {checkBox} [ipgui::get_guiparamspec -name "TX2_REF_CLK_USE_RX2" -component [ipx::current_core] ]
+set_property value false [ipx::get_user_parameters TX2_REF_CLK_USE_RX2 -of_objects [ipx::current_core]]
+set_property value false [ipx::get_hdl_parameters TX2_REF_CLK_USE_RX2 -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_user_parameters TX2_REF_CLK_USE_RX2 -of_objects [ipx::current_core]]
+set_property value_format bool [ipx::get_hdl_parameters TX2_REF_CLK_USE_RX2 -of_objects [ipx::current_core]]
 
 
 # Finalize

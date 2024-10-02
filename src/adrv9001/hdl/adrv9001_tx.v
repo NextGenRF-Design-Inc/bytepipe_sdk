@@ -1,33 +1,54 @@
 `timescale 1ns / 1ps
-// ***************************************************************************
-// ***************************************************************************
-//        Copyright 2020 (c) NextGen RF Design. All rights reserved.
-//
-// This core is distributed WITHOUT ANY WARRANTY; without even the implied 
-// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//
-// Name:          adrv9001_tx.v
-// 
-// Description: 
-//
-// This module instantiates a transmit channel for interfacing to the 
-// ADRV9001/2.  
-//
-// ***************************************************************************
-// ***************************************************************************
+/***************************************************************************//**
+ *  \file       adrv9001_tx.v
+ *
+ *  \details
+ *
+ *  \copyright
+ *
+ *  Copyright 2021(c) NextGen RF Design, Inc.  
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   - Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *   - The use of this software may or may not infringe the patent rights of one
+ *     or more patent holders.  This license does not release you from the
+ *     requirement that you obtain separate licenses from these patent holders
+ *     to use this software.
+ *   - Use of the software either in source or binary form, must be run on or
+ *     directly connected to a NextGen RF Design, Inc. product.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ *  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************/
 
 module adrv9001_tx#(
   parameter SWAP_DIFF_IDATA = 0,             // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_QDATA = 0,             // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter SWAP_DIFF_STROBE = 0,            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
-  parameter SWAP_DIFF_CLK_IN = 0,            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin 
-  parameter SWAP_DIFF_CLK_OUT = 0,            // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
+  parameter SWAP_DIFF_CLK_OUT = 0,           // Swap diff pair allowing physical connection of P signal to N pin and N signal to P pin
   parameter ENABLE_OTX_AXIS = 0
   )(
   
-// ADRV9001 interface.  Connect directly to top-level port    
-  input  wire         adrv9001_tx_refclk_p,       // Input data clock
-  input  wire         adrv9001_tx_refclk_n,      
+  wire                ssi_clk,
+  wire                ssi_clk_div,
+  
+// ADRV9001 interface.  Connect directly to top-level port      
   output wire         adrv9001_tx_dclk_p,       // Output data clock
   output wire         adrv9001_tx_dclk_n,      
   output wire         adrv9001_tx_strobe_p,     // SSI strobe pair
@@ -114,56 +135,7 @@ function [31:0] pn15;
 endfunction
 
 
-wire ssi_clk_in;
-      
-/* Reference Clock Buffer */
-generate
-  if( SWAP_DIFF_CLK_IN == 1) begin   
-    IBUFGDS ssi_clk_in_buf_i (
-      .O(ssi_clk_in),            
-      .I(adrv9001_tx_refclk_n),           
-      .IB(adrv9001_tx_refclk_p)
-    );                    
-  end else begin       
-    IBUFGDS ssi_clk_in_buf_i (
-      .O(ssi_clk_in),                
-      .I(adrv9001_tx_refclk_p),                 
-      .IB(adrv9001_tx_refclk_n)
-    );                  
-  end    
-endgenerate
-
-wire ssi_clk;
-
-/* SSI clock buffer */
-BUFGCE #(
-  .CE_TYPE ("SYNC"),
-  .IS_CE_INVERTED (1'b0),
-  .IS_I_INVERTED (SWAP_DIFF_CLK_IN)
-) 
-ssi_clk_buf_i (
-  .O (ssi_clk),
-  .CE (1'b1),
-  .I (ssi_clk_in)
-); 
- 
-wire ssi_clk_div;  
-/* ssi_clk_div buffer */  
-BUFGCE_DIV #(
-  .BUFGCE_DIVIDE(4),          
-  .IS_CE_INVERTED(1'b0),      
-  .IS_CLR_INVERTED(1'b0),      
-  .IS_I_INVERTED(SWAP_DIFF_CLK_IN)        
-)
-clk_div_buf_inst (
-  .O(ssi_clk_div),   
-  .CE(1'b1),         
-  .CLR(1'b0),      
-  .I(ssi_clk_in)              
-);
-
 reg    iq_ready = 'd0;
-
 
 wire   serdes_rst;
 xpm_cdc_async_rst #(
@@ -173,9 +145,10 @@ xpm_cdc_async_rst #(
 )
 serdes_rst_cdc_i (
   .dest_arst(serdes_rst), 
-  .dest_clk(ssi_clk),   
+  .dest_clk(ssi_clk_div),   
   .src_arst(~enable)   
 );
+
 
 always @(posedge ssi_clk_div) begin
     
@@ -271,11 +244,11 @@ adrv9001_tx_serdes#(
   )
 s_serdes(
   .rst(serdes_rst),                 // reset
-  .serdes_clk_div(ssi_clk_div),              // data/divided clock synchronous to parallel input 
-  .serdes_clk(ssi_clk),                      // data clock synchronous to output
+  .serdes_clk_div(ssi_clk_div),     // data/divided clock synchronous to parallel input 
+  .serdes_clk(ssi_clk),             // data clock synchronous to output
   .dout_p(adrv9001_tx_strobe_p),    // 1-bit input: Diff_p buffer input (connect directly to top-level port)
   .dout_n(adrv9001_tx_strobe_n),    // 1-bit input: Diff_n buffer input (connect directly to top-level port)
-  .din(s_serdes_in),                 // Parallel data output
+  .din(s_serdes_in),                // Parallel data output
   .din_t(1'b0)                      // Data in tristate
 );
 
@@ -284,11 +257,11 @@ adrv9001_tx_serdes#(
   )
 i_serdes(
   .rst(serdes_rst),                 // reset
-  .serdes_clk_div(ssi_clk_div),              // data/divided clock synchronous to parallel input 
-  .serdes_clk(ssi_clk),                      // data clock synchronous to output
+  .serdes_clk_div(ssi_clk_div),     // data/divided clock synchronous to parallel input 
+  .serdes_clk(ssi_clk),             // data clock synchronous to output
   .dout_p(adrv9001_tx_idata_p),     // 1-bit input: Diff_p buffer input (connect directly to top-level port)
   .dout_n(adrv9001_tx_idata_n),     // 1-bit input: Diff_n buffer input (connect directly to top-level port)
-  .din(i_serdes_in),                 // Parallel data output
+  .din(i_serdes_in),                // Parallel data output
   .din_t(1'b0)                      // Data in tristate
 );
 
@@ -297,69 +270,56 @@ adrv9001_tx_serdes#(
   )
 q_serdes(
   .rst(serdes_rst),                 // reset
-  .serdes_clk_div(ssi_clk_div),              // data/divided clock synchronous to parallel input 
-  .serdes_clk(ssi_clk),                      // data clock synchronous to output
+  .serdes_clk_div(ssi_clk_div),     // data/divided clock synchronous to parallel input 
+  .serdes_clk(ssi_clk),             // data clock synchronous to output
   .dout_p(adrv9001_tx_qdata_p),     // 1-bit input: Diff_p buffer input (connect directly to top-level port)
   .dout_n(adrv9001_tx_qdata_n),     // 1-bit input: Diff_n buffer input (connect directly to top-level port)
-  .din(q_serdes_in),                 // Parallel data output
+  .din(q_serdes_in),                // Parallel data output
   .din_t(1'b0)                      // Data in tristate
 );
 
     
 wire ssi_clk_out;
 
+ODDRE1 #(
+  .IS_C_INVERTED(1'b0),             // Optional inversion for C
+  .IS_D1_INVERTED(1'b0),            // Unsupported, do not use
+  .IS_D2_INVERTED(1'b0),            // Unsupported, do not use
+  .SIM_DEVICE("ULTRASCALE_PLUS"),   // Set the device version for simulation
+  .SRVAL(1'b0)                      // Initializes the ODDRE1 Flip-Flops to the specified value (1'b0, 1'b1)
+)
+oddre1_ssi_clk_out_i (
+  .Q(ssi_clk_out),                // 1-bit output: Data output to IOB
+  .C(ssi_clk),                    // 1-bit input: High-speed clock input
+  .D1(~SWAP_DIFF_CLK_OUT),        // 1-bit input: Parallel data input 1
+  .D2(SWAP_DIFF_CLK_OUT),         // 1-bit input: Parallel data input 2
+  .SR(1'b0)                       // 1-bit input: Active-High Async Reset
+);
+
 generate
 
   if( SWAP_DIFF_CLK_OUT) begin  
   
     OBUFDS ssi_clk_out_buf_i (
-      .O(adrv9001_tx_dclk_n),             
-      .OB(adrv9001_tx_dclk_p),            
+      .O(adrv9001_tx_dclk_n),
+      .OB(adrv9001_tx_dclk_p),
       .I(ssi_clk_out)
     );                    
     
   end else begin  
   
     OBUFDS ssi_clk_out_buf_i (
-      .O(adrv9001_tx_dclk_p),                     
-      .OB(adrv9001_tx_dclk_n),                  
+      .O(adrv9001_tx_dclk_p),
+      .OB(adrv9001_tx_dclk_n),
       .I(ssi_clk_out)
     );                 
     
-  end
-  
-  if( SWAP_DIFF_CLK_OUT == SWAP_DIFF_CLK_IN ) begin
-
-    /* Output clock buffer */
-    BUFGCE #(
-      .CE_TYPE ("SYNC"),
-      .IS_CE_INVERTED (1'b0),
-      .IS_I_INVERTED (1'b0)
-    ) 
-    dclk_out_buf_i (
-      .O (ssi_clk_out),
-      .CE (1'b1),
-      .I (ssi_clk_in)
-    );  
-  
-  end else begin  
-  
-    /* Output clock buffer */
-    BUFGCE #(
-      .CE_TYPE ("SYNC"),
-      .IS_CE_INVERTED (1'b0),
-      .IS_I_INVERTED (1'b1)
-    ) 
-    dclk_out_buf_i (
-      .O (ssi_clk_out),
-      .CE (1'b1),
-      .I (ssi_clk_in)
-    );    
-  
   end  
 
 endgenerate    
 
+
+    
 generate 
 
   if( ENABLE_OTX_AXIS == 1) begin    

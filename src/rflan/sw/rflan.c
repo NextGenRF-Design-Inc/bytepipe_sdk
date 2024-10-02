@@ -88,6 +88,7 @@ static adrv9001_t     RflanAdrv9001;
 static QueueHandle_t  RflanEvtQueue;
 static XIicPs         RflanIic1;
 static eeprom_t       RflanEeprom;
+static adrv9001_params_t   Adrv9001Params;
 
 static adi_adrv9001_GpioPin_e RflanRx1LnaEnablePin;
 static adi_adrv9001_GpioPin_e RflanRx2LnaEnablePin;
@@ -387,7 +388,10 @@ static int32_t Rflan_Initialize( void )
       .StateCallbackRef = NULL,
       .TxAttn = { 0, 0 },
       .TxBoost = { true, true },
-      .TxEnableMode = ADI_ADRV9001_SPI_MODE
+      .TxEnableMode = ADI_ADRV9001_PIN_MODE,
+      .Rx1RssiOffsetdB = 0,
+      .Rx2RssiOffsetdB = 0,
+      .Init = &initialize_init_8
   };
 
   /* Initialize ADRV9001 CLI */
@@ -418,17 +422,37 @@ static int32_t Rflan_Initialize( void )
     RflanVcTcxoDac = ADI_ADRV9001_AUXDAC3;
   }
 
-  /* Disable Rx1/Rx2 LNAs */
+  adrv9001_params_init_t Adrv9001ParamsInit = {
+      .Adrv9001 = &RflanAdrv9001,
+      .Rx1LnaEnablePin = RflanRx1LnaEnablePin,
+      .Rx2LnaEnablePin = RflanRx2LnaEnablePin,
+      .VcTcxoDac = RflanVcTcxoDac,
+      .VcTcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07
+  };
+  /* Init Adrv9001 Params */
+  if((status = Adrv9001Params_Initialize( &Adrv9001Params, &Adrv9001ParamsInit)) != 0 )
+    printf("Adrv9001Params_Initialize %s\r\n",StatusString(status));
+
+
+  Adrv9001_SetRxRssiOffset( &RflanAdrv9001, ADI_CHANNEL_1, -20 );
+  Adrv9001_SetRxRssiOffset( &RflanAdrv9001, ADI_CHANNEL_2, -20 );
+
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+
   Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
   Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
 
-  /* Configure VCTCXO DAC */
-  Adrv9001_SetEnableDac(&RflanAdrv9001, RflanVcTcxoDac, true );
-  Adrv9001_SetDacVoltage(&RflanAdrv9001, RflanVcTcxoDac, 0.9);
+  Adrv9001_SetDacEnable( &RflanAdrv9001, RflanVcTcxoDac, true );
+  Adrv9001_SetDacVoltage( &RflanAdrv9001, RflanVcTcxoDac, 0.9);
 
   /* Initialize ADRV9001 CLI */
-  if((status = Adrv9001Cli_Initialize( &Cli, &RflanAdrv9001 )) != 0)
+  if((status = Adrv9001Cli_Initialize( &Cli, &Adrv9001Params )) != 0)
     printf("Adrv9001Cli %s\r\n",StatusString(status));
+
+
 
 #ifdef RFLAN_STREAM_ENABLE
 

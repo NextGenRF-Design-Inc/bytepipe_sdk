@@ -107,8 +107,8 @@ static const char *StatusString( int32_t status )
     case Adrv9001Status_Busy:
       return "Adrv9001 Busy";
 
-    case Adrv9001Status_InvalidPib:
-      return "Adrv9001 Invalid PIB";
+//    case Adrv9001Status_InvalidPib:
+//      return "Adrv9001 Invalid PIB";
 
     case Adrv9001Status_SpiErr:
       return "Adrv9001 SPI Error";
