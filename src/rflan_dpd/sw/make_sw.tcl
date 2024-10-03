@@ -65,6 +65,11 @@ importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_pa
 importsources -name rpu -path $srcDir/axi_dma/sw -soft-link -target-path src/axi_dma
 importsources -name rpu -path $srcDir/adrv9001/sw -soft-link -target-path src/adrv9001
 
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_cli.c -soft-link -target-path /src/adrv9001/
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_cli.h -soft-link -target-path /src/adrv9001/
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_params.c -soft-link -target-path /src/adrv9001/
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_params.h -soft-link -target-path /src/adrv9001/
+
 
 # Configure RPU Project
 app config -name rpu define-compiler-symbols ADI_COMMON_VERBOSE
