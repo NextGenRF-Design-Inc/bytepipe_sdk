@@ -227,33 +227,11 @@ static int32_t Rflan_SetupScript( cli_t *cli, char *Filename )
 
 static int32_t RflanFs_Initialize( void )
 {
-  /*
-  if( f_mount(&FatFs, PRIMARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
-  {
-    printf("Primary File System Failed\r\n");
-
-    if( f_mount(&FatFs, SECONDARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK)
-    {
-      printf("Secondary File System Failed\r\n");
-      return RflanStatus_FileSystemErr;
-    }
-    else
-    {
-      printf("Using Secondary File System\r\n");
-    }
-
-    BasePath = SECONDARY_FILE_SYSTEM_BASE_PATH;
-  }
-  else
-  {
-    BasePath = PRIMARY_FILE_SYSTEM_BASE_PATH;
-  }
-  */
   int32_t status = RflanStatus_Success;
   
   if( f_mount(&FatFs, PRIMARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
   {
-	  status = RflanStatus_FileSystemError;
+	  status = RflanStatus_FileSystemErr;
     printf("eMMC Failed Initialization\r\n");
   }
   else
@@ -262,12 +240,12 @@ static int32_t RflanFs_Initialize( void )
     BasePath = PRIMARY_FILE_SYSTEM_BASE_PATH;
   }
 
-  if( f_mount(&SdFatFs, SECONDARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
+  if( f_mount(&FatFs, SECONDARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
   {
-  	status = RflanStatus_FileSystemError;
+  	status = RflanStatus_FileSystemErr;
     printf("SD Card Failed Initialization\r\n");
   }
-  else if( PrimaryFileSystem == NULL )
+  else
   {
     status = RflanStatus_Success;
     BasePath = SECONDARY_FILE_SYSTEM_BASE_PATH;
