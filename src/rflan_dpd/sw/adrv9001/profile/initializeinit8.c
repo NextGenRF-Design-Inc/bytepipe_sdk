@@ -13,7 +13,7 @@
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
-adi_adrv9001_Init_t initialize_init_7 = { 
+adi_adrv9001_Init_t initialize_init_8 = { 
 		.clocks = { 
 		.deviceClock_kHz = 38400, 
 		.clkPllVcoFreq_daHz = 884736000, 
@@ -1187,7 +1187,7 @@ adi_adrv9001_Init_t initialize_init_7 = {
 		.mcsMode = ADI_ADRV9001_MCSMODE_DISABLED, 
 		.mcsInterfaceType = ADI_ADRV9001_SSI_TYPE_DISABLE, 
 		.adcTypeMonitor = ADI_ADRV9001_ADC_HP, 
-		.pllLockTime_us = 750, 
+		.pllLockTime_us = 380, 
 		.pllPhaseSyncWait_us = 0, 
 		.pllModulus = { 
 		.modulus = { 8388593, 8388593, 8388593, 8388593, 8388593  }, 

@@ -13,7 +13,7 @@
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
-adi_adrv9001_GpioCtrlInitCfg_t initialize_gpioCtrlInitCfg_24 = { 
+adi_adrv9001_GpioCtrlInitCfg_t initialize_gpioCtrlInitCfg_25 = { 
 		.tx_ext_frontend_ctrl = { { 
 		.pin = ADI_ADRV9001_GPIO_UNASSIGNED, 
 		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
