@@ -15,12 +15,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.10.1*/
-/* Firmware: v0.22.27*/
-/* Profile Generator: v0.53.2.0*/
-/* Stream Generator Assembly: v0.7.10.0*/
-/* Transceiver Evaluation Software: v0.25.0*/
-/* ADRV9001 Plugin: v0.25.0*/
+/* Device Driver Client: v68.13.7*/
+/* Firmware: v0.22.30*/
+/* Profile Generator: v0.53.6.0*/
+/* Stream Generator Assembly: v0.7.11.0*/
+/* Transceiver Evaluation Software: v0.26.0*/
+/* ADRV9001 Plugin: v0.26.0*/
 
 #ifndef _INITIALIZE_H_
 #define _INITIALIZE_H_
@@ -42,15 +42,17 @@ extern "C" {
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
-extern adi_adrv9001_Init_t initialize_init_7;
-extern uint8_t initialize_binary_9[];
+extern adi_adrv9001_Init_t initialize_init_8;
 extern uint8_t initialize_binary_10[];
-extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_13[];
+extern uint8_t initialize_binary_11[];
 extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_14[];
 extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_15[];
 extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_16[];
-extern adi_adrv9001_TxAttenTableRow_t initialize_attenTableRows_17[];
-extern adi_adrv9001_GpioCtrlInitCfg_t initialize_gpioCtrlInitCfg_24;
+extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_17[];
+extern adi_adrv9001_TxAttenTableRow_t initialize_attenTableRows_18[];
+extern adi_adrv9001_GpioCtrlInitCfg_t initialize_gpioCtrlInitCfg_25;
+
+#define ADI_HANDLE_ERROR(error_code) if (0 != error_code) { return error_code; }
 
 int initialize(adi_adrv9001_Device_t * adrv9001Device_0);
 
