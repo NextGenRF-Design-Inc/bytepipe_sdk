@@ -227,6 +227,7 @@ static int32_t Rflan_SetupScript( cli_t *cli, char *Filename )
 
 static int32_t RflanFs_Initialize( void )
 {
+  /*
   if( f_mount(&FatFs, PRIMARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
   {
     printf("Primary File System Failed\r\n");
@@ -247,8 +248,32 @@ static int32_t RflanFs_Initialize( void )
   {
     BasePath = PRIMARY_FILE_SYSTEM_BASE_PATH;
   }
+  */
+  int32_t status = RflanStatus_Success;
+  
+  if( f_mount(&FatFs, PRIMARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
+  {
+	  status = RflanStatus_FileSystemError;
+    printf("eMMC Failed Initialization\r\n");
+  }
+  else
+  {
+    status = RflanStatus_Success;
+    BasePath = PRIMARY_FILE_SYSTEM_BASE_PATH;
+  }
 
-  return RflanStatus_Success;
+  if( f_mount(&SdFatFs, SECONDARY_FILE_SYSTEM_BASE_PATH, 1) != FR_OK )
+  {
+  	status = RflanStatus_FileSystemError;
+    printf("SD Card Failed Initialization\r\n");
+  }
+  else if( PrimaryFileSystem == NULL )
+  {
+    status = RflanStatus_Success;
+    BasePath = SECONDARY_FILE_SYSTEM_BASE_PATH;
+  }
+  
+  return status;
 }
 
 static void Rflan_Adrv9001StateCallback( void *CallbackRef, adi_adrv9001_ChannelState_e state, adi_common_Port_e port, adi_common_ChannelNumber_e channel )
