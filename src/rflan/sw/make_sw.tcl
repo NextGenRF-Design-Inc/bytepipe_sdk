@@ -91,6 +91,7 @@ app config -name rpu include-path $srcDir/rflan/sw
 app config -name rpu include-path $srcDir/rflan/sw/csl
 app config -name rpu include-path $srcDir/rflan/sw/lib
 app config -name rpu include-path $srcDir/rflan/sw/adrv9001/profile
+app config -name rpu include-path $srcDir/rflan/sw/adrv9001
 app config -name rpu include-path $srcDir/adrv9001/sw
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/jsmn/
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001

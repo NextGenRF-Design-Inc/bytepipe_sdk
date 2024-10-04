@@ -7,47 +7,37 @@ clear all; close all; clc;
 h = rflan();
 h.Open('COM16');
 
-%% Enable Stream
-
 % Select Transmit Port
 TxPort = h.Tx1;
 
 % Transmit burst or continous using cyclic flag
-cyclic = 1;
+cyclic = 0;
 
 % Stop Previous Streams
 h.RflanStreamStop(TxPort);
 
-% Set Tx Settings
-h.SetTxAttn(TxPort, 10);
+% Set Tx Output Power
+h.SetTxAttn(TxPort, 20);
 h.SetTxBoost(TxPort, 0);
 
 % Get Sample Rate 
 fs = h.GetSampleRate(TxPort);
 
 % Generate transmit tone as a factor of sample rate
-f_tone = fs/32;
-t = (0:4*fs/f_tone-1)'/fs;
-iq = 1/2 * (sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t));
+f_tone = fs/16;
+t = (0:8*fs/f_tone-1)'/fs;
+txiq = 1/2 * (sin(2*pi*f_tone*t)+1i*cos(2*pi*f_tone*t));
 
 % Load Transmit Buffer with signal
-h.RflanStreamBufPut(TxPort,0,iq);
+h.RflanStreamBufPut(TxPort,0,txiq);
 
 % Enable continuous transmit of the iq data
-h.RflanStreamStart(TxPort, cyclic, length(iq));
+h.RflanStreamStart(TxPort, cyclic, length(txiq));
 
-% Enable Transmitter
-h.Adrv9001ToRfEnabled( TxPort );
-
-% Get Carrier Frequency 
-fc = h.GetCarrierFrequency(TxPort) - f_tone;
-
-disp(['Tone Frequency = ' num2str(fc)]);
-
-figure();
-bins = length(iq)/2; 
+figure();    
+bins = length(txiq)/2; 
 h2 = spectrum.welch('Hamming',bins);
-spec = msspectrum(h2,iq,...
+spec = msspectrum(h2,txiq,...
         'Fs',fs,...
         'SpectrumType','twosided',...
         'CenterDC',true);    
@@ -62,21 +52,22 @@ title('Spectrum');
 xlabel('Frequency(MHz)');
 ylabel('Power (dBm)');
 subplot(2,2,2);
-plot(real(iq),imag(iq));
+plot(real(txiq),imag(txiq));
 xlabel('In-Phase');
 ylabel('Quadrature-Phase');
 title('Constillation');
 
 subplot(2,2,[3 4]);
-t = (1:length(iq))/(fs/1e6);
-plot(t,real(iq));
+t = (1:length(txiq))/(fs/1e6);
+plot(t,real(txiq));
 hold on;
-plot(t,imag(iq));
+plot(t,imag(txiq));
 xlabel('time(us)');
 ylabel('Magnitude');
 title('Time Domain');
 
-%% Disable Stream
 
-h.RflanStreamStop(TxPort);
+
+
+
 

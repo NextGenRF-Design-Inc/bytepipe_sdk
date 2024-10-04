@@ -7,7 +7,7 @@ SDK_SRCDIR := $(SRCDIR)
 all: clean profile sdk hdl
 
 hdl:
-	source $(SDK_SRCDIR)/include.sh; build_ip $(SRCDIR) $(PROJECT)
+	source $(PROJECT_DIR)/adrv9001.sh; package_hdl
   
 profile:
 	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \

@@ -1,11 +1,6 @@
 #ifndef SRC_ADRV9001_H_
 #define SRC_ADRV9001_H_
 /***************************************************************************//**
-*  \ingroup    RFLAN
-*  \defgroup   ADRV9001 ADRV9001 Interface Driver
-*  @{
-*******************************************************************************/
-/***************************************************************************//**
 *  \file       adrv9001.h
 *
 *  \details
@@ -49,7 +44,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
+#include "adi_adrv9001_rx_types.h"
+#include "adi_adrv9001_tx_types.h"
 #include "adi_adrv9001.h"
 #include "adi_adrv9001_error.h"
 #include "adi_adrv9001_radio_types.h"
@@ -61,11 +57,15 @@
 #include "adi_adrv9001_tx.h"
 #include "adi_adrv9001_rx.h"
 #include "adi_adrv9001_auxdac.h"
+#include "adi_adrv9001_auxadc.h"
+#include "adi_adrv9001_utilities.h"
 #include "adi_adrv9001_ssi.h"
-#include "adi_adrv9001_dpd.h"
 #include "adi_adrv9001_fh.h"
 #include "ff.h"
 #include "axi_adrv9001.h"
+#include "jsmn.h"
+#include "adi_adrv9001_profileutil.h"
+#include "adrv9001_Init_t_parser.h"
 
 #ifndef ADRV9001_STATUS_OFFSET
 #define ADRV9001_STATUS_OFFSET    (0)
@@ -78,6 +78,10 @@
 #define ADRV9001_MAX_HOP_TABLE_SIZE     (64)
 #define ADRV9001_HOP_TABLE_START_FREQ   (2800000000)
 #define ADRV9001_HOP_TABLE_STEP_FREQ    (40000000)
+
+#define ADRV9001_TEST_MODE_PATTERN        (0xABCDABCD)
+
+extern adi_adrv9001_Init_t initialize_init_8;
 
 /**
 * \brief Code indicated status of request
@@ -98,7 +102,7 @@ typedef enum
   Adrv9001Status_GpioErr              = (ADRV9001_STATUS_OFFSET - 11),
   Adrv9001Status_LogErr               = (ADRV9001_STATUS_OFFSET - 12),
   Adrv9001Status_Busy                 = (ADRV9001_STATUS_OFFSET - 13),
-  Adrv9001Status_InvalidPib           = (ADRV9001_STATUS_OFFSET - 14),
+  Adrv9001Status_RxGainTableErr       = (ADRV9001_STATUS_OFFSET - 14),
   Adrv9001Status_SpiErr               = (ADRV9001_STATUS_OFFSET - 15),
   Adrv9001Status_InvalidPaEnable      = (ADRV9001_STATUS_OFFSET - 16),
   Adrv9001Status_SsiSweepErr          = (ADRV9001_STATUS_OFFSET - 17),
@@ -121,6 +125,25 @@ typedef enum
   Adrv9001Status_PfirErr              = (ADRV9001_STATUS_OFFSET - 34),
   Adrv9001Status_MemoryErr            = (ADRV9001_STATUS_OFFSET - 35),
   Adrv9001Status_InvalidHopFreq       = (ADRV9001_STATUS_OFFSET - 36),
+  Adrv9001Status_AdcErr               = (ADRV9001_STATUS_OFFSET - 37),
+  Adrv9001Status_FileSystemErr        = (ADRV9001_STATUS_OFFSET - 38),
+  Adrv9001Status_InitAnalogErr        = (ADRV9001_STATUS_OFFSET - 39),
+  Adrv9001Status_StreamImageWriteErr  = (ADRV9001_STATUS_OFFSET - 40),
+  Adrv9001Status_ArmImageWriteErr     = (ADRV9001_STATUS_OFFSET - 41),
+  Adrv9001Status_ProfileWriteErr      = (ADRV9001_STATUS_OFFSET - 42),
+  Adrv9001Status_PowerMgmtErr         = (ADRV9001_STATUS_OFFSET - 43),
+  Adrv9001Status_ArmErr               = (ADRV9001_STATUS_OFFSET - 44),
+  Adrv9001Status_PllErr               = (ADRV9001_STATUS_OFFSET - 45),
+  Adrv9001Status_PathDelayErr         = (ADRV9001_STATUS_OFFSET - 46),
+  Adrv9001Status_SlewRateLimiterErr   = (ADRV9001_STATUS_OFFSET - 47),
+  Adrv9001Status_InitCalsErr          = (ADRV9001_STATUS_OFFSET - 48),
+  Adrv9001Status_FreqHopErr           = (ADRV9001_STATUS_OFFSET - 49),
+  Adrv9001Status_AgcErr               = (ADRV9001_STATUS_OFFSET - 50),
+  Adrv9001Status_LoidErr              = (ADRV9001_STATUS_OFFSET - 51),
+  Adrv9001Status_BbdcErr              = (ADRV9001_STATUS_OFFSET - 52),
+  Adrv9001Status_TrackingCalsErr      = (ADRV9001_STATUS_OFFSET - 53),
+  Adrv9001Status_LoopBackErr          = (ADRV9001_STATUS_OFFSET - 54),
+  Adrv9001Status_LogPathTooLong       = (ADRV9001_STATUS_OFFSET - 55),
 
 } adrv9001_status_t;
 
@@ -140,6 +163,42 @@ typedef void (*adrv9001_rf_state_cb_t)( void *CallbackRef, adi_adrv9001_ChannelS
 
 typedef void (*adrv9001_hop_irq_cb_t)( void *CallbackRef );
 
+typedef struct {
+  adi_adrv9001_Init_t                      *Init;
+  uint8_t                                  *StreamImageBuf;
+  adi_adrv9001_RxGainTableRow_t            *Rx1GainTable;
+  adi_adrv9001_RxGainTableRow_t            *Rx2GainTable;
+  adi_adrv9001_RxGainTableRow_t            *oRx1GainTable;
+  adi_adrv9001_RxGainTableRow_t            *oRx2GainTable;
+  adi_adrv9001_TxAttenTableRow_t           *TxAttnTable;
+  adi_adrv9001_LoGenOptimization_e          Rx1LoGenOptimization;
+  adi_adrv9001_LoGenOptimization_e          Rx2LoGenOptimization;
+  adi_adrv9001_LoGenOptimization_e          Tx1LoGenOptimization;
+  adi_adrv9001_LoGenOptimization_e          Tx2LoGenOptimization;
+  uint64_t                                  Rx1CarrierFreqHz;
+  uint64_t                                  Rx2CarrierFreqHz;
+  uint64_t                                  Tx1CarrierFreqHz;
+  uint64_t                                  Tx2CarrierFreqHz;
+  int32_t                                   Rx1IfFreqHz;
+  int32_t                                   Rx2IfFreqHz;
+  int32_t                                   Tx1IfFreqHz;
+  int32_t                                   Tx2IfFreqHz;
+  adi_adrv9001_PllCalibration_e             Lo1PllCalibration;
+  adi_adrv9001_PllPower_e                   Lo1PllPower;
+  adi_adrv9001_PllCalibration_e             Lo2PllCalibration;
+  adi_adrv9001_PllPower_e                   Lo2PllPower;
+  bool                                      Tx1Boost;
+  bool                                      Tx2Boost;
+  adi_adrv9001_GainControlCfg_t            *Rx1Agc;
+  adi_adrv9001_GainControlCfg_t            *Rx2Agc;
+  adi_adrv9001_RxGainControlMode_e          Rx1AgcCtrlMode;
+  adi_adrv9001_RxGainControlMode_e          Rx2AgcCtrlMode;
+  adi_adrv9001_RxGainControlPinCfg_t        Rx1AgcPinMode;
+  adi_adrv9001_RxGainControlPinCfg_t        Rx2AgcPinMode;
+  adi_adrv9001_TxAttenuationPinControlCfg_t Tx1AttnPinMode;
+  adi_adrv9001_TxAttenuationPinControlCfg_t Tx2AttnPinMode;
+}adrv9001_profile_t;
+
 /**
 ** SSI Delay
 */
@@ -149,8 +208,6 @@ typedef struct {
   uint32_t            Idata  : 8;
   uint32_t            Qdata  : 8;
 }adrv9001_ssi_port_delay_t;
-
-extern adi_adrv9001_Init_t initialize_init_7;
 
 typedef struct {
   adi_adrv9001_Device_t	                Device;            ///< ADI ADRV9001 Instance
@@ -173,11 +230,21 @@ typedef struct {
   bool                                  Tx2SsiSweepStatus;
   bool                                  Tx1ToRx1Loopback;
   bool                                  Tx2ToRx2Loopback;
+  bool                                  Rx1ToTx1Loopback;
+  bool                                  Rx2ToTx2Loopback;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
   adi_adrv9001_FhHopFrame_t            *HopTable;
   uint8_t                               HopTableSize;
+  adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
+  adi_adrv9001_ChannelEnableMode_e      RxEnableMode;
+  float                                 Rx1RssiOffsetdB;
+  float                                 Rx2RssiOffsetdB;
+  adi_adrv9001_SsiTestModeData_e        Rx1TestMode;
+  adi_adrv9001_SsiTestModeData_e        Rx2TestMode;
+  adi_adrv9001_SsiTestModeData_e        Tx1TestMode;
+  adi_adrv9001_SsiTestModeData_e        Tx2TestMode;
 }adrv9001_t;
 
 typedef struct {
@@ -198,12 +265,19 @@ typedef struct {
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
   uint32_t                              AxiClockFreqHz;
+  float                                 Rx1RssiOffsetdB;
+  float                                 Rx2RssiOffsetdB;
+  adi_adrv9001_Init_t                  *Init;
 }adrv9001_init_t;
 
-int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance );
+void   *Adrv9001_Calloc                 ( int count, int size );
+int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance, adrv9001_profile_t *Profile  );
+int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
 int32_t Adrv9001_ClearError             ( adrv9001_t *Instance );
-
+void    Adrv9001_RegisterRadioStateCallback( adrv9001_t *Instance, adrv9001_rf_state_cb_t Callback, void *CallbackRef );
+int32_t Adrv9001_GetLogPath             (adrv9001_t *Instance, char* LogPath);
+int32_t Adrv9001_SetLogPath             (adrv9001_t *Instance, char* LogPath);
 bool    Adrv9001_IsPortEnabled          ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
 int32_t Adrv9001_SetEnableMode          ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_ChannelEnableMode_e mode );
 int32_t Adrv9001_GetEnableMode          ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_ChannelEnableMode_e *mode );
@@ -223,12 +297,20 @@ int32_t Adrv9001_GetSsiClockDelay       ( adrv9001_t *Instance, adi_common_Port_
 int32_t Adrv9001_GetSsiDataDelay        ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint16_t *Value );
 int32_t Adrv9001_GetSsiStatus           ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, bool *Value );
 
+int32_t Adrv9001_SetTxTestMode          ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode );
+int32_t Adrv9001_GetTxTestMode          ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e *testMode );
 int32_t Adrv9001_TxTestModeCheck        ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode, uint32_t fixedPattern );
+int32_t Adrv9001_GetRxTestMode          ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e *testMode );
+int32_t Adrv9001_SetRxTestMode          ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_SsiTestModeData_e testMode );
 
-int32_t Adrv9001_SetEnableDac           ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable );
-int32_t Adrv9001_GetEnableDac           ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool *Enable );
+int32_t Adrv9001_SetDacEnable           ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool Enable );
+int32_t Adrv9001_GetDacEnable           ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Id, bool *Enable );
 int32_t Adrv9001_SetDacVoltage          ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Channel, float Voltage );
 int32_t Adrv9001_GetDacVoltage          ( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Channel, float *Voltage );
+
+int32_t Adrv9001_GetAdcVoltage          ( adrv9001_t *Instance, adi_adrv9001_AuxAdc_e Channel, float *Value );
+int32_t Adrv9001_GetAdcEnable           ( adrv9001_t *Instance, adi_adrv9001_AuxAdc_e Channel, bool *Value );
+int32_t Adrv9001_SetAdcEnable           ( adrv9001_t *Instance, adi_adrv9001_AuxAdc_e Channel, bool Value );
 
 int32_t Adrv9001_LoadHopTable           ( adrv9001_t *Instance, uint8_t size );
 int32_t Adrv9001_SetHopTableFrequency   ( adrv9001_t *Instance, uint8_t index, uint64_t Freq );
@@ -242,19 +324,28 @@ int32_t Adrv9001_SetTxAttn              ( adrv9001_t *Instance, adi_common_Chann
 int32_t Adrv9001_GetTxAttn              ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value );
 int32_t Adrv9001_SetTxBoost             ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value );
 int32_t Adrv9001_GetTxBoost             ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value );
+
 int32_t Adrv9001_GetSampleRate          ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint32_t *Value );
+
 int32_t Adrv9001_SetCarrierFrequency    ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint64_t FreqHz );
 int32_t Adrv9001_GetCarrierFrequency    ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint64_t *FreqHz );
+
 int32_t Adrv9001_LoadRxChannelFilter    ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t *Coeff );
 
+int32_t Adrv9001_SetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value);
+int32_t Adrv9001_GetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value);
 int32_t Adrv9001_SetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value );
 int32_t Adrv9001_GetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value );
 
 int32_t Adrv9001_GetRxRssi              ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value );
 int32_t Adrv9001_GetRxCurGainIndex      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value );
 int32_t Adrv9001_SetRxCurGainIndex      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t Value );
-int32_t Adrv9001_SetRxGainMode          ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e Value );
-int32_t Adrv9001_GetRxGainMode          ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e *Value );
+int32_t Adrv9001_GetRxGainTableRow      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t TableIndex, adi_adrv9001_RxGainTableRow_t *Value );
+int32_t Adrv9001_GetRxGainTableFeAttn   ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t TableIndex, float *Value );
+int32_t Adrv9001_GetRxGainTableDigAttn  ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t TableIndex, float *Value );
+int32_t Adrv9001_GetRxGainTableExtCtrl  ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t TableIndex, uint8_t *Value );
+int32_t Adrv9001_SetRxRssiOffset        ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float Value );
+int32_t Adrv9001_GetRxRssiOffset        ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value );
 
 int32_t Adrv9001_GetTemperature         ( adrv9001_t *Instance, int16_t *Value );
 int32_t Adrv9001_GetApiVersion          ( adrv9001_t *Instance, adi_common_ApiVersion_t *Value );
@@ -262,11 +353,14 @@ int32_t Adrv9001_GetFirmwareVersion     ( adrv9001_t *Instance, adi_adrv9001_Arm
 int32_t Adrv9001_GetSiliconVersion      ( adrv9001_t *Instance, adi_adrv9001_SiliconVersion_t *Value );
 
 int32_t Adrv9001_GetTxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t *Value );
-int32_t Adrv9001_SetTxDataSrc           (adrv9001_t *Instance,  adi_common_ChannelNumber_e Channel, adrv9001_tx_data_src_t Value );
+int32_t Adrv9001_SetTxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t Value );
 
 int32_t Adrv9001_SetDgitalGpioDirection ( adrv9001_t *Instance, adi_adrv9001_GpioPinCrumbSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir );
 int32_t Adrv9001_SetAnalogGpioDirection ( adrv9001_t *Instance, adi_adrv9001_GpioAnalogPinNibbleSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir );
+int32_t Adrv9001_SetGpioDirection       ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinDirection_e Dir );
+int32_t Adrv9001_GetGpioDirection       ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinDirection_e *Dir );
 int32_t Adrv9001_SetGpioPinLevel        ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e Level );
 int32_t Adrv9001_GetGpioPinLevel        ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e *Level );
+
 
 #endif

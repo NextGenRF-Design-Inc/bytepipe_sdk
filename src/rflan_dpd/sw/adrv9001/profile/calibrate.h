@@ -14,12 +14,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.10.1*/
-/* Firmware: v0.22.27*/
-/* Profile Generator: v0.53.2.0*/
-/* Stream Generator Assembly: v0.7.10.0*/
-/* Transceiver Evaluation Software: v0.25.0*/
-/* ADRV9001 Plugin: v0.25.0*/
+/* Device Driver Client: v68.13.7*/
+/* Firmware: v0.22.30*/
+/* Profile Generator: v0.53.6.0*/
+/* Stream Generator Assembly: v0.7.11.0*/
+/* Transceiver Evaluation Software: v0.26.0*/
+/* ADRV9001 Plugin: v0.26.0*/
 
 #ifndef _CALIBRATE_H_
 #define _CALIBRATE_H_
@@ -32,6 +32,8 @@ extern "C" {
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
+
+#define ADI_HANDLE_ERROR(error_code) if (0 != error_code) { return error_code; }
 
 int calibrate(adi_adrv9001_Device_t * adrv9001Device_0);
 

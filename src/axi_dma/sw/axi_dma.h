@@ -35,7 +35,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 #ifndef AXI_DMA_H_
 #define AXI_DMA_H_
 
@@ -43,25 +43,49 @@
 #include <stdbool.h>
 #include "xscugic.h"
 
-#define AXI_DMAC_REG_IRQ_MASK           0x80
-#define AXI_DMAC_REG_IRQ_PENDING        0x84
-#define AXI_DMAC_IRQ_SOT                BIT(0)
-#define AXI_DMAC_IRQ_EOT                BIT(1)
+#define BIT(n)          (1 << (n))
 
-#define AXI_DMAC_REG_CTRL               0x400
-#define AXI_DMAC_CTRL_ENABLE            BIT(0)
-#define AXI_DMAC_CTRL_PAUSE             BIT(1)
+#define AXI_DMAC_REG_SIZE_MASK              0x10
 
-#define AXI_DMAC_REG_TRANSFER_ID        0x404
-#define AXI_DMAC_REG_START_TRANSFER     0x408
-#define AXI_DMAC_REG_FLAGS              0x40c
-#define AXI_DMAC_REG_DEST_ADDRESS       0x410
-#define AXI_DMAC_REG_SRC_ADDRESS        0x414
-#define AXI_DMAC_REG_X_LENGTH           0x418
-#define AXI_DMAC_REG_Y_LENGTH           0x41c
-#define AXI_DMAC_REG_DEST_STRIDE        0x420
-#define AXI_DMAC_REG_SRC_STRIDE         0x424
-#define AXI_DMAC_REG_TRANSFER_DONE      0x428
+#define AXI_DMAC_REG_IRQ_MASK               0x80
+#define AXI_DMAC_REG_IRQ_PENDING            0x84
+#define AXI_DMAC_IRQ_SOT                    BIT(0)
+#define AXI_DMAC_IRQ_EOT                    BIT(1)
+
+#define AXI_DMAC_REG_CTRL                   0x400
+#define AXI_DMAC_CTRL_ENABLE                BIT(0)
+#define AXI_DMAC_CTRL_PAUSE                 BIT(1)
+
+#define AXI_DMAC_REG_TRANSFER_ID            0x404
+#define AXI_DMAC_REG_START_TRANSFER         0x408
+
+#define AXI_DMAC_REG_FLAGS                  0x40c
+#define AXI_DMAC_REG_FLAGS_CYCLIC           BIT(0)
+#define AXI_DMAC_REG_FLAGS_TLAST            BIT(1)
+#define AXI_DMAC_REG_FLAGS_PARTIAL          BIT(2)
+
+
+
+#define AXI_DMAC_REG_DEST_ADDRESS           0x410
+#define AXI_DMAC_REG_SRC_ADDRESS            0x414
+#define AXI_DMAC_REG_X_LENGTH               0x418
+#define AXI_DMAC_REG_Y_LENGTH               0x41c
+#define AXI_DMAC_REG_DEST_STRIDE            0x420
+#define AXI_DMAC_REG_SRC_STRIDE             0x424
+#define AXI_DMAC_REG_TRANSFER_DONE          0x428
+#define AXI_DMAC_REG_TRANSFER_DONE_PARTIAL  BIT(31)
+
+#define AXI_DMAC_REG_PARTIAL_TRANSFER_LEN   0x44C
+#define AXI_DMAC_REG_PARTIAL_TRANSFER_ID    0x450
+
+#define AXI_DMA_STATUS_OFFSET              (-600)
+
+typedef enum
+{
+  AxiDmaStatus_Success             = (0),
+  AxiDmaStatus_InvalidParameter    = (AXI_DMA_STATUS_OFFSET - 1),
+  AxiDmaStatus_RegErr              = (AXI_DMA_STATUS_OFFSET - 2),
+} axi_dma_status_t;
 
 
 typedef enum {
@@ -79,13 +103,6 @@ typedef enum  {
   AxiDmaFlags_Last            = 2
 }axi_dma_flags_t;
 
-typedef struct {
-  uint32_t                      Size;
-  uint32_t                      Address;
-  uint32_t                      SizeDone;
-  volatile bool                 TransferDone;
-}axi_dma_transfer_t;
-
 typedef void (*axi_dma_callback_t)( void *Instance, axi_dma_evt_type_t evt );
 
 typedef struct {
@@ -93,10 +110,12 @@ typedef struct {
   void                         *CallbackRef;
   uint32_t                      Base;
   axi_dma_direction_t           Direction;
+  uint8_t                       SampleSize;
+  uint32_t                      SampleCnt;
+  uint32_t                      SampleRate;
   uint32_t                      Flags;
-  uint32_t                      TransferMaxSize;
-  volatile axi_dma_transfer_t   BigTransfer;
-  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
+  uint32_t                      Addr;
+  XScuGic                      *IrqInstance;
 }axi_dma_t;
 
 typedef struct {
@@ -105,14 +124,28 @@ typedef struct {
   uint32_t                      Base;
   uint32_t                      IrqId;
   axi_dma_direction_t           Direction;
+  uint8_t                       SampleSize;
+  uint32_t                      SampleCnt;
+  uint32_t                      SampleRate;
   uint32_t                      Flags;
-  XScuGic                    *IrqInstance;           ///< Processor Interrupt Controller Instance
+  uint32_t                      Addr;
+  XScuGic                      *IrqInstance;
 }axi_dma_init_t;
 
-int32_t AxiDma_Stop           (axi_dma_t *Instance );
-int32_t AxiDma_StartTransfer  (axi_dma_t *Instance, uint32_t address, uint32_t size, bool Cyclic);
-int32_t AxiDma_IsTransferReady(axi_dma_t *Instance, bool *rdy);
-int32_t AxiDma_Transfer       (axi_dma_t *Instance, uint32_t address, uint32_t size);
-int32_t AxiDma_Initialize     (axi_dma_t *Instance, axi_dma_init_t *Init);
+int32_t AxiDma_GetEnabled( axi_dma_t *Instance, bool *Value );
+int32_t AxiDma_GetTransferCnt( axi_dma_t *Instance, uint32_t *Value );
+int32_t AxiDma_Stop( axi_dma_t *Instance );
+int32_t AxiDma_SetCyclic(axi_dma_t *Instance, bool Value );
+int32_t AxiDma_SetAddr(axi_dma_t *Instance, uint32_t Value );
+int32_t AxiDma_SetSampleCnt(axi_dma_t *Instance, uint32_t Value );
+int32_t AxiDma_GetCyclic(axi_dma_t *Instance, bool *Value );
+int32_t AxiDma_GetAddr(axi_dma_t *Instance, uint32_t *Value );
+int32_t AxiDma_GetSampleCnt(axi_dma_t *Instance, uint32_t *Value );
+int32_t AxiDma_SetSampleRate(axi_dma_t *Instance, uint32_t Value );
+int32_t AxiDma_GetSampleRate(axi_dma_t *Instance, uint32_t *Value );
+int32_t AxiDma_GetSampleSize(axi_dma_t *Instance, uint8_t *Value );
+int32_t AxiDma_StartTransfer( axi_dma_t *Instance );
+int32_t AxiDma_Initialize(axi_dma_t *Instance, axi_dma_init_t *Init);
+int32_t AxiDma_GetDirection(axi_dma_t *Instance, axi_dma_direction_t *Value );
 
 #endif

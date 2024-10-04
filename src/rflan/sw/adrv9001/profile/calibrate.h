@@ -14,12 +14,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.10.1*/
-/* Firmware: v0.22.27*/
-/* Profile Generator: v0.53.2.0*/
-/* Stream Generator Assembly: v0.7.10.0*/
-/* Transceiver Evaluation Software: v0.25.0*/
-/* ADRV9001 Plugin: v0.25.0*/
+/* Device Driver Client: v68.13.7*/
+/* Firmware: v0.22.30*/
+/* Profile Generator: v0.53.6.0*/
+/* Stream Generator Assembly: v0.7.11.0*/
+/* Transceiver Evaluation Software: v0.26.0*/
+/* ADRV9001 Plugin: v0.26.0*/
 
 #ifndef _CALIBRATE_H_
 #define _CALIBRATE_H_
@@ -27,6 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_rx.h"
 #include "adi_adrv9001_rx_gaincontrol.h"
@@ -36,6 +37,8 @@ extern "C" {
 #include <stdlib.h>
 extern adi_adrv9001_RxGainTableRow_t calibrate_gainTableRows_8[];
 extern adi_adrv9001_RxGainTableRow_t calibrate_gainTableRows_10[];
+
+#define ADI_HANDLE_ERROR(error_code) if (0 != error_code) { return error_code; }
 
 int calibrate(adi_adrv9001_Device_t * adrv9001Device_0);
 

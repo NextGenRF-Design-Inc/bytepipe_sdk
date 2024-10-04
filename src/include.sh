@@ -166,7 +166,7 @@ build_ip()
 	echo "$(printf '\033')[0;33mBuilding $project Programmable Logic $(printf '\033')[0m"
 	    
   # Build with Vivado    
-  vivado -mode batch -nojournal -quiet -source $scriptDir/make_ip.tcl -notrace -tclargs $project $srcDir/$project/hdl
+  vivado -mode batch -nojournal -quiet -source $scriptDir/make_ip.tcl -notrace -tclargs $project $srcDir/$project/hdl $wrkDir
   
 }
 

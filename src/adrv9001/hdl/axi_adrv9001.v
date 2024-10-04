@@ -1,21 +1,42 @@
 `timescale 1ns / 1ps
-// ***************************************************************************
-// ***************************************************************************
-//        Copyright 2020 (c) NextGen RF Design. All rights reserved.
-//
-// This core is distributed WITHOUT ANY WARRANTY; without even the implied 
-// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//
-// Name:          adrv9002.v
-// 
-// Description: 
-//
-// This module instantiates a receive channel for interfacing to the 
-// ADRV9002.  
-//
-// ***************************************************************************
-// ***************************************************************************
-
+/***************************************************************************//**
+ *  \file       axi_adrv9001.v
+ *
+ *  \details
+ *
+ *  \copyright
+ *
+ *  Copyright 2021(c) NextGen RF Design, Inc.  
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   - Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *   - The use of this software may or may not infringe the patent rights of one
+ *     or more patent holders.  This license does not release you from the
+ *     requirement that you obtain separate licenses from these patent holders
+ *     to use this software.
+ *   - Use of the software either in source or binary form, must be run on or
+ *     directly connected to a NextGen RF Design, Inc. product.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY NEXTGEN RF DESIGN "AS IS" AND ANY EXPRESS OR
+ *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ *  EVENT SHALL NEXTGEN RF DESIGN BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************/
+ 
 module axi_adrv9001#(
   parameter DEFAULT_DGPIO_DIR       = 16'hffff,
   parameter SWAP_DIFF_TX1_IDATA     = 1,        
@@ -52,7 +73,9 @@ module axi_adrv9001#(
   parameter ENABLE_HOPPING_SUPPORT  = 0,
   parameter ENABLE_HOPPING_DEBUG    = 0,
   parameter ENABLE_SPI_DEBUG        = 0,
-  parameter ENABLE_DEV_CLOCK_OUT    = 0
+  parameter ENABLE_DEV_CLOCK_OUT    = 0,
+  parameter TX1_REF_CLK_USE_RX1     = 0,
+  parameter TX2_REF_CLK_USE_RX2     = 0
   )(
   input  wire           dev_clk_in,
   output wire           dev_clk,
@@ -808,14 +831,26 @@ adrv9001_regs#(
     
 /**** Rx ***************************************************************************************/
     
+wire rx1_ssi_clk_div;
+wire rx1_ssi_clk;
+    
+adrv9001_clkin#(
+  .SWAP_DIFF_REF_CLK( SWAP_DIFF_RX1_DCLK )
+) adrv9001_rx1_clkin (   
+  .ref_clk_p(rx1_dclk_p),       
+  .ref_clk_n(rx1_dclk_n), 
+  .clk_out(rx1_ssi_clk),
+  .clk_out_div(rx1_ssi_clk_div)
+);
+    
 adrv9001_rx#(
-    .SWAP_DIFF_CLK(SWAP_DIFF_RX1_DCLK),
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX1_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX1_STROBE)
 ) adrv9001_rx1_inst (
-    .adrv9001_rx_clk_p(rx1_dclk_p),
-    .adrv9001_rx_clk_n(rx1_dclk_n), 
+    .ssi_clk(rx1_ssi_clk),
+    .ssi_clk_div(rx1_ssi_clk_div), 
+    
     .adrv9001_rx_strobe_p(rx1_strobe_p),
     .adrv9001_rx_strobe_n(rx1_strobe_n),
     .adrv9001_rx_idata_p(rx1_idata_p),
@@ -835,14 +870,26 @@ adrv9001_rx#(
     .m_axis_aclk(rx1_axis_aclk)
 );
     
+wire rx2_ssi_clk_div;
+wire rx2_ssi_clk;
+    
+adrv9001_clkin#(
+  .SWAP_DIFF_REF_CLK( SWAP_DIFF_RX2_DCLK )
+) adrv9001_rx2_clkin (   
+  .ref_clk_p(rx2_dclk_p),       
+  .ref_clk_n(rx2_dclk_n), 
+  .clk_out(rx2_ssi_clk),
+  .clk_out_div(rx2_ssi_clk_div)
+);
+    
 adrv9001_rx #(
-    .SWAP_DIFF_CLK(SWAP_DIFF_RX2_DCLK),
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX2_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX2_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX2_STROBE)
 ) adrv9001_rx2_inst (
-    .adrv9001_rx_clk_p(rx2_dclk_p),
-    .adrv9001_rx_clk_n(rx2_dclk_n), 
+    .ssi_clk(rx1_ssi_clk),
+    .ssi_clk_div(rx1_ssi_clk_div), 
+    
     .adrv9001_rx_strobe_p(rx2_strobe_p),
     .adrv9001_rx_strobe_n(rx2_strobe_n),
     .adrv9001_rx_idata_p(rx2_idata_p),
@@ -864,16 +911,40 @@ adrv9001_rx #(
 
 /**** Tx ***************************************************************************************/
 
+wire tx1_ssi_clk;
+wire tx1_ssi_clk_div;
+
+generate
+
+  if( TX1_REF_CLK_USE_RX1 ) begin
+    
+    assign tx1_ssi_clk = rx1_ssi_clk;
+    assign tx1_ssi_clk_div = rx1_ssi_clk_div;  
+  
+  end else begin
+  
+    adrv9001_clkin#(
+      .SWAP_DIFF_REF_CLK( SWAP_DIFF_TX1_DCLK_IN )
+    ) adrv9001_tx1_clkin (   
+     .ref_clk_p(tx1_ref_clk_p),       
+     .ref_clk_n(tx1_ref_clk_n), 
+     .clk_out(tx1_ssi_clk),
+     .clk_out_div(tx1_ssi_clk_div)
+    );    
+   
+  end
+endgenerate
+
 adrv9001_tx #(
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX1_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_TX1_STROBE),
     .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX1_DCLK_OUT),
-    .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX1_DCLK_IN),
     .ENABLE_OTX_AXIS(ENABLE_OTX1_AXIS)
 ) adrv9001_tx1_inst (
-    .adrv9001_tx_refclk_p(tx1_ref_clk_p),
-    .adrv9001_tx_refclk_n(tx1_ref_clk_n),
+    .ssi_clk(tx1_ssi_clk),
+    .ssi_clk_div(tx1_ssi_clk_div), 
+    
     .adrv9001_tx_dclk_p(tx1_dclk_p),
     .adrv9001_tx_dclk_n(tx1_dclk_n),
     .adrv9001_tx_strobe_p(tx1_strobe_p),
@@ -897,16 +968,40 @@ adrv9001_tx #(
     .s_axis_aclk(tx1_axis_aclk)   
 );
     
+wire tx2_ssi_clk;
+wire tx2_ssi_clk_div;
+
+generate
+
+  if( TX2_REF_CLK_USE_RX2 ) begin
+    
+    assign tx2_ssi_clk = rx2_ssi_clk;
+    assign tx2_ssi_clk_div = rx2_ssi_clk_div;  
+  
+  end else begin
+  
+    adrv9001_clkin#(
+      .SWAP_DIFF_REF_CLK( SWAP_DIFF_TX2_DCLK_IN )
+    ) adrv9001_tx2_clkin (   
+     .ref_clk_p(tx2_ref_clk_p),       
+     .ref_clk_n(tx2_ref_clk_n), 
+     .clk_out(tx2_ssi_clk),
+     .clk_out_div(tx2_ssi_clk_div)
+    );    
+   
+  end
+endgenerate
+    
 adrv9001_tx #(  
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX2_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX2_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_TX2_STROBE),
-    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX2_DCLK_OUT), 
-    .SWAP_DIFF_CLK_IN(SWAP_DIFF_TX2_DCLK_IN),
+    .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX2_DCLK_OUT),
     .ENABLE_OTX_AXIS(ENABLE_OTX2_AXIS)
 ) adrv9001_tx2_inst (
-    .adrv9001_tx_refclk_p(tx2_ref_clk_p),
-    .adrv9001_tx_refclk_n(tx2_ref_clk_n),
+    .ssi_clk(tx1_ssi_clk),
+    .ssi_clk_div(tx1_ssi_clk_div), 
+    
     .adrv9001_tx_dclk_p(tx2_dclk_p),
     .adrv9001_tx_dclk_n(tx2_dclk_n),    
     .adrv9001_tx_strobe_p(tx2_strobe_p),

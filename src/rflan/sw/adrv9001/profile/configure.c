@@ -15,12 +15,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.10.1*/
-/* Firmware: v0.22.27*/
-/* Profile Generator: v0.53.2.0*/
-/* Stream Generator Assembly: v0.7.10.0*/
-/* Transceiver Evaluation Software: v0.25.0*/
-/* ADRV9001 Plugin: v0.25.0*/
+/* Device Driver Client: v68.13.7*/
+/* Firmware: v0.22.30*/
+/* Profile Generator: v0.53.6.0*/
+/* Stream Generator Assembly: v0.7.11.0*/
+/* Transceiver Evaluation Software: v0.26.0*/
+/* ADRV9001 Plugin: v0.26.0*/
 
 #include "configure.h"
 
@@ -28,35 +28,46 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_RxrfdcLoidCfg_t loidConfig_1 = { 
 		.loidEnable = false, 
 		.loidThreshold_negdBFS = 61 };
 	error_code = adi_adrv9001_Rx_Loid_Configure(adrv9001Device_0, ADI_CHANNEL_1, &loidConfig_1);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Rx_Loid_Configure(adrv9001Device_0, ADI_CHANNEL_2, &loidConfig_1);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_1, &configure_agcCfg_3);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_2, &configure_agcCfg_3);
+	ADI_HANDLE_ERROR(error_code);
 
 	uint32_t gpIntMask_5 = 0;
 	error_code = adi_adrv9001_gpio_GpIntMask_Get(adrv9001Device_0, &gpIntMask_5);
 
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_gpio_GpIntMask_Set(adrv9001Device_0, 16);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_AttenuationMode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_TX_ATTENUATION_CONTROL_MODE_SPI);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_Attenuation_Set(adrv9001Device_0, ADI_CHANNEL_1, 10000);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_AttenuationMode_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_TX_ATTENUATION_CONTROL_MODE_SPI);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_Attenuation_Set(adrv9001Device_0, ADI_CHANNEL_2, 10000);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_RxInterfaceGainCtrl_t rxInterfaceGainConfig_11 = { 
 		.updateInstance = ADI_ADRV9001_RX_INTERFACE_GAIN_UPDATE_TIMING_NOW, 
-		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_AUTOMATIC, 
+		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_MANUAL, 
 		.gain = ADI_ADRV9001_RX_INTERFACE_GAIN_0_DB, 
 		.rssiDuration = 255, 
 		.rssiMovingAverageDuration = 10, 
@@ -64,15 +75,19 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.signalPAR = 15, 
 		.enableFastAttack = false };
 	error_code = adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_1, &rxInterfaceGainConfig_11);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_2, &rxInterfaceGainConfig_11);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t powerSavingCfg_13 = { 
 		.channelDisabledPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED, 
 		.gpioPinPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED };
 	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_1, &powerSavingCfg_13);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_2, &powerSavingCfg_13);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_ChannelEnablementDelays_t delays_15 = { 
 		.riseToOnDelay = 139715, 
@@ -81,8 +96,10 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.guardDelay = 0, 
 		.holdDelay = 373 };
 	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &delays_15);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &delays_15);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_ChannelEnablementDelays_t delays_17 = { 
 		.riseToOnDelay = 139715, 
@@ -91,20 +108,33 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.guardDelay = 0, 
 		.holdDelay = 0 };
 	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &delays_17);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &delays_17);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_1, 65536);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_2, 65536);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_TrackingCals_t trackingCals_21 = { 
 		.chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI  } };
 	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &trackingCals_21);
+	ADI_HANDLE_ERROR(error_code);
 
-	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_AUTO);
+	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI);
+	ADI_HANDLE_ERROR(error_code);
 
-	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_AUTO);
+	error_code = adi_adrv9001_Rx_Gain_Set(adrv9001Device_0, ADI_CHANNEL_1, 247);
+	ADI_HANDLE_ERROR(error_code);
+
+	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI);
+	ADI_HANDLE_ERROR(error_code);
+
+	error_code = adi_adrv9001_Rx_Gain_Set(adrv9001Device_0, ADI_CHANNEL_2, 247);
+	ADI_HANDLE_ERROR(error_code);
 
 
 	return error_code;

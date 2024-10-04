@@ -15,12 +15,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.10.1*/
-/* Firmware: v0.22.27*/
-/* Profile Generator: v0.53.2.0*/
-/* Stream Generator Assembly: v0.7.10.0*/
-/* Transceiver Evaluation Software: v0.25.0*/
-/* ADRV9001 Plugin: v0.25.0*/
+/* Device Driver Client: v68.13.7*/
+/* Firmware: v0.22.30*/
+/* Profile Generator: v0.53.6.0*/
+/* Stream Generator Assembly: v0.7.11.0*/
+/* Transceiver Evaluation Software: v0.26.0*/
+/* ADRV9001 Plugin: v0.26.0*/
 
 #include "configure.h"
 
@@ -28,21 +28,27 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 
+	ADI_HANDLE_ERROR(error_code);
 
 	uint32_t gpIntMask_1 = 0;
 	error_code = adi_adrv9001_gpio_GpIntMask_Get(adrv9001Device_0, &gpIntMask_1);
 
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_gpio_GpIntMask_Set(adrv9001Device_0, 16);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_AttenuationMode_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_TX_ATTENUATION_CONTROL_MODE_SPI);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_Attenuation_Set(adrv9001Device_0, ADI_CHANNEL_2, 10000);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t powerSavingCfg_5 = { 
 		.channelDisabledPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED, 
 		.gpioPinPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED };
 	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_2, &powerSavingCfg_5);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_ChannelEnablementDelays_t delays_6 = { 
 		.riseToOnDelay = 1475, 
@@ -51,12 +57,15 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.guardDelay = 0, 
 		.holdDelay = 0 };
 	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &delays_6);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_2, 65536);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_TrackingCals_t trackingCals_8 = { 
 		.chanTrackingCalMask = { (adi_adrv9001_TrackingCalibrations_e) 0, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC  } };
 	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &trackingCals_8);
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_DpdCfg_t dpdConfig_9 = { 
 		.numberOfSamples = 4096, 
@@ -80,6 +89,7 @@ int configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.captureDelay_us = 0, 
 		.enableRepeatedEstimationInTDD = false };
 	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_9);
+	ADI_HANDLE_ERROR(error_code);
 
 
 	return error_code;

@@ -14,12 +14,12 @@
 /* */
 /* FPGA: v0.0.0*/
 /* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.10.1*/
-/* Firmware: v0.22.27*/
-/* Profile Generator: v0.53.2.0*/
-/* Stream Generator Assembly: v0.7.10.0*/
-/* Transceiver Evaluation Software: v0.25.0*/
-/* ADRV9001 Plugin: v0.25.0*/
+/* Device Driver Client: v68.13.7*/
+/* Firmware: v0.22.30*/
+/* Profile Generator: v0.53.6.0*/
+/* Stream Generator Assembly: v0.7.11.0*/
+/* Transceiver Evaluation Software: v0.26.0*/
+/* ADRV9001 Plugin: v0.26.0*/
 
 #include "calibrate.h"
 
@@ -27,6 +27,7 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 
+	ADI_HANDLE_ERROR(error_code);
 
 	adi_adrv9001_InitCals_t initCals_1 = { 
 		.sysInitCalMask = (adi_adrv9001_InitCalibrations_e) 0, 
@@ -35,10 +36,12 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 		.force = false };
 	uint8_t errorFlag_1 = 0;
 	error_code = adi_adrv9001_cals_InitCals_Run(adrv9001Device_0, &initCals_1, 300000, &errorFlag_1);
+	ADI_HANDLE_ERROR(error_code);
 
 	uint8_t readData_2 = 0;
 	error_code = adi_adrv9001_spi_Byte_Read(adrv9001Device_0, 11, &readData_2);
 
+	ADI_HANDLE_ERROR(error_code);
 
 	uint32_t internalPathDelays_ns_3[6] = { 0 };
 	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, internalPathDelays_ns_3, 6);
@@ -47,6 +50,7 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	for (internalPathDelays_ns_3_indexer = 1; internalPathDelays_ns_3_indexer < 6; internalPathDelays_ns_3_indexer++)
 	{
 	}
+	ADI_HANDLE_ERROR(error_code);
 
 	uint32_t internalPathDelays_ns_4[6] = { 0 };
 	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, internalPathDelays_ns_4, 6);
@@ -55,6 +59,7 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	for (internalPathDelays_ns_4_indexer = 1; internalPathDelays_ns_4_indexer < 6; internalPathDelays_ns_4_indexer++)
 	{
 	}
+	ADI_HANDLE_ERROR(error_code);
 
 	uint32_t internalPathDelays_ns_5[6] = { 0 };
 	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, internalPathDelays_ns_5, 6);
@@ -63,6 +68,7 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	for (internalPathDelays_ns_5_indexer = 1; internalPathDelays_ns_5_indexer < 6; internalPathDelays_ns_5_indexer++)
 	{
 	}
+	ADI_HANDLE_ERROR(error_code);
 
 	uint32_t internalPathDelays_ns_6[6] = { 0 };
 	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, internalPathDelays_ns_6, 6);
@@ -71,12 +77,14 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	for (internalPathDelays_ns_6_indexer = 1; internalPathDelays_ns_6_indexer < 6; internalPathDelays_ns_6_indexer++)
 	{
 	}
+	ADI_HANDLE_ERROR(error_code);
 
 	uint8_t minGainIndex_7 = 187;
 	uint8_t maxGainIndex_7 = 255;
 	error_code = adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get(adrv9001Device_0, ADI_CHANNEL_1, &minGainIndex_7, &maxGainIndex_7);
 
 
+	ADI_HANDLE_ERROR(error_code);
 
 	uint16_t numGainIndicesRead_8 = 0;
 	error_code = adi_adrv9001_Rx_GainTable_Read(adrv9001Device_0, ADI_CHANNEL_1, 255, calibrate_gainTableRows_8, 69, &numGainIndicesRead_8);
@@ -86,12 +94,14 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	{
 	}
 
+	ADI_HANDLE_ERROR(error_code);
 
 	uint8_t minGainIndex_9 = 187;
 	uint8_t maxGainIndex_9 = 255;
 	error_code = adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get(adrv9001Device_0, ADI_CHANNEL_2, &minGainIndex_9, &maxGainIndex_9);
 
 
+	ADI_HANDLE_ERROR(error_code);
 
 	uint16_t numGainIndicesRead_10 = 0;
 	error_code = adi_adrv9001_Rx_GainTable_Read(adrv9001Device_0, ADI_CHANNEL_2, 255, calibrate_gainTableRows_10, 69, &numGainIndicesRead_10);
@@ -101,15 +111,33 @@ int calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	{
 	}
 
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_DataPath_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_1, false);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, false);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Tx_DataPath_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, false);
+	ADI_HANDLE_ERROR(error_code);
 
 	error_code = adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, false);
+	ADI_HANDLE_ERROR(error_code);
 
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC0, false);
+	ADI_HANDLE_ERROR(error_code);
+
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC1, false);
+	ADI_HANDLE_ERROR(error_code);
+
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC2, false);
+	ADI_HANDLE_ERROR(error_code);
+
+	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC3, false);
+	ADI_HANDLE_ERROR(error_code);
+
+	ADI_HANDLE_ERROR(error_code);
 
 
 	return error_code;

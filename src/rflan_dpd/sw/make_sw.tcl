@@ -65,6 +65,11 @@ importsources -name rpu -path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_pa
 importsources -name rpu -path $srcDir/axi_dma/sw -soft-link -target-path src/axi_dma
 importsources -name rpu -path $srcDir/adrv9001/sw -soft-link -target-path src/adrv9001
 
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_cli.c -soft-link -target-path /src/adrv9001/
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_cli.h -soft-link -target-path /src/adrv9001/
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_params.c -soft-link -target-path /src/adrv9001/
+importsources -name rpu -path $srcDir/rflan/sw/adrv9001/adrv9001_params.h -soft-link -target-path /src/adrv9001/
+
 
 # Configure RPU Project
 app config -name rpu define-compiler-symbols ADI_COMMON_VERBOSE
@@ -87,6 +92,7 @@ app config -name rpu include-path $srcDir/rflan/sw
 app config -name rpu include-path $srcDir/rflan/sw/csl
 app config -name rpu include-path $srcDir/rflan/sw/lib
 app config -name rpu include-path $srcDir/$proj_name/sw/adrv9001/profile
+app config -name rpu include-path $srcDir/rflan/sw/adrv9001
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/jsmn/
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001/private/include

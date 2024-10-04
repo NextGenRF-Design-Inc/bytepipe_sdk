@@ -9,33 +9,20 @@ h = rflan();
 h.Open('COM12');
 
 % Select Receive Port
-RxPort = h.Rx1;
-
-%% Enable Stream
+RxPort = h.Rx2;
 
 % Select Capture Length of DMA
-RxBufLength = 2000;
-
-% Read Sample Rate
-fs = h.GetSampleRate(RxPort);
-
-% Set Carrier Frequency (optional)
-h.SetCarrierFrequency(TxPort, 2.5e9);
+RxBufLength = 4096;
 
 % Read Carrier Frequency
-h.GetCarrierFrequency(RxPort);
-
-% Enable Receiver
-h.Adrv9001ToRfEnabled( RxPort );
+fs = h.GetSampleRate(RxPort);
 
 % Read DMA buffer and plot data several times
 figure();
-for i = 1:1
+for i = 1:20
     
 % Start DMA Burst
 h.RflanStreamStart(RxPort, 0, RxBufLength);
-
-pause(1);
 
 % Read DMA Buffer
 iq = h.RflanStreamBufGet(RxPort,0,RxBufLength);
@@ -73,8 +60,6 @@ title('Time Domain');
 
 end
 
-%% Disable Receiver
 
-h.Adrv9001ToRfPrimed( RxPort );
 
 

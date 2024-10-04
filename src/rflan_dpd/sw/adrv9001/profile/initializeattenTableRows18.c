@@ -13,7 +13,7 @@
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
-adi_adrv9001_TxAttenTableRow_t initialize_attenTableRows_17[] = { { 
+adi_adrv9001_TxAttenTableRow_t initialize_attenTableRows_18[] = { { 
 		.txAttenMult = 4095, 
 		.txAttenHp = 0, 
 		.Reserve = 0 }, { 
