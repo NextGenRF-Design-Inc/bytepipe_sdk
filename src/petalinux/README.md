@@ -17,7 +17,7 @@ make -f ../src/rflan/Makefile hdl
 make -f ../src/petalinux/Makefile
 
 ```
-# Frequently asked questions / Common Problems
+# Frequently Asked Questions / Common Problems
 <br>
 
 <!---
