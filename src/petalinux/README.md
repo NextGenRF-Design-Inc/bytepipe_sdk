@@ -44,8 +44,10 @@ make -f ../src/petalinux/Makefile
 ```|
 --->
 ### (1) Question/Problem: lsusb isn't returning any USB busses/devices
+[ Applies to release v10.04.24 and all older releases ]
 <br>
-
+<br>
+<br>
 **Answer/Solution:** Add the following
 ```
 &usb0 {
@@ -68,3 +70,5 @@ directly above
 };
 ```
 in the system-user.dtsi source file
+
+
