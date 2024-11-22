@@ -89,13 +89,6 @@
     };
 };
 
-&sdhci1{
-	status = "okay";
-	disable-wp;
-	max-frequency = <50000000>;
-	no-1-8-v;
-};
-
 &usb0 {
     status = "okay";
 };
@@ -103,4 +96,11 @@
 &dwc3_0 {
     status = "okay";
     dr_mode = "host";
+};
+
+&sdhci1{
+	status = "okay";
+	disable-wp;
+	max-frequency = <50000000>;
+	no-1-8-v;
 };
