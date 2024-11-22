@@ -46,7 +46,7 @@ make -f ../src/petalinux/Makefile
 ### (1) Question/Problem: lsusb isn't returning any USB busses/devices
 <br>
 
-**Answer/Solution:** Add the following to the bottom of the system-user.dtsi source file: 
+**Answer/Solution:** Add the following
 ```
 &usb0 {
     status = "okay";
@@ -56,7 +56,10 @@ make -f ../src/petalinux/Makefile
     status = "okay";
     dr_mode = "host";
 };
+```
+directly above 
 
+```
 &sdhci1{
 	status = "okay";
 	disable-wp;
@@ -64,3 +67,4 @@ make -f ../src/petalinux/Makefile
 	no-1-8-v;
 };
 ```
+in the system-user.dtsi source file
