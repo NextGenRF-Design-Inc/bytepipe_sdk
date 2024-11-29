@@ -3,7 +3,7 @@ srcDir:=$(dir $(lastword $(MAKEFILE_LIST)))
 
 .PHONY:	all
 
-all: clean project config build package
+all: clean project config patch build package
 
 clean:
 	rm -rf bpLinux
@@ -22,6 +22,10 @@ config:
 	petalinux-create -p bpLinux/ -t apps --template c -n sampleapp --enable			
 	petalinux-config -p bpLinux/ -c rootfs --silentconfig
 
+#this patch is for petalinux v2021.1
+patch:
+	./../src/petalinux/patch_script.sh
+
 build:
 	petalinux-build -p bpLinux
 
@@ -33,13 +37,13 @@ package:
 	petalinux-package --bsp -p bpLinux/ --force --output bpLinux/images/linux/bytepipe_x9002.bsp
 
 sdcard:
-	cp -f bpLinux/images/linux/BOOT.BIN /media/ngrf/boot/
-	cp -f bpLinux/images/linux/boot.scr /media/ngrf/boot/
-	cp -f bpLinux/images/linux/Image /media/ngrf/boot/
-	cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot /media/ngrf/boot/
-	#sudo rm -rf /media/ngrf/rootfs/ || true;
-	#sudo tar -xvf bpLinux/images/linux/rootfs.tar.gz -C /media/ngrf/rootfs/
-	#sync /media/ngrf/rootfs
+	#cp -f bpLinux/images/linux/BOOT.BIN /media/ngrf/BOOT/
+	#cp -f bpLinux/images/linux/boot.scr /media/ngrf/BOOT/
+	#cp -f bpLinux/images/linux/Image /media/ngrf/BOOT/
+	#cp -f bpLinux/images/linux/rootfs.cpio.gz.u-boot /media/ngrf/BOOT/
+	#sudo rm -rf /media/ngrf/root/ || true;
+	#sudo tar -xvf bpLinux/images/linux/rootfs.tar.gz -C /media/ngrf/root/
+	#sync /media/ngrf/root
 
 
 
