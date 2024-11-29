@@ -1,0 +1,45 @@
+From bd6e788157b4c640300087bba9a56f1ebc98200d Mon Sep 17 00:00:00 2001
+From: Manish Narani <manish.narani@xilinx.com>
+Date: Wed, 7 Jul 2021 12:10:04 -0600
+Subject: [LINUX PATCH] usb: dwc3: xilinx: Deselect the PIPE clock for USB2.0
+ only mode
+
+Deselect the PIPE clock when operating in USB2.0 only mode. Due to USB
+controller getting reset, the pipe clock control register was by default
+selecting the Serdes as the clock source. This was causing the issue
+when the Serdes is disabled and only USB2.0 mode is selected. Fixed the
+same.
+
+Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+---
+CR: 1104626
+Branch: master-next-test
+---
+ drivers/usb/dwc3/dwc3-xilinx.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/usb/dwc3/dwc3-xilinx.c b/drivers/usb/dwc3/dwc3-xilinx.c
+index 7231c5a..541d4e9 100644
+--- a/drivers/usb/dwc3/dwc3-xilinx.c
++++ b/drivers/usb/dwc3/dwc3-xilinx.c
+@@ -440,8 +440,15 @@ static int dwc3_xlnx_init_zynqmp(struct dwc3_xlnx *priv_data)
+ 	/* Set PIPE Power Present signal in FPD Power Present Register*/
+ 	writel(PIPE_POWER_ON, priv_data->regs + XLNX_USB_FPD_POWER_PRSNT);
+ 
+-	/* Set the PIPE Clock Select bit in FPD PIPE Clock register */
+-	writel(PIPE_CLK_SELECT, priv_data->regs + XLNX_USB_FPD_PIPE_CLK);
++	if (usb3_phy) {
++		/* Set the PIPE Clock Select bit in FPD PIPE Clock register */
++		writel(PIPE_CLK_SELECT,
++		       priv_data->regs + XLNX_USB_FPD_PIPE_CLK);
++	} else {
++		/* Set the PIPE Clock Deselect bit in FPD PIPE Clock register */
++		writel(PIPE_CLK_DESELECT,
++		       priv_data->regs + XLNX_USB_FPD_PIPE_CLK);
++	}
+ 
+ 	ret = reset_control_deassert(crst);
+ 	if (ret < 0) {
+-- 
+2.1.1
+
