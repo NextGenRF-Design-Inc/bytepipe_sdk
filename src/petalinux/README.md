@@ -80,21 +80,30 @@ in the system-user.dtsi source file
 <br>
 **Answer/Solution:** Patch the petalinux kernel
 
-0. **The following steps must be completed after the "project" step and before the "build" step in the petalinux Makefile.**
-1. Obtain 0001-usb-dwc3-xilinx-Deselect-the-PIPE-clock-for-USB2.0-o.patch from...
+1. Change directories to .../bytepipe_sdk/workspace
+2. Run the following
+   ```
+   make -f ../src/petalinux/Makefile clean project config
+   ``` 
+3. Obtain 0001-usb-dwc3-xilinx-Deselect-the-PIPE-clock-for-USB2.0-o.patch from...
  - bytepipe_sdk/src/petalinux/
+   - the patch file exists in this directory only for new commits
  - (or) https://adaptivesupport.amd.com/s/article/76694?language=en_US
-2. Copy the patch file to bytepipe_sdk/workspace/bpLinux/project-spec/meta-user/recipes-kernel/linux/linux-xlnx
+4. Copy the patch file to bytepipe_sdk/workspace/bpLinux/project-spec/meta-user/recipes-kernel/linux/linux-xlnx
  - Petalinux v2021.1 does not create the folders "recipes-kernel", "linux", and "linux-xlnx", so they will need to be created.
-3. Obtain linux-xlnx_%.bbappend from...
+5. Obtain linux-xlnx_%.bbappend from...
  - bytepipe_sdk/src/petalinux/
+   - the patch file exists in this directory only for new commits
  - (or) create it yourself with the following contents:
    ```
    SRC_URI_append = " file://0001-usb-dwc3-xilinx-Deselect-the-PIPE-clock-for-USB2.0-o.patch"
   
    FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
    ```
-4. Copy linux-xlnx_%.bbappend to bytepipe_sdk/workspace/bpLinux/project-spec/meta-user/recipes-kernel/linux 
-
+6. Copy linux-xlnx_%.bbappend to bytepipe_sdk/workspace/bpLinux/project-spec/meta-user/recipes-kernel/linux 
+7. Run the following
+   ```
+   make -f ../src/petalinux/Makefile build package
+   ``` 
 
 
