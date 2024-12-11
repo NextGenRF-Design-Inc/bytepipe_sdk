@@ -857,7 +857,7 @@ int32_t Adrv9001_GetApiVersion( adrv9001_t *Instance, adi_common_ApiVersion_t *V
 
 int32_t Adrv9001_GetTemperature( adrv9001_t *Instance, int16_t *Value )
 {
-  if( adi_adrv9001_Temperature_Get( &Instance->Device, Value ) != 0)
+  if( adi_adrv9001_Temperature_Get( &Instance->Device, ADI_ADRV9001_TEMPERATURE_READ_MAILBOX, Value ) != 0)
     return Adrv9001Status_ReadErr;
 
   return Adrv9001Status_Success;
@@ -1025,6 +1025,23 @@ int32_t Adrv9001_GetRxGainTableExtCtrl( adrv9001_t *Instance, adi_common_Channel
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_SetRxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_rx_data_src_t Value )
+{
+  /* Configure ADRV9001 */
+  if( Value == Adrv9001RxDataSrc_OTA )
+  {
+    if( Adrv9001_SetTxToRxLoopBack( Instance, channel, false) != 0 )
+      return Adrv9001Status_WriteErr;
+  }
+  else if( Value == Adrv9001RxDataSrc_TxLoopback )
+  {
+    if( Adrv9001_SetTxToRxLoopBack( Instance, channel, true) != 0 )
+      return Adrv9001Status_WriteErr;
+  }
+
+  return Adrv9001Status_Success;
+}
+
 int32_t Adrv9001_SetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t Value )
 {
   /* Configure Programmable Logic */
@@ -1067,13 +1084,29 @@ int32_t Adrv9001_SetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 
   return Adrv9001Status_Success;
 }
-
+int32_t Adrv9001_GetRxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_rx_data_src_t *Value )
+{
+  bool Loopback;
+  if( Adrv9001_GetTxToRxLoopBack( Instance, channel, &Loopback ) != 0)
+    return Adrv9001Status_ReadErr;
+  
+  if(Loopback == true)
+  {
+    *Value = Adrv9001RxDataSrc_TxLoopback;
+  }
+  else
+  {
+    *Value = Adrv9001RxDataSrc_OTA;
+  }
+  
+  return Adrv9001Status_Success;
+}
 int32_t Adrv9001_GetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t *Value )
 {
   axi_adrv9001_data_src_t AxiAdrv9001DataSrc = AxiAdrv9001_GetTxDataSrc( &Instance->Axi, channel);
 
   bool Loopback;
-  if( Adrv9001_GetTxToRxLoopBack( Instance, channel, &Loopback ) != 0)
+  if( Adrv9001_GetRxToTxLoopBack( Instance, channel, &Loopback ) != 0)
     return Adrv9001Status_ReadErr;
 
   if( Loopback )

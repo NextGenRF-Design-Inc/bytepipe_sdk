@@ -157,6 +157,11 @@ typedef enum{
   Adrv9001TxDataSrc_RxLoopback,
 }adrv9001_tx_data_src_t;
 
+typedef enum{
+  Adrv9001RxDataSrc_OTA,
+  Adrv9001RxDataSrc_TxLoopback,
+}adrv9001_rx_data_src_t;
+
 #define ADRV9001_LOG_PATH_SIZE      (64)
 
 typedef void (*adrv9001_rf_state_cb_t)( void *CallbackRef, adi_adrv9001_ChannelState_e state, adi_common_Port_e port, adi_common_ChannelNumber_e channel );
@@ -354,6 +359,8 @@ int32_t Adrv9001_GetSiliconVersion      ( adrv9001_t *Instance, adi_adrv9001_Sil
 
 int32_t Adrv9001_GetTxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t *Value );
 int32_t Adrv9001_SetTxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t Value );
+int32_t Adrv9001_GetRxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_rx_data_src_t *Value );
+int32_t Adrv9001_SetRxDataSrc           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_rx_data_src_t Value );
 
 int32_t Adrv9001_SetDgitalGpioDirection ( adrv9001_t *Instance, adi_adrv9001_GpioPinCrumbSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir );
 int32_t Adrv9001_SetAnalogGpioDirection ( adrv9001_t *Instance, adi_adrv9001_GpioAnalogPinNibbleSel_e Bank, adi_adrv9001_GpioPinDirection_e Dir );

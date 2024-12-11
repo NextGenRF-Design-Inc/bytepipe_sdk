@@ -12,6 +12,7 @@
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
+
 adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_14[] = { { 
 		.rxFeGain = 248, 
 		.extControl = 0, 
@@ -78,3 +79,4 @@ adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_14[] = { {
 		.adcTiaGain = 0, 
 		.digGain = 0, 
 		.phaseOffset = 0 }  };
+
