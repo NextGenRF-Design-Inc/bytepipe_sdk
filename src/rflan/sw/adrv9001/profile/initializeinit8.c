@@ -12,6 +12,7 @@
 #include "adi_adrv9001_stream.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
+
 adi_adrv9001_Init_t initialize_init_8 = { 
 		.clocks = { 
 		.deviceClock_kHz = 38400, 
@@ -45,8 +46,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.tx1LoDivMode = ADI_ADRV9001_LO_DIV_MODE_LOW_POWER, 
 		.tx2LoDivMode = ADI_ADRV9001_LO_DIV_MODE_LOW_POWER, 
 		.loGen1Select = ADI_ADRV9001_LOGENPOWER_RFPLL_LDO, 
-		.loGen2Select = ADI_ADRV9001_LOGENPOWER_RFPLL_LDO }
-	, 
+		.loGen2Select = ADI_ADRV9001_LOGENPOWER_RFPLL_LDO }, 
 		.rx = { 
 		.rxInitChannelMask = 195, 
 		.rxChannelCfg = { { 
@@ -81,73 +81,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 1, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_SINC6, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB1, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_A, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_15_BIT_I_Q_DATA_1_BIT_GAIN_CHANGE, 
@@ -164,9 +152,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = true, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 38000000, 
 		.rxOutputRate_Hz = 61440000, 
@@ -198,73 +184,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 1, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_SINC6, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB1, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_C, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_15_BIT_I_Q_DATA_1_BIT_GAIN_CHANGE, 
@@ -281,9 +255,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = true, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 12500, 
 		.rxOutputRate_Hz = 0, 
@@ -315,73 +287,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 0, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_ZERO, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB1, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_A, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_DISABLE, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_2_BIT_SYMBOL_DATA, 
@@ -398,9 +358,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = false, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 12500, 
 		.rxOutputRate_Hz = 0, 
@@ -432,73 +390,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 0, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_ZERO, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB1, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_A, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_DISABLE, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_2_BIT_SYMBOL_DATA, 
@@ -515,9 +461,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = false, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 38000000, 
 		.rxOutputRate_Hz = 61440000, 
@@ -549,73 +493,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 1, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_SINC6, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB2, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_B, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, 
@@ -632,9 +564,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = true, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 38000000, 
 		.rxOutputRate_Hz = 61440000, 
@@ -666,73 +596,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 1, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_SINC6, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB2, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_D, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, 
@@ -749,9 +667,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = true, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 12500, 
 		.rxOutputRate_Hz = 0, 
@@ -783,73 +699,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 0, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_ZERO, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB1, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_A, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_DISABLE, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_2_BIT_SYMBOL_DATA, 
@@ -866,9 +770,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = false, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }, { 
+		.rxMaskStrobeEn = false } } }, { 
 		.profile = { 
 		.primarySigBandwidth_Hz = 12500, 
 		.rxOutputRate_Hz = 0, 
@@ -900,73 +802,61 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.decBy2Blk41En = 0, 
 		.decBy2Blk43En = 0, 
 		.decBy3Blk45En = 0, 
-		.decBy2Blk47En = 0 }
-					, 
+		.decBy2Blk47En = 0 }, 
 		.rxWbDecTop = { 
 		.decBy2Blk25En = 0, 
 		.decBy2Blk27En = 0, 
 		.decBy2Blk29En = 0, 
 		.decBy2Blk31En = 0, 
 		.decBy2Blk33En = 0, 
-		.wbLpfBlk33p1En = 0 }
-					, 
+		.wbLpfBlk33p1En = 0 }, 
 		.rxDecTop = { 
 		.decBy3Blk15En = 0, 
 		.decBy2Hb3Blk17p1En = 0, 
 		.decBy2Hb4Blk17p2En = 0, 
 		.decBy2Hb5Blk19p1En = 0, 
-		.decBy2Hb6Blk19p2En = 0 }
-					, 
+		.decBy2Hb6Blk19p2En = 0 }, 
 		.rxSincHBTop = { 
 		.sincGainMux = ADI_ADRV9001_RX_SINC_GAIN_MUX_6_DB, 
 		.sincMux = ADI_ADRV9001_RX_SINC_MUX5_OUTPUT_ZERO, 
 		.hbMux = ADI_ADRV9001_RX_HB_MUX_OUTPUT_HB1, 
 		.isGainCompEnabled = 0, 
 		.gainComp9GainI = { 16384, 16384, 16384, 16384, 16384, 16384  }, 
-		.gainComp9GainQ = { 0, 0, 0, 0, 0, 0  } }
-					, 
+		.gainComp9GainQ = { 0 } }, 
 		.rxNbDem = { 
 		.dpInFifo = { 
 		.dpInFifoEn = 0, 
 		.dpInFifoMode = ADI_ADRV9001_DP_IN_FIFO_MODE_DETECTING, 
-		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }
-						, 
+		.dpInFifoTestDataSel = ADI_ADRV9001_DP_IN_FIFO_INPUT_DP_SEL }, 
 		.rxNbNco = { 
 		.rxNbNcoEn = 0, 
 		.rxNbNcoConfig = { 
 		.freq = 0, 
 		.sampleFreq = 0, 
 		.phase = 0, 
-		.realOut = 0 }
-							 }
-						, 
+		.realOut = 0 } }, 
 		.rxWbNbCompPFir = { 
 		.bankSel = ADI_ADRV9001_PFIR_BANK_A, 
 		.rxWbNbCompPFirInMuxSel = ADI_ADRV9001_RP_FIR_IN_MUX_INT_IN, 
-		.rxWbNbCompPFirEn = 0 }
-						, 
+		.rxWbNbCompPFirEn = 0 }, 
 		.resamp = { 
 		.rxResampEn = 0, 
 		.resampPhaseI = 0, 
-		.resampPhaseQ = 0 }
-						, 
+		.resampPhaseQ = 0 }, 
 		.gsOutMuxSel = ADI_ADRV9001_GS_OUT_MUX_BYPASS, 
 		.rxOutSel = ADI_ADRV9001_RX_OUT_IQ_SEL, 
 		.rxRoundMode = ADI_ADRV9001_RX_ROUNDMODE_IQ, 
-		.dpArmSel = ADI_ADRV9001_DP_SEL }
-					 }
-				, 
+		.dpArmSel = ADI_ADRV9001_DP_SEL } }, 
 		.lnaConfig = { 
 		.externalLnaPresent = false, 
 		.gpioSourceSel = ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_UNASSIGNED, 
 		.externalLnaPinSel = ADI_ADRV9001_EXTERNAL_LNA_PIN_RX1_LOWER_RX2_UPPER, 
 		.settlingDelay = 0, 
 		.numberLnaGainSteps = 0, 
-		.lnaGainSteps_mdB = { 0, 0, 0, 0  }, 
+		.lnaGainSteps_mdB = { 0 }, 
 		.lnaDigitalGainDelay = 0, 
 		.minGainIndex = 0, 
-		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }
-				, 
+		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE }, 
 		.rxSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_DISABLE, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_2_BIT_SYMBOL_DATA, 
@@ -983,10 +873,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = false, 
-		.rxMaskStrobeEn = false }
-				 }
-			 }  } }
-	, 
+		.rxMaskStrobeEn = false } } }  } }, 
 		.tx = { 
 		.txInitChannelMask = 12, 
 		.txProfile = { { 
@@ -1015,16 +902,14 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.txPreProcSymMapDivFactor = 1, 
 		.txPreProcMode = ADI_ADRV9001_TX_DP_PREPROC_IQ_DATA_WITH_PFIRS, 
 		.txPreProcWbNbPfirIBankSel = ADI_ADRV9001_PFIR_BANK_A, 
-		.txPreProcWbNbPfirQBankSel = ADI_ADRV9001_PFIR_BANK_B }
-				, 
+		.txPreProcWbNbPfirQBankSel = ADI_ADRV9001_PFIR_BANK_B }, 
 		.txWbIntTop = { 
 		.txInterpBy2Blk30En = 0, 
 		.txInterpBy2Blk28En = 0, 
 		.txInterpBy2Blk26En = 0, 
 		.txInterpBy2Blk24En = 0, 
 		.txInterpBy2Blk22En = 0, 
-		.txWbLpfBlk22p1En = 0 }
-				, 
+		.txWbLpfBlk22p1En = 0 }, 
 		.txNbIntTop = { 
 		.txInterpBy2Blk20En = 0, 
 		.txInterpBy2Blk18En = 0, 
@@ -1034,24 +919,21 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.txInterpBy3Blk10En = 0, 
 		.txInterpBy2Blk8En = 0, 
 		.txScicBlk32En = 0, 
-		.txScicBlk32DivFactor = 1 }
-				, 
+		.txScicBlk32DivFactor = 1 }, 
 		.txIntTop = { 
 		.interpBy3Blk44p1En = 1, 
 		.sinc3Blk44En = 0, 
 		.sinc2Blk42En = 0, 
 		.interpBy3Blk40En = 1, 
 		.interpBy2Blk38En = 0, 
-		.interpBy2Blk36En = 0 }
-				, 
+		.interpBy2Blk36En = 0 }, 
 		.txIntTopFreqDevMap = { 
 		.rrc2Frac = 0, 
 		.mpll = 0, 
 		.nchLsw = 0, 
 		.nchMsb = 0, 
 		.freqDevMapEn = 0, 
-		.txRoundEn = 1 }
-				, 
+		.txRoundEn = 1 }, 
 		.txIqdmDuc = { 
 		.iqdmDucMode = ADI_ADRV9001_TX_DP_IQDMDUC_MODE0, 
 		.iqdmDev = 0, 
@@ -1062,10 +944,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.freq = 0, 
 		.sampleFreq = 61440000, 
 		.phase = 0, 
-		.realOut = 0 }
-					 }
-				 }
-			, 
+		.realOut = 0 } } }, 
 		.txSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, 
@@ -1082,8 +961,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = true, 
-		.rxMaskStrobeEn = false }
-			 }, { 
+		.rxMaskStrobeEn = false } }, { 
 		.primarySigBandwidth_Hz = 38000000, 
 		.txInputRate_Hz = 61440000, 
 		.txInterfaceSampleRate_Hz = 61440000, 
@@ -1109,16 +987,14 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.txPreProcSymMapDivFactor = 1, 
 		.txPreProcMode = ADI_ADRV9001_TX_DP_PREPROC_IQ_DATA_WITH_PFIRS, 
 		.txPreProcWbNbPfirIBankSel = ADI_ADRV9001_PFIR_BANK_C, 
-		.txPreProcWbNbPfirQBankSel = ADI_ADRV9001_PFIR_BANK_D }
-				, 
+		.txPreProcWbNbPfirQBankSel = ADI_ADRV9001_PFIR_BANK_D }, 
 		.txWbIntTop = { 
 		.txInterpBy2Blk30En = 0, 
 		.txInterpBy2Blk28En = 0, 
 		.txInterpBy2Blk26En = 0, 
 		.txInterpBy2Blk24En = 0, 
 		.txInterpBy2Blk22En = 0, 
-		.txWbLpfBlk22p1En = 0 }
-				, 
+		.txWbLpfBlk22p1En = 0 }, 
 		.txNbIntTop = { 
 		.txInterpBy2Blk20En = 0, 
 		.txInterpBy2Blk18En = 0, 
@@ -1128,24 +1004,21 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.txInterpBy3Blk10En = 0, 
 		.txInterpBy2Blk8En = 0, 
 		.txScicBlk32En = 0, 
-		.txScicBlk32DivFactor = 1 }
-				, 
+		.txScicBlk32DivFactor = 1 }, 
 		.txIntTop = { 
 		.interpBy3Blk44p1En = 1, 
 		.sinc3Blk44En = 0, 
 		.sinc2Blk42En = 0, 
 		.interpBy3Blk40En = 1, 
 		.interpBy2Blk38En = 0, 
-		.interpBy2Blk36En = 0 }
-				, 
+		.interpBy2Blk36En = 0 }, 
 		.txIntTopFreqDevMap = { 
 		.rrc2Frac = 0, 
 		.mpll = 0, 
 		.nchLsw = 0, 
 		.nchMsb = 0, 
 		.freqDevMapEn = 0, 
-		.txRoundEn = 1 }
-				, 
+		.txRoundEn = 1 }, 
 		.txIqdmDuc = { 
 		.iqdmDucMode = ADI_ADRV9001_TX_DP_IQDMDUC_MODE0, 
 		.iqdmDev = 0, 
@@ -1156,10 +1029,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.freq = 0, 
 		.sampleFreq = 61440000, 
 		.phase = 0, 
-		.realOut = 0 }
-					 }
-				 }
-			, 
+		.realOut = 0 } } }, 
 		.txSsiConfig = { 
 		.ssiType = ADI_ADRV9001_SSI_TYPE_LVDS, 
 		.ssiDataFormatSel = ADI_ADRV9001_SSI_FORMAT_16_BIT_I_Q_DATA, 
@@ -1176,9 +1046,7 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.cmosDdrPosClkEn = false, 
 		.cmosClkInversionEn = false, 
 		.ddrEn = true, 
-		.rxMaskStrobeEn = false }
-			 }  } }
-	, 
+		.rxMaskStrobeEn = false } }  } }, 
 		.sysConfig = { 
 		.duplexMode = ADI_ADRV9001_TDD_MODE, 
 		.fhModeOn = 0, 
@@ -1190,67 +1058,57 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.pllPhaseSyncWait_us = 0, 
 		.pllModulus = { 
 		.modulus = { 8388593, 8388593, 8388593, 8388593, 8388593  }, 
-		.dmModulus = { 8388593, 8388593  } }
-		, 
-		.warmBootEnable = false }
-	, 
+		.dmModulus = { 8388593, 8388593  } }, 
+		.warmBootEnable = false }, 
 		.pfirBuffer = { 
 		.pfirRxWbNbChFilterCoeff_A = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 475, 312, -782, -39, 1201, -777, -1182, 1981, 177, -2874, 1941, 2393, -4416, 225, 5594, -4581, -3668, 8650, -1992, -9342, 9646, 4213, -15137, 6404, 13615, -18199, -2610, 23969, -15142, -17198, 31204, -3269, -34604, 30213, 17955, -49337, 16361, 45636, -53954, -12567, 72920, -40769, -54562, 89506, -4148, -102269, 83183, 57280, -142874, 41767, 139213, -158628, -45955, 231679, -125964, -193870, 320642, -4532, -442087, 390927, 347244, -1055854, 429729, 4391599, 4391599, 429729, -1055854, 347244, 390927, -442087, -4532, 320642, -193870, -125964, 231679, -45955, -158628, 139213, 41767, -142874, 57280, 83183, -102269, -4148, 89506, -54562, -40769, 72920, -12567, -53954, 45636, 16361, -49337, 17955, 30213, -34604, -3269, 31204, -17198, -15142, 23969, -2610, -18199, 13615, 6404, -15137, 4213, 9646, -9342, -1992, 8650, -3668, -4581, 5594, 225, -4416, 2393, 1941, -2874, 177, 1981, -1182, -777, 1201, -39, -782, 312, 0  } }
-		, 
+		.coefficients = { 475, 312, -782, -39, 1201, -777, -1182, 1981, 177, -2874, 1941, 2393, -4416, 225, 5594, -4581, -3668, 8650, -1992, -9342, 9646, 4213, -15137, 6404, 13615, -18199, -2610, 23969, -15142, -17198, 31204, -3269, -34604, 30213, 17955, -49337, 16361, 45636, -53954, -12567, 72920, -40769, -54562, 89506, -4148, -102269, 83183, 57280, -142874, 41767, 139213, -158628, -45955, 231679, -125964, -193870, 320642, -4532, -442087, 390927, 347244, -1055854, 429729, 4391599, 4391599, 429729, -1055854, 347244, 390927, -442087, -4532, 320642, -193870, -125964, 231679, -45955, -158628, 139213, 41767, -142874, 57280, 83183, -102269, -4148, 89506, -54562, -40769, 72920, -12567, -53954, 45636, 16361, -49337, 17955, 30213, -34604, -3269, 31204, -17198, -15142, 23969, -2610, -18199, 13615, 6404, -15137, 4213, 9646, -9342, -1992, 8650, -3668, -4581, 5594, 225, -4416, 2393, 1941, -2874, 177, 1981, -1182, -777, 1201, -39, -782, 312, 0  } }, 
 		.pfirRxWbNbChFilterCoeff_B = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8388608, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }
-		, 
+		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8388608, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }, 
 		.pfirRxWbNbChFilterCoeff_C = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 475, 312, -782, -39, 1201, -777, -1182, 1981, 177, -2874, 1941, 2393, -4416, 225, 5594, -4581, -3668, 8650, -1992, -9342, 9646, 4213, -15137, 6404, 13615, -18199, -2610, 23969, -15142, -17198, 31204, -3269, -34604, 30213, 17955, -49337, 16361, 45636, -53954, -12567, 72920, -40769, -54562, 89506, -4148, -102269, 83183, 57280, -142874, 41767, 139213, -158628, -45955, 231679, -125964, -193870, 320642, -4532, -442087, 390927, 347244, -1055854, 429729, 4391599, 4391599, 429729, -1055854, 347244, 390927, -442087, -4532, 320642, -193870, -125964, 231679, -45955, -158628, 139213, 41767, -142874, 57280, 83183, -102269, -4148, 89506, -54562, -40769, 72920, -12567, -53954, 45636, 16361, -49337, 17955, 30213, -34604, -3269, 31204, -17198, -15142, 23969, -2610, -18199, 13615, 6404, -15137, 4213, 9646, -9342, -1992, 8650, -3668, -4581, 5594, 225, -4416, 2393, 1941, -2874, 177, 1981, -1182, -777, 1201, -39, -782, 312, 0  } }
-		, 
+		.coefficients = { 475, 312, -782, -39, 1201, -777, -1182, 1981, 177, -2874, 1941, 2393, -4416, 225, 5594, -4581, -3668, 8650, -1992, -9342, 9646, 4213, -15137, 6404, 13615, -18199, -2610, 23969, -15142, -17198, 31204, -3269, -34604, 30213, 17955, -49337, 16361, 45636, -53954, -12567, 72920, -40769, -54562, 89506, -4148, -102269, 83183, 57280, -142874, 41767, 139213, -158628, -45955, 231679, -125964, -193870, 320642, -4532, -442087, 390927, 347244, -1055854, 429729, 4391599, 4391599, 429729, -1055854, 347244, 390927, -442087, -4532, 320642, -193870, -125964, 231679, -45955, -158628, 139213, 41767, -142874, 57280, 83183, -102269, -4148, 89506, -54562, -40769, 72920, -12567, -53954, 45636, 16361, -49337, 17955, 30213, -34604, -3269, 31204, -17198, -15142, 23969, -2610, -18199, 13615, 6404, -15137, 4213, 9646, -9342, -1992, 8650, -3668, -4581, 5594, 225, -4416, 2393, 1941, -2874, 177, 1981, -1182, -777, 1201, -39, -782, 312, 0  } }, 
 		.pfirRxWbNbChFilterCoeff_D = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8388608, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }
-		, 
+		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8388608, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }, 
 		.pfirTxWbNbPulShpCoeff_A = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }
-		, 
+		.coefficients = { 0 } }, 
 		.pfirTxWbNbPulShpCoeff_B = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }
-		, 
+		.coefficients = { 0 } }, 
 		.pfirTxWbNbPulShpCoeff_C = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }
-		, 
+		.coefficients = { 0 } }, 
 		.pfirTxWbNbPulShpCoeff_D = { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
 		.tapsSel = ADI_ADRV9001_PFIR_128_TAPS | ADI_ADRV9001_PFIR_TAPS_MAX_ID, 
 		.gainSel = ADI_ADRV9001_PFIR_GAIN_ZERO_DB, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }
-		, 
+		.coefficients = { 0 } }, 
 		.pfirRxNbPulShp = { { 
 		.numCoeff = 128, 
 		.symmetricSel = ADI_ADRV9001_PFIR_COEF_NON_SYMMETRIC, 
@@ -1294,20 +1152,18 @@ adi_adrv9001_Init_t initialize_init_8 = {
 		.coefficients = { 39, -229, 712, -1481, 2128, -1841, -215, 4131, -8490, 8497, 26266, 8497, -8490, 4131, -215, -1841, 2128, -1481, 712, -229, 39  } }  }, 
 		.pfirTxMagComp1 = { 
 		.numCoeff = 21, 
-		.coefficients = { 69, -384, 1125, -2089, 2300, -165, -5248, 12368, -13473, 4864, 34039, 4864, -13473, 12368, -5248, -165, 2300, -2089, 1125, -384, 69  } }
-		, 
+		.coefficients = { 69, -384, 1125, -2089, 2300, -165, -5248, 12368, -13473, 4864, 34039, 4864, -13473, 12368, -5248, -165, 2300, -2089, 1125, -384, 69  } }, 
 		.pfirTxMagComp2 = { 
 		.numCoeff = 21, 
-		.coefficients = { 69, -384, 1125, -2089, 2300, -165, -5248, 12368, -13473, 4864, 34039, 4864, -13473, 12368, -5248, -165, 2300, -2089, 1125, -384, 69  } }
-		, 
+		.coefficients = { 69, -384, 1125, -2089, 2300, -165, -5248, 12368, -13473, 4864, 34039, 4864, -13473, 12368, -5248, -165, 2300, -2089, 1125, -384, 69  } }, 
 		.pfirTxMagCompNb = { { 
 		.numCoeff = 13, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }, { 
+		.coefficients = { 0 } }, { 
 		.numCoeff = 13, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }  }, 
+		.coefficients = { 0 } }  }, 
 		.pfirRxMagCompNb = { { 
 		.numCoeff = 13, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }, { 
+		.coefficients = { 0 } }, { 
 		.numCoeff = 13, 
-		.coefficients = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  } }  } }
-	 };
+		.coefficients = { 0 } }  } } };
+

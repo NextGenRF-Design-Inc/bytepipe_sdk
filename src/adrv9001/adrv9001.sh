@@ -109,7 +109,8 @@ profile_parse()
 	sed -i -e '/adi_fpga9001_SsiCalibrationCfg_t/,+8d' $outDir/initialize.c
 	sed -i -e '/adi_fpga9001_ClockStatus_t/,+5d' $outDir/initialize.c
 	sed -i -e '/adi_fpga9001_Version_t/,+3d' $outDir/initialize.c
-
+  
+	sed -i '/fpga9001Device_0/d' $outDir/*
 }
 
 
