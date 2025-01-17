@@ -785,6 +785,22 @@ int32_t Adrv9001_GetRxRssi( adrv9001_t *Instance, adi_common_ChannelNumber_e cha
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_GetGainControlMode( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e *mode )
+{
+  if( adi_adrv9001_Rx_GainControl_Mode_Get(&Instance->Device, channel, mode) != 0)
+      return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetGainControlMode( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e mode )
+{
+  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, channel, mode) != 0)
+	    return Adrv9001Status_ReadErr;
+
+  return Adrv9001Status_Success;
+}
+
 int32_t Adrv9001_SetRxToTxLoopBack(adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value)
 {
   if( channel == ADI_CHANNEL_1 )
@@ -1387,6 +1403,91 @@ int32_t Adrv9001_SetCarrierFrequency( adrv9001_t *Instance, adi_common_Port_e po
   {
     if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
       return status;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetRxInputPort( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxRfInputSel_e InputPort )
+{
+  int32_t status;
+
+  adi_adrv9001_ChannelState_e State;
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_RX, channel, &State ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  adi_adrv9001_ChannelEnableMode_e mode;
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, ADI_RX, channel, &mode) != 0)
+    return Adrv9001Status_ReadErr;
+
+  if( mode == ADI_ADRV9001_PIN_MODE )
+  {
+    /* Set SPI Mode */
+    if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_RX, channel, ADI_ADRV9001_SPI_MODE) != 0)
+      return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+    if((status = Adrv9001_ToPrimed( Instance, ADI_RX, channel )) != 0)
+      return status;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+    if((status = Adrv9001_ToCalibrated( Instance, ADI_RX, channel )) != 0)
+      return status;
+  }
+
+  adi_adrv9001_Carrier_t carrier;
+
+  if( adi_adrv9001_Radio_Carrier_Inspect( &Instance->Device, ADI_RX, channel, &carrier ) != 0)
+    return Adrv9001Status_ReadErr;
+
+  memcpy((uint8_t*)&carrier.manualRxport, (uint8_t*)&InputPort, sizeof( carrier.manualRxport ) );
+
+  if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_RX, channel, &carrier) != 0)
+    return Adrv9001Status_WriteErr;
+
+  if( channel == ADI_CHANNEL_1 )
+  {
+    memcpy((uint8_t*)&Instance->Params->clocks.rx1RfInputSel, (uint8_t*)&InputPort, sizeof(adi_adrv9001_RxRfInputSel_e));
+  }
+  else
+  {
+    memcpy((uint8_t*)&Instance->Params->clocks.rx2RfInputSel, (uint8_t*)&InputPort, sizeof(adi_adrv9001_RxRfInputSel_e));
+  }
+
+  if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+  {
+    if((status = Adrv9001_ToPrimed( Instance, ADI_RX, channel )) != 0)
+      return status;
+  }
+
+  if(mode == ADI_ADRV9001_PIN_MODE)
+  {
+    if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, ADI_RX, channel, ADI_ADRV9001_PIN_MODE) != 0)
+      return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+    if((status = Adrv9001_ToRfEnabled( Instance, ADI_RX, channel )) != 0)
+      return status;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetRxInputPort( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxRfInputSel_e *InputPort )
+{
+  if( channel == ADI_CHANNEL_1 )
+  {
+    memcpy((uint8_t*)InputPort, (uint8_t*)&Instance->Params->clocks.rx1RfInputSel, sizeof(adi_adrv9001_RxRfInputSel_e));
+  }
+  else
+  {
+    memcpy((uint8_t*)InputPort, (uint8_t*)&Instance->Params->clocks.rx2RfInputSel, sizeof(adi_adrv9001_RxRfInputSel_e));
   }
 
   return Adrv9001Status_Success;
@@ -2461,6 +2562,21 @@ int32_t Adrv9001_GetHopTableFrequency( adrv9001_t *Instance, uint8_t index, uint
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_EnableManualInputPorts( adrv9001_t *Instance, bool Enable )
+{
+  adi_adrv9001_RxPortSwitchCfg_t switchConfig_32 = {
+      .minFreqPortA_Hz = 30000000,
+      .maxFreqPortA_Hz = 6000000000,
+      .minFreqPortB_Hz = 30000000,
+      .maxFreqPortB_Hz = 6000000000,
+      .enable = Enable,
+      .manualRxPortSwitch = Enable };
+
+  if( adi_adrv9001_Rx_PortSwitch_Configure(&Instance->Device, &switchConfig_32) != 0)
+    return Adrv9001Status_WriteErr;
+
+  return Adrv9001Status_Success;
+}
 
 int32_t(*adi_common_hal_LogWrite)(void *devHalCfg, uint32_t logLevel, const char *formatStr, va_list argp)    = Adrv9001_LogWrite;
 int32_t(*adi_common_hal_Wait_us)(void *devHalCfg, uint32_t time_us)                                           = Adrv9001_DelayUs;

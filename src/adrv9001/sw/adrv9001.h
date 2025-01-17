@@ -342,6 +342,8 @@ int32_t Adrv9001_GetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_Channe
 int32_t Adrv9001_SetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value );
 int32_t Adrv9001_GetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value );
 
+int32_t Adrv9001_SetGainControlMode     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e mode );
+int32_t Adrv9001_GetGainControlMode     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e *mode );
 int32_t Adrv9001_GetRxRssi              ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, float *Value );
 int32_t Adrv9001_GetRxCurGainIndex      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value );
 int32_t Adrv9001_SetRxCurGainIndex      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t Value );
@@ -368,6 +370,11 @@ int32_t Adrv9001_SetGpioDirection       ( adrv9001_t *Instance, adi_adrv9001_Gpi
 int32_t Adrv9001_GetGpioDirection       ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinDirection_e *Dir );
 int32_t Adrv9001_SetGpioPinLevel        ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e Level );
 int32_t Adrv9001_GetGpioPinLevel        ( adrv9001_t *Instance, adi_adrv9001_GpioPin_e Pin, adi_adrv9001_GpioPinLevel_e *Level );
+
+int32_t Adrv9001_SetRxInputPort         ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxRfInputSel_e InputPort );
+int32_t Adrv9001_GetRxInputPort         ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxRfInputSel_e *InputPort );
+
+int32_t Adrv9001_EnableManualInputPorts ( adrv9001_t *Instance, bool Enable );
 
 
 #endif
