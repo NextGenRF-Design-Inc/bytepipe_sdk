@@ -1384,6 +1384,15 @@ int32_t Adrv9001_SetCarrierFrequency( adrv9001_t *Instance, adi_common_Port_e po
 
   memcpy((uint8_t*)&carrier.carrierFrequency_Hz, (uint8_t*)&FreqHz, sizeof( carrier.carrierFrequency_Hz ) );
 
+  if( channel == ADI_CHANNEL_1 )
+  {
+    memcpy((uint8_t*)&carrier.manualRxport, (uint8_t*)&Instance->Params->clocks.rx1RfInputSel, sizeof( carrier.manualRxport ) );
+  }
+  else
+  {
+    memcpy((uint8_t*)&carrier.manualRxport, (uint8_t*)&Instance->Params->clocks.rx2RfInputSel, sizeof( carrier.manualRxport ) );
+  }
+
   if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, port, channel, &carrier) != 0)
     return Adrv9001Status_WriteErr;
 
