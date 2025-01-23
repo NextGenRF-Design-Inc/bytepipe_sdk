@@ -314,6 +314,18 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
   {
 
   }
+  else if( Id == Adrv9001ParamId_Rx1InputPort )
+  {
+    uint8_t tmp;
+    sscanf(Value, "%hhu", &tmp);
+    status = Adrv9001_SetRxInputPort( Adrv9001, ADI_CHANNEL_1, (adi_adrv9001_RxRfInputSel_e)tmp );
+  }
+  else if( Id == Adrv9001ParamId_Rx2InputPort )
+  {
+    uint8_t tmp;
+    sscanf(Value, "%hhu", &tmp);
+    status = Adrv9001_SetRxInputPort( Adrv9001, ADI_CHANNEL_2, (adi_adrv9001_RxRfInputSel_e)tmp );
+  }  
 
   return status;
 }
@@ -768,6 +780,24 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
   {
 
   }
+  else if( Id == Adrv9001ParamId_Rx1InputPort )
+  {
+    adi_adrv9001_RxRfInputSel_e tmp;
+
+    if((status = Adrv9001_GetRxInputPort( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+
+    sprintf(Value, "%hhu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx2InputPort )
+  {
+    adi_adrv9001_RxRfInputSel_e tmp;
+
+    if((status = Adrv9001_GetRxInputPort( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+
+    sprintf(Value, "%hhu", tmp);
+  }    
 
   return Adrv9001Status_Success;
 }
@@ -779,6 +809,8 @@ int32_t Adrv9001Params_Initialize( adrv9001_params_t *Instance, adrv9001_params_
   Instance->Rx2LnaEnablePin = Init->Rx2LnaEnablePin;
   Instance->VcTcxoDac = Init->VcTcxoDac;
   Instance->VcTcxoEnablePin = Init->VcTcxoEnablePin;
+
+  Adrv9001_EnableManualInputPorts( Instance->Adrv9001, true );
 
   return Adrv9001Status_Success;
 }

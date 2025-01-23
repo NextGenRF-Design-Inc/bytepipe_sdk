@@ -213,7 +213,19 @@ generate
 
   if( ENABLE_DEV_CLOCK_OUT ) begin
   
-    assign dev_clk = dev_clk_in;
+    /* Clock buffer */
+    BUFGCE #(
+      .CE_TYPE ("SYNC"),
+      .IS_CE_INVERTED (1'b0),
+      .IS_I_INVERTED (1'b0)
+    ) 
+    dev_clk_buf_i (
+      .O (dev_clk),
+      .CE (1'b1),
+      .I (dev_clk_in)
+    ); 
+  
+    //assign dev_clk = dev_clk_in;
   
   end else begin
   

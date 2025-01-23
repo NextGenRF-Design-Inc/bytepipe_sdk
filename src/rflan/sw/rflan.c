@@ -288,10 +288,6 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanGpio_Initialize( &RflanGpio, XPAR_PSU_GPIO_0_DEVICE_ID )) != 0)
     printf("%s\r\n",StatusString(status));
 
-  /* Initialize File System*/
-  if((status = RflanFs_Initialize()) != FR_OK)
-    printf("FatFs %s\r\n",StatusString(status));
-
   cli_init_t CliInit = {
       .Callback         = (cli_callback_t)Rflan_CliCallback,
       .CallbackRef      = NULL
@@ -326,6 +322,10 @@ static int32_t Rflan_Initialize( void )
   /* Initialize System Reset */
   if((status = RflanUart_Initialize( &RflanUart, &UartInit )) != 0)
     printf("Rflan Uart %s\r\n",StatusString(status));
+
+  /* Initialize File System*/
+  if((status = RflanFs_Initialize()) != FR_OK)
+    printf("FatFs %s\r\n",StatusString(status));
 
   /* Initialize System Reset */
   if((status = RflanReset_Initialize( &RflanReset )) != 0)
@@ -367,6 +367,9 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanPib_Initialize( &RflanPib, &PibInit )) != 0)
     printf("Rflan Pib Init %s\r\n",StatusString(status));
 
+  /* Execute Init Script */
+  if((status = Rflan_SetupScript( &Cli, "1:/rflan_setup.txt")) != 0 )
+    printf("Rflan Setup Script %s\r\n",StatusString(status));
 
   printf("\r\n\r\n\r\n" );
   printf("************************************************\r\n");
@@ -455,7 +458,9 @@ static int32_t Rflan_Initialize( void )
   if((status = Adrv9001Cli_Initialize( &Cli, &Adrv9001Params )) != 0)
     printf("Adrv9001Cli %s\r\n",StatusString(status));
 
-
+  /* Execute Init Script */
+  if((status = Rflan_SetupScript( &Cli, "1:/adrv9001_setup.txt")) != 0 )
+    printf("Adrv9001 Setup Script %s\r\n",StatusString(status));
 
 #ifdef RFLAN_STREAM_ENABLE
 

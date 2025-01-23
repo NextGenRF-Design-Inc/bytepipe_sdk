@@ -1,0 +1,9 @@
+// The rflan_setup.txt script can be used for configuration 
+// at startup of the rflan application.  Add any CLI commands
+// related to the RFLAN to this script.
+
+// Set IP address to the following
+RflanSetParam IpAddr 192.168.1.88
+
+// Disable IP interface
+RflanSetParam LwipEnable 0
