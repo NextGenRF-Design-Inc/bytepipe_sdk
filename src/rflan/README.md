@@ -10,8 +10,8 @@ To evaluate the RFLAN application, the executables can be downloaded from the la
 
 # Programmable Logic
 
-The RFLAN programmable logic consists of the ADRV9002 IP, ZynqUltrascale+ CPU, and transmit and receive DMAs as shown below.  The programmable logic allows for streaming of IQ data to and from the processor for evaluation of the BytePipe_x9002.  It also serves as a starting point for developing custom applications by inserting custom programmable logic between the ADRV9001 and DMAs which can be used for data transfer or debugging.  This is shown in the [rflan_qpsk example](../rflan_qpsk/README.md).  Additional information regarding the ADRV9002 can be found [here](../adrv9001/README.md).
 
+The RFLAN programmable logic consists of the ADRV9002 IP, ZynqUltrascale+ CPU, and transmit and receive DMAs as shown below.  The programmable logic allows for streaming of IQ data to and from the processor for evaluation of the BytePipe_x9002.  It also serves as a starting point for developing custom applications by inserting custom programmable logic between the ADRV9001 and DMAs which can be used for data transfer or debugging. Additional information regarding the ADRV9002 can be found [here](../adrv9001/README.md).
 To build the programmable logic see `Building Source` found below.
 
 [![hdl_01](docs/hdl_01.png)]()
