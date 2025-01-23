@@ -26,7 +26,6 @@ If you are new to the BytePipe start with the [rflan](src/rflan/README.md) appli
 | [radio_carbon](docs/hardware/RadioCarbon/RadioCarbon.md)            | Radio Carbon RF Front End User Guide                          | 
 | [rflan](src/rflan/README.md)                                        | Production example streaming IQ data to RPU                   | 
 | [rflan_dpd](src/rflan_dpd)                                     | Digital Pre-Distortion example using Radio Carbon and BytePipe SOM | 
-| [rflan_qpsk](src/rflan_qpsk/README.md)                              | QPSK modem example using RPU and HDL Coder from MathWorks          | 
 | [sd_card](docs/sd_card/README.md)                                   | Detailed information on supported micro-SD cards and formats  | 
 | [som_id](docs/som_id/README.md)                                     | Detailed information on identifying SOM models (2CG or 3CG)   | 
 | [Video Tutorials](https://www.youtube.com/playlist?list=PL1O6z4HXixy3uAJCNkjg2Hvm9Dcu4XAUr) | Playlist of video tutorials           | 

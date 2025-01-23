@@ -17,3 +17,93 @@ make -f ../src/rflan/Makefile hdl
 make -f ../src/petalinux/Makefile
 
 ```
+# Frequently Asked Questions / Common Problems
+<br>
+
+<!---
+|Question/Problem|Answer/Solution|
+|-|-|
+|lsusb isn't returning any USB busses/devices|add the following to the bottom of the system-user.dtsi source file: \
+```
+&usb0 {
+    status = "okay";
+};
+  
+&dwc3_0 {
+    status = "okay";
+    dr_mode = "host";
+};
+
+&sdhci1{
+	status = "okay";
+	disable-wp;
+	max-frequency = <50000000>;
+	no-1-8-v;
+};
+
+```|
+--->
+### (1) Question/Problem: lsusb isn't returning any USB busses/devices
+[ Applies to release v10.04.24 and all older releases ]
+<br>
+<br>
+<br>
+**Answer/Solution:** Add information to system-user.dtsi
+
+Add the following
+```
+&usb0 {
+    status = "okay";
+};
+  
+&dwc3_0 {
+    status = "okay";
+    dr_mode = "host";
+};
+```
+directly above 
+
+```
+&sdhci1{
+	status = "okay";
+	disable-wp;
+	max-frequency = <50000000>;
+	no-1-8-v;
+};
+```
+in the system-user.dtsi source file
+
+### (2) Question/Problem: OS cannot connect to USB device and throws this error message: "usb usb1-port1: connect-debounce failed"
+[ Applies to release v10.04.24 and all older releases ]
+<br>
+<br>
+<br>
+**Answer/Solution:** Patch the petalinux kernel
+
+1. Change directories to .../bytepipe_sdk/workspace
+2. Run the following
+   ```
+   make -f ../src/petalinux/Makefile clean project config
+   ``` 
+3. Obtain 0001-usb-dwc3-xilinx-Deselect-the-PIPE-clock-for-USB2.0-o.patch from...
+ - bytepipe_sdk/src/petalinux/
+   - the patch file exists in this directory only for new commits
+ - (or) https://adaptivesupport.amd.com/s/article/76694?language=en_US
+4. Copy the patch file to bytepipe_sdk/workspace/bpLinux/project-spec/meta-user/recipes-kernel/linux/linux-xlnx
+ - Petalinux v2021.1 does not create the folders "recipes-kernel", "linux", and "linux-xlnx", so they will need to be created.
+5. Obtain linux-xlnx_%.bbappend from...
+ - bytepipe_sdk/src/petalinux/
+   - the patch file exists in this directory only for new commits
+ - (or) create it yourself with the following contents:
+   ```
+   SRC_URI_append = " file://0001-usb-dwc3-xilinx-Deselect-the-PIPE-clock-for-USB2.0-o.patch"
+  
+   FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+   ```
+6. Copy linux-xlnx_%.bbappend to bytepipe_sdk/workspace/bpLinux/project-spec/meta-user/recipes-kernel/linux 
+7. Run the following
+   ```
+   make -f ../src/petalinux/Makefile build package
+   ``` 
+
+
