@@ -404,16 +404,12 @@ static int32_t Rflan_Initialize( void )
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
     printf("%s\r\n",StatusString(status));
 
-  /* Drive TCXO enable pin (pulled high on power up) */
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
 
   /* Configure Analog GPIO as outputs */
   Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
   Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
   Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
 
-  /* Drive TCXO enable pin (pulled high on power up) */
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
 
   if( Rflan_GetHwVer() == 2 )
   {
