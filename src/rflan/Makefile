@@ -24,7 +24,7 @@ clean:
   
 profile:	
 	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \
-  source $(SDK_SRCDIR)/adrv9001/adrv9001.sh; profile_parse $$C99_DIR $(PROJECT_DIR)/sw/adrv9001/profile
+	source $(SDK_SRCDIR)/adrv9001/adrv9001.sh; profile_parse $$C99_DIR $(PROJECT_DIR)/sw/adrv9001/profile "rf1"
 	
   
 

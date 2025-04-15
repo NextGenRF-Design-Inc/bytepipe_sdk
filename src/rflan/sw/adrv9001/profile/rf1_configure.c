@@ -23,8 +23,8 @@
 /* ADRV9001 Plugin: v0.27.0*/
 
 
-#include "configure.h"
-int configure(adi_adrv9001_Device_t * adrv9001Device_0)
+#include "rf1_configure.h"
+int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 

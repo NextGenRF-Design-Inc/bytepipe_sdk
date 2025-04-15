@@ -1,6 +1,6 @@
 #include "adrv9001.h"
-#ifndef _INITIALIZE_H_
-#define _INITIALIZE_H_
+#ifndef _RF1_CONFIGURE_H_
+#define _RF1_CONFIGURE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,28 +30,16 @@ extern "C" {
 /* ADRV9001 Plugin: v0.27.0*/
 
 
-#include "adi_adrv9001.h"
-#include "adi_adrv9001_arm.h"
+#include "adi_adrv9001_bbdc.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_gpio.h"
-#include "adi_adrv9001_mcs.h"
-#include "adi_adrv9001_powermanagement.h"
 #include "adi_adrv9001_powersavingandmonitormode.h"
 #include "adi_adrv9001_radio.h"
 #include "adi_adrv9001_rx.h"
-#include "adi_adrv9001_ssi.h"
-#include "adi_adrv9001_stream.h"
+#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 
-extern adi_adrv9001_Init_t initialize_init_8;
-extern uint8_t initialize_binary_10[];
-extern uint8_t initialize_binary_11[];
-extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_14[];
-extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_15[];
-extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_16[];
-extern adi_adrv9001_RxGainTableRow_t initialize_gainTableRows_17[];
-extern adi_adrv9001_TxAttenTableRow_t initialize_attenTableRows_18[];
 #define ADI_HANDLE_ERROR(error_code, device_context) if (0 != error_code) \
 { \
     printf("Device API call returned non-zero error code\n"); \
@@ -64,7 +52,7 @@ extern adi_adrv9001_TxAttenTableRow_t initialize_attenTableRows_18[];
     printf("Variable name: %s \n", device_context->common.error.varName); \
     printf("Error message: %s \n", device_context->common.error.errormessage); \
 }
-int initialize(adi_adrv9001_Device_t * adrv9001Device_0);
+int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0);
 
 
 #ifdef __cplusplus

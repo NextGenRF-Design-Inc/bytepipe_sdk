@@ -1,5 +1,5 @@
-#ifndef _CALIBRATE_H_
-#define _CALIBRATE_H_
+#ifndef _RF1_CALIBRATE_H_
+#define _RF1_CALIBRATE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +29,7 @@ extern "C" {
 /* ADRV9001 Plugin: v0.27.0*/
 
 
+#include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_rx.h"
 #include "adi_adrv9001_rx_gaincontrol.h"
@@ -49,7 +50,7 @@ extern "C" {
     printf("Variable name: %s \n", device_context->common.error.varName); \
     printf("Error message: %s \n", device_context->common.error.errormessage); \
 }
-int calibrate(adi_adrv9001_Device_t * adrv9001Device_0);
+int rf1_calibrate(adi_adrv9001_Device_t * adrv9001Device_0);
 
 
 #ifdef __cplusplus
