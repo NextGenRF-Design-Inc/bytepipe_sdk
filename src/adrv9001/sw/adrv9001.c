@@ -210,10 +210,6 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance, adrv9001_profile_t *Profile 
   if( adi_adrv9001_HwReset(&Instance->Device) != 0)
     return Adrv9001Status_ProfileInitErr;
 
-  /* Configure TCXO Enable Pin */
-  Adrv9001_SetAnalogGpioDirection( Instance, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetGpioPinLevel( Instance, ADI_ADRV9001_GPIO_ANALOG_07, Instance->UseExtClock? ADI_ADRV9001_GPIO_PIN_LEVEL_LOW : ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
-
   /* Initialize Analog */
   if( adi_adrv9001_InitAnalog(&Instance->Device, Profile->Init, ADI_ADRV9001_DEVICECLOCKDIVISOR_2) != 0)
     return Adrv9001Status_InitAnalogErr;
@@ -2507,8 +2503,14 @@ int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )
 
   AxiAdrv9001_ResetbPinSet( &Adrv9001->Axi, pinLevel );
 
+  /* Configure TCXO Enable Pin */
+  if( pinLevel > 0 )
+  {
+	  Adrv9001_DelayUs(devHalCfg, 1000);
 
-
+	  Adrv9001_SetAnalogGpioDirection( Adrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+	  Adrv9001_SetGpioPinLevel( Adrv9001, ADI_ADRV9001_GPIO_ANALOG_07, Adrv9001->UseExtClock? ADI_ADRV9001_GPIO_PIN_LEVEL_LOW : ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
+  }
   return Adrv9001Status_Success;
 }
 
