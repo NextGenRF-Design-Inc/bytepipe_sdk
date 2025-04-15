@@ -145,7 +145,11 @@ package_hdl()
   project="$(basename $srcDir)"
     
   # Abstract working directory
-  wrkDir=$1 
+  wrkDir=$(pwd)
+   
+  if [[ $wrkDir == *"cygdrive"* ]]; then
+    wrkDir=$(realpath $(cygpath -w $wrkDir))
+  fi  
    
   # Make projct directory
   mkdir -p $wrkDir/$project
