@@ -52,6 +52,7 @@ download_sdk()
 # Inputs:	
 #	$1 = Directory or zip file containing TES generated c99 code
 #	$2 = Directory to be updated with parsed c99 code
+# $3 = Name of profile
 # Prerequisites: none
 profile_parse()
 {
@@ -63,9 +64,13 @@ profile_parse()
       echo "Enter path of directory to ouput parsed C99 code: "  
       read outDir
       
+      echo "Enter name of profile: "  
+      read name      
+      
   else
     FILENAME=$1
 	  outDir=$2    
+    name=$3
   fi
 
   # Indicate Build
@@ -83,6 +88,8 @@ profile_parse()
 	fi
 		
 	echo "output Directory: $2"
+  
+  echo "Profile Name: $3"
 
 	# Clean destination directory
 	rm -rf $outDir
@@ -111,6 +118,19 @@ profile_parse()
 	sed -i -e '/adi_fpga9001_Version_t/,+3d' $outDir/initialize.c
   
 	sed -i '/fpga9001Device_0/d' $outDir/*
+  
+  for f in $outDir/* ; do mv -- "$outDir/$(basename ${f})" "$outDir/${name}_$(basename ${f})" ; done  
+  
+  sed -i "s/initialize/${name}_initialize/g" $outDir/*
+  sed -i "s/calibrate/${name}_calibrate/g" $outDir/*
+  sed -i "s/configure/${name}_configure/g" $outDir/*  
+  
+  sed -i "s/_INITIALIZE_H_/_${name^^}_INITIALIZE_H_/g" $outDir/*    
+  sed -i "s/_CONFIGURE_H_/_${name^^}_CONFIGURE_H_/g" $outDir/*   
+  sed -i "s/_CALIBRATE_H_/_${name^^}_CALIBRATE_H_/g" $outDir/*     
+
+
+  
 }
 
 
@@ -126,10 +146,10 @@ package_hdl()
     
   # Abstract working directory
   wrkDir=$(pwd)
-  
-if [[ $wrkDir == *"cygdrive"* ]]; then
-  wrkDir=$(realpath $(cygpath -w $wrkDir))
-fi  
+   
+  if [[ $wrkDir == *"cygdrive"* ]]; then
+    wrkDir=$(realpath $(cygpath -w $wrkDir))
+  fi  
    
   # Make projct directory
   mkdir -p $wrkDir/$project

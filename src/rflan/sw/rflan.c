@@ -57,6 +57,9 @@
 #include "status.h"
 #include "xiicps.h"
 #include "eeprom.h"
+#include "rf1_initialize.h"
+#include "rf1_configure.h"
+#include "rf1_calibrate.h"
 
 extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
@@ -395,21 +398,20 @@ static int32_t Rflan_Initialize( void )
       .TxAttn = { 0, 0 },
       .TxBoost = { true, true },
       .TxEnableMode = ADI_ADRV9001_PIN_MODE,
-      .Rx1RssiOffsetdB = 0,
-      .Rx2RssiOffsetdB = 0,
-      .Init = &initialize_init_8
+      .Rx1RssiOffsetdB = -20,
+      .Rx2RssiOffsetdB = -20,
+      .Init = &rf1_initialize_init_8,
+	  .InitializeFn = rf1_initialize,
+      .CalibrateFn = rf1_calibrate,
+      .ConfigureFn = rf1_configure,
+	  .Malloc = pvPortMalloc,
+	  .Free = vPortFree,
+	  .UseExtClock = false
   };
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
     printf("%s\r\n",StatusString(status));
-
-
-  /* Configure Analog GPIO as outputs */
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-
 
   if( Rflan_GetHwVer() == 2 )
   {
@@ -424,6 +426,19 @@ static int32_t Rflan_Initialize( void )
     RflanVcTcxoDac = ADI_ADRV9001_AUXDAC3;
   }
 
+  /* Configure Analog GPIO as outputs */
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+
+  /* Set DAC Voltage */
+  Adrv9001_SetDacEnable( &RflanAdrv9001, RflanVcTcxoDac, true );
+  Adrv9001_SetDacVoltage( &RflanAdrv9001, RflanVcTcxoDac, 0.9);
+
+  /* Init Adrv9001 Params */
   adrv9001_params_init_t Adrv9001ParamsInit = {
       .Adrv9001 = &RflanAdrv9001,
       .Rx1LnaEnablePin = RflanRx1LnaEnablePin,
@@ -431,24 +446,9 @@ static int32_t Rflan_Initialize( void )
       .VcTcxoDac = RflanVcTcxoDac,
       .VcTcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07
   };
-  /* Init Adrv9001 Params */
+
   if((status = Adrv9001Params_Initialize( &Adrv9001Params, &Adrv9001ParamsInit)) != 0 )
     printf("Adrv9001Params_Initialize %s\r\n",StatusString(status));
-
-
-  Adrv9001_SetRxRssiOffset( &RflanAdrv9001, ADI_CHANNEL_1, -20 );
-  Adrv9001_SetRxRssiOffset( &RflanAdrv9001, ADI_CHANNEL_2, -20 );
-
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_07, ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
-
-  Adrv9001_SetDacEnable( &RflanAdrv9001, RflanVcTcxoDac, true );
-  Adrv9001_SetDacVoltage( &RflanAdrv9001, RflanVcTcxoDac, 0.9);
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001Cli_Initialize( &Cli, &Adrv9001Params )) != 0)

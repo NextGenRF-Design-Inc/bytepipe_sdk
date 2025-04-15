@@ -50,6 +50,7 @@
 #include "adi_adrv9001_error.h"
 #include "adi_adrv9001_radio_types.h"
 #include "adi_adrv9001_rx_gaincontrol_types.h"
+#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_arm.h"
 #include "adi_adrv9001_radio.h"
 #include "adi_adrv9001_profileutil.h"
@@ -66,6 +67,15 @@
 #include "jsmn.h"
 #include "adi_adrv9001_profileutil.h"
 #include "adrv9001_Init_t_parser.h"
+#include "adi_adrv9001_arm.h"
+#include "adi_adrv9001_cals.h"
+#include "adi_adrv9001_gpio.h"
+#include "adi_adrv9001_mcs.h"
+#include "adi_adrv9001_stream.h"
+#include "adi_adrv9001_powermanagement.h"
+#include "adi_adrv9001_powersavingandmonitormode.h"
+#include "adi_adrv9001_bbdc.h"
+
 
 #ifndef ADRV9001_STATUS_OFFSET
 #define ADRV9001_STATUS_OFFSET    (0)
@@ -168,6 +178,12 @@ typedef void (*adrv9001_rf_state_cb_t)( void *CallbackRef, adi_adrv9001_ChannelS
 
 typedef void (*adrv9001_hop_irq_cb_t)( void *CallbackRef );
 
+typedef int  (*adrv9001_initialize_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+typedef int  (*adrv9001_calibrate_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+typedef int  (*adrv9001_configure_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+typedef void* (*adrv9001_malloc_t)(size_t);
+typedef void  (*adrv9001_free_t)(void *);
+
 typedef struct {
   adi_adrv9001_Init_t                      *Init;
   uint8_t                                  *StreamImageBuf;
@@ -237,6 +253,7 @@ typedef struct {
   bool                                  Tx2ToRx2Loopback;
   bool                                  Rx1ToTx1Loopback;
   bool                                  Rx2ToTx2Loopback;
+  bool                                  UseExtClock;
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
@@ -250,6 +267,11 @@ typedef struct {
   adi_adrv9001_SsiTestModeData_e        Rx2TestMode;
   adi_adrv9001_SsiTestModeData_e        Tx1TestMode;
   adi_adrv9001_SsiTestModeData_e        Tx2TestMode;
+  adrv9001_initialize_fn_t              InitializeFn;
+  adrv9001_calibrate_fn_t               CalibrateFn;
+  adrv9001_configure_fn_t               ConfigureFn;
+  adrv9001_malloc_t                     Malloc;
+  adrv9001_free_t                       Free;
 }adrv9001_t;
 
 typedef struct {
@@ -273,9 +295,15 @@ typedef struct {
   float                                 Rx1RssiOffsetdB;
   float                                 Rx2RssiOffsetdB;
   adi_adrv9001_Init_t                  *Init;
+  adrv9001_initialize_fn_t              InitializeFn;
+  adrv9001_calibrate_fn_t               CalibrateFn;
+  adrv9001_configure_fn_t               ConfigureFn;
+  adrv9001_malloc_t                     Malloc;
+  adrv9001_free_t                       Free;
+  bool                                  UseExtClock;
 }adrv9001_init_t;
 
-void   *Adrv9001_Calloc                 ( int count, int size );
+
 int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance, adrv9001_profile_t *Profile  );
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );

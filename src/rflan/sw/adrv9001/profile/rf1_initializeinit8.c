@@ -13,7 +13,7 @@
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 
-adi_adrv9001_Init_t initialize_init_8 = { 
+adi_adrv9001_Init_t rf1_initialize_init_8 = { 
 		.clocks = { 
 		.deviceClock_kHz = 38400, 
 		.clkPllVcoFreq_daHz = 884736000, 

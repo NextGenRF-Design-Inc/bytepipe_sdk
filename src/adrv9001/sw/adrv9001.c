@@ -38,11 +38,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "adrv9001.h"
-#include "initialize.h"
-#include "calibrate.h"
-#include "configure.h"
 #include "sleep.h"
 #include "math.h"
+#include "adrv9001_arm_image.h"
 
 
 #define ADI_CHANNEL_RX1_INIT_MASK               (0x40)
@@ -54,6 +52,20 @@
 #define ADI_ADRV9001_RX_INIT_CALS (ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY)
 #define ADI_ADRV9001_TX_INIT_CALS (ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY)
 
+void *Adrv9001_Calloc( adrv9001_t *Instance, int count, int size )
+{
+  uint8_t *p = Instance->Malloc(count * size);
+
+  if( p != NULL )
+  {
+    for( int i = 0; i < (count * size); i++)
+    {
+      p[i] = 0;
+    }
+  }
+
+  return p;
+}
 
 static int32_t Adrv9001_ConfigureProfile( adrv9001_t *Instance, int32_t *Rx1ChfCoeff, int32_t *Rx2ChfCoeff )
 {
@@ -122,7 +134,7 @@ static int32_t Adrv9001_ConfigureProfile( adrv9001_t *Instance, int32_t *Rx1ChfC
   {
     Instance->HopTableSize = ADRV9001_MAX_HOP_TABLE_SIZE;
 
-    Instance->HopTable = calloc(1, sizeof(adi_adrv9001_FhHopFrame_t) * Instance->HopTableSize );
+    Instance->HopTable = Adrv9001_Calloc(Instance, 1, sizeof(adi_adrv9001_FhHopFrame_t) * Instance->HopTableSize );
 
     if( Instance->HopTable == NULL )
       return Adrv9001Status_MemoryErr;
@@ -208,7 +220,7 @@ int32_t Adrv9001_LoadProfile( adrv9001_t *Instance, adrv9001_profile_t *Profile 
   if( adi_adrv9001_Stream_Image_Write(&Instance->Device, 0, Profile->StreamImageBuf, 32768, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
     return Adrv9001Status_StreamImageWriteErr;
 
-  if( adi_adrv9001_arm_Image_Write(&Instance->Device, 0, initialize_binary_10, 310272, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
+  if( adi_adrv9001_arm_Image_Write(&Instance->Device, 0, adrv9001_arm_binary, ADRV9001_ARM_IMAGE_SIZE, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
     return Adrv9001Status_ArmImageWriteErr;
 
   if( adi_adrv9001_arm_Profile_Write(&Instance->Device, Profile->Init) != 0)
@@ -700,13 +712,13 @@ int32_t Adrv9001_LoadDefaultProfile( adrv9001_t *Instance )
 
   printf("\r\nAdrv9001 Load Profile\r\n\r\n");
 
-  if((status = initialize( &Instance->Device )) != 0)
+  if((status = Instance->InitializeFn( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileInitErr;
 
-  if((status = calibrate( &Instance->Device )) != 0)
+  if((status = Instance->CalibrateFn( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileCalErr;
 
-  if((status = configure( &Instance->Device )) != 0)
+  if((status = Instance->ConfigureFn( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileCfgErr;
 
   return Adrv9001Status_Success;
@@ -1100,6 +1112,7 @@ int32_t Adrv9001_SetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 
   return Adrv9001Status_Success;
 }
+
 int32_t Adrv9001_GetRxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_rx_data_src_t *Value )
 {
   bool Loopback;
@@ -1117,6 +1130,7 @@ int32_t Adrv9001_GetRxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e 
   
   return Adrv9001Status_Success;
 }
+
 int32_t Adrv9001_GetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_tx_data_src_t *Value )
 {
   axi_adrv9001_data_src_t AxiAdrv9001DataSrc = AxiAdrv9001_GetTxDataSrc( &Instance->Axi, channel);
@@ -1232,6 +1246,15 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   if( Init->Init == NULL )
 	return Adrv9001Status_InvalidParameter;
 
+  if( Init->InitializeFn == NULL )
+	return Adrv9001Status_InvalidParameter;
+
+  if( Init->CalibrateFn == NULL )
+	return Adrv9001Status_InvalidParameter;
+
+  if( Init->ConfigureFn == NULL )
+	return Adrv9001Status_InvalidParameter;
+
   Instance->Params = Init->Init;
   Instance->IrqInstance = Init->IrqInstance;
   Instance->StateCallback = Init->StateCallback;
@@ -1246,6 +1269,11 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->TxEnableMode = Init->TxEnableMode;
   Instance->Rx1RssiOffsetdB = Init->Rx1RssiOffsetdB;
   Instance->Rx2RssiOffsetdB = Init->Rx2RssiOffsetdB;
+  Instance->InitializeFn = Init->InitializeFn;
+  Instance->ConfigureFn = Init->ConfigureFn;
+  Instance->CalibrateFn = Init->CalibrateFn;
+  Instance->Malloc = Init->Malloc;
+  Instance->Free = Init->Free;
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
@@ -2357,6 +2385,7 @@ int32_t Adrv9001_GetDacVoltage( adrv9001_t *Instance, adi_adrv9001_AuxDac_e Chan
 
   return Adrv9001Status_Success;
 }
+
 int32_t Adrv9001_SetLogPath(adrv9001_t *Instance, char* LogPath)
 {
   if(strlen(LogPath) < ADRV9001_LOG_PATH_SIZE)
@@ -2385,7 +2414,7 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
   {
     UINT len = 0;
 
-    char *str = calloc(1,1024);
+    char *str = Adrv9001_Calloc(Adrv9001, 1,1024);
 
     vsnprintf( str, 1023, comment, argp );
 
@@ -2394,7 +2423,7 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 
     f_sync(&Adrv9001->LogFil);
 
-    free(str);
+    Adrv9001->Free(str);
   }
 #endif
   return Adrv9001Status_Success;
@@ -2474,6 +2503,14 @@ int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )
 
   AxiAdrv9001_ResetbPinSet( &Adrv9001->Axi, pinLevel );
 
+  /* Configure TCXO Enable Pin */
+  if( pinLevel > 0 )
+  {
+	  Adrv9001_DelayUs(devHalCfg, 1000);
+
+	  Adrv9001_SetAnalogGpioDirection( Adrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+	  Adrv9001_SetGpioPinLevel( Adrv9001, ADI_ADRV9001_GPIO_ANALOG_07, Adrv9001->UseExtClock? ADI_ADRV9001_GPIO_PIN_LEVEL_LOW : ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
+  }
   return Adrv9001Status_Success;
 }
 
