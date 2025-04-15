@@ -10,7 +10,7 @@ To evaluate the RFLAN application, the executables can be downloaded from the la
 
 # Programmable Logic
 
-The RFLAN programmable logic consists of the ADRV9002 IP, ZynqUltrascale+ CPU, and transmit and receive DMAs as shown below.  The programmable logic allows for streaming of IQ data to and from the processor for evaluation of the BytePipe_x9002.  It also serves as a starting point for developing custom applications by inserting custom programmable logic between the ADRV9001 and DMAs which can be used for data transfer or debugging.  This is shown in the [rflan_qpsk example](../rflan_qpsk/README.md).  Additional information regarding the ADRV9002 can be found [here](../adrv9001/README.md).
+The RFLAN programmable logic consists of the ADRV9002 IP, ZynqUltrascale+ CPU, and transmit and receive DMAs as shown below.  The programmable logic allows for streaming of IQ data to and from the processor for evaluation of the BytePipe_x9002.  It also serves as a starting point for developing custom applications by inserting custom programmable logic between the ADRV9001 and DMAs which can be used for data transfer or debugging. Additional information regarding the ADRV9002 can be found [here](../adrv9001/README.md).
 
 To build the programmable logic see `Building Source` found below.
 
@@ -111,6 +111,8 @@ Please review the video found below for additional information.
 
 [![building_rpu](docs/building_rpu.png)](https://youtu.be/-x7LC3vSTFg)
 
+
+
 # Building ADRV9002 Profile
 
 The ADRV9002 configuration is generated from Analog Devices Transceiver Evaluation Software (TES).  The RFLAN includes a default configuration found in `src/rflan/sw/adrv9001/profile'.  To update the profile, new settings need to be exported from TES and then compiled into the RFLAN. 
@@ -127,15 +129,9 @@ Please review the video found below for additional information.
 
 # Programming BytePipe RFLAN
 
-To program the BytePipe with the RFLAN application, execute the following command once the code has been built.  This will create a folder called `sd_card` with the contents to be copied to the sd card.  
+Once the RPU code has been built, a zipped folder called `sd_card` will be created in the workspace/rflan directory. This zipped folder contains the contents to be copied to the sd card.  
 
-```
-make -f ../src/rflan/Makefile sd_card
-```
-
-Please review the video found below for additional information.
-
-[![programming_sd_card](docs/programming_sd_card.png)](https://youtu.be/JeQZI49h6uE)
+Make sure to unzip `sd_card` before copying its contents to the SD card.
 
 # MATLAB bpToolbox
 
