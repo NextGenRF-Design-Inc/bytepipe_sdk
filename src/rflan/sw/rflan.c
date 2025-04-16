@@ -406,7 +406,7 @@ static int32_t Rflan_Initialize( void )
       .ConfigureFn = rf1_configure,
 	  .Malloc = pvPortMalloc,
 	  .Free = vPortFree,
-	  .UseExtClock = false
+	  .UseExtClock = DEFAULT_REF_CLK_EXTERNAL
   };
 
   /* Initialize ADRV9001 CLI */
