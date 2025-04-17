@@ -1274,6 +1274,7 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->CalibrateFn = Init->CalibrateFn;
   Instance->Malloc = Init->Malloc;
   Instance->Free = Init->Free;
+  Instance->UseExtClock = Init->UseExtClock;
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
