@@ -2,7 +2,7 @@
 
 # Building Source
 
-Building the source files is straightforward using the supplied build scripts.  The first step in building the Petalinux image is to build the HDL.  Once the HDL is built the Petalinux Makefile can be ran to build the Linux image.  The example outlines this process using a Linux machine running Unbuntu 18.04.
+Building the source files is straightforward using the supplied build scripts.  The first step in building the Petalinux image is to build the HDL.  Once the HDL is built the Petalinux Makefile can be ran to build the Linux image.  The example outlines this process using a Linux machine running Unbuntu v18.04 or v20.04.
 
 ```
 source ~/tools/Vivado/2021.1/settings64.sh
