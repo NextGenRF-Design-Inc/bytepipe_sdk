@@ -172,7 +172,7 @@ J601 is a board to board connector which provides access to power and RF control
 
 # Boot Switch
 
-The boot switch allows the user to select the location of boot code for the baseband processor.  When SD is selected the BBP will boot from the external SD card.  When EMMC is selected the BBP will boot from the 8GB on-board eMMC flash.    
+The boot switch allows the user to select the location of boot code for the baseband processor.  When SD is selected the BBP will boot from the external SD card.  When EMMC is selected the BBP will boot from the 4GB on-board eMMC flash.    
 
 ![boot_switch](boot_switch.png)
 
