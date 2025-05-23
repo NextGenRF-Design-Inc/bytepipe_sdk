@@ -154,11 +154,11 @@ J601 is a board to board connector which provides access to power and RF control
 |                  | RF External Clock             | RF_CLK_P              | 5   | 6   | MCS_N                 | ADRV9002 MCS- (D8)            |                  |
 |                  | Ground                        | GND                   | 7   | 8   | GND                   | Ground                        |                  |
 |                  | ADRV9002 AGPIO_2 (E3)         | AGPIO_2               | 9   | 10  | AUXADC_0              | ADRV9002 AUXADC_0 (H11)       |                  |
-|                  | ADRV9002 AGPIO_4 (F4)         | AGPIO_4               | 11  | 12  | AUXADC_1              | ADRV9002 AUXADC_1 (B8)        |                  |
-| RX1 Enable       | ADRV9002 AGPIO_6 (G6)         | AGPIO_6               | 13  | 14  | GND                   | Ground                        |                  |
-|                  | Ground                        | GND                   | 15  | 16  | AGPIO_1               | ADRV9002 AGPIO_1 (F10)        |                  |
-|                  | Ground                        | GND                   | 17  | 18  | AGPIO_3               | ADRV9002 AGPIO_3 (F5)         |                  |
-|                  | Ground                        | GND                   | 19  | 20  | AGPIO_5               | ADRV9002 AGPIO_5 (G4)         | RX2 Enable       |
+|                  | ADRV9002 AGPIO_8 (F4)         | AGPIO_8               | 11  | 12  | AUXADC_1              | ADRV9002 AUXADC_1 (B8)        |                  |
+| RX1 Enable       | ADRV9002 AGPIO_1 (G6)         | AGPIO_1               | 13  | 14  | GND                   | Ground                        |                  |
+|                  | Ground                        | GND                   | 15  | 16  | AGPIO_5               | ADRV9002 AGPIO_5 (F10)        |                  |
+|                  | Ground                        | GND                   | 17  | 18  | AGPIO_0               | ADRV9002 AGPIO_0 (F5)         |                  |
+|                  | Ground                        | GND                   | 19  | 20  | AGPIO_9               | ADRV9002 AGPIO_9 (G4)         | RX2 Enable       |
 |                  | MIO Reference Voltage         | VCCIO                 | 21  | 22  | GND                   | Ground                        |                  |
 |                  | Ground                        | GND                   | 23  | 24  | GND                   | Ground                        |                  |
 |                  | Ground                        | GND                   | 25  | 26  | GND                   | Ground                        |                  |
