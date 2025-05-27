@@ -258,10 +258,11 @@ The BytePipe_x9002 RF interface allows for a wide range of applications.  The AD
 
 # RF Clock
 
-The RF clock provides the ADRV9002 a reference for its internal PLLs and clocks.  It can be supplied using an on-board 38.4MHz VC-TCXO or supplied externally by the host through J601.  A mux allows the ADRV9002 to control which reference clock to use.  By default, the VC-TCXO is enabled.  The VC-TCXO can be fine-tuned using the AGPIO0 DAC from the ADRV9002.  For applications requiring specific clocking requirements or for multi-chip synchronization a clock can be supplied externally through J601.  
+The RF clock provides the ADRV9002 a reference for its internal PLLs and clocks.  It can be supplied using an on-board 38.4MHz VC-TCXO or supplied externally by the host through J601.  A mux allows the ADRV9002 to control which reference clock to use.  By default, the VC-TCXO is enabled.  The VC-TCXO can be fine-tuned using the AGPIO3 DAC from the ADRV9002.  
 
 ![rf_clk](rf_clk.png)
 
+For applications requiring specific clocking requirements or for multi-chip synchronization a clock can be supplied externally through J601.  Select the external clock (supplied through J601) by changing "DEFAULT_REF_CLK_EXTERNAL=0" in make_sw.tcl (bytepipe_sdk/src/rflan/sw/make_sw.tcl) to "DEFAULT_REF_CLK_EXTERNAL=1".
 
 # Gigabit Ethernet
 
