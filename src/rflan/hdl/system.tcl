@@ -698,6 +698,7 @@ Port;FD4A0000;FD4AFFFF;0|FPD;DPDMA;FD4C0000;FD4CFFFF;0|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.PSU__USB0__RESET__ENABLE {0} \
    CONFIG.PSU__USB1__RESET__ENABLE {0} \
    CONFIG.PSU__USB2_0__EMIO__ENABLE {0} \
+   CONFIG.PSU__USB3_0__EMIO__ENABLE {0} \
    CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE {0} \
    CONFIG.PSU__USB__RESET__MODE {Boot Pin} \
    CONFIG.PSU__USB__RESET__POLARITY {Active Low} \
@@ -935,6 +936,19 @@ proc create_root_design { parentCell } {
   connect_bd_net -net tx2_dma_m_axis_xfer_req [get_bd_pins adrv9002_0/tx2_pl_en] [get_bd_pins tx2_dma/m_axis_xfer_req]
 
   # Create address segments
+  assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
+  assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces rx1_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
+  assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces rx2_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
+  assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces rx2_dma/m_dest_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
+  assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces tx1_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
+  assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces tx1_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
+  assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_DDR_LOW] -force
+  assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces tx2_dma/m_src_axi] [get_bd_addr_segs cpu/sys_ps8/SAXIGP3/HP1_LPS_OCM] -force
+  assign_bd_address -offset 0x80000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs adrv9002_0/s_axi/reg0] -force
+  assign_bd_address -offset 0x80010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx1_dma/s_axi/axi_lite] -force
+  assign_bd_address -offset 0x80020000 -range 0x00010000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs rx2_dma/s_axi/axi_lite] -force
+  assign_bd_address -offset 0x80030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx1_dma/s_axi/axi_lite] -force
+  assign_bd_address -offset 0x80040000 -range 0x00010000 -target_address_space [get_bd_addr_spaces cpu/sys_ps8/Data] [get_bd_addr_segs tx2_dma/s_axi/axi_lite] -force
 
 
   # Restore current instance
