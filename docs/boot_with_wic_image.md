@@ -34,6 +34,21 @@ cd <petalinux project directory> && \
 petalinux-package --wic; \
 cd <original directory>
 ```
+**(3)** flash .wic image onto sd card
+
+/dev/sdx represents a general sd-card. Your sd-card will show up in your build machine's /dev directory is sda, sdb, sdc, ...
+
+```
+wic_image=<path to SD (.wic) image file>
+sudo dd if=$wic_image of=/dev/sdx conv=fsync
+sudo sync
+sudo umount /dev/sdx*
+```
+
+**(4)** Insert sd-card into HDK sd-card slot and turn HDK power on.
+
+Analyze the boot log to identify any error messages that may appear.
+
 
 ### SD-first, eMMC boot:
 <br />
