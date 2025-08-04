@@ -24,6 +24,8 @@ This section assumes that your project has already been built and all necessary 
 
 **(3)** Now, exit the config menu to lock-in changes.
 
+![exit_config](/docs/exit_config.png)
+
 **(4)** Create a .wks file
 
 .wks file example:
