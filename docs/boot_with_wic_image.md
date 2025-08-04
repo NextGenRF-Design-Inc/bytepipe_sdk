@@ -3,12 +3,15 @@
 ---
 
 # Linux OS Boot options using a .wic image
-This section assumes that your project has already been built and all necessary artifacts are available for packaging into a .wic file.
-
+This tutorial assumes that you have already created your petalinux project using petalinux-create
 <br />
 
 ### SD boot:
 **(1)** Use petalinux-config to designate rootfs type as EXT4
+
+```
+petalinux-config -p <path to petalinux project directory>/ --get-hw-description=<path to directory that contains .xsa file>/<.xsa file>
+```
 
 ![image_pack_config](/docs/image_pack_config.png)
 
@@ -26,7 +29,12 @@ This section assumes that your project has already been built and all necessary 
 
 ![exit_config](/docs/exit_config.png)
 
-**(4)** Create a .wks file
+**(4)** Build using petalinux-build
+
+```
+petalinux-build -p <path to petalinux project directory>/ || true
+```
+**(5)** Create a .wks file
 
 .wks file example:
 
@@ -34,7 +42,7 @@ This section assumes that your project has already been built and all necessary 
 part /boot --source bootimg-partition --ondisk mmcblk1 --fstype=vfat --label boot --active --align 4 --fixed-size 128M
 part /     --source rootfs            --ondisk mmcblk1 --fstype=ext4 --label root          --align 4 --fixed-size 2G
 ```
-**(5)** Package build artifacts as .wic
+**(6)** Package build artifacts as .wic
 
 The following assumes that you are currently in a directory that is not your petalinux project directory:
 
@@ -52,7 +60,7 @@ cd <petalinux project directory> && \
 petalinux-package --wic; \
 cd <original directory>
 ```
-**(6)** flash .wic image onto sd card
+**(7)** flash .wic image onto sd card
 
 /dev/sdx represents a general sd-card. Your sd-card will show up in your build machine's /dev directory is sda, sdb, sdc, ...
 
@@ -63,7 +71,7 @@ sudo sync
 sudo umount /dev/sdx*
 ```
 
-**(7)** Insert sd-card into HDK sd-card slot and turn HDK power on.
+**(8)** Insert sd-card into HDK sd-card slot and turn HDK power on.
 
 Analyze the boot log to identify any error messages that may appear.
 
