@@ -86,6 +86,8 @@ The second will be zipped and copied to the "boot" partition of the sd-card for 
 
 **(1)** Build SD .wic image
 
+Follow the diections under [SD boot](#sd-boot).
+
 **(2)** Build eMMC .wic image
 <br />
 
