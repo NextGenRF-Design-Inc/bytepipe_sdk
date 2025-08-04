@@ -186,3 +186,25 @@ Analyze the boot log to identify any error messages that may appear.
 <br />
 
 ### JTAG-first, eMMC boot:
+
+**(1)** Build eMMC .wic image
+
+Follow the diections under [Create eMMC Boot Image](#create-emmc-boot-image).
+
+**(2)** Compress .wic file using gzip
+
+```
+gzip -k <address of .wic file>
+```
+**(3)** Make sure the u-boot bsp.cfg files contains the following:
+
+bsp.cfg is located at \<petalinux project directory>/project-spec/meta-user/recipes-bsp/u-boot/files/bsp.cfg
+
+```
+CONFIG_ZYNQ_GEM=y
+CONFIG_DM_ETH=y
+CONFIG_NET=y
+CONFIG_NET_RANDOM_ETHADDR=y
+```
+
+Follow the diections under [Create eMMC Boot Image](#create-emmc-boot-image).
