@@ -23,6 +23,8 @@ petalinux-config -p <path to petalinux project directory>/ --get-hw-description=
 
 ![dev_node_sd_device](/docs/dev_node_sd_device.png)
 
+My sd-card mmc device is set to be mmc0 in my device tree. "mmc0" is associated with "mmcblk0"
+
 ![edit_dev_node_sd_device](/docs/edit_dev_node_sd_device.png)
 
 **(3)** Now, exit the config menu to lock-in changes.
@@ -34,7 +36,7 @@ petalinux-config -p <path to petalinux project directory>/ --get-hw-description=
 ```
 petalinux-build -p <path to petalinux project directory>/ || true
 ```
-**(5)** Create a .wks file
+**(5)** Create a .wks file (If using default rootfs.wks file, go to step 6)
 
 .wks file example:
 
