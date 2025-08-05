@@ -164,9 +164,28 @@ sudo service xinetd restart
 ```
 **or**
 ```
-sudo service xinetd start
 sudo service xinetd stop
+sudo service xinetd start
 ```
+
+### TFTP Server Test
+
+**(1)** Create a file named "test" with some content and save it in the "tftpboot" directory.
+
+**(2)** Obtain the IP address of the TFTP server by using the "ifconfig" command.
+
+**(3)** Open TFTP session:
+
+```
+tftp <ip address>
+```
+
+**(4)** Test the tftp server
+
+```
+tftp> get test
+```
+
 ### SD-first, eMMC boot:
 
 Two sets of build artifacts will need to be generated for this boot mode.
