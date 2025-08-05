@@ -122,8 +122,51 @@ cd <petalinux project directory> && \
 petalinux-package --wic; \
 cd <original directory>
 ```
+### TFTP Server Setup
 
+**(1)** Install the following packages:
 
+```
+sudo apt-get install xinetd tftpd tftp
+```
+
+**(2)** in the directory /etc/xinetd.d, create a file named "tftp" with the following contents:
+
+```
+service tftp
+{
+protocol        = udp
+port            = 69
+socket_type     = dgram
+wait            = yes
+user            = nobody
+server          = /usr/sbin/in.tftpd
+server_args     = /tftpboot
+disable         = no
+}
+```
+
+**(3)** Create a directory named "tftpboot". 
+
+This directory's path should match whatever you gave in server_args. 
+
+If server_args = \<parent directory path>/tftpboot, then "tftpboot" should reside inside of \<parent directory path>/tftpboot.
+```
+ sudo mkdir \<parent directory path>/tftpboot
+ sudo chmod -R 777 \<parent directory path>/tftpboot
+ sudo chown -R nobody \<parent directory path>/tftpboot
+```
+
+**(4)** Restart xinetd service
+
+```
+sudo service xinetd restart
+```
+**or**
+```
+sudo service xinetd start
+sudo service xinetd stop
+```
 ### SD-first, eMMC boot:
 
 Two sets of build artifacts will need to be generated for this boot mode.
