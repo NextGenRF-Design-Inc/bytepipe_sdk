@@ -186,19 +186,29 @@ tftp <ip address>
 tftp> get test
 ```
 
+If the test is successful you should see something like this: 
+
+```
+Sent 159 bytes in 0.0 seconds
+
+```
 ### SD-first, eMMC boot:
 
 Two sets of build artifacts will need to be generated for this boot mode.
 The first will be flashed to the sd-card to acheive the initial sd boot.
 The second will be zipped and copied to the "boot" partition of the sd-card for use after the sd boot has been completed successfully.
 
-**(1)** Build SD .wic image and flash it to your sd-card
+**(1)** Flip boot switch to "SD"
+
+![boot_switch](/docs/hardware/BytePipe_x900x/boot_switch.png)
+
+**(2)** Build SD .wic image and flash it to your sd-card
 
 Follow the diections under [Create SD Boot Image](#create-sd-boot-image).
 
 If you have bootargs in your devicetree, make sure your bootargs are pointing at the corret mmc device.
 
-**(2)** Flash sd-card .wic image onto sd card
+**(3)** Flash sd-card .wic image onto sd card
 
 /dev/sdx represents a general sd-card. Your sd-card will show up in your build machine's /dev directory is sda, sdb, sdc, ...
 
@@ -209,56 +219,52 @@ sudo sync
 sudo umount /dev/sdx*
 ```
 
-**(3)** Build eMMC .wic image
+**(4)** Build eMMC .wic image
 
 Follow the diections under [Create eMMC Boot Image](#create-emmc-boot-image).
 
 
-**(4)** Compress .wic file using gzip
+**(5)** Compress .wic file using gzip
 
 ```
 gzip -k <address of .wic file>
 ```
 
-**(5)** Copy compressed .wic file onto boot partition of your sd-card
+**(6)** Copy compressed .wic file onto boot partition of your sd-card
 
-**(6)** Insert sd-card into HDK sd-card slot and turn HDK power on.
+**(7)** Insert sd-card into HDK sd-card slot and turn HDK power on.
 
 Analyze the boot log to identify any error messages that may appear.
 
-**(7)** When your uart terminal presents you with a login prompt, login.
+**(8)** When your uart terminal presents you with a login prompt, login.
 
 Our default username/password is analog/analog.
 
 
-**(8)** Unzip compressed .wic image and flash to eMMC
+**(9)** Unzip compressed .wic image and flash to eMMC
 ```
 gunzip -c /boot/<name of emmc .wic image>.wic.gz | dd of=/dev/mmcblk1
 sync
 ```
 
-**(9)** Power down and remove sd-card
+**(10)** Power down and remove sd-card
 
-**(10)** Flip boot switch to "eMMC"
+**(11)** Flip boot switch to "eMMC"
 
-**(11)** Power HDK on
+![boot_switch](/docs/hardware/BytePipe_x900x/boot_switch.png)
+
+**(12)** Power HDK on
 
 Analyze the boot log to identify any error messages that may appear.
 
 <br />
 
 ### JTAG-first, eMMC boot:
+**(1)** Put the Bytepipe SoM into eMMC boot mode.
 
-**(1)** Build eMMC .wic image
+![boot_switch](/docs/hardware/BytePipe_x900x/boot_switch.png)
 
-Follow the diections under [Create eMMC Boot Image](#create-emmc-boot-image).
-
-**(2)** Compress .wic file using gzip
-
-```
-gzip -k <address of .wic file>
-```
-**(3)** Make sure the u-boot bsp.cfg files contains the following:
+**(2)** Make sure the u-boot bsp.cfg files contains the following:
 
 bsp.cfg is located at \<petalinux project directory>/project-spec/meta-user/recipes-bsp/u-boot/files/bsp.cfg
 
@@ -269,4 +275,39 @@ CONFIG_NET=y
 CONFIG_NET_RANDOM_ETHADDR=y
 ```
 
+**(3)** Build eMMC .wic image
+
 Follow the diections under [Create eMMC Boot Image](#create-emmc-boot-image).
+
+**(4)** Compress .wic file using gzip
+
+```
+gzip -k <address of .wic file>
+```
+
+**(5)** Setup a tftp server
+
+Follow the diections under [TFTP Server Setup](#tftp-server-setup).
+
+**(6)** Run jtag_uboot.tcl and interrupt at u-boot
+
+Click [here](/docs/jtag_uboot.tcl) for jtag_uboot.tcl.
+
+You will start seeing output on your uart terminal. 
+
+Interrupt at u-boot.
+
+**(7)** Once boot has been interrupted at u-boot, run the followng commands (change ipaddr and serverip to match your setup).
+
+```
+setenv ipaddr 10.33.33.1
+setenv serverip 10.33.33.2
+setenv netmask 255.255.255.0
+tftpboot petalinux-emmcimage.wic.gz
+gzwrite mmc 0 ${fileaddr} ${filesize}
+```
+Expect tftpboot and gzwrite to take some time to complete.
+
+**(8)** Power Cycle
+
+Do not interrupt the boot at u-boot this time.
