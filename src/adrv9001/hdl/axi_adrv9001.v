@@ -1011,8 +1011,8 @@ adrv9001_tx #(
     .SWAP_DIFF_CLK_OUT(SWAP_DIFF_TX2_DCLK_OUT),
     .ENABLE_OTX_AXIS(ENABLE_OTX2_AXIS)
 ) adrv9001_tx2_inst (
-    .ssi_clk(tx1_ssi_clk),
-    .ssi_clk_div(tx1_ssi_clk_div), 
+    .ssi_clk(tx2_ssi_clk),
+    .ssi_clk_div(tx2_ssi_clk_div), 
     
     .adrv9001_tx_dclk_p(tx2_dclk_p),
     .adrv9001_tx_dclk_n(tx2_dclk_n),    
