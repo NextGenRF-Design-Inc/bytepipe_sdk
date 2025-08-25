@@ -899,8 +899,8 @@ adrv9001_rx #(
     .SWAP_DIFF_QDATA(SWAP_DIFF_RX2_QDATA),
     .SWAP_DIFF_STROBE(SWAP_DIFF_RX2_STROBE)
 ) adrv9001_rx2_inst (
-    .ssi_clk(rx1_ssi_clk),
-    .ssi_clk_div(rx1_ssi_clk_div), 
+    .ssi_clk(rx2_ssi_clk),
+    .ssi_clk_div(rx2_ssi_clk_div), 
     
     .adrv9001_rx_strobe_p(rx2_strobe_p),
     .adrv9001_rx_strobe_n(rx2_strobe_n),
