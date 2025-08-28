@@ -1,4 +1,4 @@
-![logo](/docs/Logo.png)
+![logo](/docs/BytePipe_Logo.png)
 
 ---
 
