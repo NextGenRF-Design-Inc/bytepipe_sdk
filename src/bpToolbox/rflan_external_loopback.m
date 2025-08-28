@@ -11,10 +11,10 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM12');
+h.Open('COM8');
 
-TxPort = h.Tx2;
-RxPort = h.Rx2;
+TxPort = h.Tx1;
+RxPort = h.Rx1;
 RxBufLength = 4096;
 
 % Set Tx Output Power

@@ -5,7 +5,7 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM12');
+h.Open('COM6');
 
 %% Help
 clc;
@@ -60,9 +60,9 @@ h.GetCarrierFrequency(h.Rx2);
 
 %% Set Carrier Frequency
 clc;
-v = 2.7e9;
-h.SetCarrierFrequency(h.Tx1, v);
-v2 = h.GetCarrierFrequency(h.Tx1);
+v = 250e6;
+h.SetCarrierFrequency(h.Rx1, v);
+v2 = h.GetCarrierFrequency(h.Rx1);
 if( abs(v2 - v) > 10 )
     error("Error");
 end
