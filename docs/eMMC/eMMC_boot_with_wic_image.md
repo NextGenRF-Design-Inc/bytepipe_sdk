@@ -200,7 +200,7 @@ The second will be zipped and copied to the "boot" partition of the sd-card for 
 
 **(1)** Flip boot switch to "SD"
 
-![boot_switch](/docs/BytePipe_x900x/figs/boot_switch.png)
+![boot_switch](figs/boot_switch.png)
 
 **(2)** Build SD .wic image and flash it to your sd-card
 
@@ -251,7 +251,7 @@ sync
 
 **(11)** Flip boot switch to "eMMC"
 
-![boot_switch](/docs/BytePipe_x900x/figs/boot_switch.png)
+![boot_switch](figs/boot_switch.png)
 
 **(12)** Power HDK on
 
@@ -262,7 +262,7 @@ Analyze the boot log to identify any error messages that may appear.
 ### JTAG-first, eMMC boot:
 **(1)** Put the Bytepipe SoM into eMMC boot mode.
 
-![boot_switch](/docs/BytePipe_x900x/figs/boot_switch.png)
+![boot_switch](figs/boot_switch.png)
 
 **(2)** Make sure the u-boot bsp.cfg files contains the following:
 
