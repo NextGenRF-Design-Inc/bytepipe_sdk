@@ -6,15 +6,23 @@
 clear all; close all; clc;
 
 h = rflan();
-h.Open('COM12');
+h.Open('COM8');
 
 % Select Receive Port
-RxPort = h.Rx2;
+RxPort = h.Rx1;
 
 % Select Capture Length of DMA
 RxBufLength = 4096;
 
-% Read Carrier Frequency
+clc;
+v = 289e6;
+h.SetCarrierFrequency(h.Rx1, v);
+v2 = h.GetCarrierFrequency(h.Rx1);
+if( abs(v2 - v) > 10 )
+    error("Error");
+end
+
+% Read Sample Frequency
 fs = h.GetSampleRate(RxPort);
 
 % Read DMA buffer and plot data several times
@@ -38,25 +46,26 @@ f = spec.Frequencies/1e6;
 a = 10*log10(spec.Data);    
 
 hold off;
-subplot(2,2,1);
+%subplot(2,2,1);
 plot(f,a);
+ylim([-180 -80]);
 title('Spectrum');
 xlabel('Frequency(MHz)');
 ylabel('Power (dBm)');
-subplot(2,2,2);
-plot(real(iq),imag(iq));
-xlabel('In-Phase');
-ylabel('Quadrature-Phase');
-title('Constillation');
+% subplot(2,2,2);
+% plot(real(iq),imag(iq));
+% xlabel('In-Phase');
+% ylabel('Quadrature-Phase');
+% title('Constillation');
 
-subplot(2,2,[3 4]);
-t = (1:length(iq))/(fs/1e6);
-plot(t,real(iq));
-hold on;
-plot(t,imag(iq));
-xlabel('time(us)');
-ylabel('Magnitude');
-title('Time Domain');
+% subplot(2,2,[3 4]);
+% t = (1:length(iq))/(fs/1e6);
+% plot(t,real(iq));
+ hold on;
+% plot(t,imag(iq));
+% xlabel('time(us)');
+% ylabel('Magnitude');
+% title('Time Domain');
 
 end
 

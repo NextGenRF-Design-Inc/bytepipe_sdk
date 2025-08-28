@@ -26,7 +26,8 @@ If you are new to the BytePipe start with the [rflan](src/rflan/README.md) appli
 | [radio_carbon](docs/hardware/RadioCarbon/RadioCarbon.md)            | Radio Carbon RF Front End User Guide                          | 
 | [rflan](src/rflan/README.md)                                        | Production example streaming IQ data to RPU                   | 
 | [rflan_dpd](src/rflan_dpd)                                     | Digital Pre-Distortion example using Radio Carbon and BytePipe SOM | 
-| [sd_card](docs/sd_card/README.md)                                   | Detailed information on supported micro-SD cards and formats  | 
+| [sd_card](docs/sd_card/README.md)                                   | Detailed information on supported micro-SD cards and formats  |
+| [eMMC boot](docs/eMMC/eMMC_boot_with_wic_image.md)                  | eMMC Boot options using .wic images               |
 | [som_id](docs/som_id/README.md)                                     | Detailed information on identifying SOM models (2CG or 3CG)   | 
 | [Video Tutorials](https://www.youtube.com/playlist?list=PL1O6z4HXixy3uAJCNkjg2Hvm9Dcu4XAUr) | Playlist of video tutorials           | 
 
