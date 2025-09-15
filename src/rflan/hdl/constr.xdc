@@ -90,8 +90,25 @@ set_property  -dict {PACKAGE_PIN N5     IOSTANDARD LVDS}                        
 #set_property  -dict {PACKAGE_PIN L3     IOSTANDARD LVCMOS18}                        [get_ports pmodb[7]]                ;## IO_L12N_T1U_N11_GC_65
 
 
+set_property BITSTREAM.CONFIG.USR_ACCESS TIMESTAMP [current_design]
 
 
+set ADRV9001_CLK_PERIOD                       2.036; # in nanoseconds.
+set ADRV9001_CLK_WAVEFORM             {0.000 1.018}; # in nanoseconds. 
 
+# Clocks
+create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_rx1_clk_in     -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_rx1_dclk_p}]
+create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_rx2_clk_in     -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_rx2_dclk_p}]
+create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_tx1_ref_clk_in -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_tx1_ref_clk_p}]
+create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_tx2_ref_clk_in -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_tx2_ref_clk_p}]
+
+# Allow max skew of 0.5 ns between input clocks
+set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx1_dclk_out]
+set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx2_dclk_out]
+set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx1_dclk_out]
+set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx2_dclk_out]
+
+# Define SPI clock
+create_clock -name spi0_clk      -period 40   [get_pins -hier */EMIOSPI0SCLKO]
 
 
