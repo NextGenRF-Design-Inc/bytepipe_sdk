@@ -10,6 +10,8 @@ all: clean hdl sw fsbl
 hdl:
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile hdl
 	$(MAKE) -f $(SDK_SRCDIR)/axi_dma/Makefile
+	$(MAKE) -f $(SDK_SRCDIR)/axi_sys/Makefile
+	$(MAKE) -f $(SDK_SRCDIR)/axi_dma_trig/Makefile
 	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $(DEV)
   
 sw: 

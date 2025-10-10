@@ -92,23 +92,42 @@ set_property  -dict {PACKAGE_PIN N5     IOSTANDARD LVDS}                        
 
 set_property BITSTREAM.CONFIG.USR_ACCESS TIMESTAMP [current_design]
 
-
+# Clocks
 set ADRV9001_CLK_PERIOD                       2.036; # in nanoseconds.
 set ADRV9001_CLK_WAVEFORM             {0.000 1.018}; # in nanoseconds. 
 
-# Clocks
 create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_rx1_clk_in     -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_rx1_dclk_p}]
 create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_rx2_clk_in     -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_rx2_dclk_p}]
 create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_tx1_ref_clk_in -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_tx1_ref_clk_p}]
 create_clock -period $ADRV9001_CLK_PERIOD -name adrv9001_tx2_ref_clk_in -waveform $ADRV9001_CLK_WAVEFORM [get_ports {adrv9001_tx2_ref_clk_p}]
 
-# Allow max skew of 0.5 ns between input clocks
-set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx1_dclk_out]
-set_clock_latency -source -early -0.25 [get_clocks adrv9001_rx2_dclk_out]
-set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx1_dclk_out]
-set_clock_latency -source -late 0.25 [get_clocks adrv9001_rx2_dclk_out]
+create_clock -period 5.000 -name cfg_clk -waveform {0.000 2.500} [get_pins system_i/axi_sys/inst/accesse2_inst/CCLK]
 
-# Define SPI clock
-create_clock -name spi0_clk      -period 40   [get_pins -hier */EMIOSPI0SCLKO]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_TX1 [get_nets system_i/adrv9002/inst/adrv9001_tx1_clkin/clk_out_div]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_TX1 [get_nets system_i/adrv9002/inst/adrv9001_tx1_clkin/clk_out]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_TX2 [get_nets system_i/adrv9002/inst/adrv9001_tx2_clkin/clk_out_div]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_TX2 [get_nets system_i/adrv9002/inst/adrv9001_tx2_clkin/clk_out]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_RX1 [get_nets system_i/adrv9002/inst/adrv9001_rx1_clkin/clk_out_div]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_RX1 [get_nets system_i/adrv9002/inst/adrv9001_rx1_clkin/clk_out]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_RX2 [get_nets system_i/adrv9002/inst/adrv9001_rx2_clkin/clk_out_div]
+set_property CLOCK_DELAY_GROUP BALANCE_CLOCKS_RX2 [get_nets system_i/adrv9002/inst/adrv9001_rx2_clkin/clk_out]
+  
+# Input/Output delays
 
 
+#set_max_delay -from [get_ports {adrv9001_dgpio[*]}] -to [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/axi_rdata_reg[*]/C}] 10.000
+
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/dgpio_ps_t_reg[*]/C}] -to [get_ports {adrv9001_dgpio[*]}] 10.000
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/dgpio_ps_o_reg[*]/C}] -to [get_ports {adrv9001_dgpio[*]}] 10.000
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/adrv9001_rstn_reg/C}] -to [get_ports {adrv9001_rstn}] 10.000
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/tx1_enable_reg/C}] -to [get_ports {adrv9001_tx1_en}] 10.000
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/tx2_enable_reg/C}] -to [get_ports {adrv9001_tx2_en}] 10.000
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/rx1_enable_reg/C}] -to [get_ports {adrv9001_rx1_en}] 10.000
+set_max_delay -from [get_pins {system_i/adrv9002/inst/adrv9001_regs_i/rx2_enable_reg/C}] -to [get_ports {adrv9001_rx2_en}] 10.000
+
+
+set_max_delay -from [get_pins system_i/adrv9002/inst/adrv9001_mspi_inst/spi_csn_reg/C] -to [get_ports adrv9001_csn] 10.000
+set_max_delay -from [get_pins system_i/adrv9002/inst/adrv9001_mspi_inst/spi_mosi_reg/C] -to [get_ports adrv9001_mosi] 10.000
+set_max_delay -from [get_pins system_i/adrv9002/inst/adrv9001_mspi_inst/spi_clk_reg/C] -to [get_ports adrv9001_sclk] 10.000
+
+#set_max_delay -from [get_ports adrv9001_miso] -to [get_pins system_i/adrv9002/inst/adrv9001_mspi_inst/misoData_reg[0]/C]  10.000
