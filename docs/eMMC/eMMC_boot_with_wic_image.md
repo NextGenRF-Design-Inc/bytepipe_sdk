@@ -282,32 +282,40 @@ Follow the diections under [Create eMMC Boot Image](#create-emmc-boot-image).
 **(4)** Compress .wic file using gzip
 
 ```
-gzip -k <address of .wic file>
+gzip -k <.wic image file path>
 ```
 
 **(5)** Setup a tftp server
 
 Follow the diections under [TFTP Server Setup](#tftp-server-setup).
 
-**(6)** Run jtag_uboot.tcl and interrupt at u-boot
+**(6)** Copy the compressed .wic image to the tftpboot directory created in the "TFTP Server Setup" tutorial.
+
+**(7)** Source vitis tools. This also sources xsct.
+
+**(8)** Run jtag_uboot.tcl and interrupt at u-boot
 
 Click [here](jtag_uboot.tcl) for jtag_uboot.tcl.
+
+```
+xsct <path to directory containing jtab_uboot.tcl>/jtag_uboot.tcl <petalinux project directory>/images/linux
+```
 
 You will start seeing output on your uart terminal. 
 
 Interrupt at u-boot.
 
-**(7)** Once boot has been interrupted at u-boot, run the followng commands (change ipaddr and serverip to match your setup).
+**(9)** Once boot has been interrupted at u-boot, run the followng commands (change ipaddr and serverip to match your setup).
 
 ```
 setenv ipaddr 10.33.33.1
 setenv serverip 10.33.33.2
 setenv netmask 255.255.255.0
 tftpboot petalinux-emmcimage.wic.gz
-gzwrite mmc 0 ${fileaddr} ${filesize}
+gzwrite mmc 1 ${fileaddr} ${filesize}
 ```
 Expect tftpboot and gzwrite to take some time to complete.
 
-**(8)** Power Cycle
+**(10)** Power Cycle
 
 Do not interrupt the boot at u-boot this time.
