@@ -257,10 +257,10 @@ int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *In
   DmaInit.SampleCnt = 4096;
   DmaInit.Addr = RFLAN_DMA_RX1_BUF_ADDR;
   DmaInit.IrqInstance = &xInterruptController;
-  DmaInit.Base = XPAR_RX1_DMA_BASEADDR;
+  DmaInit.Base = XPAR_RX1_DMA_DMA_BASEADDR;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Rx1DmaCallback;
   DmaInit.Direction = AxiDmaDir_DevToMem;
-  DmaInit.IrqId = XPAR_FABRIC_RX1_DMA_IRQ_INTR;
+  DmaInit.IrqId = XPAR_FABRIC_RX1_DMA_DMA_IRQ_INTR;
 
   if((status = AxiDma_Initialize( &Instance->Rx1Dma, &DmaInit )) != 0)
     return status;
@@ -269,10 +269,10 @@ int32_t RflanStream_Initialize(rflan_stream_t *Instance, rflan_stream_init_t *In
   DmaInit.SampleCnt = 4096;
   DmaInit.Addr = RFLAN_DMA_RX2_BUF_ADDR;
   DmaInit.IrqInstance = &xInterruptController;
-  DmaInit.Base = XPAR_RX2_DMA_BASEADDR;
+  DmaInit.Base = XPAR_RX2_DMA_DMA_BASEADDR;
   DmaInit.Callback = (axi_dma_callback_t)RflanStream_Rx2DmaCallback;
   DmaInit.Direction = AxiDmaDir_DevToMem;
-  DmaInit.IrqId = XPAR_FABRIC_RX2_DMA_IRQ_INTR;
+  DmaInit.IrqId = XPAR_FABRIC_RX2_DMA_DMA_IRQ_INTR;
 
   if((status = AxiDma_Initialize( &Instance->Rx2Dma, &DmaInit )) != 0)
     return status;

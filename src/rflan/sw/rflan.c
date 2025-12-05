@@ -384,7 +384,7 @@ static int32_t Rflan_Initialize( void )
   adrv9001_init_t Adrv9001Init = {
       .AxiBase = XPAR_ADRV9001_0_BASEADDR,
       .AxiClockFreqHz = RFLAN_ADRV9001_AXI_CLOCK_FREQ_HZ,
-      .AxiIrqId = XPAR_FABRIC_ADRV9002_0_SPI_IRQ_INTR,
+      .AxiIrqId = XPAR_FABRIC_ADRV9002_SPI_IRQ_INTR,
       .BasePath = BasePath,
       .HopIrqCallback = NULL,
       .HopIrqCallbackRef = NULL,

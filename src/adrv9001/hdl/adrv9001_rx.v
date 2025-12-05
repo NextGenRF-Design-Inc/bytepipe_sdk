@@ -449,9 +449,9 @@ assign m_axis_aclk = ssi_clk_div;
 
 always @(posedge ssi_clk_div) begin    
   if( swap_iq )
-    m_axis_tdata <= { q_aligned, i_aligned };
-  else
     m_axis_tdata <= { i_aligned, q_aligned };
+  else
+    m_axis_tdata <= { q_aligned, i_aligned };
     
   m_axis_tvalid <= aligned_valid;
 end

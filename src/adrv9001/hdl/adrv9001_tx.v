@@ -175,7 +175,7 @@ always @(posedge ssi_clk_div) begin
     case ( data_src )      
       
       DATA_SRC_AXIS: 
-        iq_packed <= {iq_in_packed[15:0], iq_in_packed[31:16]};
+        iq_packed <= iq_in_packed;
       
       DATA_SRC_ZEROS:
         iq_packed <= 32'h0;
