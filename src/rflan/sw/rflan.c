@@ -296,6 +296,10 @@ static int32_t Rflan_Initialize( void )
       .CallbackRef      = NULL
   };
 
+  /* Initialize File System*/
+  if((status = RflanFs_Initialize()) != FR_OK)
+    printf("FatFs %s\r\n",StatusString(status));
+
   /* Initialize CLI */
   if((status = Cli_Initialize( &Cli, &CliInit )) != 0)
     printf("%s\r\n",StatusString(status));
@@ -326,9 +330,9 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanUart_Initialize( &RflanUart, &UartInit )) != 0)
     printf("Rflan Uart %s\r\n",StatusString(status));
 
-  /* Initialize File System*/
+  /* Initialize File System
   if((status = RflanFs_Initialize()) != FR_OK)
-    printf("FatFs %s\r\n",StatusString(status));
+    printf("FatFs %s\r\n",StatusString(status));*/
 
   /* Initialize System Reset */
   if((status = RflanReset_Initialize( &RflanReset )) != 0)
