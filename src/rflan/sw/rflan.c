@@ -330,9 +330,6 @@ static int32_t Rflan_Initialize( void )
   if((status = RflanUart_Initialize( &RflanUart, &UartInit )) != 0)
     printf("Rflan Uart %s\r\n",StatusString(status));
 
-  /* Initialize File System
-  if((status = RflanFs_Initialize()) != FR_OK)
-    printf("FatFs %s\r\n",StatusString(status));*/
 
   /* Initialize System Reset */
   if((status = RflanReset_Initialize( &RflanReset )) != 0)
