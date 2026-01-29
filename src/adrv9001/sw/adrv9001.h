@@ -235,6 +235,7 @@ typedef struct {
   adi_adrv9001_Init_t                  *Params;            ///< ADRV9001 Parameters
   axi_adrv9001_t                        Axi;               ///< AXI Instance
   FIL                                   LogFil;            ///< Log File
+  uint8_t                               PendingReboot;     ///< ADRV9001 needs reboot due to profile changes
   uint8_t                               Initialized;
   XScuGic                              *IrqInstance;       ///< Processor Interrupt Controller Instance
   adrv9001_rf_state_cb_t                StateCallback;
@@ -257,6 +258,12 @@ typedef struct {
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
+  uint32_t                              Tx1DpdExternalPathDelay;
+  uint32_t                              Tx2DpdExternalPathDelay;
+  adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
+  adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
+  adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
+  adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
   adi_adrv9001_FhHopFrame_t            *HopTable;
   uint8_t                               HopTableSize;
   adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
@@ -403,6 +410,8 @@ int32_t Adrv9001_SetRxInputPort         ( adrv9001_t *Instance, adi_common_Chann
 int32_t Adrv9001_GetRxInputPort         ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxRfInputSel_e *InputPort );
 
 int32_t Adrv9001_EnableManualInputPorts ( adrv9001_t *Instance, bool Enable );
+
+int32_t Adrv9001_SetTxDpdEnable         ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable );
 
 
 #endif

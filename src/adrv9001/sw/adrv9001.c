@@ -969,6 +969,18 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
   return Adrv9001Status_Success;
 }
 
+int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
+{
+  //add content. not finished
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_GetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
+{
+  //add content. not finished
+  return Adrv9001Status_Success;
+}
+
 int32_t Adrv9001_SetTxBoost( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value )
 {
   if( Adrv9001_IsPortEnabled(Instance, ADI_TX, channel ) == false )
