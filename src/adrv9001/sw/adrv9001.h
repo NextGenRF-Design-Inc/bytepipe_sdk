@@ -91,7 +91,7 @@
 
 #define ADRV9001_TEST_MODE_PATTERN        (0xABCDABCD)
 
-extern adi_adrv9001_Init_t initialize_init_8;
+//extern adi_adrv9001_Init_t initialize_init_8;
 
 /**
 * \brief Code indicated status of request
@@ -260,10 +260,10 @@ typedef struct {
   bool                                  TxBoost[2];
   uint32_t                              Tx1DpdExternalPathDelay;
   uint32_t                              Tx2DpdExternalPathDelay;
-  adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
-  adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
-  adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
-  adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
+  //adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
+  //adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
+  //adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
+  //adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
   adi_adrv9001_FhHopFrame_t            *HopTable;
   uint8_t                               HopTableSize;
   adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
