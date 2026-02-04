@@ -1304,6 +1304,18 @@ int32_t Adrv9001_LoadDefaultProfile( adrv9001_t *Instance )
 
   if((status = Instance->ConfigureFn( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileCfgErr;
+  
+  /* Extract Dpd Info */
+  
+  if( adi_adrv9001_dpd_Inspect( &Instance->Device, ADI_CHANNEL_1, &Instance->Tx1DpdCfg ) != 0)
+    return Adrv9001Status_Tx1DpdErr;
+  if( adi_adrv9001_dpd_Initial_Inspect( &Instance->Device, ADI_CHANNEL_1, &Instance->Tx1DpdInitCfg ) != 0)
+    return Adrv9001Status_Tx1DpdErr;
+  
+  if( adi_adrv9001_dpd_Inspect( &Instance->Device, ADI_CHANNEL_2, &Instance->Tx2DpdCfg ) != 0)
+    return Adrv9001Status_Tx2DpdErr;
+  if( adi_adrv9001_dpd_Initial_Inspect( &Instance->Device, ADI_CHANNEL_2, &Instance->Tx2DpdInitCfg ) != 0)
+    return Adrv9001Status_Tx2DpdErr;
 
   return Adrv9001Status_Success;
 }
