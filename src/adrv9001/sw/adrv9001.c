@@ -179,7 +179,7 @@ int32_t Adrv9001_ClearError( adrv9001_t *Instance )
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
+int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
 {
 
   /* Pre-Restart */
@@ -206,10 +206,13 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
 
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
+  
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx2Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
+  
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Tx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
+  
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Tx2Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
 
@@ -221,10 +224,13 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
   /* Read Gain Table */
   if( adi_adrv9001_Rx_GainTable_Read(&Instance->Device, channel, gainIndex, &Rx1GainTable, 1, NULL) != 0)
     return Adrv9001Status_RxGainTableErr;
+  
   if( adi_adrv9001_Rx_GainTable_Read(&Instance->Device, channel, gainIndex, &Rx2GainTable, 1, NULL) != 0)
     return Adrv9001Status_RxGainTableErr;
+  
   if( adi_adrv9001_Rx_GainTable_Read(&Instance->Device, channel, gainIndex, &Tx1GainTable, 1, NULL) != 0)
     return Adrv9001Status_RxGainTableErr;
+  
   if( adi_adrv9001_Rx_GainTable_Read(&Instance->Device, channel, gainIndex, &Tx2GainTable, 1, NULL) != 0)
     return Adrv9001Status_RxGainTableErr;
 
@@ -240,8 +246,10 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
 
   if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO1,&pll_lo1_loop_filter) != 0)                                     
     return Adrv9001Status_PllErr;
+  
   if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO1,&pll_lo2_loop_filter) != 0)                                     
     return Adrv9001Status_PllErr;
+  
   if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO1,&pll_aux_loop_filter) != 0)                                     
     return Adrv9001Status_PllErr;
 
@@ -251,8 +259,10 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
 
   if( adi_adrv9001_powerSavingAndMonitorMode_MonitorMode_Rssi_Inspect(&Instance->Device, &MonitorModeRssiCfg) !=0 )
     return Adrv9001Status_PowerMgmtErr;
+  
   if( adi_adrv9001_powerSavingAndMonitorMode_MonitorMode_DmrSearch_Inspect(&Instance->Device, &DmrSearchCfg) != 0)
     return Adrv9001Status_PowerMgmtErr;
+  
   if( adi_adrv9001_Rx_PortSwitch_Inspect(&Instance->Device, &RxPortSwitchCfg) != 0)
     return Adrv9001Status_PowerMgmtErr;
 
@@ -261,6 +271,7 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
 
   if( adi_adrv9001_Radio_Pll_Inspect(&Instance->Device, ADI_ADRV9001_PLL_LO1, &Lo1PllConfig) != 0)
     return Adrv9001Status_PllErr;
+  
   if( adi_adrv9001_Radio_Pll_Inspect(&Instance->Device, ADI_ADRV9001_PLL_LO2, &Lo2PllConfig) != 0)
     return Adrv9001Status_PllErr;
 
@@ -318,6 +329,66 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
   if( adi_adrv9001_Rx_InterfaceGain_Inspect(&Instance->Device, ADI_CHANNEL_2, &Rx2InterfaceGainCfg) != 0)
     return Adrv9001Status_AgcErr;
 
+
+  adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t Ch1PowerSavingCfg;
+  adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t Ch2PowerSavingCfg;
+
+  if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Inspect(&Instance->Device, ADI_CHANNEL_1, &Ch1PowerSavingCfg) != 0)
+    return Adrv9001Status_PowerMgmtErr;
+
+  if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Inspect(&Instance->Device, ADI_CHANNEL_2, &Ch2PowerSavingCfg) != 0)
+    return Adrv9001Status_PowerMgmtErr;
+  
+  adi_adrv9001_ChannelEnablementDelays_t Rx1EnablementDelays;
+  adi_adrv9001_ChannelEnablementDelays_t Rx2EnablementDelays;
+
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx1EnablementDelays) != 0)
+    return Adrv9001Status_PathDelayErr;
+
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &Rx2EnablementDelays) != 0)
+      return Adrv9001Status_PathDelayErr;
+    
+  adi_adrv9001_ChannelEnablementDelays_t Tx1EnablementDelays;
+  adi_adrv9001_ChannelEnablementDelays_t Tx2EnablementDelays;
+
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Inspect(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &Tx1EnablementDelays) != 0)
+    return Adrv9001Status_PathDelayErr;
+
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Inspect(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &Tx2EnablementDelays) != 0)
+    return Adrv9001Status_PathDelayErr;
+  
+  adi_adrv9001_TrackingCals_t TrackingCals;
+  
+  if( adi_adrv9001_cals_Tracking_Get(&Instance->Device, &TrackingCals) != 0)
+    return Adrv9001Status_TrackingCalsErr;
+  
+  adi_adrv9001_RxGainControlMode_e Rx1AgcCtrlMode;
+  adi_adrv9001_RxGainControlMode_e Rx2AgcCtrlMode;
+  
+  if( adi_adrv9001_Rx_GainControl_Mode_Get(&Instance->Device, ADI_CHANNEL_1, &Rx1AgcCtrlMode ) != 0)
+    return Adrv9001Status_AgcErr;
+  
+  if( adi_adrv9001_Rx_GainControl_Mode_Get(&Instance->Device, ADI_CHANNEL_2, &Rx2AgcCtrlMode ) != 0)
+    return Adrv9001Status_AgcErr;
+  
+  adi_adrv9001_RxGainControlPinCfg_t Rx1AgcPinMode;
+  adi_adrv9001_RxGainControlPinCfg_t Rx2AgcPinMode;
+  
+  if( adi_adrv9001_Rx_GainControl_PinMode_Inspect(&Instance->Device, ADI_CHANNEL_1, &Rx1AgcPinMode) != 0)
+      return Adrv9001Status_AgcErr;
+    
+  if( adi_adrv9001_Rx_GainControl_PinMode_Inspect(&Instance->Device, ADI_CHANNEL_2, &Rx2AgcPinMode) != 0)
+      return Adrv9001Status_AgcErr;
+    
+  adi_adrv9001_SlewRateLimiterCfg_t Tx1SlewRateLimiterCfg;
+  adi_adrv9001_SlewRateLimiterCfg_t Tx2SlewRateLimiterCfg;
+
+  if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_1, &Tx1SlewRateLimiterCfg) != 0)
+    return Adrv9001Status_SlewRateLimiterErr;
+  
+  if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_2, &Tx2SlewRateLimiterCfg) != 0)
+    return Adrv9001Status_SlewRateLimiterErr;
+  
   adi_adrv9001_SpiSettings_t SpiSettings = {
       .msbFirst = 1,
       .enSpiStreaming = 0,
@@ -419,14 +490,7 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx1Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    adi_adrv9001_ChannelEnablementDelays_t Rx1EnablementDelay = {
-        .riseToOnDelay = 0,
-        .riseToAnalogOnDelay = 0,
-        .fallToOffDelay = 0,
-        .guardDelay = 0,
-        .holdDelay = 0 };
-
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx1EnablementDelay) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx1EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
     if( adi_adrv9001_Rx_AdcSwitchEnable_Set(&Instance->Device, ADI_CHANNEL_1, false) != 0)
@@ -441,14 +505,7 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &Rx2Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    adi_adrv9001_ChannelEnablementDelays_t Rx2EnablementDelay = {
-        .riseToOnDelay = 0,
-        .riseToAnalogOnDelay = 0,
-        .fallToOffDelay = 0,
-        .guardDelay = 0,
-        .holdDelay = 0 };
-
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &Rx2EnablementDelay) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &Rx2EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
     if( adi_adrv9001_Rx_AdcSwitchEnable_Set(&Instance->Device, ADI_CHANNEL_2, false) != 0)
@@ -463,14 +520,7 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &Tx1Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    adi_adrv9001_ChannelEnablementDelays_t Tx1EnablementDelay = {
-        .riseToOnDelay = 0,
-        .riseToAnalogOnDelay = 0,
-        .fallToOffDelay = 0,
-        .guardDelay = 0,
-        .holdDelay = 0 };
-
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &Tx1EnablementDelay) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &Tx1EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
     if( adi_adrv9001_cals_ExternalPathDelay_Set(&Instance->Device, ADI_CHANNEL_1, 0) != 0)
@@ -495,13 +545,6 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &Tx2Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    adi_adrv9001_ChannelEnablementDelays_t Tx2EnablementDelay = {
-        .riseToOnDelay = 0,
-        .riseToAnalogOnDelay = 0,
-        .fallToOffDelay = 0,
-        .guardDelay = 0,
-        .holdDelay = 0 };
-
     if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &Tx2EnablementDelay) != 0)
       return Adrv9001Status_PathDelayErr;
 
@@ -511,16 +554,16 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     if( adi_adrv9001_Ssi_PowerDown_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
       return Adrv9001Status_PowerMgmtErr;
 
-    adi_adrv9001_SlewRateLimiterCfg_t Tx2SlewRateLimiterCfg = {
-      .srlEnable = false,
-      .srlStatisticsEnable = false,
-      .srlTableSelect = ADI_ADRV9001_SRL_TABLE0,
-      .srlSlewOffset = 0,
-      .srlStatisticsMode = ADI_ADRV9001_SRL_STATISTICS_MIN_SLEW_FACTOR_OBSERVED };
-
     if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_2, &Tx2SlewRateLimiterCfg) != 0)
       return Adrv9001Status_SlewRateLimiterErr;
   }
+  
+  /* Configure Dpd */
+  if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_1, &Instance->Tx1DpdInitCfg) != 0)
+    return Adrv9001Status_Tx1DpdErr;
+  
+  if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_2, &Instance->Tx2DpdInitCfg) != 0)
+    return Adrv9001Status_Tx2DpdErr;
 
   if( adi_adrv9001_Radio_Pll_Configure(&Instance->Device, ADI_ADRV9001_PLL_LO1, &Lo1PllConfig) != 0)
     return Adrv9001Status_PllErr;
@@ -585,10 +628,6 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     return Adrv9001Status_AgcErr;
 
   /* Configure Power Savings Monitor Mode */
-  adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t PowerSavingCfg = {
-    .channelDisabledPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED,
-    .gpioPinPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED };
-
   if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(&Instance->Device, ADI_CHANNEL_1, &Ch1PowerSavingCfg) != 0)
     return Adrv9001Status_PowerMgmtErr;
 
@@ -596,31 +635,19 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     return Adrv9001Status_PowerMgmtErr;
 
   /* Configure Rx enable delays */
-  adi_adrv9001_ChannelEnablementDelays_t RxEnablementDelays = {
-    .riseToOnDelay = 139715,
-    .riseToAnalogOnDelay = 0,
-    .fallToOffDelay = 0,
-    .guardDelay = 0,
-    .holdDelay = 373 };
 
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &RxEnablementDelays) != 0)
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &Rx1EnablementDelays) != 0)
     return Adrv9001Status_PathDelayErr;
 
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &RxEnablementDelays) != 0)
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &Rx2EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
   /* Configure Tx enable delays */
-  adi_adrv9001_ChannelEnablementDelays_t TxEnablementDelays = {
-    .riseToOnDelay = 139715,
-    .riseToAnalogOnDelay = 0,
-    .fallToOffDelay = 343,
-    .guardDelay = 0,
-    .holdDelay = 0 };
-
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &TxEnablementDelays) != 0)
+  
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &Tx1EnablementDelays) != 0)
     return Adrv9001Status_PathDelayErr;
 
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &TxEnablementDelays) != 0)
+  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &Tx2EnablementDelays) != 0)
     return Adrv9001Status_PathDelayErr;
 
   /* Configure BBDC Loop gain */
@@ -631,14 +658,11 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
     return Adrv9001Status_BbdcErr;
 
   /* Configure Tracking Cals */
-  adi_adrv9001_TrackingCals_t TrackingCals = {
-    .chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI  } };
-
   if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &TrackingCals) != 0)
     return Adrv9001Status_TrackingCalsErr;
 
   /* Configure Rx Gain Control */
-  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_1, Profile->Rx1AgcCtrlMode ) != 0)
+  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_1, &Rx1AgcCtrlMode ) != 0)
     return Adrv9001Status_AgcErr;
 
   if( Profile->Rx1AgcCtrlMode == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
@@ -648,11 +672,11 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
   }
   else
   {
-    if( adi_adrv9001_Rx_GainControl_PinMode_Configure(&Instance->Device, ADI_CHANNEL_1, &Profile->Rx1AgcPinMode) != 0)
+    if( adi_adrv9001_Rx_GainControl_PinMode_Configure(&Instance->Device, ADI_CHANNEL_1, &Rx1AgcPinMode) != 0)
       return Adrv9001Status_AgcErr;
   }
 
-  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_2, Profile->Rx2AgcCtrlMode) != 0)
+  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_2, &Rx2AgcCtrlMode) != 0)
     return Adrv9001Status_AgcErr;
 
   if( Profile->Rx2AgcCtrlMode == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
@@ -662,7 +686,7 @@ int32_t Adrv9001_LoadProfile_c99(adrv9001_t *Instance)
   }
   else
   {
-    if( adi_adrv9001_Rx_GainControl_PinMode_Configure(&Instance->Device, ADI_CHANNEL_2, &Profile->Rx2AgcPinMode) != 0)
+    if( adi_adrv9001_Rx_GainControl_PinMode_Configure(&Instance->Device, ADI_CHANNEL_2, &Rx2AgcPinMode) != 0)
       return Adrv9001Status_AgcErr;
   }
 
@@ -1530,7 +1554,7 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
     Instance->Tx2DpdInitCfg.enable = Enable;
   }
 
-  Adrv9001_LoadProfile(Instance,)
+  Adrv9001_ReLoadProfile(Instance);
   */
   return Adrv9001Status_Success;
 }

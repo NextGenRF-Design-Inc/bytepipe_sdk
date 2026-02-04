@@ -154,7 +154,9 @@ typedef enum
   Adrv9001Status_TrackingCalsErr      = (ADRV9001_STATUS_OFFSET - 53),
   Adrv9001Status_LoopBackErr          = (ADRV9001_STATUS_OFFSET - 54),
   Adrv9001Status_LogPathTooLong       = (ADRV9001_STATUS_OFFSET - 55),
-
+  Adrv9001Status_Tx1DpdErr            = (ADRV9001_STATUS_OFFSET - 56),
+  Adrv9001Status_Tx2DpdErr            = (ADRV9001_STATUS_OFFSET - 57),
+  
 } adrv9001_status_t;
 
 typedef enum{
@@ -310,7 +312,7 @@ typedef struct {
   bool                                  UseExtClock;
 }adrv9001_init_t;
 
-
+int32_t Adrv9001_ReLoadProfile          (adrv9001_t *Instance);
 int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance, adrv9001_profile_t *Profile  );
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
