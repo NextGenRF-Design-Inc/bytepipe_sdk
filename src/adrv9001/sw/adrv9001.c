@@ -538,6 +538,10 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
 
     if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_1, &Tx1SlewRateLimiterCfg) != 0)
       return Adrv9001Status_SlewRateLimiterErr;
+    
+    /* Configure Dpd */
+    if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_1, &Instance->Tx1DpdInitCfg) != 0)
+      return Adrv9001Status_Tx1DpdErr;
   }
 
   if( Tx2ProfileEnable )
@@ -556,14 +560,10 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
 
     if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_2, &Tx2SlewRateLimiterCfg) != 0)
       return Adrv9001Status_SlewRateLimiterErr;
+    /* Configure Dpd */
+    if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_2, &Instance->Tx2DpdInitCfg) != 0)
+      return Adrv9001Status_Tx2DpdErr;
   }
-  
-  /* Configure Dpd */
-  if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_1, &Instance->Tx1DpdInitCfg) != 0)
-    return Adrv9001Status_Tx1DpdErr;
-  
-  if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_2, &Instance->Tx2DpdInitCfg) != 0)
-    return Adrv9001Status_Tx2DpdErr;
 
   if( adi_adrv9001_Radio_Pll_Configure(&Instance->Device, ADI_ADRV9001_PLL_LO1, &Lo1PllConfig) != 0)
     return Adrv9001Status_PllErr;
@@ -660,7 +660,18 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
   /* Configure Tracking Cals */
   if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &TrackingCals) != 0)
     return Adrv9001Status_TrackingCalsErr;
-
+  
+  if( Tx1ProfileEnable )
+  {
+	  if( adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Instance->Tx1DpdCfg) != 0)
+      return Adrv9001Status_Tx1DpdErr
+  }
+  
+  if( Tx2ProfileEnable )
+  {
+	  if( adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Instance->Tx2DpdCfg) != 0)
+      return Adrv9001Status_Tx2DpdErr
+  }
   /* Configure Rx Gain Control */
   if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_1, &Rx1AgcCtrlMode ) != 0)
     return Adrv9001Status_AgcErr;
@@ -1871,6 +1882,10 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->Malloc = Init->Malloc;
   Instance->Free = Init->Free;
   Instance->UseExtClock = Init->UseExtClock;
+  Instance->Tx1DpdInitCfg = Init->Tx1DpdInitCfg;
+  Instance->Tx2DpdInitCfg = Init->Tx2DpdInitCfg;
+  Instance->Tx1DpdCfg = Init->Tx1DpdCfg;
+  Instance->Tx2DpdCfg = Init->Tx2DpdCfg;
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
