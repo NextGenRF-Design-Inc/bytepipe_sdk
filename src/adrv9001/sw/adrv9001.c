@@ -261,10 +261,10 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
   if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO1,&pll_lo1_loop_filter) != 0)                                     
     return Adrv9001Status_PllErr;
   
-  if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO1,&pll_lo2_loop_filter) != 0)                                     
+  if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO2,&pll_lo2_loop_filter) != 0)
     return Adrv9001Status_PllErr;
   
-  if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_LO1,&pll_aux_loop_filter) != 0)                                     
+  if( adi_adrv9001_Radio_PllLoopFilter_Get(&Instance->Device,ADI_ADRV9001_PLL_AUX,&pll_aux_loop_filter) != 0)
     return Adrv9001Status_PllErr;
 
   adi_adrv9001_PowerSavingAndMonitorMode_MonitorModeRssiCfg_t      MonitorModeRssiCfg;
@@ -1587,7 +1587,7 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
 
 int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
 {
-	/*
+
   if(channel == ADI_CHANNEL_1)
   {
     Instance->Tx1DpdInitCfg.enable = Enable; 
@@ -1598,7 +1598,7 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
   }
 
   Adrv9001_ReLoadProfile(Instance);
-  */
+
   return Adrv9001Status_Success;
 }
 
@@ -1914,10 +1914,7 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->Malloc = Init->Malloc;
   Instance->Free = Init->Free;
   Instance->UseExtClock = Init->UseExtClock;
-  Instance->Tx1DpdInitCfg = Init->Tx1DpdInitCfg;
-  Instance->Tx2DpdInitCfg = Init->Tx2DpdInitCfg;
-  Instance->Tx1DpdCfg = Init->Tx1DpdCfg;
-  Instance->Tx2DpdCfg = Init->Tx2DpdCfg;
+
 
   /* Assign Hal Reference to adrv9001 */
   Instance->Device.common.devHalInfo = (void*)Instance;
@@ -1950,6 +1947,32 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   /* Load Profile */
   if((status = Adrv9001_LoadDefaultProfile( Instance )) != 0)
     return status;
+
+  /* Get Dpd Configuration */
+  adi_adrv9001_DpdInitCfg_t Tx1DpdInitCfg;
+  adi_adrv9001_DpdInitCfg_t Tx2DpdInitCfg;
+
+  if( adi_adrv9001_dpd_Initial_Inspect(&Instance->Device,ADI_CHANNEL_1,&Tx1DpdInitCfg) != 0)
+	return Adrv9001Status_Tx1DpdErr;
+
+  if( adi_adrv9001_dpd_Initial_Inspect(&Instance->Device,ADI_CHANNEL_2,&Tx2DpdInitCfg) != 0)
+  	return Adrv9001Status_Tx2DpdErr;
+
+  adi_adrv9001_DpdCfg_t Tx1DpdCfg;
+  adi_adrv9001_DpdCfg_t Tx2DpdCfg;
+
+  if( adi_adrv9001_dpd_Inspect(&Instance->Device,ADI_CHANNEL_1,&Tx1DpdCfg) != 0)
+  	return Adrv9001Status_Tx1DpdErr;
+
+  if( adi_adrv9001_dpd_Inspect(&Instance->Device,ADI_CHANNEL_2,&Tx2DpdCfg) != 0)
+    return Adrv9001Status_Tx2DpdErr;
+
+
+  Instance->Tx1DpdInitCfg = Tx1DpdInitCfg;
+  Instance->Tx2DpdInitCfg = Tx2DpdInitCfg;
+  Instance->Tx1DpdCfg = Tx1DpdCfg;
+  Instance->Tx2DpdCfg = Tx2DpdCfg;
+
 
   /* Configure Profile */
   if((status = Adrv9001_ConfigureProfile( Instance, Init->Rx1ChfCoeff, Init->Rx2ChfCoeff )) != 0)

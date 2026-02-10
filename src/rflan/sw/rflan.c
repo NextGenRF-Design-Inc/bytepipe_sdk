@@ -402,7 +402,7 @@ static int32_t Rflan_Initialize( void )
       .Rx1RssiOffsetdB = -20,
       .Rx2RssiOffsetdB = -20,
       .Init = &rf1_initialize_init_8,
-	    .InitializeFn = rf1_initialize,
+	  .InitializeFn = rf1_initialize,
       .CalibrateFn = rf1_calibrate,
       .ConfigureFn = rf1_configure,
 	  .Malloc = pvPortMalloc,

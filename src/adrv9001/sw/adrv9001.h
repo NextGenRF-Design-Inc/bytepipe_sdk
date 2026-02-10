@@ -302,12 +302,14 @@ typedef struct {
   int32_t                              *Rx2ChfCoeff;
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
+  /*
   uint32_t                              Tx1DpdExternalPathDelay;
   uint32_t                              Tx2DpdExternalPathDelay;
   adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
   adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
   adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
   adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
+  */
   uint32_t                              AxiClockFreqHz;
   float                                 Rx1RssiOffsetdB;
   float                                 Rx2RssiOffsetdB;

@@ -124,6 +124,8 @@ typedef enum
   Adrv9001ParamId_Rx2TestData                                   ,
   Adrv9001ParamId_Rx1InputPort                                  ,
   Adrv9001ParamId_Rx2InputPort                                  ,  
+  Adrv9001ParamId_Tx1DpdEnable                                  ,
+  Adrv9001ParamId_Tx2DpdEnable                                  ,
                                                                 
   Adrv9001ParamId_Num                                           ,
 
@@ -208,7 +210,9 @@ static const char* Adrv9001ParamNames[] = {
   "Rx1TestData",
   "Rx2TestData",
   "Rx1InputPort",
-  "Rx2InputPort"
+  "Rx2InputPort",
+  "Tx1DpdEnable",
+  "Tx2DpdEnable"
 };
 
 typedef struct{

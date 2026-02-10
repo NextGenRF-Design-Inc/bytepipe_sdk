@@ -314,7 +314,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
   {
 
   }
-  /*
+
   else if( Id == Adrv9001ParamId_Tx1DpdEnable )
   {
     uint8_t tmp;
@@ -327,7 +327,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     sscanf(Value, "%hhu", &tmp);
     status = Adrv9001_SetTxDpdEnable(Adrv9001, ADI_CHANNEL_2, (bool)tmp);
   }
-  */
+
   else if( Id == Adrv9001ParamId_Rx1InputPort )
   {
     uint8_t tmp;
