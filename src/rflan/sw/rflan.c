@@ -398,7 +398,6 @@ static int32_t Rflan_Initialize( void )
       .StateCallbackRef = NULL,
       .TxAttn = { 0, 0 },
       .TxBoost = { true, true },
-      .Tx1DpdCfg
       .TxEnableMode = ADI_ADRV9001_PIN_MODE,
       .Rx1RssiOffsetdB = -20,
       .Rx2RssiOffsetdB = -20,

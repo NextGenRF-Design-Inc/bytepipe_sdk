@@ -75,6 +75,8 @@
 #include "adi_adrv9001_powermanagement.h"
 #include "adi_adrv9001_powersavingandmonitormode.h"
 #include "adi_adrv9001_bbdc.h"
+#include "adi_adrv9001_dpd_types.h"
+#include "adi_adrv9001_dpd.h"
 
 
 #ifndef ADRV9001_STATUS_OFFSET
