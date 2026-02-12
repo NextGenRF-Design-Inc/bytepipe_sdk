@@ -448,10 +448,7 @@ static int32_t Rflan_Initialize( void )
       .VcTcxoEnablePin = ADI_ADRV9001_GPIO_ANALOG_07
   };
 
-  /* Init Adrv9001 Profile */
-  adrv9001_profile_t Adrv9001Profile  = {
 
-  };
 
   if((status = Adrv9001Params_Initialize( &Adrv9001Params, &Adrv9001ParamsInit)) != 0 )
     printf("Adrv9001Params_Initialize %s\r\n",StatusString(status));

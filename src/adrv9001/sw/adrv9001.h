@@ -94,7 +94,13 @@
 #define ADRV9001_TEST_MODE_PATTERN        (0xABCDABCD)
 
 //extern adi_adrv9001_Init_t initialize_init_8;
-
+/*
+typedef struct
+{
+	uint8_t CurrentChunk;
+	uint8_t ChunkTotal;
+}bychunks_t;
+*/
 /**
 * \brief Code indicated status of request
 */
@@ -158,6 +164,7 @@ typedef enum
   Adrv9001Status_LogPathTooLong       = (ADRV9001_STATUS_OFFSET - 55),
   Adrv9001Status_Tx1DpdErr            = (ADRV9001_STATUS_OFFSET - 56),
   Adrv9001Status_Tx2DpdErr            = (ADRV9001_STATUS_OFFSET - 57),
+  Adrv9001Status_ProfileErr           = (ADRV9001_STATUS_OFFSET - 58),
   
 } adrv9001_status_t;
 
@@ -189,39 +196,83 @@ typedef void* (*adrv9001_malloc_t)(size_t);
 typedef void  (*adrv9001_free_t)(void *);
 
 typedef struct {
-  adi_adrv9001_Init_t                      *Init;
-  uint8_t                                  *StreamImageBuf;
-  adi_adrv9001_RxGainTableRow_t            *Rx1GainTable;
-  adi_adrv9001_RxGainTableRow_t            *Rx2GainTable;
-  adi_adrv9001_RxGainTableRow_t            *oRx1GainTable;
-  adi_adrv9001_RxGainTableRow_t            *oRx2GainTable;
-  adi_adrv9001_TxAttenTableRow_t           *TxAttnTable;
-  adi_adrv9001_LoGenOptimization_e          Rx1LoGenOptimization;
-  adi_adrv9001_LoGenOptimization_e          Rx2LoGenOptimization;
-  adi_adrv9001_LoGenOptimization_e          Tx1LoGenOptimization;
-  adi_adrv9001_LoGenOptimization_e          Tx2LoGenOptimization;
-  uint64_t                                  Rx1CarrierFreqHz;
-  uint64_t                                  Rx2CarrierFreqHz;
-  uint64_t                                  Tx1CarrierFreqHz;
-  uint64_t                                  Tx2CarrierFreqHz;
-  int32_t                                   Rx1IfFreqHz;
-  int32_t                                   Rx2IfFreqHz;
-  int32_t                                   Tx1IfFreqHz;
-  int32_t                                   Tx2IfFreqHz;
-  adi_adrv9001_PllCalibration_e             Lo1PllCalibration;
-  adi_adrv9001_PllPower_e                   Lo1PllPower;
-  adi_adrv9001_PllCalibration_e             Lo2PllCalibration;
-  adi_adrv9001_PllPower_e                   Lo2PllPower;
-  bool                                      Tx1Boost;
-  bool                                      Tx2Boost;
-  adi_adrv9001_GainControlCfg_t            *Rx1Agc;
-  adi_adrv9001_GainControlCfg_t            *Rx2Agc;
-  adi_adrv9001_RxGainControlMode_e          Rx1AgcCtrlMode;
-  adi_adrv9001_RxGainControlMode_e          Rx2AgcCtrlMode;
-  adi_adrv9001_RxGainControlPinCfg_t        Rx1AgcPinMode;
-  adi_adrv9001_RxGainControlPinCfg_t        Rx2AgcPinMode;
-  adi_adrv9001_TxAttenuationPinControlCfg_t Tx1AttnPinMode;
-  adi_adrv9001_TxAttenuationPinControlCfg_t Tx2AttnPinMode;
+  adi_adrv9001_Init_t                        *Init;
+  uint8_t                                    *StreamImageBuf;
+  uint8_t                                    *ArmImageBuf;
+  adi_adrv9001_SpiSettings_t                 *SpiSettings;
+  adi_adrv9001_RxProfile_t                   *Rx1Profile; 
+  adi_adrv9001_RxProfile_t                   *Rx2Profile; 
+  adi_adrv9001_RxProfile_t                   *oRx1Profile;
+  adi_adrv9001_RxProfile_t                   *oRx2Profile;
+  adi_adrv9001_Carrier_t                      Rx1Carrier;
+  adi_adrv9001_Carrier_t                      Rx2Carrier;
+  adi_adrv9001_Carrier_t                      Tx1Carrier;
+  adi_adrv9001_Carrier_t                      Tx2Carrier;
+  uint8_t                                     Rx1GainIndex;
+  uint8_t                                     Rx2GainIndex;
+  adi_adrv9001_RxGainTableRow_t               Rx1GainTable;
+  adi_adrv9001_RxGainTableRow_t               Rx2GainTable;
+  adi_adrv9001_RxGainTableRow_t               oRx1GainTable;
+  adi_adrv9001_RxGainTableRow_t               oRx2GainTable;
+  adi_adrv9001_TxAttenTableRow_t              Tx1AttnTable;
+  adi_adrv9001_TxAttenTableRow_t              Tx2AttnTable;
+  adi_adrv9001_PllLoopFilterCfg_t             pll_lo1_loop_filter;
+  adi_adrv9001_PllLoopFilterCfg_t             pll_lo2_loop_filter;
+  adi_adrv9001_PllLoopFilterCfg_t             pll_aux_loop_filter;
+  adi_adrv9001_PowerSavingAndMonitorMode_MonitorModeRssiCfg_t      MonitorModeRssiCfg;
+  adi_adrv9001_PowerSavingAndMonitorMode_MonitorModeDmrSearchCfg_t *DmrSearchCfg;
+  adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t   Ch1PowerSavingCfg;
+  adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t   Ch2PowerSavingCfg;
+  adi_adrv9001_RxPortSwitchCfg_t              RxPortSwitchCfg;
+  adi_adrv9001_McsDelay_t                     Rx1McsDelay;
+  adi_adrv9001_McsDelay_t                     Rx2McsDelay;
+  adi_adrv9001_McsDelay_t                     Tx1McsDelay;
+  adi_adrv9001_McsDelay_t                     Tx2McsDelay;
+  adi_adrv9001_RxrfdcLoidCfg_t                Rx1LoidCfg;
+  adi_adrv9001_RxrfdcLoidCfg_t                Rx2LoidCfg;
+  adi_adrv9001_LoGenOptimization_e            Rx1LoGenOptimization;
+  adi_adrv9001_LoGenOptimization_e            Rx2LoGenOptimization;
+  adi_adrv9001_LoGenOptimization_e            Tx1LoGenOptimization;
+  adi_adrv9001_LoGenOptimization_e            Tx2LoGenOptimization;
+  uint64_t                                    Rx1CarrierFreqHz;
+  uint64_t                                    Rx2CarrierFreqHz;
+  uint64_t                                    Tx1CarrierFreqHz;
+  uint64_t                                    Tx2CarrierFreqHz;
+  int32_t                                     Rx1IfFreqHz;
+  int32_t                                     Rx2IfFreqHz;
+  int32_t                                     Tx1IfFreqHz;
+  int32_t                                     Tx2IfFreqHz;
+  adi_adrv9001_PllCalibration_e               Lo1PllCalibration;
+  adi_adrv9001_PllPower_e                     Lo1PllPower;
+  adi_adrv9001_PllConfig_t                    Lo1PllConfig;
+  adi_adrv9001_PllCalibration_e               Lo2PllCalibration;
+  adi_adrv9001_PllPower_e                     Lo2PllPower;
+  adi_adrv9001_PllConfig_t                    Lo2PllConfig;
+  bool                                        Tx1Boost;
+  bool                                        Tx2Boost;
+  uint32_t                                    Tx1DpdExternalPathDelay;
+  uint32_t                                    Tx2DpdExternalPathDelay;
+  adi_adrv9001_DpdInitCfg_t                   Tx1DpdInitCfg;
+  adi_adrv9001_DpdInitCfg_t                   Tx2DpdInitCfg;
+  adi_adrv9001_DpdCfg_t                       Tx1DpdCfg;
+  adi_adrv9001_DpdCfg_t                       Tx2DpdCfg;
+  adi_adrv9001_GainControlCfg_t               Rx1Agc;
+  adi_adrv9001_GainControlCfg_t               Rx2Agc;
+  adi_adrv9001_RxGainControlMode_e            Rx1AgcCtrlMode;
+  adi_adrv9001_RxGainControlMode_e            Rx2AgcCtrlMode;
+  adi_adrv9001_RxGainControlPinCfg_t          Rx1AgcPinMode;
+  adi_adrv9001_RxGainControlPinCfg_t          Rx2AgcPinMode;
+  adi_adrv9001_RxInterfaceGainCtrl_t          Rx1InterfaceGainCfg;
+  adi_adrv9001_RxInterfaceGainCtrl_t          Rx2InterfaceGainCfg;
+  adi_adrv9001_ChannelEnablementDelays_t      Rx1EnablementDelays;
+  adi_adrv9001_ChannelEnablementDelays_t      Rx2EnablementDelays;
+  adi_adrv9001_ChannelEnablementDelays_t      Tx1EnablementDelays;
+  adi_adrv9001_ChannelEnablementDelays_t      Tx2EnablementDelays;
+  adi_adrv9001_TxAttenuationPinControlCfg_t   Tx1AttnPinMode;
+  adi_adrv9001_TxAttenuationPinControlCfg_t   Tx2AttnPinMode;
+  adi_adrv9001_SlewRateLimiterCfg_t           Tx1SlewRateLimiterCfg;
+  adi_adrv9001_SlewRateLimiterCfg_t           Tx2SlewRateLimiterCfg;
+  adi_adrv9001_TrackingCals_t                 TrackingCals;
 }adrv9001_profile_t;
 
 /**
@@ -262,12 +313,6 @@ typedef struct {
   char                                  LogPath[ ADRV9001_LOG_PATH_SIZE ];
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
-  uint32_t                              Tx1DpdExternalPathDelay;
-  uint32_t                              Tx2DpdExternalPathDelay;
-  adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
-  adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
-  adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
-  adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
   adi_adrv9001_FhHopFrame_t            *HopTable;
   uint8_t                               HopTableSize;
   adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
@@ -322,8 +367,9 @@ typedef struct {
   bool                                  UseExtClock;
 }adrv9001_init_t;
 
-int32_t Adrv9001_ReLoadProfile          (adrv9001_t *Instance);
-int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance, adrv9001_profile_t *Profile  );
+int32_t Adrv9001_ReLoadProfile          ( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance);
+//int32_t Adrv9001_ReLoadProfile_ByChunks ( adrv9001_t *Instance);
+//int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance, adrv9001_profile_t *Profile  );
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
 int32_t Adrv9001_ClearError             ( adrv9001_t *Instance );
