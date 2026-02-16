@@ -192,7 +192,7 @@ module axi_adrv9001#(
   output wire [1:0]     s_axi_rresp,
   output wire           s_axi_rvalid,
   input  wire           s_axi_rready,
-  
+
   output wire           HopDbg_HopPin,
   output wire           HopDbg_Rx1EnPin,
   output wire           HopDbg_Rx2EnPin,
@@ -208,6 +208,17 @@ module axi_adrv9001#(
   output wire           SpiDbg_Miso
   
 );
+
+wire [31:0]     tx1_disable_cnt;
+wire [31:0]     tx1_ssi_enable_cnt;
+wire [31:0]     tx2_disable_cnt;
+wire [31:0]     tx2_ssi_enable_cnt;
+wire [31:0]     rx1_disable_cnt;
+wire [31:0]     rx1_ssi_enable_cnt;
+wire [31:0]     rx1_ssi_disable_cnt;
+wire [31:0]     rx2_disable_cnt;
+wire [31:0]     rx2_ssi_enable_cnt;
+wire [31:0]     rx2_ssi_disable_cnt;
 
 generate
 
@@ -831,6 +842,17 @@ adrv9001_regs#(
     .dgpio_ps_t(dgpio_ps_t),
     .dgpio_ps_i(dgpio_ps_i),
     .dgpio_ps_o(dgpio_ps_o),    
+
+    .tx1_disable_cnt(tx1_disable_cnt),
+    .tx1_ssi_enable_cnt (tx1_ssi_enable_cnt),
+    .tx2_disable_cnt(tx2_disable_cnt),    
+    .tx2_ssi_enable_cnt(tx2_ssi_enable_cnt),  
+    .rx1_disable_cnt(rx1_disable_cnt),
+    .rx1_ssi_enable_cnt(rx1_ssi_enable_cnt),
+    .rx1_ssi_disable_cnt(rx1_ssi_disable_cnt),
+    .rx2_disable_cnt(rx2_disable_cnt), 
+    .rx2_ssi_enable_cnt(rx2_ssi_enable_cnt),
+    .rx2_ssi_disable_cnt(rx2_ssi_disable_cnt),
             
     .mspi_axis_tdata(mspi_axis_tdata),
     .mspi_axis_tvalid(mspi_axis_tvalid),
@@ -854,6 +876,52 @@ adrv9001_clkin#(
   .clk_out(rx1_ssi_clk),
   .clk_out_div(rx1_ssi_clk_div)
 );
+
+wire [31:0]  rx1_disable_cnt_cdc;
+wire [31:0]  rx1_ssi_enable_cnt_cdc;
+wire [31:0]  rx1_ssi_disable_cnt_cdc;
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx1_disable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (rx1_disable_cnt),
+  .dest_clk (rx1_ssi_clk_div),
+  .dest_out (rx1_disable_cnt_cdc)
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx1_ssi_enable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (rx1_ssi_enable_cnt),
+  .dest_clk (rx1_ssi_clk_div),
+  .dest_out (rx1_ssi_enable_cnt_cdc)
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx1_ssi_disable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (rx1_ssi_disable_cnt),
+  .dest_clk (rx1_ssi_clk_div),
+  .dest_out (rx1_ssi_disable_cnt_cdc)
+);
     
 adrv9001_rx#(
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX1_IDATA),
@@ -870,7 +938,10 @@ adrv9001_rx#(
     .adrv9001_rx_qdata_p(rx1_qdata_p),
     .adrv9001_rx_qdata_n(rx1_qdata_n),
     
-    .enable(rx1_enable),           
+    .enable(rx1_enable),      
+    .disable_cnt(rx1_disable_cnt_cdc), 
+    .ssi_enable_cnt(rx1_ssi_enable_cnt_cdc),
+    .ssi_disable_cnt(rx1_ssi_disable_cnt_cdc),     
     .swap_iq(rx1_swap_iq_cdc),
     .fixed_pattern(rx1_fixed_pattern_cdc),     
     .ramp_detected_out(rx1_ramp_detected),
@@ -893,6 +964,52 @@ adrv9001_clkin#(
   .clk_out(rx2_ssi_clk),
   .clk_out_div(rx2_ssi_clk_div)
 );
+
+wire [31:0]  rx2_disable_cnt_cdc;
+wire [31:0]  rx2_ssi_enable_cnt_cdc;
+wire [31:0]  rx2_ssi_disable_cnt_cdc;
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx2_disable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (rx2_disable_cnt),
+  .dest_clk (rx2_ssi_clk_div),
+  .dest_out (rx2_disable_cnt_cdc)
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx2_ssi_enable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (rx2_ssi_enable_cnt),
+  .dest_clk (rx2_ssi_clk_div),
+  .dest_out (rx2_ssi_enable_cnt_cdc)
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+rx2_ssi_disable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (rx2_ssi_disable_cnt),
+  .dest_clk (rx2_ssi_clk_div),
+  .dest_out (rx2_ssi_disable_cnt_cdc)
+);
     
 adrv9001_rx #(
     .SWAP_DIFF_IDATA(SWAP_DIFF_RX2_IDATA),
@@ -909,7 +1026,10 @@ adrv9001_rx #(
     .adrv9001_rx_qdata_p(rx2_qdata_p),
     .adrv9001_rx_qdata_n(rx2_qdata_n),
     
-    .enable(rx2_enable),       
+    .enable(rx2_enable),  
+    .disable_cnt(rx2_disable_cnt_cdc), 
+    .ssi_enable_cnt(rx2_ssi_enable_cnt_cdc),
+    .ssi_disable_cnt(rx2_ssi_disable_cnt_cdc),      
     .swap_iq(rx2_swap_iq_cdc),    
     .fixed_pattern(rx2_fixed_pattern_cdc),     
     .ramp_detected_out(rx2_ramp_detected),
@@ -947,6 +1067,37 @@ generate
   end
 endgenerate
 
+wire [31:0]  tx1_disable_cnt_cdc;
+wire [31:0]  tx1_ssi_enable_cnt_cdc;
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+tx1_disable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (tx1_disable_cnt),
+  .dest_clk (tx1_ssi_clk_div),
+  .dest_out (tx1_disable_cnt_cdc)
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+tx1_ssi_enable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (tx1_ssi_enable_cnt),
+  .dest_clk (tx1_ssi_clk_div),
+  .dest_out (tx1_ssi_enable_cnt_cdc)
+);
+
 adrv9001_tx #(
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX1_IDATA),
     .SWAP_DIFF_QDATA(SWAP_DIFF_TX1_QDATA),
@@ -967,6 +1118,8 @@ adrv9001_tx #(
     .adrv9001_tx_qdata_n(tx1_qdata_n),
     
     .enable(tx1_enable),
+    .disable_cnt(tx1_disable_cnt_cdc),
+    .ssi_enable_cnt(tx1_ssi_enable_cnt_cdc),
     .swap_iq(tx1_swap_iq_cdc),
     .data_src(tx1_data_src_cdc),    
     .fixed_pattern(tx1_fixed_pattern_cdc), 
@@ -1003,6 +1156,37 @@ generate
    
   end
 endgenerate
+
+wire [31:0]  tx2_disable_cnt_cdc;
+wire [31:0]  tx2_ssi_enable_cnt_cdc;
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+tx2_disable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (tx2_disable_cnt),
+  .dest_clk (tx2_ssi_clk_div),
+  .dest_out (tx2_disable_cnt_cdc)
+);
+
+xpm_cdc_array_single #(
+  .DEST_SYNC_FF(3),  
+  .INIT_SYNC_FF(0),  
+  .SIM_ASSERT_CHK(0),
+  .SRC_INPUT_REG(1),  
+  .WIDTH(32)         
+)
+tx2_ssi_enable_cnt_cdc_i (
+  .src_clk  (s_axi_aclk),
+  .src_in   (tx2_ssi_enable_cnt),
+  .dest_clk (tx2_ssi_clk_div),
+  .dest_out (tx2_ssi_enable_cnt_cdc)
+);
     
 adrv9001_tx #(  
     .SWAP_DIFF_IDATA(SWAP_DIFF_TX2_IDATA),
@@ -1023,7 +1207,9 @@ adrv9001_tx #(
     .adrv9001_tx_qdata_p(tx2_qdata_p),
     .adrv9001_tx_qdata_n(tx2_qdata_n),
 
-    .enable(tx2_enable),    
+    .enable(tx2_enable),   
+    .disable_cnt(tx2_disable_cnt_cdc),
+    .ssi_enable_cnt(tx2_ssi_enable_cnt_cdc),  
     .swap_iq(tx2_swap_iq_cdc),    
     .data_src(tx2_data_src_cdc),  
     .fixed_pattern(tx2_fixed_pattern_cdc),    

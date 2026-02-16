@@ -60,6 +60,8 @@ module adrv9001_tx#(
     
 // User control interface    
   input  wire         enable,                // Enable transmitter
+  input  wire [31:0]  disable_cnt,
+  input  wire [31:0]  ssi_enable_cnt,
   input  wire         swap_iq,
   input  wire [2:0]   data_src,              // Data Source
   input  wire [31:0]  fixed_pattern,  
@@ -137,22 +139,24 @@ endfunction
 
 reg    iq_ready = 'd0;
 
-wire   serdes_rst;
+reg    serdes_rst = 0;
+wire   tx_enable_cdc;
+
 xpm_cdc_async_rst #(
   .DEST_SYNC_FF(4),   
   .INIT_SYNC_FF(0),  
   .RST_ACTIVE_HIGH(1)  
 )
-serdes_rst_cdc_i (
-  .dest_arst(serdes_rst), 
+tx_enable_cdc_i (
+  .dest_arst(tx_enable_cdc), 
   .dest_clk(ssi_clk_div),   
-  .src_arst(~enable)   
+  .src_arst(enable)   
 );
 
 
 always @(posedge ssi_clk_div) begin
     
-  if( serdes_rst )
+  if( ~tx_enable_cdc )
     iq_ready <= 1'b0;
   else    
     iq_ready <= ~iq_ready;
@@ -278,8 +282,39 @@ q_serdes(
   .din_t(1'b0)                      // Data in tristate
 );
 
+reg [31:0] cnt = 0;
+reg ce = 0;
+
+always @( posedge ssi_clk_div ) begin
+
+  if( tx_enable_cdc == 1'b0 )
+    ce <= 1'b0;
+  else
+    ce <= ~ce;
+
+  if( tx_enable_cdc == 1'b0 )
+    cnt <= 0;
+  else if( (cnt < 32'hffffffff) && ( ce == 1'b1) )
+    cnt <= cnt + 1;   
+  else
+    cnt <= cnt;   
+
+  if( ( cnt > ssi_enable_cnt ) && ( cnt <= disable_cnt ) )
+    serdes_rst <= 1'b0;
+  else
+    serdes_rst <= 1'b1;     
+
+/*
+  if( tx_enable_cdc == 1'b1 )
+    serdes_rst <= 1'b0;
+  else
+    serdes_rst <= 1'b1;
+*/
+end
+
     
-wire ssi_clk_out;
+wire         ssi_clk_out;
+
 
 ODDRE1 #(
   .IS_C_INVERTED(1'b0),             // Optional inversion for C

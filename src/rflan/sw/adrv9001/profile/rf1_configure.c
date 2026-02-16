@@ -14,13 +14,12 @@
 /* External LO optimal frequencies: 60 MHz to 12 GHz*/
 /* */
 /* FPGA: v0.0.0*/
-/* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.14.10*/
-/* Firmware: v0.22.39*/
+/* Device Driver: v68.16.2*/
+/* Firmware: v0.22.49*/
 /* Profile Generator: v0.53.11.0*/
 /* Stream Generator Assembly: v0.7.15.0*/
-/* Transceiver Evaluation Software: v0.27.0*/
-/* ADRV9001 Plugin: v0.27.0*/
+/* Transceiver Evaluation Software: v0.28.0*/
+/* ADRV9001 Plugin: v0.28.0*/
 
 
 #include "rf1_configure.h"
@@ -156,7 +155,7 @@ int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_ChannelEnablementDelays_t delays_15 = { 
-		.riseToOnDelay = 139715, 
+		.riseToOnDelay = 1475, 
 		.riseToAnalogOnDelay = 0, 
 		.fallToOffDelay = 0, 
 		.guardDelay = 0, 
@@ -169,7 +168,7 @@ int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_ChannelEnablementDelays_t delays_17 = { 
-		.riseToOnDelay = 139715, 
+		.riseToOnDelay = 1475, 
 		.riseToAnalogOnDelay = 0, 
 		.fallToOffDelay = 343, 
 		.guardDelay = 0, 
@@ -188,9 +187,59 @@ int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_TrackingCals_t trackingCals_21 = { 
-		.chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI  } };
+		.chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI  } };
 
 	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &trackingCals_21);
+
+	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	adi_adrv9001_DpdCfg_t dpdConfig_22 = { 
+		.numberOfSamples = 4096, 
+		.additionalPowerScale = 4, 
+		.rxTxNormalizationLowerThreshold = 3395470, 
+		.rxTxNormalizationUpperThreshold = 33954698, 
+		.detectionPowerThreshold = 53942350, 
+		.detectionPeakThreshold = 214748365, 
+		.countsLessThanPowerThreshold = 0, 
+		.countsGreaterThanPeakThreshold = 0, 
+		.immediateLutSwitching = true, 
+		.useSpecialFrame = false, 
+		.resetLuts = false, 
+		.timeFilterCoefficient = 1073741824, 
+		.dpdSamplingRate_Hz = 0, 
+		.clgcLoopOpen = 0, 
+		.clgcGainTarget_HundredthdB = 0, 
+		.clgcFilterAlpha = 1610612736, 
+		.clgcLastGain_HundredthdB = 0, 
+		.clgcFilteredGain_HundredthdB = 0, 
+		.captureDelay_us = 1000, 
+		.enableRepeatedEstimationInTDD = false };
+
+	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_1, &dpdConfig_22);
+
+	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	adi_adrv9001_DpdCfg_t dpdConfig_23 = { 
+		.numberOfSamples = 4096, 
+		.additionalPowerScale = 4, 
+		.rxTxNormalizationLowerThreshold = 3395470, 
+		.rxTxNormalizationUpperThreshold = 33954698, 
+		.detectionPowerThreshold = 53942350, 
+		.detectionPeakThreshold = 214748365, 
+		.countsLessThanPowerThreshold = 4096, 
+		.countsGreaterThanPeakThreshold = 0, 
+		.immediateLutSwitching = true, 
+		.useSpecialFrame = false, 
+		.resetLuts = false, 
+		.timeFilterCoefficient = 1073741824, 
+		.dpdSamplingRate_Hz = 0, 
+		.clgcLoopOpen = 0, 
+		.clgcGainTarget_HundredthdB = 0, 
+		.clgcFilterAlpha = 1610612736, 
+		.clgcLastGain_HundredthdB = 0, 
+		.clgcFilteredGain_HundredthdB = 0, 
+		.captureDelay_us = 1000, 
+		.enableRepeatedEstimationInTDD = false };
+
+	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_23);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI);

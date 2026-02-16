@@ -190,12 +190,12 @@ int32_t Adrv9001_ConstructProfile(adrv9001_t *Instance, adrv9001_profile_t *Prof
   ProfileInstance->Init           = Instance->Params;
   ProfileInstance->StreamImageBuf = rf1_initialize_binary_10;
   ProfileInstance->ArmImageBuf    = rf1_initialize_binary_11;
-
+/*
   bool Tx1ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX1 ) == ADI_ADRV9001_TX1 );
   bool Tx2ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX2 ) == ADI_ADRV9001_TX2 );
   bool Rx1ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX1 ) == ADI_ADRV9001_RX1 );
   bool Rx2ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX2 ) == ADI_ADRV9001_RX2 );
-
+*/
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
   
@@ -1542,20 +1542,20 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
   
   if( adi_adrv9001_Tx_SlewRateLimiter_Inspect(&Instance->Device, ADI_CHANNEL_2, &Tx2SlewRateLimiterCfg) != 0)
     return Adrv9001Status_SlewRateLimiterErr;
-  
+*/
   adi_adrv9001_SpiSettings_t SpiSettings = {
       .msbFirst = 1,
       .enSpiStreaming = 0,
       .autoIncAddrUp = 1,
       .fourWireMode = 1,
       .cmosPadDrvStrength = ADI_ADRV9001_CMOSPAD_DRV_STRONG };
-*/
+
   /* Restart */
 
   if( adi_adrv9001_HwClose(&Instance->Device) != 0)
     return Adrv9001Status_ProfileInitErr;
 
-  if( adi_adrv9001_HwOpen(&Instance->Device, ProfileInstance->SpiSettings) != 0)
+  if( adi_adrv9001_HwOpen(&Instance->Device, &SpiSettings) != 0)
     return Adrv9001Status_ProfileInitErr;
 
   if( adi_adrv9001_HwReset(&Instance->Device) != 0)
@@ -1600,10 +1600,10 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
 
 
   /* Configure TX Attenuation Table */
-  if( adi_adrv9001_Tx_AttenuationTable_Write(&Instance->Device, ADI_CHANNEL_1, 0, &ProfileInstance->Tx1AttnTable, 960) != 0)
+  if( adi_adrv9001_Tx_AttenuationTable_Write(&Instance->Device, ADI_CHANNEL_1, 0, rf1_initialize_attenTableRows_18, 960) != 0)
       return Adrv9001Status_TxAttnErr;
 
-  if( adi_adrv9001_Tx_AttenuationTable_Write(&Instance->Device, ADI_CHANNEL_2, 0, &ProfileInstance->Tx2AttnTable, 960) != 0)
+  if( adi_adrv9001_Tx_AttenuationTable_Write(&Instance->Device, ADI_CHANNEL_2, 0, rf1_initialize_attenTableRows_18, 960) != 0)
       return Adrv9001Status_TxAttnErr;
 
   /* Configure Power Management Settings */
@@ -1811,8 +1811,13 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
   if( adi_adrv9010_bbdc_LoopGain_Set(&Instance->Device, ADI_CHANNEL_2, 65536) != 0)
     return Adrv9001Status_BbdcErr;
 
+  adi_adrv9001_TrackingCals_t trackingCals_21 = {
+  		.chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI  } };
+
+
   /* Configure Tracking Cals */
-  if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &ProfileInstance->TrackingCals) != 0)
+  // if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &ProfileInstance->TrackingCals) != 0)
+  if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &trackingCals_21) != 0)
     return Adrv9001Status_TrackingCalsErr;
   
   if( Tx1ProfileEnable )
@@ -1856,12 +1861,12 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
   }
 
   /* Calibrate */
-  adi_adrv9001_InitCals_t InitCals = {
-    .sysInitCalMask = (adi_adrv9001_InitCalibrations_e) 0,
-    .chanInitCalMask = { 0, 0},
-    .calMode = ADI_ADRV9001_INIT_CAL_MODE_ALL,
-    .force = false };
-
+  adi_adrv9001_InitCals_t initCals = {
+  		.sysInitCalMask = (adi_adrv9001_InitCalibrations_e) 0,
+  		.chanInitCalMask = { ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY | ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY, ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY | ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY  },
+  		.calMode = ADI_ADRV9001_INIT_CAL_MODE_ALL,
+  		.force = false };
+/*
   if( Rx1ProfileEnable )
     InitCals.chanInitCalMask[0] |= ADI_ADRV9001_RX_INIT_CALS;
 
@@ -1873,9 +1878,9 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
 
   if( Tx2ProfileEnable )
     InitCals.chanInitCalMask[1] |= ADI_ADRV9001_TX_INIT_CALS;
-
+*/
   uint8_t InitCalsError = 0;
-  if( adi_adrv9001_cals_InitCals_Run(&Instance->Device, &InitCals, 300000, &InitCalsError) != 0)
+  if( adi_adrv9001_cals_InitCals_Run(&Instance->Device, &initCals, 300000, &InitCalsError) != 0)
     return Adrv9001Status_InitCalsErr;
 
   if( InitCalsError != 0 )
@@ -2720,7 +2725,8 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
     Adrv9001Profile.Tx2DpdInitCfg.enable = Enable;
   }
 
-  Adrv9001_ReLoadProfile(Instance,&Adrv9001Profile);
+  if( Adrv9001_ReLoadProfile(Instance,&Adrv9001Profile) !=0 )
+    return Adrv9001Status_ProfileReloadErr;
 
   return Adrv9001Status_Success;
 }

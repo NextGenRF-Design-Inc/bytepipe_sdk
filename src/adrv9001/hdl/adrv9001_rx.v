@@ -55,6 +55,9 @@ module adrv9001_rx#(
   
 // User interface
   input  wire         enable,                   // Enable Receiver 
+  input  wire [31:0]  disable_cnt, 
+  input  wire [31:0]  ssi_enable_cnt,
+  input  wire [31:0]  ssi_disable_cnt,
   input  wire         swap_iq,
   input  wire [31:0]  fixed_pattern,  
   output reg          ramp_detected_out = 0,
@@ -164,16 +167,18 @@ wire [7:0]  i_serdes_dout;
 wire [7:0]  q_serdes_dout;
 wire [7:0]  s_serdes_dout;        
  
-wire   serdes_rst;
+reg    serdes_rst = 0;
+wire   rx_enable_cdc;
+
 xpm_cdc_async_rst #(
   .DEST_SYNC_FF(4),   
   .INIT_SYNC_FF(0),  
   .RST_ACTIVE_HIGH(1)  
 )
-serdes_rst_cdc_i (
-  .dest_arst(serdes_rst), 
+tx_enable_cdc_i (
+  .dest_arst(rx_enable_cdc), 
   .dest_clk(ssi_clk_div),   
-  .src_arst(~enable)   
+  .src_arst(enable)   
 );
            
 /* I Data Serdes */
@@ -215,6 +220,36 @@ s_serdes_i (
   .dout(s_serdes_dout)
 );
 
+reg [31:0] cnt = 0;
+reg ce = 0;
+
+always @( posedge ssi_clk_div ) begin
+
+  if( rx_enable_cdc == 1'b0 )
+    ce <= 1'b0;
+  else
+    ce <= ~ce;
+
+  if( rx_enable_cdc == 1'b0 )
+    cnt <= 0;
+  else if( (cnt < 32'hffffffff) && ( ce == 1'b1) )
+    cnt <= cnt + 1;   
+  else
+    cnt <= cnt;   
+
+  if( ( cnt > ssi_enable_cnt ) && ( cnt <= disable_cnt ) )
+    serdes_rst <= 1'b0;
+  else
+    serdes_rst <= 1'b1;     
+
+/*
+  if( rx_enable_cdc == 1'b1 )
+    serdes_rst <= 1'b0;
+  else
+    serdes_rst <= 1'b1;
+*/
+end
+
 reg  [15:0] i_packed = 'd0;
 reg  [15:0] q_packed = 'd0;
 reg  [15:0] s_packed = 'd0;
@@ -228,7 +263,7 @@ reg         packed_valid_prev = 'd0;
 
 always @( posedge ssi_clk_div ) begin   
     
-  if( serdes_rst )
+  if( ~rx_enable_cdc )
     packed_valid <= 1'b0;    
   else
     packed_valid <= ~packed_valid;  

@@ -13,13 +13,12 @@
 /* External LO optimal frequencies: 60 MHz to 12 GHz*/
 /* */
 /* FPGA: v0.0.0*/
-/* Device Driver API: v0.0.0*/
-/* Device Driver Client: v68.14.10*/
-/* Firmware: v0.22.39*/
+/* Device Driver: v68.16.2*/
+/* Firmware: v0.22.49*/
 /* Profile Generator: v0.53.11.0*/
 /* Stream Generator Assembly: v0.7.15.0*/
-/* Transceiver Evaluation Software: v0.27.0*/
-/* ADRV9001 Plugin: v0.27.0*/
+/* Transceiver Evaluation Software: v0.28.0*/
+/* ADRV9001 Plugin: v0.28.0*/
 
 
 #include "rf1_calibrate.h"

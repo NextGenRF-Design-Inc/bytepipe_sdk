@@ -110,6 +110,7 @@ typedef enum
   Adrv9001Status_ProfileInitErr       = (ADRV9001_STATUS_OFFSET - 1),
   Adrv9001Status_ProfileCalErr        = (ADRV9001_STATUS_OFFSET - 2),
   Adrv9001Status_ProfileCfgErr        = (ADRV9001_STATUS_OFFSET - 3),
+  Adrv9001Status_ProfileReloadErr     = (ADRV9001_STATUS_OFFSET - 3),
   Adrv9001Status_ToPrimedErr          = (ADRV9001_STATUS_OFFSET - 4),
   Adrv9001Status_ToCalErr             = (ADRV9001_STATUS_OFFSET - 5),
   Adrv9001Status_ToEnabledErr         = (ADRV9001_STATUS_OFFSET - 6),
