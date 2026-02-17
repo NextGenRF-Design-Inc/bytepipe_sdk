@@ -166,6 +166,7 @@ typedef enum
   Adrv9001Status_Tx1DpdErr            = (ADRV9001_STATUS_OFFSET - 56),
   Adrv9001Status_Tx2DpdErr            = (ADRV9001_STATUS_OFFSET - 57),
   Adrv9001Status_ProfileErr           = (ADRV9001_STATUS_OFFSET - 58),
+  Adrv9001Status_SetParamErr          = (ADRV9001_STATUS_OFFSET - 59),
   
 } adrv9001_status_t;
 
@@ -191,6 +192,7 @@ typedef void (*adrv9001_rf_state_cb_t)( void *CallbackRef, adi_adrv9001_ChannelS
 typedef void (*adrv9001_hop_irq_cb_t)( void *CallbackRef );
 
 typedef int  (*adrv9001_initialize_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+
 typedef int  (*adrv9001_calibrate_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
 typedef int  (*adrv9001_configure_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
 typedef void* (*adrv9001_malloc_t)(size_t);
@@ -251,6 +253,8 @@ typedef struct {
   adi_adrv9001_PllConfig_t                    Lo2PllConfig;
   bool                                        Tx1Boost;
   bool                                        Tx2Boost;
+  int16_t                                     Tx1DpdExternalLoopbackPower;
+  int16_t                                     Tx2DpdExternalLoopbackPower;
   uint32_t                                    Tx1DpdExternalPathDelay;
   uint32_t                                    Tx2DpdExternalPathDelay;
   adi_adrv9001_DpdInitCfg_t                   Tx1DpdInitCfg;
@@ -276,6 +280,9 @@ typedef struct {
   adi_adrv9001_TrackingCals_t                 TrackingCals;
 }adrv9001_profile_t;
 
+typedef int  (*adrv9001_initialize_new_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance );
+typedef int  (*adrv9001_configure_new_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance );
+typedef int  (*adrv9001_calibrate_new_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
 /**
 ** SSI Delay
 */
@@ -316,6 +323,14 @@ typedef struct {
   bool                                  TxBoost[2];
   adi_adrv9001_FhHopFrame_t            *HopTable;
   uint8_t                               HopTableSize;
+   uint32_t                             Tx1SsiEnableDly;
+  uint32_t                              Tx2SsiEnableDly;
+  uint32_t                              Rx1SsiEnableDly;
+  uint32_t                              Rx2SsiEnableDly;
+  uint32_t                              Tx1DisableDly;
+  uint32_t                              Tx2DisableDly;
+  uint32_t                              Rx1SsiDisableDly;
+  uint32_t                              Rx2SsiDisableDly;
   adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
   adi_adrv9001_ChannelEnableMode_e      RxEnableMode;
   float                                 Rx1RssiOffsetdB;
@@ -325,8 +340,11 @@ typedef struct {
   adi_adrv9001_SsiTestModeData_e        Tx1TestMode;
   adi_adrv9001_SsiTestModeData_e        Tx2TestMode;
   adrv9001_initialize_fn_t              InitializeFn;
+  adrv9001_initialize_new_fn_t          InitializeFn_new;
   adrv9001_calibrate_fn_t               CalibrateFn;
+  adrv9001_calibrate_new_fn_t           CalibrateFn_new;
   adrv9001_configure_fn_t               ConfigureFn;
+  adrv9001_configure_new_fn_t           ConfigureFn_new;
   adrv9001_malloc_t                     Malloc;
   adrv9001_free_t                       Free;
 }adrv9001_t;
@@ -357,20 +375,50 @@ typedef struct {
   adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
   */
   uint32_t                              AxiClockFreqHz;
+
+  uint32_t                              Tx1SsiEnableDly;
+  uint32_t                              Tx2SsiEnableDly;
+  uint32_t                              Rx1SsiEnableDly;
+  uint32_t                              Rx2SsiEnableDly;
+  uint32_t                              Tx1DisableDly;
+  uint32_t                              Tx2DisableDly;
+  uint32_t                              Rx1SsiDisableDly;
+  uint32_t                              Rx2SsiDisableDly;
   float                                 Rx1RssiOffsetdB;
   float                                 Rx2RssiOffsetdB;
   adi_adrv9001_Init_t                  *Init;
   adrv9001_initialize_fn_t              InitializeFn;
+  adrv9001_initialize_new_fn_t          InitializeFn_new;
   adrv9001_calibrate_fn_t               CalibrateFn;
+  adrv9001_calibrate_new_fn_t           CalibrateFn_new;
   adrv9001_configure_fn_t               ConfigureFn;
+  adrv9001_configure_new_fn_t           ConfigureFn_new;
   adrv9001_malloc_t                     Malloc;
   adrv9001_free_t                       Free;
   bool                                  UseExtClock;
 }adrv9001_init_t;
 
+
+int32_t Adrv9001_SetTxExternalPathDelay( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Delay);
+int32_t Adrv9001_SetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int16_t Power);
+int32_t Adrv9001_SetTxDpdNumberofSamples( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t SampleCnt);
+int32_t Adrv9001_SetTxDpdRxTxNormalizationLowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold);
+int32_t Adrv9001_SetTxDpdRxTxNormalizationUpperThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold);
+int32_t Adrv9001_SetTxDpdDetectionPowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold);
+int32_t Adrv9001_SetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold);
+int32_t Adrv9001_GetTxExternalPathDelay( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *Delay);
+int32_t Adrv9001_GetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int16_t *Power);
+int32_t Adrv9001_GetTxDpdNumberofSamples( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *SampleCnt);
+int32_t Adrv9001_GetTxDpdRxTxNormalizationLowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *Threshold);
+int32_t Adrv9001_GetTxDpdRxTxNormalizationUpperThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *Threshold);
+int32_t Adrv9001_GetTxDpdDetectionPowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *Threshold);
+int32_t Adrv9001_GetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *Threshold);
+void AxiAdrv9001_SetSsiDisableCnt       ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetSsiEnableCnt        ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetDisableCnt          ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 int32_t Adrv9001_ReLoadProfile          ( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance);
 //int32_t Adrv9001_ReLoadProfile_ByChunks ( adrv9001_t *Instance);
-//int32_t Adrv9001_LoadProfile            ( adrv9001_t *Instance, adrv9001_profile_t *Profile  );
+int32_t Adrv9001_LoadNewProfile         ( adrv9001_t *Instance , adrv9001_profile_t *ProfileInstance);
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
 int32_t Adrv9001_ClearError             ( adrv9001_t *Instance );

@@ -173,7 +173,7 @@ module axi_adrv9001#(
   
   input  wire           s_axi_aclk,
   input  wire           s_axi_aresetn,
-  input  wire [6:0]     s_axi_awaddr,
+  input  wire [7:0]     s_axi_awaddr,
   input  wire [2:0]     s_axi_awprot,
   input  wire           s_axi_awvalid,
   output wire           s_axi_awready,
@@ -184,7 +184,7 @@ module axi_adrv9001#(
   output wire [1:0]     s_axi_bresp,
   output wire           s_axi_bvalid,
   input  wire           s_axi_bready,
-  input  wire [6:0]     s_axi_araddr,
+  input  wire [7:0]     s_axi_araddr,
   input  wire [2:0]     s_axi_arprot,
   input  wire           s_axi_arvalid,
   output wire           s_axi_arready,

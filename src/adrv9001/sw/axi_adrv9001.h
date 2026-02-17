@@ -155,8 +155,12 @@ typedef struct{
   uint32_t            ClockFreqHz;
 }axi_adrv9001_t;
 
-
-
+void AxiAdrv9001_SetSsiDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetSsiEnableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+void AxiAdrv9001_SetDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
+uint32_t AxiAdrv9001_GetSsiDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel );
+uint32_t AxiAdrv9001_GetSsiEnableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel );
+uint32_t AxiAdrv9001_GetDisableCnt( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel );
 int32_t AxiAdrv9001_Initialize( axi_adrv9001_t *Instance, axi_adrv9001_init_t *Init );
 void AxiAdrv9001_ResetbPinSet( axi_adrv9001_t *Instance, uint8_t Level );
 void AxiAdrv9001_SetDgpio( axi_adrv9001_t *Instance, uint32_t Value );

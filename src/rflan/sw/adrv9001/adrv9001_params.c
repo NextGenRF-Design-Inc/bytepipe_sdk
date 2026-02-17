@@ -340,6 +340,204 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     sscanf(Value, "%hhu", &tmp);
     status = Adrv9001_SetRxInputPort( Adrv9001, ADI_CHANNEL_2, (adi_adrv9001_RxRfInputSel_e)tmp );
   }  
+  else if( Id == Adrv9001ParamId_Tx1ExternalPathDelay)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxExternalPathDelay( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1ExternalLoopbackPower)
+  {
+    int16_t tmp;
+    sscanf(Value, "%i", &tmp);
+    Adrv9001_SetTxExternalLoopbackPower( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdNumberofSamples)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdNumberofSamples( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationLowerThreshold)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdRxTxNormalizationLowerThreshold( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationUpperThreshold)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdRxTxNormalizationUpperThreshold( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdDetectionPowerThreshold)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdDetectionPowerThreshold( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdDetectionPeakThreshold) 
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdDetectionPeakThreshold( Adrv9001, ADI_CHANNEL_1, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2ExternalPathDelay)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxExternalPathDelay( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2ExternalLoopbackPower)
+  {
+    int16_t tmp;
+    sscanf(Value, "%i", &tmp);
+    Adrv9001_SetTxExternalLoopbackPower( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdNumberofSamples)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdNumberofSamples( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdRxTxNormalizationLowerThreshold)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdRxTxNormalizationLowerThreshold( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdRxTxNormalizationUpperThreshold)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdRxTxNormalizationUpperThreshold( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdDetectionPowerThreshold)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdDetectionPowerThreshold( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdDetectionPeakThreshold )
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    Adrv9001_SetTxDpdDetectionPeakThreshold( Adrv9001, ADI_CHANNEL_2, tmp);
+    status = (int32_t)Adrv9001Status_Success;
+  }
+  else if( Id == Adrv9001ParamId_Tx1SsiEnableDly)
+  {
+	uint32_t tmp;
+	sscanf(Value, "%lu", &tmp);
+	AxiAdrv9001_SetSsiEnableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_1, tmp);
+	if( AxiAdrv9001_GetSsiEnableCnt(Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_1) == tmp)
+		status = (int32_t)Adrv9001Status_Success;
+	else
+		status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Tx2SsiEnableDly)
+  {
+	uint32_t tmp;
+	sscanf(Value, "%lu", &tmp);
+	AxiAdrv9001_SetSsiEnableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_2, tmp);
+	if( AxiAdrv9001_GetSsiEnableCnt(Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_2) == tmp)
+		status = (int32_t)Adrv9001Status_Success;
+	else
+		status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Rx1SsiEnableDly)
+  {
+	uint32_t tmp;
+	sscanf(Value, "%lu", &tmp);
+	AxiAdrv9001_SetSsiEnableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1, tmp);
+	if( AxiAdrv9001_GetSsiEnableCnt(Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1) == tmp)
+		status = (int32_t)Adrv9001Status_Success;
+	else
+		status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Rx2SsiEnableDly)
+  {
+	uint32_t tmp;
+	sscanf(Value, "%lu", &tmp);
+	AxiAdrv9001_SetSsiEnableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2, tmp);
+	if( AxiAdrv9001_GetSsiEnableCnt(Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2) == tmp)
+		status = (int32_t)Adrv9001Status_Success;
+	else
+		status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Rx1SsiDisableDly)
+  {
+  	uint32_t tmp;
+  	sscanf(Value, "%lu", &tmp);
+  	AxiAdrv9001_SetSsiDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1, tmp);
+	  if( AxiAdrv9001_GetSsiDisableCnt(Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1) == tmp)
+	  	status = (int32_t)Adrv9001Status_Success;
+	  else
+	  	status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Rx2SsiDisableDly)
+  {
+	  uint32_t tmp;
+	  sscanf(Value, "%lu", &tmp);
+	  AxiAdrv9001_SetSsiDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2, tmp);
+	  if( AxiAdrv9001_GetSsiDisableCnt(Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2) == tmp)
+	  	status = (int32_t)Adrv9001Status_Success;
+	  else
+	  	status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Tx1DisableDly)
+  {
+    uint32_t tmp;
+    sscanf(Value, "%lu", &tmp);
+    AxiAdrv9001_SetDisableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_1, tmp);
+	  if( AxiAdrv9001_GetDisableCnt(Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_1) == tmp)
+	  	status = (int32_t)Adrv9001Status_Success;
+	  else
+	  	status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Tx2DisableDly)
+  {
+	  uint32_t tmp;
+	  sscanf(Value, "%lu", &tmp);
+	  AxiAdrv9001_SetDisableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_2, tmp);
+	  if( AxiAdrv9001_GetDisableCnt(Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_2) == tmp)
+	  	status = (int32_t)Adrv9001Status_Success;
+	  else
+	  	status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Rx1DisableDly)
+  {
+	  uint32_t tmp;
+	  sscanf(Value, "%lu", &tmp);
+	  AxiAdrv9001_SetDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1, tmp);
+	  if( AxiAdrv9001_GetDisableCnt(Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1) == tmp)
+	  	status = (int32_t)Adrv9001Status_Success;
+	  else
+	  	status = (int32_t)Adrv9001Status_SetParamErr;
+  }
+  else if( Id == Adrv9001ParamId_Rx2DisableDly)
+  {
+	  uint32_t tmp;
+	  sscanf(Value, "%lu", &tmp);
+	  AxiAdrv9001_SetDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2, tmp);
+	  if( AxiAdrv9001_GetDisableCnt(Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2) == tmp)
+	  	status = (int32_t)Adrv9001Status_Success;
+	  else
+	  	status = (int32_t)Adrv9001Status_SetParamErr;
+  }
 
   return status;
 }
@@ -812,6 +1010,122 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
 
     sprintf(Value, "%hhu", tmp);
   }    
+  else if( Id == Adrv9001ParamId_Tx1ExternalPathDelay)
+  {
+
+  }
+  else if( Id == Adrv9001ParamId_Tx1ExternalLoopbackPower)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdNumberofSamples)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationLowerThreshold)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationUpperThreshold)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdDetectionPowerThreshold)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdDetectionPeakThreshold) 
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2ExternalPathDelay)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2ExternalLoopbackPower)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdNumberofSamples)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdRxTxNormalizationLowerThreshold)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdRxTxNormalizationUpperThreshold)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdDetectionPowerThreshold)
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdDetectionPeakThreshold )
+  {
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx1SsiEnableDly)
+  {
+    uint32_t tmp;
+    tmp = AxiAdrv9001_GetSsiEnableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_1);
+    sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx2SsiEnableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetSsiEnableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_2);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx1SsiEnableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetSsiEnableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx2SsiEnableDly)
+  {
+    uint32_t tmp;
+	tmp = AxiAdrv9001_GetSsiEnableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx1SsiDisableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetSsiDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx2SsiDisableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetSsiDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx1DisableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetDisableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_1);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx2DisableDly)
+  {
+    uint32_t tmp;
+	tmp = AxiAdrv9001_GetDisableCnt( Adrv9001->Axi.Base, ADI_TX, ADI_CHANNEL_2);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx1DisableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_1);
+	sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Rx2DisableDly)
+  {
+	uint32_t tmp;
+	tmp = AxiAdrv9001_GetDisableCnt( Adrv9001->Axi.Base, ADI_RX, ADI_CHANNEL_2);
+	sprintf(Value, "%lu", tmp);
+  }
 
   return Adrv9001Status_Success;
 }
