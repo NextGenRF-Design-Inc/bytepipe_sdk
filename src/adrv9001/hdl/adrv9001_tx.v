@@ -68,7 +68,7 @@ module adrv9001_tx#(
   
   output wire [31:0]  otx_axis_tdata,
   output wire         otx_axis_tvalid,
-  
+  output reg          enable_out = 0,
 // User data interface        
   input  wire [31:0]  s_axis_tdata,          // IQ data to be transmitted
   output wire         s_axis_tready,         // Ready for new IQ data sample
@@ -297,7 +297,12 @@ always @( posedge ssi_clk_div ) begin
   else if( (cnt < 32'hffffffff) && ( ce == 1'b1) )
     cnt <= cnt + 1;   
   else
-    cnt <= cnt;   
+    cnt <= cnt;  
+
+  if( (cnt <= disable_cnt) && (cnt > 32'h0) )
+    enable_out <= 1'b1;
+  else
+    enable_out <= 1'b0; 
 
   if( ( cnt > ssi_enable_cnt ) && ( cnt <= disable_cnt ) )
     serdes_rst <= 1'b0;

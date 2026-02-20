@@ -27,11 +27,11 @@ int rf1_configure_new(adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile
 {
 	int32_t error_code = 0;
 
-
+/*
 	adi_adrv9001_RxrfdcLoidCfg_t loidConfig_1 = { 
 		.loidEnable = false, 
 		.loidThreshold_negdBFS = 61 };
-
+*/
 	error_code = adi_adrv9001_Rx_Loid_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Rx1LoidCfg);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
@@ -182,6 +182,7 @@ int rf1_configure_new(adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile
 	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &ProfileInstance->TrackingCals);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	/*
 	adi_adrv9001_DpdCfg_t dpdConfig_22 = { 
 		.numberOfSamples = 4096, 
 		.additionalPowerScale = 4, 
@@ -203,10 +204,13 @@ int rf1_configure_new(adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile
 		.clgcFilteredGain_HundredthdB = 0, 
 		.captureDelay_us = 1000, 
 		.enableRepeatedEstimationInTDD = false };
+*/
+	if( ProfileInstance->Tx1DpdInitCfg.enable == true)
+  {
+	  error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdCfg);
 
-	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdCfg);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  }
 	/*
 	adi_adrv9001_DpdCfg_t dpdConfig_23 = { 
 		.numberOfSamples = 4096, 
@@ -230,9 +234,12 @@ int rf1_configure_new(adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile
 		.captureDelay_us = 1000, 
 		.enableRepeatedEstimationInTDD = false };
 */
-	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdCfg);
+  if( ProfileInstance->Tx2DpdInitCfg.enable == true)
+  {
+	  error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdCfg);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  }
 	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Rx1AgcCtrlMode);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);

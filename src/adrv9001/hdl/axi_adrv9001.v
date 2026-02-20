@@ -79,10 +79,17 @@ module axi_adrv9001#(
   )(
   input  wire           dev_clk_in,
   output wire           dev_clk,
+  
   output reg            rx1_en = 'd0,
   output reg            rx2_en = 'd0,
   output reg            tx1_en = 'd0,
   output reg            tx2_en = 'd0,
+  /*
+  output wire           rx1_en_dbg,
+  output wire           rx2_en_dbg,
+  output wire           tx1_en_dbg,
+  output wire           tx2_en_dbg,
+  */
   output wire           rstn,
   input  wire           irq,
   output wire [15:0]    dgpio_o,
@@ -208,6 +215,8 @@ module axi_adrv9001#(
   output wire           SpiDbg_Miso
   
 );
+
+
 
 wire [31:0]     tx1_disable_cnt;
 wire [31:0]     tx1_ssi_enable_cnt;
@@ -444,22 +453,22 @@ if( ENABLE_HOPPING_SUPPORT ) begin
     if( hop_mode )
       rx1_en <= rx1_setup;
     else
-      rx1_en <= rx1_enable;
+      rx1_en <= rx1_enable_out;
       
     if( hop_mode )
       rx2_en <= rx2_setup;
     else
-      rx2_en <= rx2_enable;
+      rx2_en <= rx2_enable_out;
 
     if( hop_mode )
       tx1_en <= tx1_setup;
     else
-      tx1_en <= tx1_enable;
+      tx1_en <= tx1_enable_out;
       
     if( hop_mode )
       tx2_en <= tx2_setup;
     else
-      tx2_en <= tx2_enable;    
+      tx2_en <= tx2_enable_out;    
       
   end      
   
@@ -467,10 +476,10 @@ end else begin
   
   always @(posedge s_axi_aclk) begin
 
-    rx1_en <= rx1_enable;     
-    rx2_en <= rx2_enable;  
-    tx1_en <= tx1_enable;     
-    tx2_en <= tx2_enable;   
+    rx1_en <= rx1_enable_out;     
+    rx2_en <= rx2_enable_out;  
+    tx1_en <= tx1_enable_out;     
+    tx2_en <= tx2_enable_out;   
 
   end
   
@@ -478,7 +487,12 @@ end else begin
 
 end
 endgenerate
-
+/*
+assign rx1_en_dbg = rx1_enable_out;
+assign rx2_en_dbg = rx2_enable_out;
+assign tx1_en_dbg = tx1_enable_out;
+assign tx2_en_dbg = tx2_enable_out;
+*/
 
 /**** Swap IQ ***************************************************************************************/
 
@@ -867,6 +881,7 @@ adrv9001_regs#(
     
 wire rx1_ssi_clk_div;
 wire rx1_ssi_clk;
+wire rx1_enable_out;
     
 adrv9001_clkin#(
   .SWAP_DIFF_REF_CLK( SWAP_DIFF_RX1_DCLK )
@@ -938,7 +953,8 @@ adrv9001_rx#(
     .adrv9001_rx_qdata_p(rx1_qdata_p),
     .adrv9001_rx_qdata_n(rx1_qdata_n),
     
-    .enable(rx1_enable),      
+    .enable(rx1_enable),   
+    .enable_out(rx1_enable_out),   
     .disable_cnt(rx1_disable_cnt_cdc), 
     .ssi_enable_cnt(rx1_ssi_enable_cnt_cdc),
     .ssi_disable_cnt(rx1_ssi_disable_cnt_cdc),     
@@ -955,6 +971,7 @@ adrv9001_rx#(
     
 wire rx2_ssi_clk_div;
 wire rx2_ssi_clk;
+wire rx2_enable_out;
     
 adrv9001_clkin#(
   .SWAP_DIFF_REF_CLK( SWAP_DIFF_RX2_DCLK )
@@ -1027,6 +1044,7 @@ adrv9001_rx #(
     .adrv9001_rx_qdata_n(rx2_qdata_n),
     
     .enable(rx2_enable),  
+    .enable_out(),
     .disable_cnt(rx2_disable_cnt_cdc), 
     .ssi_enable_cnt(rx2_ssi_enable_cnt_cdc),
     .ssi_disable_cnt(rx2_ssi_disable_cnt_cdc),      
@@ -1045,6 +1063,7 @@ adrv9001_rx #(
 
 wire tx1_ssi_clk;
 wire tx1_ssi_clk_div;
+wire tx1_enable_out;
 
 generate
 
@@ -1118,6 +1137,7 @@ adrv9001_tx #(
     .adrv9001_tx_qdata_n(tx1_qdata_n),
     
     .enable(tx1_enable),
+    .enable_out(tx1_enable_out),
     .disable_cnt(tx1_disable_cnt_cdc),
     .ssi_enable_cnt(tx1_ssi_enable_cnt_cdc),
     .swap_iq(tx1_swap_iq_cdc),
@@ -1135,6 +1155,7 @@ adrv9001_tx #(
     
 wire tx2_ssi_clk;
 wire tx2_ssi_clk_div;
+wire tx2_enable_out;
 
 generate
 
@@ -1208,6 +1229,7 @@ adrv9001_tx #(
     .adrv9001_tx_qdata_n(tx2_qdata_n),
 
     .enable(tx2_enable),   
+    .enable_out(tx2_enable_out),
     .disable_cnt(tx2_disable_cnt_cdc),
     .ssi_enable_cnt(tx2_ssi_enable_cnt_cdc),  
     .swap_iq(tx2_swap_iq_cdc),    

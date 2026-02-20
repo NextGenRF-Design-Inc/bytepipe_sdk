@@ -309,19 +309,6 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_1, &config_45);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_DpdInitCfg_t dpdConfig_46 = { 
-		.enable = true, 
-		.amplifierType = ADI_ADRV9001_DPDAMPLIFIER_DEFAULT, 
-		.lutSize = ADI_ADRV9001_DPDLUTSIZE_512, 
-		.model = ADI_ADRV9001_DPDMODEL_4, 
-		.changeModelTapOrders = false, 
-		.modelOrdersForEachTap = { 31, 127, 31, 30  }, 
-		.preLutScale = 8, 
-		.clgcEnable = 0 };
-
-	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_1, &dpdConfig_46);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &carrier_33);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
@@ -337,37 +324,34 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_2, &config_45);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_46);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_PllConfig_t pllConfig_53 = { 
+	adi_adrv9001_PllConfig_t pllConfig_51 = { 
 		.pllCalibration = ADI_ADRV9001_PLL_CALIBRATION_NORMAL, 
 		.pllPower = ADI_ADRV9001_PLL_POWER_LOW };
 
-	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &pllConfig_53);
+	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &pllConfig_51);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO2, &pllConfig_53);
+	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO2, &pllConfig_51);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_McsDelay_t mcsDelay_55 = { 
+	adi_adrv9001_McsDelay_t mcsDelay_53 = { 
 		.readDelay = 1, 
 		.sampleDelay = 0 };
 
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &mcsDelay_55);
+	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &mcsDelay_53);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_McsDelay_t mcsDelay_56 = { 
+	adi_adrv9001_McsDelay_t mcsDelay_54 = { 
 		.readDelay = 5, 
 		.sampleDelay = 0 };
 
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &mcsDelay_56);
+	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &mcsDelay_54);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &mcsDelay_55);
+	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &mcsDelay_53);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &mcsDelay_56);
+	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &mcsDelay_54);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_arm_System_Program(adrv9001Device_0, 15);

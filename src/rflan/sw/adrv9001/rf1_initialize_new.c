@@ -278,10 +278,14 @@ int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profi
 	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1SlewRateLimiterCfg);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  
+  if( ProfileInstance->Tx1DpdInitCfg.enable == true)
+  {
+  	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdInitCfg);
 
-	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdInitCfg);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  }
+	
 	error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
@@ -297,10 +301,12 @@ int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profi
 	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2SlewRateLimiterCfg);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdInitCfg);
+	if( ProfileInstance->Tx2DpdInitCfg.enable == true)
+  {
+	  error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdInitCfg);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  }
 	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &ProfileInstance->Lo1PllConfig);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);

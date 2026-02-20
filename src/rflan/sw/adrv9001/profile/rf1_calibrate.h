@@ -28,7 +28,6 @@ extern "C" {
 /* ADRV9001 Plugin: v0.28.0*/
 
 
-#include "adi_adrv9001_auxdac.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_rx.h"
 #include "adi_adrv9001_rx_gaincontrol.h"

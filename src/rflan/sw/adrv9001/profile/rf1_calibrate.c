@@ -818,18 +818,6 @@ int rf1_calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, false);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC0, false);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC1, false);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC2, false);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC3, false);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
 	return error_code;
 

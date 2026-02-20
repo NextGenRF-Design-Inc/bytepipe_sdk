@@ -63,6 +63,7 @@ module adrv9001_rx#(
   output reg          ramp_detected_out = 0,
   output reg          pn15_detected_out = 0,
   output reg          fixed_detected_out = 0,
+  output reg          enable_out = 0,
     
   output wire         m_axis_aclk,
   output reg  [31:0]  m_axis_tdata = 0,         // Received IQ data sample
@@ -235,7 +236,12 @@ always @( posedge ssi_clk_div ) begin
   else if( (cnt < 32'hffffffff) && ( ce == 1'b1) )
     cnt <= cnt + 1;   
   else
-    cnt <= cnt;   
+    cnt <= cnt; 
+
+  if( (cnt <= disable_cnt) && (cnt > 32'h0) )
+    enable_out <= 1'b1;
+  else
+    enable_out <= 1'b1;//1'b0;   
 
   if( ( cnt > ssi_enable_cnt ) && ( cnt <= disable_cnt ) )
     serdes_rst <= 1'b0;
