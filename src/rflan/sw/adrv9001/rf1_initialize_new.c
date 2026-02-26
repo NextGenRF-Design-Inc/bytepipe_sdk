@@ -23,9 +23,16 @@
 
 
 #include "rf1_initialize.h"
-int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance )
+//int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance )
+int rf1_initialize_new( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance )
 {
 	int32_t error_code = 0;
+	adi_adrv9001_Device_t * adrv9001Device_0 = &Instance->Device;
+
+	bool Tx1ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX1 ) == ADI_ADRV9001_TX1 );
+	bool Tx2ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX2 ) == ADI_ADRV9001_TX2 );
+	bool Rx1ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX1 ) == ADI_ADRV9001_RX1 );
+	bool Rx2ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX2 ) == ADI_ADRV9001_RX2 );
 
 	adi_common_ApiVersion_t apiVersion_0 = { 
 		.major = 0, 
@@ -84,18 +91,8 @@ int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profi
 		.minGainIndex = 0, 
 		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE };
     */
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_1, 14, rf1_initialize_gainTableRows_14, 13, &ProfileInstance->oRx1Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_2, 14, rf1_initialize_gainTableRows_15, 13, &ProfileInstance->oRx1Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, 255, rf1_initialize_gainTableRows_16, 69, &ProfileInstance->oRx1Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, 255, rf1_initialize_gainTableRows_17, 69, &ProfileInstance->oRx1Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_Tx_AttenuationTable_Write(adrv9001Device_0, 3, 0, rf1_initialize_attenTableRows_18, 960);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
@@ -113,12 +110,8 @@ int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profi
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
 
-	error_code = adi_adrv9001_Tx_OutputPowerBoost_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Tx1Boost);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Tx_OutputPowerBoost_Set(adrv9001Device_0, ADI_CHANNEL_2, ProfileInstance->Tx2Boost);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_SsiCalibrationCfg_t ssiCalibration_25 = { 
 		.rxClkDelay = { 0 }, 
 		.rxStrobeDelay = { 0 }, 
@@ -231,82 +224,120 @@ int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profi
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier);
+	if(Rx1ProfileEnable == true)
+	{
+		error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, 255, rf1_initialize_gainTableRows_16, 69, &ProfileInstance->Rx1Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_ChannelEnablementDelays_t delays_34 = { 
-		.riseToOnDelay = 0, 
-		.riseToAnalogOnDelay = 0, 
-		.fallToOffDelay = 0, 
-		.guardDelay = 0, 
-		.holdDelay = 0 };
+		error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_1, 14, rf1_initialize_gainTableRows_14, 13, &ProfileInstance->oRx1Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1EnablementDelays);
+		error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_AdcSwitchEnable_Set(adrv9001Device_0, ADI_CHANNEL_1, false);
+		error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1EnablementDelays);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
+		error_code = adi_adrv9001_Rx_AdcSwitchEnable_Set(adrv9001Device_0, ADI_CHANNEL_1, false);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2Carrier);
+		error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2EnablementDelays);
+		error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1McsDelay);
+		ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_AdcSwitchEnable_Set(adrv9001Device_0, ADI_CHANNEL_2, false);
+	}
+	if(Rx2ProfileEnable == true)
+    {
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
+	  error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_2, 14, rf1_initialize_gainTableRows_15, 13, &ProfileInstance->oRx2Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1Carrier);
+	  error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, 255, rf1_initialize_gainTableRows_17, 69, &ProfileInstance->Rx2Profile->lnaConfig, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1EnablementDelays);
+	  error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2Carrier);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Tx1DpdExternalPathDelay);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2EnablementDelays);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Rx_AdcSwitchEnable_Set(adrv9001Device_0, ADI_CHANNEL_2, false);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
 
-	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1SlewRateLimiterCfg);
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+      error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Rx2McsDelay);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+    }
+    if(Tx1ProfileEnable == true)
+    {
+      error_code = adi_adrv9001_Tx_OutputPowerBoost_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Tx1Boost);
+      ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+	  error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1Carrier);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1EnablementDelays);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Tx1DpdExternalPathDelay);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+	  error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1SlewRateLimiterCfg);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
   
-  if( ProfileInstance->Tx1DpdInitCfg.enable == true)
-  {
-  	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdInitCfg);
+      if( ProfileInstance->Tx1DpdInitCfg.enable == true)
+      {
+    	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdInitCfg);
 
-	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-  }
+	    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+      }
+
+  	  error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Tx1McsDelay);
+
+  	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	
-	error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier);
+    }
+    if(Tx2ProfileEnable == true)
+    {
+      error_code = adi_adrv9001_Tx_OutputPowerBoost_Set(adrv9001Device_0, ADI_CHANNEL_2, ProfileInstance->Tx2Boost);
+      ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2EnablementDelays);
+	  error_code = adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier);
 
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, ProfileInstance->Tx2DpdExternalPathDelay);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2SlewRateLimiterCfg);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	if( ProfileInstance->Tx2DpdInitCfg.enable == true)
-  {
-	  error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdInitCfg);
+  	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2EnablementDelays);
 
 	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-  }
+	  error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, ProfileInstance->Tx2DpdExternalPathDelay);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2SlewRateLimiterCfg);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	  if( ProfileInstance->Tx2DpdInitCfg.enable == true)
+      {
+	    error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdInitCfg);
+
+	    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+      }
+	  error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2McsDelay);
+
+	  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+    }
 	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &ProfileInstance->Lo1PllConfig);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
@@ -314,19 +345,6 @@ int rf1_initialize_new( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profi
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1McsDelay);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Rx2McsDelay);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Tx1McsDelay);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2McsDelay);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_arm_System_Program(adrv9001Device_0, 15);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);

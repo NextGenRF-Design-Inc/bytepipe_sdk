@@ -280,9 +280,9 @@ typedef struct {
   adi_adrv9001_TrackingCals_t                 TrackingCals;
 }adrv9001_profile_t;
 
-typedef int  (*adrv9001_initialize_new_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance );
-typedef int  (*adrv9001_configure_new_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance );
-typedef int  (*adrv9001_calibrate_new_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+//typedef int  (*adrv9001_initialize_new_fn_t)( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance );
+//typedef int  (*adrv9001_configure_new_fn_t) ( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance );
+//typedef int  (*adrv9001_calibrate_new_fn_t) ( adrv9001_t *Instance);
 /**
 ** SSI Delay
 */
@@ -340,13 +340,14 @@ typedef struct {
   adi_adrv9001_SsiTestModeData_e        Tx1TestMode;
   adi_adrv9001_SsiTestModeData_e        Tx2TestMode;
   adrv9001_initialize_fn_t              InitializeFn;
-  adrv9001_initialize_new_fn_t          InitializeFn_new;
+  //adrv9001_initialize_new_fn_t          InitializeFn_new;
   adrv9001_calibrate_fn_t               CalibrateFn;
-  adrv9001_calibrate_new_fn_t           CalibrateFn_new;
+  //adrv9001_calibrate_new_fn_t           CalibrateFn_new;
   adrv9001_configure_fn_t               ConfigureFn;
-  adrv9001_configure_new_fn_t           ConfigureFn_new;
+  //adrv9001_configure_new_fn_t           ConfigureFn_new;
   adrv9001_malloc_t                     Malloc;
   adrv9001_free_t                       Free;
+  uint32_t                              HwVer;
 }adrv9001_t;
 
 typedef struct {
@@ -388,14 +389,15 @@ typedef struct {
   float                                 Rx2RssiOffsetdB;
   adi_adrv9001_Init_t                  *Init;
   adrv9001_initialize_fn_t              InitializeFn;
-  adrv9001_initialize_new_fn_t          InitializeFn_new;
+  //adrv9001_initialize_new_fn_t          InitializeFn_new;
   adrv9001_calibrate_fn_t               CalibrateFn;
-  adrv9001_calibrate_new_fn_t           CalibrateFn_new;
+  //adrv9001_calibrate_new_fn_t           CalibrateFn_new;
   adrv9001_configure_fn_t               ConfigureFn;
-  adrv9001_configure_new_fn_t           ConfigureFn_new;
+  //adrv9001_configure_new_fn_t           ConfigureFn_new;
   adrv9001_malloc_t                     Malloc;
   adrv9001_free_t                       Free;
   bool                                  UseExtClock;
+  uint32_t                              HwVer;
 }adrv9001_init_t;
 
 

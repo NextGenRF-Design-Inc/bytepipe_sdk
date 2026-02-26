@@ -382,6 +382,7 @@ bool AxiAdrv9001_GetHopIrqStatus( axi_adrv9001_t *Instance )
   return ((tmp & ADRV9001_HOP_TRIG_STATUS_MASK ) == ADRV9001_HOP_TRIG_STATUS_MASK);
 }
 
+
 void AxiAdrv9001_SetPsEnable(axi_adrv9001_t *Instance, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint8_t Enable )
 {
   uint32_t tmp = (uint32_t)Enable;

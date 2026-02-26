@@ -360,8 +360,14 @@ static int32_t Rflan_Initialize( void )
   if((status = Eeprom_Initialize( &RflanEeprom, &EepromInit )) != 0)
     printf("Eeprom %s\r\n",StatusString(status));
 
+  /* Get HwVer */
+  uint32_t HwVer = Rflan_GetHwVer( );
+  printf("\r\nHwVer = %lu\r\n\r\n",HwVer);
+
+
   rflan_pib_init_t PibInit = {
-      .HwVer = Rflan_GetHwVer( ),
+      .HwVer = HwVer,
+      //.HwVer = Rflan_GetHwVer( ),
 #ifdef VERSA_CLOCK5_ENABLE
       .VersaClock5 = &RflanVersaClock5,
 #endif
@@ -403,11 +409,11 @@ static int32_t Rflan_Initialize( void )
       .Rx2RssiOffsetdB = -20,
       .Init = &rf1_initialize_init_8,
 	    .InitializeFn = rf1_initialize,
-	    .InitializeFn_new = rf1_initialize_new,
+	    //.InitializeFn_new = rf1_initialize_new,
       .CalibrateFn = rf1_calibrate,
-      .CalibrateFn_new = rf1_calibrate_new,
+      //.CalibrateFn_new = rf1_calibrate_new,
       .ConfigureFn = rf1_configure,
-      .ConfigureFn_new = rf1_configure_new,
+      //.ConfigureFn_new = rf1_configure_new,
       .Tx1SsiEnableDly = 20,
       .Tx2SsiEnableDly = 20,
       .Rx1SsiEnableDly = 20,
@@ -416,16 +422,17 @@ static int32_t Rflan_Initialize( void )
       .Tx2DisableDly = 100,
       .Rx1SsiDisableDly = 130,
       .Rx2SsiDisableDly = 130,
-	  .Malloc = pvPortMalloc,
-	  .Free = vPortFree,
-	  .UseExtClock = DEFAULT_REF_CLK_EXTERNAL
-  };
+	    .Malloc = pvPortMalloc,
+	    .Free = vPortFree,
+	    .UseExtClock = DEFAULT_REF_CLK_EXTERNAL,
+      .HwVer = HwVer,
+  };  
 
   /* Initialize ADRV9001 CLI */
   if((status = Adrv9001_Initialize( &RflanAdrv9001, &Adrv9001Init )) != 0)
     printf("%s\r\n",StatusString(status));
 
-  if( Rflan_GetHwVer() == 2 )
+  if( HwVer == 2 )
   {
     RflanRx1LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_06;
     RflanRx2LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_05;

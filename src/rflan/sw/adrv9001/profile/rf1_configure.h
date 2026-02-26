@@ -31,11 +31,10 @@ extern "C" {
 
 #include "adi_adrv9001_bbdc.h"
 #include "adi_adrv9001_cals.h"
+#include "adi_adrv9001_dpd.h"
 #include "adi_adrv9001_gpio.h"
 #include "adi_adrv9001_powersavingandmonitormode.h"
 #include "adi_adrv9001_radio.h"
-#include "adi_adrv9001_rx.h"
-#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 
@@ -52,7 +51,7 @@ extern "C" {
     printf("Error message: %s \n", device_context->common.error.errormessage); \
 }
 int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0);
-int rf1_configure_new(adi_adrv9001_Device_t * adrv9001Device_0, adrv9001_profile_t *ProfileInstance);
+int rf1_configure_new(adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance);
 
 #ifdef __cplusplus
 }

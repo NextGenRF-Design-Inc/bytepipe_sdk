@@ -1,21 +1,5 @@
 // This script enables the transmitter with DPD enabled
 
-//Set Center Frequency
-Adrv9001ToRfCalibrated Tx2
-Adrv9001SetParam Tx2CarrierFrequency 4800000000
-Adrv9001ToRfPrimed Tx2
-
-// Set Attenuation to 6dB
-Adrv9001SetParam Tx2Attn 6000
-
-// Enable Tx Boost
-Adrv9001SetParam Tx2Boost 1
-
-// Set SSI enable delay
-Adrv9001SetParam Tx2SsiEnableDly 500
-
-// Set SSI disable delay
-Adrv9001SetParam Tx2DisableDly 200
 
 // Enable DPD
 Adrv9001SetParam Tx2DpdEnable 1
@@ -40,6 +24,20 @@ Adrv9001SetParam Tx2DpdDetectionPowerThreshold 53942350
 
 // Set Detection Peak Threshold to -10dBm
 Adrv9001SetParam Tx2DpdDetectionPeakThreshold 214748364
+
+//Set Center Frequency
+Adrv9001ToRfCalibrated Tx2
+Adrv9001SetParam Tx2CarrierFrequency 4800000000
+Adrv9001ToRfPrimed Tx2
+
+// Set Attenuation to 6dB
+Adrv9001SetParam Tx2Attn 6000
+
+// Enable Tx Boost
+Adrv9001SetParam Tx2Boost 1
+
+// Set SSI enable delay
+Adrv9001SetParam Tx2SsiEnableDly 500
 
 // Load DMA buffer with local file
 RflanStreamBufLoad Tx2 CFR_sample_rate_15p36M_bw_10M_DPD_Demo.csv

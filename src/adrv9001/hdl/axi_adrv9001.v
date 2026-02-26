@@ -1044,7 +1044,7 @@ adrv9001_rx #(
     .adrv9001_rx_qdata_n(rx2_qdata_n),
     
     .enable(rx2_enable),  
-    .enable_out(),
+    .enable_out(rx2_enable_out),
     .disable_cnt(rx2_disable_cnt_cdc), 
     .ssi_enable_cnt(rx2_ssi_enable_cnt_cdc),
     .ssi_disable_cnt(rx2_ssi_disable_cnt_cdc),      
