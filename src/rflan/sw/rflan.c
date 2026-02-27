@@ -95,6 +95,8 @@ static adrv9001_params_t   Adrv9001Params;
 
 static adi_adrv9001_GpioPin_e RflanRx1LnaEnablePin;
 static adi_adrv9001_GpioPin_e RflanRx2LnaEnablePin;
+static adi_adrv9001_GpioPin_e RflanTx1EnablePin;
+static adi_adrv9001_GpioPin_e RflanTx2EnablePin;
 static adi_adrv9001_AuxDac_e  RflanVcTcxoDac;
 
 static int32_t RflanIic_Initialize( XIicPs *Instance, uint32_t DeviceId )
@@ -442,16 +444,33 @@ static int32_t Rflan_Initialize( void )
   {
     RflanRx1LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_01;
     RflanRx2LnaEnablePin = ADI_ADRV9001_GPIO_ANALOG_09;
+    RflanTx1EnablePin    = ADI_ADRV9001_GPIO_ANALOG_00;
+    RflanTx2EnablePin    = ADI_ADRV9001_GPIO_ANALOG_08;
     RflanVcTcxoDac = ADI_ADRV9001_AUXDAC3;
   }
 
+  
   /* Configure Analog GPIO as outputs */
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
-  Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+  if( HwVer == 2 )
+  {
+    Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+    /* Disable Rx1A */
+    Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+    /* Disable Rx2A */
+    Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+  }
 
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx1LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
-  Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanRx2LnaEnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+  if( HwVer == 3 )
+  {
+    Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_03_00, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+    Adrv9001_SetAnalogGpioDirection( &RflanAdrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_11_08, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
+    /* Disable Tx1 */
+    Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanTx1EnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+    /* Disable Tx2 */
+    Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanTx2EnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
+  }  
+  
+  
 
   /* Set DAC Voltage */
   Adrv9001_SetDacEnable( &RflanAdrv9001, RflanVcTcxoDac, true );
