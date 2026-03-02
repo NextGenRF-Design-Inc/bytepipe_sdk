@@ -65,7 +65,7 @@ extern adi_adrv9001_TxAttenTableRow_t rf1_initialize_attenTableRows_18[];
     printf("Error message: %s \n", device_context->common.error.errormessage); \
 }
 int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0);
-int rf1_initialize_new( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance );
+
 
 #ifdef __cplusplus
 }

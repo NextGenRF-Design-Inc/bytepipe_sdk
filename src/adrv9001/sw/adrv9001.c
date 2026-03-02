@@ -274,18 +274,60 @@ int32_t Adrv9001_ConstructProfile(adrv9001_t *Instance, adrv9001_profile_t *Prof
       return Adrv9001Status_ToCalErr;
   }
 
-
-
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
 
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_RX, ADI_CHANNEL_2, &State ) != 0)
+      return Adrv9001Status_ReadErr;
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+    if( Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_2 ) != 0)
+      return Adrv9001Status_ToPrimedErr;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+    if( Adrv9001_ToCalibrated( Instance, ADI_RX, ADI_CHANNEL_2 ) != 0)
+      return Adrv9001Status_ToCalErr;
+  }
 
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
   
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_TX, ADI_CHANNEL_1, &State ) != 0)
+      return Adrv9001Status_ReadErr;
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+    if( Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_1 ) != 0)
+      return Adrv9001Status_ToPrimedErr;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+    if( Adrv9001_ToCalibrated( Instance, ADI_TX, ADI_CHANNEL_1 ) != 0)
+      return Adrv9001Status_ToCalErr;
+  }
+
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
   
+  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_TX, ADI_CHANNEL_2, &State ) != 0)
+      return Adrv9001Status_ReadErr;
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+    if( Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_2 ) != 0)
+      return Adrv9001Status_ToPrimedErr;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+    if( Adrv9001_ToCalibrated( Instance, ADI_TX, ADI_CHANNEL_2 ) != 0)
+      return Adrv9001Status_ToCalErr;
+  }
+
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
 
@@ -2098,6 +2140,65 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
 
   return Adrv9001Status_Success;
 }
+int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdChannelStatus_t* dpdChannelStatus )
+{
+	int32_t status;
+	adi_common_Port_e port = ADI_TX;
+
+	adi_adrv9001_ChannelState_e State;
+	if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
+	  return Adrv9001Status_ReadErr;
+
+	adi_adrv9001_ChannelEnableMode_e mode;
+	if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
+	  return Adrv9001Status_ReadErr;
+
+	if( mode == ADI_ADRV9001_PIN_MODE )
+	{
+	  /* Set SPI Mode */
+	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+	    return Adrv9001Status_WriteErr;
+    }
+
+	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+	if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+	{
+	  if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+
+	if( adi_adrv9001_dpd_channel_Status_Get( &Instance->Device, channel, dpdChannelStatus) != 0)
+	    return Adrv9001Status_DpdStatusErr;
+
+
+	if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+	if(mode == ADI_ADRV9001_PIN_MODE)
+	{
+	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+	    return Adrv9001Status_WriteErr;
+	}
+
+	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+	{
+	  if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+
+
+  return Adrv9001Status_Success;
+}
 
 int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
 {
@@ -2761,8 +2862,8 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   usleep(1000);
 
   /* Construct Profile Obj */
-  if( Adrv9001_ConstructProfile(Instance, &Adrv9001Profile) != 0)
-     return Adrv9001Status_ProfileErr;
+  //if( Adrv9001_ConstructProfile(Instance, &Adrv9001Profile) != 0)
+     //return Adrv9001Status_ProfileErr;
 
   if( Init->HopIrqId != 0x00 )
   {

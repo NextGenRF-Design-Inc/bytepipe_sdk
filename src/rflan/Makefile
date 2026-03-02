@@ -15,6 +15,11 @@ hdl:
 	source $(SDK_SRCDIR)/include.sh; build_hdl $(SRCDIR) $(PROJECT) $(DEV)
   
 sw: 
+	echo $(PROJECT_DIR)
+	echo $(PROJECT)
+	echo $(SRCDIR)
+	echo $(SDK_SRCDIR)
+	echo $(DEV)
 	$(MAKE) -f $(SDK_SRCDIR)/adrv9001/Makefile sdk
 	source $(SDK_SRCDIR)/include.sh; build_sw $(SRCDIR) $(PROJECT) $(DEV)
    

@@ -29,10 +29,11 @@ extern "C" {
 
 
 #include "adi_adrv9001_cals.h"
+#include "adi_adrv9001_rx.h"
+#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_spi.h"
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_tx.h"
-#include "adrv9001.h"
 #include <stdlib.h>
 
 #define ADI_HANDLE_ERROR(error_code, device_context) if (0 != error_code) \
@@ -48,7 +49,7 @@ extern "C" {
     printf("Error message: %s \n", device_context->common.error.errormessage); \
 }
 int rf1_calibrate(adi_adrv9001_Device_t * adrv9001Device_0);
-int rf1_calibrate_new(adrv9001_t *Instance);
+
 
 #ifdef __cplusplus
 }

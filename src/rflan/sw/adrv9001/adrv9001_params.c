@@ -38,6 +38,7 @@
 
 #include "adrv9001.h"
 #include "adrv9001_params.h"
+#include <string.h>
 
 int32_t Adrv9001Params_GetParamName( adrv9001_param_id_t Id, char *Name )
 {
@@ -975,6 +976,39 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
       return status;
 
     sprintf(Value, "%hhu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdStatus)
+  {
+    adi_adrv9001_DpdChannelStatus_t tmp;
+
+    if((status = Adrv9001_GetDpdStatus( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+
+    //6 elements in adi_adrv9001_DpdChannelStatus_t structure
+    char *p = Value + strlen(Value);
+    p += sprintf(p, "%s%lu\r\n","numberofsuccessfuliterations = ",tmp.numberOfSuccessfulIterations);
+    p += sprintf(p, "%s%lu\r\n","numberofiterations = ",tmp.numberOfIterations);
+    p += sprintf(p, "%s%ld\r\n","txPeakPower_100th_dB = ",tmp.txPeakPower_100th_dB);
+    p += sprintf(p, "%s%ld\r\n","rxPeakPower_100th_dB = ",tmp.rxPeakPower_100th_dB);
+    p += sprintf(p, "%s%ld\r\n","txAvgPower_100th_dB = ",tmp.txAvgPower_100th_dB);
+    p += sprintf(p, "%s%ld\r\n","rxAvgPower_100th_dB = ",tmp.rxAvgPower_100th_dB);
+    
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdStatus)
+  {
+    adi_adrv9001_DpdChannelStatus_t tmp;
+
+    if((status = Adrv9001_GetDpdStatus( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+
+    //6 elements in adi_adrv9001_DpdChannelStatus_t structure
+    char *p = Value + strlen(Value);
+    p += sprintf(p, "%s%lu\r\n","numberOfSuccessfulIterations = ",tmp.numberOfSuccessfulIterations);
+    p += sprintf(p, "%s%lu\r\n","numberOfIterations = ",tmp.numberOfIterations);
+    p += sprintf(p, "%s%ld\r\n","txPeakPower_100th_dB = ",tmp.txPeakPower_100th_dB);
+    p += sprintf(p, "%s%ld\r\n","rxPeakPower_100th_dB = ",tmp.rxPeakPower_100th_dB);
+    p += sprintf(p, "%s%ld\r\n","txAvgPower_100th_dB = ",tmp.txAvgPower_100th_dB);
+    p += sprintf(p, "%s%ld\r\n","rxAvgPower_100th_dB = ",tmp.rxAvgPower_100th_dB);
   }
   else if( Id == Adrv9001ParamId_Tx1TestData )
   {

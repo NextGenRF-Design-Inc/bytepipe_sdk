@@ -1,5 +1,7 @@
 // This script enables the transmitter with DPD enabled
 
+//set Tx2 to Primed mode
+Adrv9001ToRfPrimed Tx2
 
 // Enable DPD
 Adrv9001SetParam Tx2DpdEnable 1
