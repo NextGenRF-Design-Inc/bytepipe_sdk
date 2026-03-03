@@ -168,6 +168,7 @@ typedef enum
   Adrv9001Status_ProfileErr           = (ADRV9001_STATUS_OFFSET - 58),
   Adrv9001Status_SetParamErr          = (ADRV9001_STATUS_OFFSET - 59),
   Adrv9001Status_DpdStatusErr         = (ADRV9001_STATUS_OFFSET - 60),
+  Adrv9001Status_DpdReadCaptureErr    = (ADRV9001_STATUS_OFFSET - 61),
   
 } adrv9001_status_t;
 
@@ -522,6 +523,7 @@ int32_t Adrv9001_GetRxInputPort         ( adrv9001_t *Instance, adi_common_Chann
 int32_t Adrv9001_EnableManualInputPorts ( adrv9001_t *Instance, bool Enable );
 
 int32_t Adrv9001_SetTxDpdEnable         ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable );
-int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdChannelStatus_t* dpdChannelStatus );
+int32_t Adrv9001_GetDpdStatus           ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdChannelStatus_t* dpdChannelStatus );
+int32_t Adrv9001_ReadDpdCaptureData     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t iData_tx[], int32_t qData_tx[], int32_t iData_elb[], int32_t qData_elb[], uint32_t length, bool autoIncrement);
 
 #endif

@@ -62,6 +62,8 @@
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
+
+
 static void Adrv9001Cli_GetPortChannelParameter(cli_t *CliInstance, const char *cmd, uint8_t pNum, adi_common_ChannelNumber_e *Channel, adi_common_Port_e *Port)
 {
   char pName[64] = {0};
@@ -204,6 +206,7 @@ static void Adrv9001Cli_ToRfPrimed(cli_t *CliInstance, const char *cmd, adrv9001
   int32_t status = 0;
   adi_common_ChannelNumber_e Channel;
   adi_common_Port_e Port;
+  
 
   Adrv9001_ClearError( Adrv9001Params->Adrv9001 );
 
@@ -274,6 +277,81 @@ static void Adrv9001Cli_SweepSsi(cli_t *CliInstance, const char *cmd, adrv9001_p
   {
     Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
   }
+}
+
+static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, adrv9001_params_t *Adrv9001Params )
+{
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+  int32_t status = 0;
+  uint32_t Length;
+
+  int32_t *iData_tx;
+  int32_t *qData_tx;
+  int32_t *iData_elb;
+  int32_t *qData_elb;
+
+
+
+  Adrv9001_ClearError( Adrv9001Params->Adrv9001 );
+
+  Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
+
+  Cli_GetParameter(cmd, 2, CliParamTypeU32, &Length);
+
+  if(((iData_tx  = calloc(1, Length*4 )) == NULL) ||
+     ((qData_tx  = calloc(1, Length*4 )) == NULL) ||
+     ((iData_elb = calloc(1, Length*4 )) == NULL) ||
+     ((qData_elb = calloc(1, Length*4 )) == NULL))
+    {
+      Cli_Printf(CliInstance,"Memory Error\r\n");
+      return;
+    }
+
+  status = Adrv9001_ReadDpdCaptureData(Adrv9001Params->Adrv9001, Channel,iData_tx,qData_tx,iData_elb,qData_elb,Length,false);    
+  
+  if(status !=0 )
+  {
+    free(iData_tx);
+    free(qData_tx);
+    free(iData_elb);
+    free(qData_elb);
+    return;
+  }
+
+  Cli_Printf(CliInstance,"iData_tx: ");
+  for(int i = 0; i < Length-1; i++)
+  {
+    Cli_Printf(CliInstance,"%ld,",iData_tx[i]);
+  }
+  Cli_Printf(CliInstance,"%ld\r\n",iData_tx[Length-1]);
+  free(iData_tx);
+  Cli_Printf(CliInstance,"qData_tx: ");
+  for(int j = 0; j < Length-1; j++)
+  {
+    Cli_Printf(CliInstance,"%ld,",qData_tx[j]);
+  }
+  Cli_Printf(CliInstance,"%ld\r\n",qData_tx[Length-1]);
+  free(qData_tx);
+  Cli_Printf(CliInstance,"iData_elb: ");
+  for(int k = 0; k < Length-1; k++)
+  {
+    Cli_Printf(CliInstance,"%ld,",iData_elb[k]);
+  }
+  Cli_Printf(CliInstance,"%ld\r\n",iData_elb[Length-1]);
+  free(iData_elb);
+  Cli_Printf(CliInstance,"qData_elb: ");
+  for(int l = 0; l < Length-1; l++)
+  {
+    Cli_Printf(CliInstance,"%ld,",qData_elb[l]);
+  }
+  Cli_Printf(CliInstance,"%ld\r\n",qData_elb[Length-1]);
+  free(qData_elb);
+
+
+
+
+  return;
 }
 
 cli_cmd_t Adrv9001CliSweepSsiDef =
@@ -356,6 +434,16 @@ cli_cmd_t Adrv9001CliGetParamDef =
     NULL
 };
 
+cli_cmd_t Adrv9001CliReadDpdCaptureDataDef =
+{
+    "Adrv9001ReadDpdCaptureData",
+    "Adrv9001ReadDpdCaptureData:  Get DPD capture data \r\n"
+    "Adrv9001ReadDpdCaptureData < Port (Tx1, Tx2), SampleCnt >\r\n\r\n",
+    (CliCmdFn_t)Adrv9001Cli_ReadDpdCaptureData,
+    2,
+    NULL
+};
+
 int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
 {
   Cli->CallbackRef = Cli;
@@ -368,6 +456,7 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
   Adrv9001CliToRfEnabledDef.userData = Adrv9001Params;
   Adrv9001CliCalibrateSsiDef.userData = Adrv9001Params;
   Adrv9001CliSweepSsiDef.userData = Adrv9001Params;
+  Adrv9001CliReadDpdCaptureDataDef.userData = Adrv9001Params;
 
   Cli_RegisterCommand(Cli, &Adrv9001CliGetParamDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliSetParamDef);
@@ -377,6 +466,7 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
   Cli_RegisterCommand(Cli, &Adrv9001CliToRfEnabledDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliCalibrateSsiDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliSweepSsiDef);
+  Cli_RegisterCommand(Cli, &Adrv9001CliReadDpdCaptureDataDef);
 
   return Adrv9001Status_Success;
 }
