@@ -2786,6 +2786,7 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   if( Init->ConfigureFn == NULL )
 	return Adrv9001Status_InvalidParameter;
 
+  Instance->PendingReboot = 0;
   Instance->Params = Init->Init;
   Instance->IrqInstance = Init->IrqInstance;
   Instance->StateCallback = Init->StateCallback;
