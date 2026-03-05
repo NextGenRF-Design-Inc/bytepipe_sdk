@@ -297,6 +297,7 @@ typedef struct {
 
 typedef struct {
   adi_adrv9001_Device_t	                Device;            ///< ADI ADRV9001 Instance
+  //adi_fpga9001_Device_t                 FpgaDevice;        ///< ADI FPGA9001 Instance
   adi_adrv9001_Init_t                  *Params;            ///< ADRV9001 Parameters
   axi_adrv9001_t                        Axi;               ///< AXI Instance
   FIL                                   LogFil;            ///< Log File

@@ -125,39 +125,65 @@ static int32_t Adrv9001_ConfigureProfile( adrv9001_t *Instance, int32_t *Rx1ChfC
 {
   int32_t status;
 
-  if((status = Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_1 )) != 0)
-    return Adrv9001Status_ToPrimedErr;
+  bool Tx1ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX1 ) == ADI_ADRV9001_TX1 );
+  bool Tx2ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX2 ) == ADI_ADRV9001_TX2 );
+  bool Rx1ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX1 ) == ADI_ADRV9001_RX1 );
+  bool Rx2ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX2 ) == ADI_ADRV9001_RX2 );
 
-  if((status = Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_2 )) != 0)
-    return Adrv9001Status_ToPrimedErr;
+  if( Tx1ProfileEnable )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_1 )) != 0)
+	    return Adrv9001Status_ToPrimedErr;
 
-  if((status = Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_1 )) != 0)
-    return Adrv9001Status_ToPrimedErr;
+	Adrv9001_SetTddTiming(Instance, ADI_TX, ADI_CHANNEL_1, ADRV9001_TDD_ENABLE_DUR_FOREVER);
 
-  if((status = Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_2 )) != 0)
-    return Adrv9001Status_ToPrimedErr;
+	if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT, ADRV9001_TEST_MODE_PATTERN )) != 0)
+	  printf("Adrv9001 Tx1 Failed SSI Calibration\r\n");
 
-  /* Set Tdd Timing for all channels*/
-  Adrv9001_SetTddTiming(Instance, ADI_RX, ADI_CHANNEL_1, ADRV9001_TDD_ENABLE_DUR_FOREVER);
+	if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_1, Instance->TxEnableMode) != 0)
+	    return Adrv9001Status_EnableModeErr;
 
-  Adrv9001_SetTddTiming(Instance, ADI_RX, ADI_CHANNEL_2, ADRV9001_TDD_ENABLE_DUR_FOREVER);
+  }
+  if( Tx2ProfileEnable )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_2 )) != 0)
+	  return Adrv9001Status_ToPrimedErr;
 
-  Adrv9001_SetTddTiming(Instance, ADI_TX, ADI_CHANNEL_1, ADRV9001_TDD_ENABLE_DUR_FOREVER);
-  
-  Adrv9001_SetTddTiming(Instance, ADI_TX, ADI_CHANNEL_2, ADRV9001_TDD_ENABLE_DUR_FOREVER);
+	Adrv9001_SetTddTiming(Instance, ADI_TX, ADI_CHANNEL_2, ADRV9001_TDD_ENABLE_DUR_FOREVER);
 
-  /* Calibrate SSI */
-  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT, ADRV9001_TEST_MODE_PATTERN )) != 0)
-    printf("Adrv9001 Tx1 Failed SSI Calibration\r\n");
+	if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT, ADRV9001_TEST_MODE_PATTERN )) != 0)
+	  printf("Adrv9001 Tx2 Failed SSI Calibration\r\n");
 
-  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TESTMODE_DATA_RAMP_16_BIT, ADRV9001_TEST_MODE_PATTERN )) != 0)
-    printf("Adrv9001 Tx2 Failed SSI Calibration\r\n");
+	if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_2, Instance->TxEnableMode) != 0)
+	  return Adrv9001Status_EnableModeErr;
+  }
+  if( Rx1ProfileEnable )
+  {
+    if((status = Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_1 )) != 0)
+	  return Adrv9001Status_ToPrimedErr;
 
-  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15, ADRV9001_TEST_MODE_PATTERN )) != 0)
-    printf("Adrv9001 Rx1 Failed SSI Calibration\r\n");
+    Adrv9001_SetTddTiming(Instance, ADI_RX, ADI_CHANNEL_1, ADRV9001_TDD_ENABLE_DUR_FOREVER);
 
-  if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15, ADRV9001_TEST_MODE_PATTERN )) != 0)
-    printf("Adrv9001 Rx2 Failed SSI Calibration\r\n");
+    if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15, ADRV9001_TEST_MODE_PATTERN )) != 0)
+      printf("Adrv9001 Rx1 Failed SSI Calibration\r\n");
+
+    if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_1, Instance->RxEnableMode) != 0)
+      return Adrv9001Status_EnableModeErr;
+  }
+  if( Rx2ProfileEnable )
+  {
+    if((status = Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_2 )) != 0)
+      return Adrv9001Status_ToPrimedErr;
+
+    Adrv9001_SetTddTiming(Instance, ADI_RX, ADI_CHANNEL_2, ADRV9001_TDD_ENABLE_DUR_FOREVER);
+
+    if((status = Adrv9001_CalibrateSsiDelay( Instance, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TESTMODE_DATA_PRBS15, ADRV9001_TEST_MODE_PATTERN )) != 0)
+      printf("Adrv9001 Rx2 Failed SSI Calibration\r\n");
+
+    if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_2, Instance->RxEnableMode) != 0)
+      return Adrv9001Status_EnableModeErr;
+  }
+
 
   printf("%s Version Information:\r\n","ADRV9002" );
 
@@ -179,18 +205,8 @@ static int32_t Adrv9001_ConfigureProfile( adrv9001_t *Instance, int32_t *Rx1ChfC
   else
     printf("  -API Version: Failed\r\n\r\n");
 
-  /* Set Enable Mode */
-  if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_1, Instance->TxEnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
 
-  if( Adrv9001_SetEnableMode(Instance, ADI_TX, ADI_CHANNEL_2, Instance->TxEnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
 
-  if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_1, Instance->RxEnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
-
-  if( Adrv9001_SetEnableMode(Instance, ADI_RX, ADI_CHANNEL_2, Instance->RxEnableMode) != 0)
-    return Adrv9001Status_EnableModeErr;
 
 
   if( Instance->Params->sysConfig.fhModeOn )
@@ -241,7 +257,7 @@ int32_t Adrv9001_ClearError( adrv9001_t *Instance )
 }
 int32_t Adrv9001_ConstructProfile(adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance)
 {
-
+  /*
   ProfileInstance->Rx1Profile     = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_RX_CHANNEL_START].profile;
   ProfileInstance->Rx2Profile     = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_RX_CHANNEL_START + 1].profile;
   ProfileInstance->oRx1Profile    = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_ORX_CHANNEL_START].profile;
@@ -250,83 +266,25 @@ int32_t Adrv9001_ConstructProfile(adrv9001_t *Instance, adrv9001_profile_t *Prof
   ProfileInstance->Init           = Instance->Params;
   ProfileInstance->StreamImageBuf = rf1_initialize_binary_10;
   ProfileInstance->ArmImageBuf    = rf1_initialize_binary_11;
-
-
+  */
+  /*
   if( adi_adrv9001_Tx_OutputPowerBoost_Get(&Instance->Device,ADI_CHANNEL_1, &ProfileInstance->Tx1Boost) != 0)
 	return Adrv9001Status_TxBoostErr;
 
   if( adi_adrv9001_Tx_OutputPowerBoost_Get(&Instance->Device,ADI_CHANNEL_1, &ProfileInstance->Tx2Boost) != 0)
   	return Adrv9001Status_TxBoostErr;
-  
-  adi_adrv9001_ChannelState_e State;
-  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_RX, ADI_CHANNEL_1, &State ) != 0)
-    return Adrv9001Status_ReadErr;
+  */
 
-  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
-  {
-    if( Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_1 ) != 0)
-      return Adrv9001Status_ToPrimedErr;
-  }
 
-  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
-  {
-    if( Adrv9001_ToCalibrated( Instance, ADI_RX, ADI_CHANNEL_1 ) != 0)
-      return Adrv9001Status_ToCalErr;
-  }
 
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
 
-  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_RX, ADI_CHANNEL_2, &State ) != 0)
-      return Adrv9001Status_ReadErr;
-
-  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
-  {
-    if( Adrv9001_ToPrimed( Instance, ADI_RX, ADI_CHANNEL_2 ) != 0)
-      return Adrv9001Status_ToPrimedErr;
-  }
-
-  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
-  {
-    if( Adrv9001_ToCalibrated( Instance, ADI_RX, ADI_CHANNEL_2 ) != 0)
-      return Adrv9001Status_ToCalErr;
-  }
-
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
-  
-  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_TX, ADI_CHANNEL_1, &State ) != 0)
-      return Adrv9001Status_ReadErr;
-
-  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
-  {
-    if( Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_1 ) != 0)
-      return Adrv9001Status_ToPrimedErr;
-  }
-
-  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
-  {
-    if( Adrv9001_ToCalibrated( Instance, ADI_TX, ADI_CHANNEL_1 ) != 0)
-      return Adrv9001Status_ToCalErr;
-  }
 
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
-  
-  if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, ADI_TX, ADI_CHANNEL_2, &State ) != 0)
-      return Adrv9001Status_ReadErr;
-
-  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
-  {
-    if( Adrv9001_ToPrimed( Instance, ADI_TX, ADI_CHANNEL_2 ) != 0)
-      return Adrv9001Status_ToPrimedErr;
-  }
-
-  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
-  {
-    if( Adrv9001_ToCalibrated( Instance, ADI_TX, ADI_CHANNEL_2 ) != 0)
-      return Adrv9001Status_ToCalErr;
-  }
 
   if( adi_adrv9001_Radio_Carrier_Inspect(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier) != 0)
     return Adrv9001Status_CarrierFreqErr;
@@ -337,13 +295,13 @@ int32_t Adrv9001_ConstructProfile(adrv9001_t *Instance, adrv9001_profile_t *Prof
   if( adi_adrv9001_Rx_Gain_Get(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Rx2GainIndex) != 0)
     return Adrv9001Status_RxGainTableErr;
 
-  /* Read Gain Table */
+  /*
   if( adi_adrv9001_Rx_GainTable_Read(&Instance->Device, ADI_CHANNEL_1, ProfileInstance->Rx1GainIndex, &ProfileInstance->Rx1GainTable , 1, NULL) != 0)
     return Adrv9001Status_RxGainTableErr;
 
   if( adi_adrv9001_Rx_GainTable_Read(&Instance->Device, ADI_CHANNEL_2, ProfileInstance->Rx2GainIndex, &ProfileInstance->Rx2GainTable , 1, NULL) != 0)
     return Adrv9001Status_RxGainTableErr;
-  
+  */
   /* Read TX Attenuation Table */
   //if( adi_adrv9001_Tx_AttenuationTable_Read(&Instance->Device, ADI_CHANNEL_1, 3,&ProfileInstance->Tx1AttnTable,960,NULL  ) != 0)
   //  return Adrv9001Status_TxAttnErr;
@@ -1434,18 +1392,35 @@ int32_t Adrv9001_ReLoadProfile_ByChunks(adrv9001_t *Instance)
 
 int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance)
 {
+  //Initialize
 
   /* Pre-Restart */
 
-  //int32_t status;
+  int32_t error_code = 0;
+
+  adi_adrv9001_Device_t * adrv9001Device_0 = &Instance->Device;
 
   /* Clear any errors */
   Adrv9001_ClearError( Instance );
+
+  adi_common_ApiVersion_t apiVersion_0 = { 
+    .major = 0, 
+    .minor = 0, 
+    .patch = 0 };
+
+  error_code = adi_adrv9001_ApiVersion_Get(adrv9001Device_0, &apiVersion_0);
 
   bool Tx1ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX1 ) == ADI_ADRV9001_TX1 );
   bool Tx2ProfileEnable = ((Instance->Params->tx.txInitChannelMask & ADI_ADRV9001_TX2 ) == ADI_ADRV9001_TX2 );
   bool Rx1ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX1 ) == ADI_ADRV9001_RX1 );
   bool Rx2ProfileEnable = ((Instance->Params->rx.rxInitChannelMask & ADI_ADRV9001_RX2 ) == ADI_ADRV9001_RX2 );
+
+  uint8_t ChannelMask = Instance->Params->tx.txInitChannelMask | Instance->Params->rx.rxInitChannelMask;
+
+  adi_adrv9001_RxProfile_t *Rx1Profile = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_RX_CHANNEL_START].profile;
+  adi_adrv9001_RxProfile_t *Rx2Profile = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_RX_CHANNEL_START + 1].profile;
+  adi_adrv9001_RxProfile_t *oRx1Profile = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_ORX_CHANNEL_START].profile;
+  adi_adrv9001_RxProfile_t *oRx2Profile = &Instance->Params->rx.rxChannelCfg[ADI_ADRV9001_MAX_ORX_CHANNEL_START + 1].profile;
   
   adi_adrv9001_SpiSettings_t SpiSettings = {
       .msbFirst = 1,
@@ -1456,322 +1431,312 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
 
   /* Restart */
 
-  if( adi_adrv9001_HwClose(&Instance->Device) != 0)
+  if( adi_adrv9001_HwClose(adrv9001Device_0) != 0)
     return Adrv9001Status_ProfileInitErr;
 
-  if( adi_adrv9001_HwOpen(&Instance->Device, &SpiSettings) != 0)
+  if( adi_adrv9001_HwOpen(adrv9001Device_0, &SpiSettings) != 0)
     return Adrv9001Status_ProfileInitErr;
 
-  if( adi_adrv9001_HwReset(&Instance->Device) != 0)
+  if( adi_adrv9001_HwReset(adrv9001Device_0) != 0)
     return Adrv9001Status_ProfileInitErr;
 
 
   /* Post-Restart */
 
   /* Initialize Analog */
-  if( adi_adrv9001_InitAnalog(&Instance->Device, Instance->Params, ADI_ADRV9001_DEVICECLOCKDIVISOR_2) != 0)
+  if( adi_adrv9001_InitAnalog(adrv9001Device_0, &rf1_initialize_init_8, ADI_ADRV9001_DEVICECLOCKDIVISOR_2) != 0)
     return Adrv9001Status_InitAnalogErr;
 
-  if( adi_adrv9001_arm_AhbSpiBridge_Enable(&Instance->Device) != 0)
+  if( adi_adrv9001_arm_AhbSpiBridge_Enable(adrv9001Device_0) != 0)
     return Adrv9001Status_SpiErr;
 
-  if( adi_adrv9001_Stream_Image_Write(&Instance->Device, 0, ProfileInstance->StreamImageBuf, 32768, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
+  if( adi_adrv9001_Stream_Image_Write(adrv9001Device_0, 0, rf1_initialize_binary_10, 32768, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
     return Adrv9001Status_StreamImageWriteErr;
 
-  if( adi_adrv9001_arm_Image_Write(&Instance->Device, 0, ProfileInstance->ArmImageBuf, ADRV9001_ARM_IMAGE_SIZE, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
+  if( adi_adrv9001_arm_Image_Write(adrv9001Device_0, 0, rf1_initialize_binary_11, ADRV9001_ARM_IMAGE_SIZE, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252) != 0)
     return Adrv9001Status_ArmImageWriteErr;
 
-  if( adi_adrv9001_arm_Profile_Write(&Instance->Device, Instance->Params) != 0)
+  if( adi_adrv9001_arm_Profile_Write(adrv9001Device_0, &rf1_initialize_init_8) != 0)
     return Adrv9001Status_ProfileWriteErr;
 
-  if( adi_adrv9001_arm_PfirProfiles_Write(&Instance->Device, Instance->Params) != 0)
+  if( adi_adrv9001_arm_PfirProfiles_Write(adrv9001Device_0, &rf1_initialize_init_8) != 0)
     return Adrv9001Status_PfirErr;
 
 
   /* Configure Rx Gain Tables */
-  if( adi_adrv9001_Rx_GainTable_Write(&Instance->Device, ADI_ORX, ADI_CHANNEL_1, 14, &ProfileInstance->Rx1GainTable, 13, &ProfileInstance->oRx1Profile->lnaConfig, ProfileInstance->oRx1Profile->gainTableType) != 0)
+  if( adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_1, 14, rf1_initialize_gainTableRows_14, 13, &oRx1Profile->lnaConfig, oRx1Profile->gainTableType) != 0)
     return Adrv9001Status_RxGainTableErr;
 
-  if( adi_adrv9001_Rx_GainTable_Write(&Instance->Device, ADI_ORX, ADI_CHANNEL_2, 14, &ProfileInstance->Rx2GainTable, 13, &ProfileInstance->oRx2Profile->lnaConfig, ProfileInstance->oRx2Profile->gainTableType) != 0)
+  if( adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_2, 14, rf1_initialize_gainTableRows_15, 13, &oRx2Profile->lnaConfig, oRx2Profile->gainTableType) != 0)
     return Adrv9001Status_RxGainTableErr;
 
-  if( adi_adrv9001_Rx_GainTable_Write(&Instance->Device, ADI_RX, ADI_CHANNEL_1, 255, &ProfileInstance->Rx1GainTable, 69, &ProfileInstance->Rx1Profile->lnaConfig, ProfileInstance->Rx1Profile->gainTableType) != 0)
+  if( adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, 255, rf1_initialize_gainTableRows_16, 69, &Rx1Profile->lnaConfig, Rx1Profile->gainTableType) != 0)
     return Adrv9001Status_RxGainTableErr;
 
-  if( adi_adrv9001_Rx_GainTable_Write(&Instance->Device, ADI_RX, ADI_CHANNEL_2, 255, &ProfileInstance->Rx2GainTable, 69, &ProfileInstance->Rx2Profile->lnaConfig, ProfileInstance->Rx2Profile->gainTableType) != 0)
+  if( adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, 255, rf1_initialize_gainTableRows_17, 69, &Rx2Profile->lnaConfig, Rx2Profile->gainTableType) != 0)
     return Adrv9001Status_RxGainTableErr;
-
-
-
-  /* Configure TX Attenuation Table */
-  if( adi_adrv9001_Tx_AttenuationTable_Write(&Instance->Device, ADI_CHANNEL_1, 0, rf1_initialize_attenTableRows_18, 960) != 0)
-      return Adrv9001Status_TxAttnErr;
-
-  if( adi_adrv9001_Tx_AttenuationTable_Write(&Instance->Device, ADI_CHANNEL_2, 0, rf1_initialize_attenTableRows_18, 960) != 0)
-      return Adrv9001Status_TxAttnErr;
 
   /* Configure Power Management Settings */
   adi_adrv9001_PowerManagementSettings_t PowerManagementSettings = {
     .ldoPowerSavingModes = { ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1, ADI_ADRV9001_LDO_POWER_SAVING_MODE_1  } };
 
-  if( adi_adrv9001_powermanagement_Configure(&Instance->Device, &PowerManagementSettings) != 0)
+  if( adi_adrv9001_powermanagement_Configure(adrv9001Device_0, &PowerManagementSettings) != 0)
     return Adrv9001Status_PowerMgmtErr;
 
   /* Start ARM processor */
-  if( adi_adrv9001_arm_Start(&Instance->Device) != 0)
+  if( adi_adrv9001_arm_Start(adrv9001Device_0) != 0)
     return Adrv9001Status_ArmErr;
 
-  if( adi_adrv9001_arm_StartStatus_Check(&Instance->Device, 5000000) != 0)
+  if( adi_adrv9001_arm_StartStatus_Check(adrv9001Device_0, 5000000) != 0)
     return Adrv9001Status_ArmErr;
 
-  /* Configure Boost */
-  if(adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_1, Instance->TxBoost[0]) != 0)
-    return Adrv9001Status_TxBoostErr;
+  //error_code = adi_fpga9001_Initialize(&Instance->FpgaDevice, &initialize_init_8, &ProfileInstance->ssiCalibrationFpga, ADI_FPGA9001_MMCM_CLKDIV_2);
+  //ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  adi_adrv9001_SsiCalibrationCfg_t ssiCalibration = { 
+      .rxClkDelay = { 0 }, 
+      .rxStrobeDelay = { 0 }, 
+      .rxIDataDelay = { 0 }, 
+      .rxQDataDelay = { 0 }, 
+      .txClkDelay = { 0 }, 
+      .txRefClkDelay = { 0 }, 
+      .txStrobeDelay = { 0 }, 
+      .txIDataDelay = { 0 }, 
+      .txQDataDelay = { 0 } };
+  error_code = adi_adrv9001_Ssi_Delay_Configure(adrv9001Device_0, ADI_ADRV9001_SSI_TYPE_LVDS, &ssiCalibration);
+  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  
+  adi_adrv9001_GpioCtrlInitCfg_t gpioCtrlInitCfg_26 = {
+  		.tx_ext_frontend_ctrl = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.rx_ext_frontend_ctrl = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.ext_pll_chip_enable = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.vco_chip_enable = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.ext_pll_lock = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.channelPowerSaving = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.systemPowerSavingAndMonitorEnable = {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC },
+  		.systemPowerSavingAndMonitorWakeUp = {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC },
+  		.fh_update_rx_nco = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  },
+  		.rx_interfaceGain_seed_save = { {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, {
+  		.pin = ADI_ADRV9001_GPIO_UNASSIGNED,
+  		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL,
+  		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  } };
 
-  if(adi_adrv9001_Tx_OutputPowerBoost_Set(&Instance->Device, ADI_CHANNEL_2, Instance->TxBoost[1]) != 0)
-    return Adrv9001Status_TxBoostErr;
+  error_code = adi_adrv9001_gpio_ControlInit_Configure(adrv9001Device_0, &gpioCtrlInitCfg_26);
+
+  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
   /* Configure PLL Loop Filter*/
-  if( adi_adrv9001_Radio_PllLoopFilter_Set(&Instance->Device, ADI_ADRV9001_PLL_LO1, &ProfileInstance->pll_lo1_loop_filter ) != 0)
+  if( adi_adrv9001_Radio_PllLoopFilter_Set(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &ProfileInstance->pll_lo1_loop_filter ) != 0)
     return Adrv9001Status_PllErr;
 
-  if( adi_adrv9001_Radio_PllLoopFilter_Set(&Instance->Device, ADI_ADRV9001_PLL_LO2, &ProfileInstance->pll_lo2_loop_filter ) != 0)
+  if( adi_adrv9001_Radio_PllLoopFilter_Set(adrv9001Device_0, ADI_ADRV9001_PLL_LO2, &ProfileInstance->pll_lo2_loop_filter ) != 0)
     return Adrv9001Status_PllErr;
 
-  if( adi_adrv9001_Radio_PllLoopFilter_Set(&Instance->Device, ADI_ADRV9001_PLL_AUX, &ProfileInstance->pll_aux_loop_filter ) != 0)
+  if( adi_adrv9001_Radio_PllLoopFilter_Set(adrv9001Device_0, ADI_ADRV9001_PLL_AUX, &ProfileInstance->pll_aux_loop_filter ) != 0)
     return Adrv9001Status_PllErr;
 
-  if( adi_adrv9001_powerSavingAndMonitorMode_MonitorMode_Rssi_Configure(&Instance->Device, &ProfileInstance->MonitorModeRssiCfg) != 0)
+  if( adi_adrv9001_powerSavingAndMonitorMode_MonitorMode_Rssi_Configure(adrv9001Device_0, &ProfileInstance->MonitorModeRssiCfg) != 0)
     return Adrv9001Status_PowerMgmtErr;
 
-  if( adi_adrv9001_powerSavingAndMonitorMode_MonitorMode_DmrSearch_Configure(&Instance->Device, ProfileInstance->DmrSearchCfg) != 0)
+  adi_adrv9001_PowerSavingAndMonitorMode_MonitorModeDmrSearchCfg_t dmrSearchCfg_31 = { 
+    .pathDelay = 0, 
+    .magcorrTh = 250, 
+    .detCnt1 = 375, 
+    .detCnt2 = 500, 
+    .detTgtMin = 880000 };
+
+  if( adi_adrv9001_powerSavingAndMonitorMode_MonitorMode_DmrSearch_Configure(adrv9001Device_0, &dmrSearchCfg_31) != 0)
     return Adrv9001Status_PowerMgmtErr;
 
-  if( adi_adrv9001_Rx_PortSwitch_Configure(&Instance->Device, &ProfileInstance->RxPortSwitchCfg) != 0)
-    return Adrv9001Status_PowerMgmtErr;
+  if( Rx1ProfileEnable || Rx2ProfileEnable )
+  {
+    if( adi_adrv9001_Rx_PortSwitch_Configure(adrv9001Device_0, &ProfileInstance->RxPortSwitchCfg) != 0)
+      return Adrv9001Status_PowerMgmtErr;
+  }
+  
 
   if( Rx1ProfileEnable )
   {
-    if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier) != 0)
+    if( adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1EnablementDelays) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
-    if( adi_adrv9001_Rx_AdcSwitchEnable_Set(&Instance->Device, ADI_CHANNEL_1, false) != 0)
+    if( adi_adrv9001_Rx_AdcSwitchEnable_Set(adrv9001Device_0, ADI_CHANNEL_1, false) != 0)
       return Adrv9001Status_AdcErr;
 
-    if( adi_adrv9001_Ssi_PowerDown_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
+    if( adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
       return Adrv9001Status_PowerMgmtErr;
+
+    if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1McsDelay) != 0)
+      return Adrv9001Status_PathDelayErr;
   }
 
   if( Rx2ProfileEnable )
   {
-    if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2Carrier) != 0)
+    if( adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2EnablementDelays) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
-    if( adi_adrv9001_Rx_AdcSwitchEnable_Set(&Instance->Device, ADI_CHANNEL_2, false) != 0)
+    if( adi_adrv9001_Rx_AdcSwitchEnable_Set(adrv9001Device_0, ADI_CHANNEL_2, false) != 0)
       return Adrv9001Status_AdcErr;
 
-    if( adi_adrv9001_Ssi_PowerDown_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
+    if( adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
       return Adrv9001Status_PowerMgmtErr;
+
+    if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2McsDelay) != 0)
+      return Adrv9001Status_PathDelayErr;
   }
 
   if( Tx1ProfileEnable )
   {
-    if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1Carrier) != 0)
+    if( adi_adrv9001_Tx_AttenuationTable_Write(adrv9001Device_0, ADI_CHANNEL_1, 0, rf1_initialize_attenTableRows_18, 960) != 0)
+      return Adrv9001Status_TxAttnErr;
+
+    if(adi_adrv9001_Tx_OutputPowerBoost_Set(adrv9001Device_0, ADI_CHANNEL_1, Instance->TxBoost[0]) != 0)
+      return Adrv9001Status_TxBoostErr;
+
+    if( adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1EnablementDelays) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
-    if( adi_adrv9001_cals_ExternalPathDelay_Set(&Instance->Device, ADI_CHANNEL_1, 0) != 0)
+    if( adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Tx1DpdExternalPathDelay) != 0)
       return Adrv9001Status_PathDelayErr;
 
-    if( adi_adrv9001_Ssi_PowerDown_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
+    if( adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
       return Adrv9001Status_PowerMgmtErr;
 
-    if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Tx1SlewRateLimiterCfg) != 0)
+    if( adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1SlewRateLimiterCfg) != 0)
       return Adrv9001Status_SlewRateLimiterErr;
     
     /* Configure Dpd */
-    if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdInitCfg) != 0)
+    if( adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdInitCfg) != 0)
       return Adrv9001Status_Tx1DpdErr;
+
+    if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1McsDelay) != 0)
+      return Adrv9001Status_PathDelayErr;
   }
 
   if( Tx2ProfileEnable )
   {
-    if( adi_adrv9001_Radio_Carrier_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier) != 0)
+    if( adi_adrv9001_Tx_AttenuationTable_Write(adrv9001Device_0, ADI_CHANNEL_2, 0, rf1_initialize_attenTableRows_18, 960) != 0)
+      return Adrv9001Status_TxAttnErr;
+
+    if(adi_adrv9001_Tx_OutputPowerBoost_Set(adrv9001Device_0, ADI_CHANNEL_2, Instance->TxBoost[1]) != 0)
+      return Adrv9001Status_TxBoostErr;
+
+    if( adi_adrv9001_Radio_Carrier_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2Carrier) != 0)
       return Adrv9001Status_CarrierFreqErr;
 
-    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2EnablementDelays) != 0)
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2EnablementDelays) != 0)
       return Adrv9001Status_PathDelayErr;
 
-    if( adi_adrv9001_cals_ExternalPathDelay_Set(&Instance->Device, ADI_CHANNEL_2, 0) != 0)
+    if( adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, ProfileInstance->Tx2DpdExternalPathDelay) != 0)
       return Adrv9001Status_PathDelayErr;
 
-    if( adi_adrv9001_Ssi_PowerDown_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
+    if( adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED) != 0)
       return Adrv9001Status_PowerMgmtErr;
 
-    if( adi_adrv9001_Tx_SlewRateLimiter_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Tx2SlewRateLimiterCfg) != 0)
+    if( adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2SlewRateLimiterCfg) != 0)
       return Adrv9001Status_SlewRateLimiterErr;
     /* Configure Dpd */
-    if( adi_adrv9001_dpd_Initial_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdInitCfg) != 0)
+    if( adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdInitCfg) != 0)
       return Adrv9001Status_Tx2DpdErr;
+
+    if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2McsDelay) != 0)
+      return Adrv9001Status_PathDelayErr;
   }
 
-  if( adi_adrv9001_Radio_Pll_Configure(&Instance->Device, ADI_ADRV9001_PLL_LO1, &ProfileInstance->Lo1PllConfig) != 0)
+  if( adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &ProfileInstance->Lo1PllConfig) != 0)
     return Adrv9001Status_PllErr;
 
-  if( adi_adrv9001_Radio_Pll_Configure(&Instance->Device, ADI_ADRV9001_PLL_LO2, &ProfileInstance->Lo2PllConfig) != 0)
+  if( adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO2, &ProfileInstance->Lo2PllConfig) != 0)
     return Adrv9001Status_PllErr;
 
-  /* Configure MCS Delay */
-  if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1McsDelay) != 0)
-    return Adrv9001Status_PathDelayErr;
-
-  if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2McsDelay) != 0)
-    return Adrv9001Status_PathDelayErr;
-
-  if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1McsDelay) != 0)
-    return Adrv9001Status_PathDelayErr;
-
-  if( adi_adrv9001_Mcs_ChannelMcsDelay_Set(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2McsDelay) != 0)
-    return Adrv9001Status_PathDelayErr;
+  
 
   /* Configure ARM */
-  if( adi_adrv9001_arm_System_Program(&Instance->Device, 15) != 0)
+  if( adi_adrv9001_arm_System_Program(adrv9001Device_0, ChannelMask) != 0)
     return Adrv9001Status_ArmErr;
+/*
+  error_code = adi_fpga9001_ssi_Reset(&Instance->FpgaDevice);
+  ADI_HANDLE_ERROR(error_code, &Instance->FpgaDevice);
 
-  /* Configure Rx Loid */
-  if( adi_adrv9001_Rx_Loid_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Rx1LoidCfg) != 0)
-    return Adrv9001Status_LoidErr;
+  adi_fpga9001_ClockStatus_t status_56 = { 
+    .locked = false, 
+    .mcsClock_kHz = 0, 
+    .observationGpiosClock_kHz = 0, 
+    .tddClock_kHz = 0, 
+    .refClock_kHz = 0 };
 
-  if( adi_adrv9001_Rx_Loid_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Rx2LoidCfg) != 0)
-    return Adrv9001Status_LoidErr;
+  error_code = adi_fpga9001_clock_Status_Get(fpga9001Device_0, &status_56);
 
-  /* Configure AGC */
-  if( adi_adrv9001_Rx_GainControl_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Rx1Agc) != 0)
-    return Adrv9001Status_AgcErr;
-
-  if( adi_adrv9001_Rx_GainControl_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Rx2Agc) != 0)
-    return Adrv9001Status_AgcErr;
-
-  /* Configure IRQ Sources */
-  if( adi_adrv9001_gpio_GpIntMask_Set(&Instance->Device, 16) != 0)
-    return Adrv9001Status_IrqErr;
-
-  /* Configure Attenuation */
-  if( adi_adrv9001_Tx_Attenuation_PinControl_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Tx1AttnPinMode) != 0)
-    return Adrv9001Status_TxAttnErr;
-
-  if( adi_adrv9001_Tx_Attenuation_PinControl_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Tx2AttnPinMode) != 0)
-    return Adrv9001Status_TxAttnErr;
-
-  if( adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, ADI_CHANNEL_1, 0) != 0)
-    return Adrv9001Status_TxAttnErr;
-
-  if( adi_adrv9001_Tx_Attenuation_Set(&Instance->Device, ADI_CHANNEL_2, 0) != 0)
-    return Adrv9001Status_TxAttnErr;
-
-  /* Configure Interface Gain */
-
-  if( adi_adrv9001_Rx_InterfaceGain_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Rx1InterfaceGainCfg) != 0)
-    return Adrv9001Status_AgcErr;
-
-  if( adi_adrv9001_Rx_InterfaceGain_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Rx2InterfaceGainCfg) != 0)
-    return Adrv9001Status_AgcErr;
-
-  /* Configure Power Savings Monitor Mode */
-  if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Ch1PowerSavingCfg) != 0)
-    return Adrv9001Status_PowerMgmtErr;
-
-  if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Ch2PowerSavingCfg) != 0)
-    return Adrv9001Status_PowerMgmtErr;
-
-  /* Configure Rx enable delays */
-
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1EnablementDelays) != 0)
-    return Adrv9001Status_PathDelayErr;
-
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2EnablementDelays) != 0)
-      return Adrv9001Status_PathDelayErr;
-
-  /* Configure Tx enable delays */
+  printf("adi_fpga9001_clock_Status_Get parameter 'status' read back as '{ \n\t\tlocked: %s, \n\t\tmcsClock_kHz: %lu, \n\t\tobservationGpiosClock_kHz: %lu, \n\t\ttddClock_kHz: %lu, \n\t\trefClock_kHz: %lu\n }' \n", (status_56.locked ? "true" : "false"), status_56.mcsClock_kHz, status_56.observationGpiosClock_kHz, status_56.tddClock_kHz, status_56.refClock_kHz);
   
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1EnablementDelays) != 0)
-    return Adrv9001Status_PathDelayErr;
+  ADI_HANDLE_ERROR(error_code, fpga9001Device_0);
+  */
+  printf("%s", "Initialization successful.");
 
-  if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(&Instance->Device, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2EnablementDelays) != 0)
-    return Adrv9001Status_PathDelayErr;
+  //Initialize - end
 
-  /* Configure BBDC Loop gain */
-  if( adi_adrv9010_bbdc_LoopGain_Set(&Instance->Device, ADI_CHANNEL_1, 65536) != 0)
-    return Adrv9001Status_BbdcErr;
+  //Calibrate
 
-  if( adi_adrv9010_bbdc_LoopGain_Set(&Instance->Device, ADI_CHANNEL_2, 65536) != 0)
-    return Adrv9001Status_BbdcErr;
-
-  adi_adrv9001_TrackingCals_t trackingCals_21 = {
-  		.chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_ORX_QEC_WBPOLY | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI  } };
-
-
-  /* Configure Tracking Cals */
-  if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &ProfileInstance->TrackingCals) != 0)
-  //if( adi_adrv9001_cals_Tracking_Set(&Instance->Device, &trackingCals_21) != 0)
-    return Adrv9001Status_TrackingCalsErr;
-  
-  if( Tx1ProfileEnable )
-  {
-	  if( adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdCfg) != 0)
-      return Adrv9001Status_Tx1DpdErr;
-  }
-  
-  if( Tx2ProfileEnable )
-  {
-	  if( adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdCfg) != 0)
-      return Adrv9001Status_Tx2DpdErr;
-  }
-  /* Configure Rx Gain Control */
-  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_1, ProfileInstance->Rx1AgcCtrlMode ) != 0)
-    return Adrv9001Status_AgcErr;
-
-  if( ProfileInstance->Rx1AgcCtrlMode == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
-  {
-    if( adi_adrv9001_Rx_Gain_Set(&Instance->Device, ADI_CHANNEL_1, 247) != 0)
-      return Adrv9001Status_AgcErr;
-  }
-  else
-  {
-    if( adi_adrv9001_Rx_GainControl_PinMode_Configure(&Instance->Device, ADI_CHANNEL_1, &ProfileInstance->Rx1AgcPinMode) != 0)
-      return Adrv9001Status_AgcErr;
-  }
-
-  if( adi_adrv9001_Rx_GainControl_Mode_Set(&Instance->Device, ADI_CHANNEL_2, ProfileInstance->Rx2AgcCtrlMode) != 0)
-    return Adrv9001Status_AgcErr;
-
-  if( ProfileInstance->Rx2AgcCtrlMode == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
-  {
-    if( adi_adrv9001_Rx_Gain_Set(&Instance->Device, ADI_CHANNEL_2, 247) != 0)
-      return Adrv9001Status_AgcErr;
-  }
-  else
-  {
-    if( adi_adrv9001_Rx_GainControl_PinMode_Configure(&Instance->Device, ADI_CHANNEL_2, &ProfileInstance->Rx2AgcPinMode) != 0)
-      return Adrv9001Status_AgcErr;
-  }
-
-  /* Calibrate
-  adi_adrv9001_InitCals_t initCals = {
-  		.sysInitCalMask = (adi_adrv9001_InitCalibrations_e) 0,
-  		.chanInitCalMask = { ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY | ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY, ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY | ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY  },
-  		.calMode = ADI_ADRV9001_INIT_CAL_MODE_ALL,
-  		.force = false };*/
-
- adi_adrv9001_InitCals_t InitCals = {
+  adi_adrv9001_InitCals_t InitCals = {
     .sysInitCalMask = (adi_adrv9001_InitCalibrations_e) 0,
     .chanInitCalMask = { 0, 0},
     .calMode = ADI_ADRV9001_INIT_CAL_MODE_ALL,
@@ -1790,36 +1755,975 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance, adrv9001_profile_t *Profile
     InitCals.chanInitCalMask[1] |= ADI_ADRV9001_TX_INIT_CALS;
 
   uint8_t InitCalsError = 0;
-  if( adi_adrv9001_cals_InitCals_Run(&Instance->Device, &InitCals, 300000, &InitCalsError) != 0)
+  if( adi_adrv9001_cals_InitCals_Run(adrv9001Device_0, &InitCals, 300000, &InitCalsError) != 0)
     return Adrv9001Status_InitCalsErr;
 
   if( InitCalsError != 0 )
     return Adrv9001Status_InitCalsErr;
 
+  uint8_t readData_2 = 0;
+  error_code = adi_adrv9001_spi_Byte_Read(adrv9001Device_0, 11, &readData_2);
+  printf("adi_adrv9001_spi_Byte_Read parameter 'readData' read back as '%lu' \n", readData_2);
+  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  
+  
+
+  
+
+  if( Rx1ProfileEnable )
+  {
+    uint32_t internalPathDelays_ns_3[6] = { 0 };
+    error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, internalPathDelays_ns_3, 6);
+    printf("adi_adrv9001_cals_InternalPathDelay_Get parameter 'internalPathDelays_ns' read back as '");
+    printf("{ %lu", internalPathDelays_ns_3[0]);
+    int32_t internalPathDelays_ns_3_indexer = 1;
+    for (internalPathDelays_ns_3_indexer = 1; internalPathDelays_ns_3_indexer < 6; internalPathDelays_ns_3_indexer++)
+    {
+      printf(", %lu", internalPathDelays_ns_3[internalPathDelays_ns_3_indexer]);
+    }
+    printf(" }'\n");
+    
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+    uint8_t minGainIndexRx1 = 0;
+    uint8_t maxGainIndexRx1 = 0;
+    error_code = adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get(adrv9001Device_0, ADI_CHANNEL_1, &minGainIndexRx1, &maxGainIndexRx1);
+  
+    printf("adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get parameter 'minGainIndex' read back as '%lu' \n", minGainIndexRx1);
+    
+    printf("adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get parameter 'maxGainIndex' read back as '%lu' \n", maxGainIndexRx1);
+    
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+    adi_adrv9001_RxGainTableRow_t gainTableRowsRx1[] = { { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }  };
+  
+    uint16_t numGainIndicesReadRx1 = 0;
+    error_code = adi_adrv9001_Rx_GainTable_Read(adrv9001Device_0, ADI_CHANNEL_1, 255, gainTableRowsRx1, 69, &numGainIndicesReadRx1);
+  
+    printf("adi_adrv9001_Rx_GainTable_Read parameter 'gainTableRows' read back as '");
+    printf("{ { \n\t\trxFeGain: %lu, \n\t\textControl: %lu, \n\t\tadcTiaGain: %lu, \n\t\tdigGain: %ld, \n\t\tphaseOffset: %lu\n }", gainTableRowsRx1[0]);
+    int32_t gainTableRows_Rx1_indexer = 1;
+    for (gainTableRows_Rx1_indexer = 1; gainTableRows_Rx1_indexer < 69; gainTableRows_Rx1_indexer++)
+    {
+      printf(", { \n\t\trxFeGain: %lu, \n\t\textControl: %lu, \n\t\tadcTiaGain: %lu, \n\t\tdigGain: %ld, \n\t\tphaseOffset: %lu\n }", gainTableRowsRx1[gainTableRows_Rx1_indexer]);
+    }
+    printf(" }'\n");
+    
+    printf("adi_adrv9001_Rx_GainTable_Read parameter 'numGainIndicesRead' read back as '%lu' \n", numGainIndicesReadRx1);
+  }
+
+  if( Rx2ProfileEnable )
+  {
+    uint32_t internalPathDelays_ns_4[6] = { 0 };
+    error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, internalPathDelays_ns_4, 6);
+    printf("adi_adrv9001_cals_InternalPathDelay_Get parameter 'internalPathDelays_ns' read back as '");
+    printf("{ %lu", internalPathDelays_ns_4[0]);
+    int32_t internalPathDelays_ns_4_indexer = 1;
+    for (internalPathDelays_ns_4_indexer = 1; internalPathDelays_ns_4_indexer < 6; internalPathDelays_ns_4_indexer++)
+    {
+      printf(", %lu", internalPathDelays_ns_4[internalPathDelays_ns_4_indexer]);
+    }
+    printf(" }'\n");
+    
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+    uint8_t minGainIndexRx2 = 0;
+    uint8_t maxGainIndexRx2 = 0;
+    error_code = adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get(adrv9001Device_0, ADI_CHANNEL_1, &minGainIndexRx2, &maxGainIndexRx2);
+  
+    printf("adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get parameter 'minGainIndex' read back as '%lu' \n", minGainIndexRx2);
+    
+    printf("adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get parameter 'maxGainIndex' read back as '%lu' \n", maxGainIndexRx2);
+    
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+    adi_adrv9001_RxGainTableRow_t gainTableRowsRx2[] = { { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }, { 
+      .rxFeGain = 0, 
+      .extControl = 0, 
+      .adcTiaGain = 0, 
+      .digGain = 0, 
+      .phaseOffset = 0 }  };
+  
+    uint16_t numGainIndicesReadRx2 = 0;
+    error_code = adi_adrv9001_Rx_GainTable_Read(adrv9001Device_0, ADI_CHANNEL_1, 255, gainTableRowsRx2, 69, &numGainIndicesReadRx2);
+  
+    printf("adi_adrv9001_Rx_GainTable_Read parameter 'gainTableRows' read back as '");
+    printf("{ { \n\t\trxFeGain: %lu, \n\t\textControl: %lu, \n\t\tadcTiaGain: %lu, \n\t\tdigGain: %ld, \n\t\tphaseOffset: %lu\n }", gainTableRowsRx2[0]);
+    int32_t gainTableRows_Rx2_indexer = 1;
+    for (gainTableRows_Rx2_indexer = 1; gainTableRows_Rx2_indexer < 69; gainTableRows_Rx2_indexer++)
+    {
+      printf(", { \n\t\trxFeGain: %lu, \n\t\textControl: %lu, \n\t\tadcTiaGain: %lu, \n\t\tdigGain: %ld, \n\t\tphaseOffset: %lu\n }", gainTableRowsRx2[gainTableRows_Rx2_indexer]);
+    }
+    printf(" }'\n");
+    
+    printf("adi_adrv9001_Rx_GainTable_Read parameter 'numGainIndicesRead' read back as '%lu' \n", numGainIndicesReadRx2);
+  }
+
+  if( Tx1ProfileEnable )
+  {
+    if( adi_adrv9001_Tx_DataPath_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_1, false) != 0)
+      return Adrv9001Status_LoopBackErr;
+
+    if( adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, false) != 0)
+      return Adrv9001Status_LoopBackErr;
+    uint32_t internalPathDelays_ns_5[6] = { 0 };
+
+    error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, internalPathDelays_ns_5, 6);
+  
+    printf("adi_adrv9001_cals_InternalPathDelay_Get parameter 'internalPathDelays_ns' read back as '");
+    printf("{ %lu", internalPathDelays_ns_5[0]);
+    int32_t internalPathDelays_ns_5_indexer = 1;
+    for (internalPathDelays_ns_5_indexer = 1; internalPathDelays_ns_5_indexer < 6; internalPathDelays_ns_5_indexer++)
+    {
+      printf(", %lu", internalPathDelays_ns_5[internalPathDelays_ns_5_indexer]);
+    }
+    printf(" }'\n");
+    
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+    
+  }
+  if( Tx2ProfileEnable )
+  {
+    if( adi_adrv9001_Tx_DataPath_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, false) != 0)
+      return Adrv9001Status_LoopBackErr;
+
+    if( adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, false) != 0)
+      return Adrv9001Status_LoopBackErr;
+
+    uint32_t internalPathDelays_ns_6[6] = { 0 };
+    error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, internalPathDelays_ns_6, 6);
+  
+    printf("adi_adrv9001_cals_InternalPathDelay_Get parameter 'internalPathDelays_ns' read back as '");
+    printf("{ %lu", internalPathDelays_ns_6[0]);
+    int32_t internalPathDelays_ns_6_indexer = 1;
+    for (internalPathDelays_ns_6_indexer = 1; internalPathDelays_ns_6_indexer < 6; internalPathDelays_ns_6_indexer++)
+    {
+      printf(", %lu", internalPathDelays_ns_6[internalPathDelays_ns_6_indexer]);
+    }
+    printf(" }'\n");
+    
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  }
   /* Disable Loopbacks */
-  if( adi_adrv9001_Tx_DataPath_Loopback_Set(&Instance->Device, ADI_CHANNEL_1, false) != 0)
-    return Adrv9001Status_LoopBackErr;
+  
 
-  if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, false) != 0)
-    return Adrv9001Status_LoopBackErr;
+  
 
-  if( adi_adrv9001_Tx_DataPath_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, false) != 0)
-    return Adrv9001Status_LoopBackErr;
+  printf("%s", "Calibrations complete.");
+  //Calibrate - end
 
-  if( adi_adrv9001_Ssi_Loopback_Set(&Instance->Device, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, false) != 0)
-    return Adrv9001Status_LoopBackErr;
+  //Configure
+  printf("%s", "Configuring features.");
+
+  if( Rx1ProfileEnable )
+  {
+    if( adi_adrv9001_Rx_Loid_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Rx1LoidCfg) != 0)
+      return Adrv9001Status_LoidErr;
+
+    if( adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Rx1Agc) != 0)
+      return Adrv9001Status_AgcErr;
+
+    if( adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Rx1InterfaceGainCfg) != 0)
+      return Adrv9001Status_AgcErr;
+
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &ProfileInstance->Rx1EnablementDelays) != 0)
+      return Adrv9001Status_PathDelayErr;
+ 
+    if( adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ProfileInstance->Rx1AgcCtrlMode ) != 0)
+      return Adrv9001Status_AgcErr;
+
+    if( ProfileInstance->Rx1AgcCtrlMode == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
+    {
+      if( adi_adrv9001_Rx_Gain_Set(adrv9001Device_0, ADI_CHANNEL_1, 247) != 0)
+        return Adrv9001Status_AgcErr;
+    }
+    else
+    {
+      if( adi_adrv9001_Rx_GainControl_PinMode_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Rx1AgcPinMode) != 0)
+        return Adrv9001Status_AgcErr;
+    }
+  }
+  if( Rx2ProfileEnable )
+  {
+    if( adi_adrv9001_Rx_Loid_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Rx2LoidCfg) != 0)
+      return Adrv9001Status_LoidErr;  
+
+    if( adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Rx2Agc) != 0)
+      return Adrv9001Status_AgcErr; 
+
+    if( adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Rx2InterfaceGainCfg) != 0)
+      return Adrv9001Status_AgcErr;
+
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, &ProfileInstance->Rx2EnablementDelays) != 0)
+      return Adrv9001Status_PathDelayErr;
+
+    if( adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_2, ProfileInstance->Rx2AgcCtrlMode) != 0)
+      return Adrv9001Status_AgcErr;
+
+    if( ProfileInstance->Rx2AgcCtrlMode == ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI )
+    {
+      if( adi_adrv9001_Rx_Gain_Set(adrv9001Device_0, ADI_CHANNEL_2, 247) != 0)
+        return Adrv9001Status_AgcErr;
+    }
+    else
+    {
+      if( adi_adrv9001_Rx_GainControl_PinMode_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Rx2AgcPinMode) != 0)
+        return Adrv9001Status_AgcErr;
+    }
+  }
+  if( Tx1ProfileEnable )
+  {
+    error_code = adi_adrv9001_Tx_AttenuationMode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_TX_ATTENUATION_CONTROL_MODE_SPI);
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+  
+    error_code = adi_adrv9001_Tx_Attenuation_Set(adrv9001Device_0, ADI_CHANNEL_1, 10000);
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &ProfileInstance->Tx1EnablementDelays) != 0)
+      return Adrv9001Status_PathDelayErr;
+
+    if( adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Tx1DpdCfg) != 0)
+      return Adrv9001Status_Tx1DpdErr;
+  }
+  if( Tx2ProfileEnable )
+  {
+    error_code = adi_adrv9001_Tx_AttenuationMode_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_TX_ATTENUATION_CONTROL_MODE_SPI);
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+    error_code = adi_adrv9001_Tx_Attenuation_Set(adrv9001Device_0, ADI_CHANNEL_2, 10000);
+    ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+    if( adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &ProfileInstance->Tx2EnablementDelays) != 0)
+      return Adrv9001Status_PathDelayErr;
+
+    if( adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Tx2DpdCfg) != 0)
+      return Adrv9001Status_Tx2DpdErr;
+  }
+
+  if( Tx1ProfileEnable || Rx1ProfileEnable )
+  {
+    if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_1, &ProfileInstance->Ch1PowerSavingCfg) != 0)
+      return Adrv9001Status_PowerMgmtErr;
+
+    if( adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_1, 65536) != 0)
+      return Adrv9001Status_BbdcErr;
+  }
+
+  if( Tx2ProfileEnable || Rx2ProfileEnable )
+  {
+    if( adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_2, &ProfileInstance->Ch2PowerSavingCfg) != 0)
+      return Adrv9001Status_PowerMgmtErr;
+    if( adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_2, 65536) != 0)
+      return Adrv9001Status_BbdcErr;
+  }
+  uint32_t gpIntMask_3 = 0;
+  error_code = adi_adrv9001_gpio_GpIntMask_Get(adrv9001Device_0, &gpIntMask_3);
+  printf("adi_adrv9001_gpio_GpIntMask_Get parameter 'gpIntMask' read back as '%lu' \n", gpIntMask_3);
+  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+  error_code = adi_adrv9001_gpio_GpIntMask_Set(adrv9001Device_0, 16);
+  ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+
+  if( adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &ProfileInstance->TrackingCals) != 0)
+    return Adrv9001Status_TrackingCalsErr;
+
+  //Configure - end
+
 
   /* Disable Aux DAC by default */
-  if( adi_adrv9001_AuxDac_Configure(&Instance->Device, ADI_ADRV9001_AUXDAC0, false) != 0)
+  if( adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC0, false) != 0)
     return Adrv9001Status_DacErr;
 
-  if( adi_adrv9001_AuxDac_Configure(&Instance->Device, ADI_ADRV9001_AUXDAC1, false) != 0)
+  if( adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC1, false) != 0)
     return Adrv9001Status_DacErr;
 
-  if( adi_adrv9001_AuxDac_Configure(&Instance->Device, ADI_ADRV9001_AUXDAC2, false) != 0)
+  if( adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC2, false) != 0)
     return Adrv9001Status_DacErr;
 
-  if( adi_adrv9001_AuxDac_Configure(&Instance->Device, ADI_ADRV9001_AUXDAC3, false) != 0)
+  if( adi_adrv9001_AuxDac_Configure(adrv9001Device_0, ADI_ADRV9001_AUXDAC3, false) != 0)
     return Adrv9001Status_DacErr;
 
   /* Configure Profile */
@@ -2142,9 +3046,7 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
 }
 int32_t Adrv9001_ReadDpdCaptureData( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t iData_tx[], int32_t qData_tx[], int32_t iData_elb[], int32_t qData_elb[], uint32_t length, bool autoIncrement)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_CaptureData_Read( &Instance->Device, channel ,iData_tx,qData_tx,iData_elb, qData_elb,length,autoIncrement )) != 0)
-    return status;
+  return adi_adrv9001_dpd_CaptureData_Read( &Instance->Device, channel ,iData_tx,qData_tx,iData_elb, qData_elb,length,autoIncrement );
 }
 
 int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdChannelStatus_t* dpdChannelStatus )
@@ -2219,8 +3121,9 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
     Adrv9001Profile.Tx2DpdInitCfg.enable = Enable;
   }
 
-  if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
+  //if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
   //if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
+  if( Adrv9001_ReLoadProfile(Instance,&Adrv9001Profile) !=0 )
     return Adrv9001Status_ProfileReloadErr;
 
   return Adrv9001Status_Success;
@@ -2311,9 +3214,9 @@ int32_t Adrv9001_SetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_Ch
   {
     Adrv9001Profile.Tx2DpdExternalLoopbackPower = Power;
   }
-  if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
+  //if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
   //if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
+    //return Adrv9001Status_ProfileReloadErr;
 
   return Adrv9001Status_Success;
 }
@@ -2870,8 +3773,8 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   usleep(1000);
 
   /* Construct Profile Obj */
-  //if( Adrv9001_ConstructProfile(Instance, &Adrv9001Profile) != 0)
-     //return Adrv9001Status_ProfileErr;
+  if( Adrv9001_ConstructProfile(Instance, &Adrv9001Profile) != 0)
+     return Adrv9001Status_ProfileErr;
 
   if( Init->HopIrqId != 0x00 )
   {
