@@ -57,6 +57,8 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_HwReset(adrv9001Device_0);
 
+
+
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_InitAnalog(adrv9001Device_0, &rf1_initialize_init_8, ADI_ADRV9001_DEVICECLOCKDIVISOR_2);
 

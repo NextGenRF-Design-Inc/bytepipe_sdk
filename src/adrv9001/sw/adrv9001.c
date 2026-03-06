@@ -1440,6 +1440,12 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
 
 	printf("\r\nAdrv9001 Load Profile\r\n\r\n");
 
+	memset(&Instance->Device, 0, sizeof(adi_adrv9001_Device_t));
+	/* Assign Hal Reference to adrv9001 */
+	Instance->Device.common.devHalInfo = (void*)Instance;
+	/* Enable Logging */
+	Instance->Device.common.error.logEnable = 1;
+
 	if((status = Instance->InitializeFn_new( &Instance->Device )) != 0)
 	  return Adrv9001Status_ProfileInitErr;
 
@@ -1510,8 +1516,16 @@ int32_t Adrv9001_LoadDefaultProfile( adrv9001_t *Instance )
 
   printf("\r\nAdrv9001 Load Profile\r\n\r\n");
 
+  memset(&Instance->Device, 0, sizeof(adi_adrv9001_Device_t));
+  /* Assign Hal Reference to adrv9001 */
+  Instance->Device.common.devHalInfo = (void*)Instance;
+  /* Enable Logging */
+  Instance->Device.common.error.logEnable = 1;
+
   if((status = Instance->InitializeFn( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileInitErr;
+
+  //usleep(1000);
 
   if((status = Instance->CalibrateFn( &Instance->Device )) != 0)
     return Adrv9001Status_ProfileCalErr;
@@ -3689,7 +3703,6 @@ int32_t Adrv9001_DelayUs(void *devHalCfg, uint32_t time_us)
   //
   //	  time_us -= 1000;
   //	}
-
   usleep(time_us);
 
   return Adrv9001Status_Success;
@@ -3759,7 +3772,7 @@ int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )
   if( pinLevel > 0 )
   {
 	  Adrv9001_DelayUs(devHalCfg, 1000);
-
+	  //Adrv9001_DelayUs(devHalCfg, 100000); //increased x100 to allow for profile loading
 	  Adrv9001_SetAnalogGpioDirection( Adrv9001, ADI_ADRV9001_GPIO_ANALOG_PIN_NIBBLE_07_04, ADI_ADRV9001_GPIO_PIN_DIRECTION_OUTPUT );
 	  Adrv9001_SetGpioPinLevel( Adrv9001, ADI_ADRV9001_GPIO_ANALOG_07, Adrv9001->UseExtClock? ADI_ADRV9001_GPIO_PIN_LEVEL_LOW : ADI_ADRV9001_GPIO_PIN_LEVEL_HIGH );
   }

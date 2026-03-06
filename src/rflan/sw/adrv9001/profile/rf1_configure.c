@@ -71,10 +71,10 @@ int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 	adi_adrv9001_DpdCfg_t dpdConfig_9 = { 
 		.numberOfSamples = 4096, 
 		.additionalPowerScale = 4, 
-		.rxTxNormalizationLowerThreshold = 85290344,
-		.rxTxNormalizationUpperThreshold = 269711751,
+		.rxTxNormalizationLowerThreshold = 33954698, 
+		.rxTxNormalizationUpperThreshold = 269711752, 
 		.detectionPowerThreshold = 53942350, 
-		.detectionPeakThreshold = 214748364,
+		.detectionPeakThreshold = 214748365, 
 		.countsLessThanPowerThreshold = 4096, 
 		.countsGreaterThanPeakThreshold = 0, 
 		.immediateLutSwitching = true, 
