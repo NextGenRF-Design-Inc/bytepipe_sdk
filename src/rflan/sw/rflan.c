@@ -60,6 +60,9 @@
 #include "rf1_initialize.h"
 #include "rf1_configure.h"
 #include "rf1_calibrate.h"
+#include "rf2_initialize.h"
+#include "rf2_configure.h"
+#include "rf2_calibrate.h"
 
 extern XScuGic xInterruptController;       ///< Processor Interrupt Controller Instance
 
@@ -410,12 +413,12 @@ static int32_t Rflan_Initialize( void )
       .Rx1RssiOffsetdB = -20,
       .Rx2RssiOffsetdB = -20,
       .Init = &rf1_initialize_init_8,
-	    .InitializeFn = rf1_initialize,
-	    //.InitializeFn_new = rf1_initialize_new,
+	  .InitializeFn = rf1_initialize,
+	  .InitializeFn_new = rf2_initialize,
       .CalibrateFn = rf1_calibrate,
-      //.CalibrateFn_new = rf1_calibrate_new,
+      .CalibrateFn_new = rf2_calibrate,
       .ConfigureFn = rf1_configure,
-      //.ConfigureFn_new = rf1_configure_new,
+      .ConfigureFn_new = rf2_configure,
       .Tx1SsiEnableDly = 20,
       .Tx2SsiEnableDly = 20,
       .Rx1SsiEnableDly = 20,

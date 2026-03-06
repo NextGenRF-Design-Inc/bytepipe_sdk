@@ -4,12 +4,10 @@
 Adrv9001SetParam Tx2DpdEnable 0
 
 //Set Center Frequency
-Adrv9001ToRfCalibrated Tx2
 Adrv9001SetParam Tx2CarrierFrequency 4800000000
-Adrv9001ToRfPrimed Tx2
 
 // Set Attenuation to 6dB
-Adrv9001SetParam Tx2Attn 6000
+Adrv9001SetParam Tx2Attn 6
 
 // Enable Tx Boost
 Adrv9001SetParam Tx2Boost 1

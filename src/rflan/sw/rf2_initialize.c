@@ -22,8 +22,8 @@
 /* ADRV9001 Plugin: v0.28.0*/
 
 
-#include "rf1_initialize.h"
-int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
+#include "rf2_initialize.h"
+int rf2_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 
@@ -58,22 +58,22 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_HwReset(adrv9001Device_0);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_InitAnalog(adrv9001Device_0, &rf1_initialize_init_8, ADI_ADRV9001_DEVICECLOCKDIVISOR_2);
+	error_code = adi_adrv9001_InitAnalog(adrv9001Device_0, &rf2_initialize_init_8, ADI_ADRV9001_DEVICECLOCKDIVISOR_2);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_arm_AhbSpiBridge_Enable(adrv9001Device_0);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Stream_Image_Write(adrv9001Device_0, 0, rf1_initialize_binary_10, 32768, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+	error_code = adi_adrv9001_Stream_Image_Write(adrv9001Device_0, 0, rf2_initialize_binary_10, 32768, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_arm_Image_Write(adrv9001Device_0, 0, rf1_initialize_binary_11, 310272, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+	error_code = adi_adrv9001_arm_Image_Write(adrv9001Device_0, 0, rf2_initialize_binary_11, 310272, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_arm_Profile_Write(adrv9001Device_0, &rf1_initialize_init_8);
+	error_code = adi_adrv9001_arm_Profile_Write(adrv9001Device_0, &rf2_initialize_init_8);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_arm_PfirProfiles_Write(adrv9001Device_0, &rf1_initialize_init_8);
+	error_code = adi_adrv9001_arm_PfirProfiles_Write(adrv9001Device_0, &rf2_initialize_init_8);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_RxLnaConfig_t lnaConfig_14 = { 
@@ -87,19 +87,19 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 		.minGainIndex = 0, 
 		.lnaType = ADI_ADRV9001_EXTERNAL_LNA_TYPE_SINGLE };
 
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_1, 14, rf1_initialize_gainTableRows_14, 13, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_1, 14, rf2_initialize_gainTableRows_14, 13, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_2, 14, rf1_initialize_gainTableRows_15, 13, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_ORX, ADI_CHANNEL_2, 14, rf2_initialize_gainTableRows_15, 13, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, 255, rf1_initialize_gainTableRows_16, 69, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, 255, rf2_initialize_gainTableRows_16, 69, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, 255, rf1_initialize_gainTableRows_17, 69, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
+	error_code = adi_adrv9001_Rx_GainTable_Write(adrv9001Device_0, ADI_RX, ADI_CHANNEL_2, 255, rf2_initialize_gainTableRows_17, 69, &lnaConfig_14, ADI_ADRV9001_RX_GAIN_CORRECTION_TABLE);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Tx_AttenuationTable_Write(adrv9001Device_0, 2, 0, rf1_initialize_attenTableRows_18, 960);
+	error_code = adi_adrv9001_Tx_AttenuationTable_Write(adrv9001Device_0, 2, 0, rf2_initialize_attenTableRows_18, 960);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_PowerManagementSettings_t powerManagementSettings_19 = { 
@@ -282,34 +282,21 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Tx_SlewRateLimiter_Configure(adrv9001Device_0, ADI_CHANNEL_2, &config_36);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_DpdInitCfg_t dpdConfig_37 = { 
-		.enable = true, 
-		.amplifierType = ADI_ADRV9001_DPDAMPLIFIER_DEFAULT, 
-		.lutSize = ADI_ADRV9001_DPDLUTSIZE_512, 
-		.model = ADI_ADRV9001_DPDMODEL_4, 
-		.changeModelTapOrders = false, 
-		.modelOrdersForEachTap = { 31, 127, 31, 30  }, 
-		.preLutScale = 8, 
-		.clgcEnable = 0 };
-
-	error_code = adi_adrv9001_dpd_Initial_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_37);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_PllConfig_t pllConfig_38 = { 
+	adi_adrv9001_PllConfig_t pllConfig_37 = { 
 		.pllCalibration = ADI_ADRV9001_PLL_CALIBRATION_NORMAL, 
 		.pllPower = ADI_ADRV9001_PLL_POWER_LOW };
 
-	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &pllConfig_38);
+	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO1, &pllConfig_37);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO2, &pllConfig_38);
+	error_code = adi_adrv9001_Radio_Pll_Configure(adrv9001Device_0, ADI_ADRV9001_PLL_LO2, &pllConfig_37);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_McsDelay_t mcsDelay_40 = { 
+	adi_adrv9001_McsDelay_t mcsDelay_39 = { 
 		.readDelay = 5, 
 		.sampleDelay = 0 };
 
-	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &mcsDelay_40);
+	error_code = adi_adrv9001_Mcs_ChannelMcsDelay_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &mcsDelay_39);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_arm_System_Program(adrv9001Device_0, 8);

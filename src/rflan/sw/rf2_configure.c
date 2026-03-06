@@ -22,8 +22,8 @@
 /* ADRV9001 Plugin: v0.28.0*/
 
 
-#include "rf1_configure.h"
-int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
+#include "rf2_configure.h"
+int rf2_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 
@@ -63,34 +63,9 @@ int rf1_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_TrackingCals_t trackingCals_8 = { 
-		.chanTrackingCalMask = { (adi_adrv9001_TrackingCalibrations_e) 0, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC  } };
+		.chanTrackingCalMask = { (adi_adrv9001_TrackingCalibrations_e) 0, ADI_ADRV9001_TRACKING_CAL_TX_QEC | ADI_ADRV9001_TRACKING_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_RFDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC  } };
 
 	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &trackingCals_8);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_DpdCfg_t dpdConfig_9 = { 
-		.numberOfSamples = 4096, 
-		.additionalPowerScale = 4, 
-		.rxTxNormalizationLowerThreshold = 85290344,
-		.rxTxNormalizationUpperThreshold = 269711751,
-		.detectionPowerThreshold = 53942350, 
-		.detectionPeakThreshold = 214748364,
-		.countsLessThanPowerThreshold = 4096, 
-		.countsGreaterThanPeakThreshold = 0, 
-		.immediateLutSwitching = true, 
-		.useSpecialFrame = false, 
-		.resetLuts = false, 
-		.timeFilterCoefficient = 0, 
-		.dpdSamplingRate_Hz = 0, 
-		.clgcLoopOpen = 0, 
-		.clgcGainTarget_HundredthdB = 0, 
-		.clgcFilterAlpha = 1610612736, 
-		.clgcLastGain_HundredthdB = 0, 
-		.clgcFilteredGain_HundredthdB = 0, 
-		.captureDelay_us = 0, 
-		.enableRepeatedEstimationInTDD = false };
-
-	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_9);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 

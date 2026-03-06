@@ -2,7 +2,6 @@
 #include "adi_adrv9001.h"
 #include "adi_adrv9001_arm.h"
 #include "adi_adrv9001_cals.h"
-#include "adi_adrv9001_dpd.h"
 #include "adi_adrv9001_gpio.h"
 #include "adi_adrv9001_mcs.h"
 #include "adi_adrv9001_powermanagement.h"
@@ -14,7 +13,7 @@
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 
-adi_adrv9001_Init_t rf1_initialize_init_8 = { 
+adi_adrv9001_Init_t rf2_initialize_init_8 = {
 		.clocks = { 
 		.deviceClock_kHz = 38400, 
 		.clkPllVcoFreq_daHz = 884736000, 

@@ -21,8 +21,8 @@
 /* ADRV9001 Plugin: v0.28.0*/
 
 
-#include "rf1_calibrate.h"
-int rf1_calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
+#include "rf2_calibrate.h"
+int rf2_calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 {
 	int32_t error_code = 0;
 

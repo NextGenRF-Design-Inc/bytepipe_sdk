@@ -29,8 +29,6 @@ extern "C" {
 
 
 #include "adi_adrv9001_cals.h"
-#include "adi_adrv9001_rx.h"
-#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_spi.h"
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_tx.h"

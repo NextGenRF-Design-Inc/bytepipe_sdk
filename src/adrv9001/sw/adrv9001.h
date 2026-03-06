@@ -342,11 +342,11 @@ typedef struct {
   adi_adrv9001_SsiTestModeData_e        Tx1TestMode;
   adi_adrv9001_SsiTestModeData_e        Tx2TestMode;
   adrv9001_initialize_fn_t              InitializeFn;
-  //adrv9001_initialize_new_fn_t          InitializeFn_new;
+  adrv9001_initialize_fn_t              InitializeFn_new;
   adrv9001_calibrate_fn_t               CalibrateFn;
-  //adrv9001_calibrate_new_fn_t           CalibrateFn_new;
+  adrv9001_calibrate_fn_t               CalibrateFn_new;
   adrv9001_configure_fn_t               ConfigureFn;
-  //adrv9001_configure_new_fn_t           ConfigureFn_new;
+  adrv9001_configure_fn_t               ConfigureFn_new;
   adrv9001_malloc_t                     Malloc;
   adrv9001_free_t                       Free;
   uint32_t                              HwVer;
@@ -391,11 +391,11 @@ typedef struct {
   float                                 Rx2RssiOffsetdB;
   adi_adrv9001_Init_t                  *Init;
   adrv9001_initialize_fn_t              InitializeFn;
-  //adrv9001_initialize_new_fn_t          InitializeFn_new;
+  adrv9001_initialize_fn_t              InitializeFn_new;
   adrv9001_calibrate_fn_t               CalibrateFn;
-  //adrv9001_calibrate_new_fn_t           CalibrateFn_new;
+  adrv9001_calibrate_fn_t               CalibrateFn_new;
   adrv9001_configure_fn_t               ConfigureFn;
-  //adrv9001_configure_new_fn_t           ConfigureFn_new;
+  adrv9001_configure_fn_t               ConfigureFn_new;
   adrv9001_malloc_t                     Malloc;
   adrv9001_free_t                       Free;
   bool                                  UseExtClock;
@@ -420,7 +420,7 @@ int32_t Adrv9001_GetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_commo
 void AxiAdrv9001_SetSsiDisableCnt       ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 void AxiAdrv9001_SetSsiEnableCnt        ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 void AxiAdrv9001_SetDisableCnt          ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
-int32_t Adrv9001_ReLoadProfile          ( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance);
+int32_t Adrv9001_ReLoadProfile          ( adrv9001_t *Instance);
 //int32_t Adrv9001_ReLoadProfile_ByChunks ( adrv9001_t *Instance);
 int32_t Adrv9001_LoadNewProfile         ( adrv9001_t *Instance , adrv9001_profile_t *ProfileInstance);
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
