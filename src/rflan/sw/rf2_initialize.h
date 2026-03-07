@@ -1,6 +1,6 @@
 #include "adrv9001.h"
-#ifndef _RF2_INITIALIZE_H_
-#define _RF2_INITIALIZE_H_
+#ifndef _rf2_INITIALIZE_H_
+#define _rf2_INITIALIZE_H_
 
 #ifdef __cplusplus
 extern "C" {

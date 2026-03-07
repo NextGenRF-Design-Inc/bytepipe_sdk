@@ -1,6 +1,6 @@
 #include "adrv9001.h"
-#ifndef _RF2_CONFIGURE_H_
-#define _RF2_CONFIGURE_H_
+#ifndef _rf2_CONFIGURE_H_
+#define _rf2_CONFIGURE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +34,8 @@ extern "C" {
 #include "adi_adrv9001_gpio.h"
 #include "adi_adrv9001_powersavingandmonitormode.h"
 #include "adi_adrv9001_radio.h"
+#include "adi_adrv9001_rx.h"
+#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 

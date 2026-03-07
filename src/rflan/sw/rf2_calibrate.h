@@ -1,5 +1,5 @@
-#ifndef _RF2_CALIBRATE_H_
-#define _RF2_CALIBRATE_H_
+#ifndef _rf2_CALIBRATE_H_
+#define _rf2_CALIBRATE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +29,8 @@ extern "C" {
 
 
 #include "adi_adrv9001_cals.h"
+#include "adi_adrv9001_rx.h"
+#include "adi_adrv9001_rx_gaincontrol.h"
 #include "adi_adrv9001_spi.h"
 #include "adi_adrv9001_ssi.h"
 #include "adi_adrv9001_tx.h"
