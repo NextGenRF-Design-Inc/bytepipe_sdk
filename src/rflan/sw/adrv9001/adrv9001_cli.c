@@ -286,10 +286,10 @@ static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, 
   int32_t status = 0;
   uint32_t Length;
 
-  int32_t *iData_tx;
-  int32_t *qData_tx;
-  int32_t *iData_elb;
-  int32_t *qData_elb;
+  static int32_t iData_tx[4096] = {0};
+  static int32_t qData_tx[4096] = {0};
+  static int32_t iData_elb[4096] = {0};
+  static int32_t qData_elb[4096] = {0};
 
 
 
@@ -298,7 +298,7 @@ static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, 
   Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
 
   Cli_GetParameter(cmd, 2, CliParamTypeU32, &Length);
-
+/*
   if(((iData_tx  = calloc(1, Length*4 )) == NULL) ||
      ((qData_tx  = calloc(1, Length*4 )) == NULL) ||
      ((iData_elb = calloc(1, Length*4 )) == NULL) ||
@@ -307,15 +307,23 @@ static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, 
       Cli_Printf(CliInstance,"Memory Error\r\n");
       return;
     }
+*/
+  //Fill dpd data capture buffers with zeros
+  memset(iData_tx,0,DPD_MAX_SAMPLES*sizeof(int32_t));
+  memset(qData_tx,0,DPD_MAX_SAMPLES*sizeof(int32_t));
+  memset(iData_elb,0,DPD_MAX_SAMPLES*sizeof(int32_t));
+  memset(qData_elb,0,DPD_MAX_SAMPLES*sizeof(int32_t));
 
   status = Adrv9001_ReadDpdCaptureData(Adrv9001Params->Adrv9001, Channel,iData_tx,qData_tx,iData_elb,qData_elb,Length,false);    
   
   if(status !=0 )
   {
+	/*
     free(iData_tx);
     free(qData_tx);
     free(iData_elb);
     free(qData_elb);
+    */
     return;
   }
 
@@ -325,28 +333,28 @@ static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, 
     Cli_Printf(CliInstance,"%ld,",iData_tx[i]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",iData_tx[Length-1]);
-  free(iData_tx);
+  //free(iData_tx);
   Cli_Printf(CliInstance,"qData_tx: ");
   for(int j = 0; j < Length-1; j++)
   {
     Cli_Printf(CliInstance,"%ld,",qData_tx[j]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",qData_tx[Length-1]);
-  free(qData_tx);
+  //free(qData_tx);
   Cli_Printf(CliInstance,"iData_elb: ");
   for(int k = 0; k < Length-1; k++)
   {
     Cli_Printf(CliInstance,"%ld,",iData_elb[k]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",iData_elb[Length-1]);
-  free(iData_elb);
+  //free(iData_elb);
   Cli_Printf(CliInstance,"qData_elb: ");
   for(int l = 0; l < Length-1; l++)
   {
     Cli_Printf(CliInstance,"%ld,",qData_elb[l]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",qData_elb[Length-1]);
-  free(qData_elb);
+  //free(qData_elb);
 
 
 

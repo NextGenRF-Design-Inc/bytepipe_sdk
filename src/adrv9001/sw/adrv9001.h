@@ -92,7 +92,7 @@
 #define ADRV9001_HOP_TABLE_STEP_FREQ    (40000000)
 
 #define ADRV9001_TEST_MODE_PATTERN        (0xABCDABCD)
-
+#define DPD_MAX_SAMPLES                 (4096)
 //extern adi_adrv9001_Init_t initialize_init_8;
 /*
 typedef struct
