@@ -30,9 +30,11 @@ clean:
 	rm -rf $(PROJECT)
   
 profile:	
-	@read -p "Enter path of directory containing exported C99 code from TES: " C99_DIR; \
-	source $(SDK_SRCDIR)/adrv9001/adrv9001.sh; profile_parse $$C99_DIR $(PROJECT_DIR)/sw/adrv9001/profile "rf1"
-	
+	@read -p "Enter path of directory containing FIRST exported C99 code from TES: " C99_DIR1; \
+	source $(SDK_SRCDIR)/adrv9001/adrv9001.sh; profile_parse $$C99_DIR1 $(PROJECT_DIR)/sw/adrv9001/profile "rf1"
+	@read -p "Enter path of directory containing SECOND exported C99 code from TES: " C99_DIR2; \
+	source $(SDK_SRCDIR)/adrv9001/adrv9001.sh; profile_parse $$C99_DIR2 $(PROJECT_DIR)/sw/adrv9001/profile2 "rf2"
+  
   
 
 
