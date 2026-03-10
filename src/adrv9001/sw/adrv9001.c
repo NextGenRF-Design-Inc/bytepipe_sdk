@@ -2120,7 +2120,7 @@ int32_t Adrv9001_GetTxExternalPathDelay( adrv9001_t *Instance, adi_common_Channe
 
 int32_t Adrv9001_GetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int16_t *Power)
 {
-  Power = &Instance->Params->tx.txProfile[channel - 1].txPeakLoopBackPower;
+  *Power = Instance->Params->tx.txProfile[channel - 1].txPeakLoopBackPower;
   return Adrv9001Status_Success;
 }
 
@@ -2128,7 +2128,7 @@ int32_t Adrv9001_GetTxDpdNumberofSamples( adrv9001_t *Instance, adi_common_Chann
 {
   adi_adrv9001_DpdCfg_t dpdConfig;
   int32_t status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel,&dpdConfig);
-  SampleCnt = &dpdConfig.numberOfSamples;
+  *SampleCnt = dpdConfig.numberOfSamples;
   return status;
 }
 
@@ -2136,14 +2136,14 @@ int32_t Adrv9001_GetTxDpdRxTxNormalizationLowerThreshold( adrv9001_t *Instance, 
 {
   adi_adrv9001_DpdCfg_t dpdConfig;
   int32_t status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel,&dpdConfig);
-  Threshold = &dpdConfig.rxTxNormalizationLowerThreshold;
+  *Threshold = dpdConfig.rxTxNormalizationLowerThreshold;
   return status;
 }
 int32_t Adrv9001_GetTxDpdRxTxNormalizationUpperThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t *Threshold)
 {
   adi_adrv9001_DpdCfg_t dpdConfig;
   int32_t status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel,&dpdConfig);
-  Threshold = &dpdConfig.rxTxNormalizationUpperThreshold;
+  *Threshold = dpdConfig.rxTxNormalizationUpperThreshold;
   return status;
 }
 
@@ -2151,7 +2151,7 @@ int32_t Adrv9001_GetTxDpdDetectionPowerThreshold( adrv9001_t *Instance, adi_comm
 {
   adi_adrv9001_DpdCfg_t dpdConfig;
   int32_t status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel,&dpdConfig);
-  Threshold = &dpdConfig.detectionPowerThreshold;
+  *Threshold = dpdConfig.detectionPowerThreshold;
   return status;
 }
 
@@ -2159,7 +2159,7 @@ int32_t Adrv9001_GetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_commo
 {
   adi_adrv9001_DpdCfg_t dpdConfig;
   int32_t status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel,&dpdConfig);
-  Threshold = &dpdConfig.detectionPeakThreshold;
+  *Threshold = dpdConfig.detectionPeakThreshold;
   return status;
 }
 
