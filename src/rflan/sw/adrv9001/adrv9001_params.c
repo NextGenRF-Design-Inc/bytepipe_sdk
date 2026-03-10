@@ -1046,59 +1046,127 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
   }    
   else if( Id == Adrv9001ParamId_Tx1ExternalPathDelay)
   {
-
+    uint32_t tmp;
+    if(( status = Adrv9001_GetTxExternalPathDelay( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1ExternalLoopbackPower)
   {
+    int16_t tmp;
     
+    if(( status = Adrv9001_GetTxExternalLoopbackPower( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%d", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1DpdNumberofSamples)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdNumberofSamples( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status; 
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationLowerThreshold)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdRxTxNormalizationLowerThreshold( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationUpperThreshold)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdRxTxNormalizationUpperThreshold( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1DpdDetectionPowerThreshold)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdDetectionPowerThreshold( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1DpdDetectionPeakThreshold) 
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdDetectionPeakThreshold( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2ExternalPathDelay)
   {
+    uint32_t tmp;
+    if(( status = Adrv9001_GetTxExternalPathDelay( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
     
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2ExternalLoopbackPower)
   {
+    int16_t tmp;
     
+    if(( status = Adrv9001_GetTxExternalLoopbackPower( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%d", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2DpdNumberofSamples)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdNumberofSamples( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status; 
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2DpdRxTxNormalizationLowerThreshold)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdRxTxNormalizationLowerThreshold( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2DpdRxTxNormalizationUpperThreshold)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdRxTxNormalizationUpperThreshold( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2DpdDetectionPowerThreshold)
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdDetectionPowerThreshold( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx2DpdDetectionPeakThreshold )
   {
+    uint32_t tmp;
     
+    if(( status = Adrv9001_GetTxDpdDetectionPeakThreshold( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+    
+    sprintf(Value, "%lu", tmp);
   }
   else if( Id == Adrv9001ParamId_Tx1SsiEnableDly)
   {
