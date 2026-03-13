@@ -977,6 +977,26 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
 
     sprintf(Value, "%hhu", tmp);
   }
+  /*
+  else if( Id == Adrv9001ParamId_Tx1DpdCoefficients
+  {
+    adi_adrv9001_DpdCoefficients_t tmp;
+
+    if((status = Adrv9001_GetTxDPDCoefficients( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+
+    sprintf(Value, "%?", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdCoefficients
+  {
+    adi_adrv9001_DpdCoefficients_t tmp;
+
+    if((status = Adrv9001_GetTxDPDCoefficients( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+
+    sprintf(Value, "%?", tmp);
+  }
+  */
   else if( Id == Adrv9001ParamId_Tx1DpdStatus)
   {
     adi_adrv9001_DpdChannelStatus_t tmp;

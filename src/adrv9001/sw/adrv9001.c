@@ -1781,6 +1781,13 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
 
   return Adrv9001Status_Success;
 }
+
+int32_t Adrv9001_GetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients)
+{
+  int32_t status = 0;
+  if((status = adi_adrv9001_dpd_coefficients_Get(&Instance->Device,channel,coefficients)) != 0)
+    return status;
+}
 int32_t Adrv9001_ReadDpdCaptureData( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t iData_tx[], int32_t qData_tx[], int32_t iData_elb[], int32_t qData_elb[], uint32_t length, bool autoIncrement)
 {
   int32_t status = 0;
