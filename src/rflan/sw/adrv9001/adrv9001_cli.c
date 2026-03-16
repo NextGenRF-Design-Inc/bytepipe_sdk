@@ -279,6 +279,53 @@ static void Adrv9001Cli_SweepSsi(cli_t *CliInstance, const char *cmd, adrv9001_p
   }
 }
 
+static void Adrv9001Cli_WriteDpdCoefficients(cli_t *CliInstance, const char *cmd, adrv9001_params_t *Adrv9001Params )
+{
+  static adi_adrv9001_DpdCoefficients_t DpdCoeffs;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+  uint16_t len;
+  int32_t status = 0;
+
+  Adrv9001_ClearError( Adrv9001Params->Adrv9001 );
+
+  Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
+
+  Cli_GetParameter(cmd, 2, CliParamTypeU8, &DpdCoeffs.region);
+
+  memset(&DpdCoeffs.coefficients,0,ADI_ADRV9001_DPD_NUM_COEFFICIENTS*sizeof(uint8_t));
+
+  char *str = (char*)Cli_FindParameter( cmd, 3, &len );
+  char *s = strtok(str,",");
+  sscanf( s, "%u", (uint16_t*)&DpdCoeffs.coefficients[0] );
+
+  int i=0;
+  while( s != NULL )
+  {
+    i++;
+    if((s = strtok(NULL,",")) != NULL)
+    {
+      sscanf( s, "%u", (uint16_t*)&DpdCoeffs.coefficients[i] );
+    }
+  }
+
+  if( (status = Adrv9001_SetTxDPDCoefficients(Adrv9001Params->Adrv9001, Channel, &DpdCoeffs)) != 0)
+  {
+    Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
+    return;
+  }
+/*
+  Cli_Printf(CliInstance,"DPD coefficients ( region %u ): ",DpdCoeffs.region);
+  for(int i = 0; i < ADI_ADRV9001_DPD_NUM_COEFFICIENTS-1; i++)
+  {
+    Cli_Printf(CliInstance,"%ld,",DpdCoeffs.coefficients[i]);
+  }
+  Cli_Printf(CliInstance,"%ld\r\n",DpdCoeffs.coefficients[ADI_ADRV9001_DPD_NUM_COEFFICIENTS-1]);
+*/
+  return;
+
+}
+
 static void Adrv9001Cli_ReadDpdCoefficients(cli_t *CliInstance, const char *cmd, adrv9001_params_t *Adrv9001Params )
 {
   static adi_adrv9001_DpdCoefficients_t DpdCoeffs;
@@ -489,6 +536,16 @@ cli_cmd_t Adrv9001CliReadDpdCoefficientsDef =
     NULL
 };
 
+cli_cmd_t Adrv9001CliWriteDpdCoefficientsDef =
+{
+    "Adrv9001WriteDpdCoefficients",
+    "Adrv9001WriteDpdCoefficients:  Get DPD coefficients \r\n"
+    "Adrv9001WriteDpdCoefficients < Port (Tx1, Tx2), FH region(0-7), Coefficients( C0, C1, C2, ... ) >\r\n\r\n",
+    (CliCmdFn_t)Adrv9001Cli_WriteDpdCoefficients,
+    3,
+    NULL
+};
+
 int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
 {
   Cli->CallbackRef = Cli;
@@ -503,6 +560,7 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
   Adrv9001CliSweepSsiDef.userData = Adrv9001Params;
   Adrv9001CliReadDpdCaptureDataDef.userData = Adrv9001Params;
   Adrv9001CliReadDpdCoefficientsDef.userData = Adrv9001Params;
+  Adrv9001CliWriteDpdCoefficientsDef.userData = Adrv9001Params;
 
   Cli_RegisterCommand(Cli, &Adrv9001CliGetParamDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliSetParamDef);
@@ -514,6 +572,7 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
   Cli_RegisterCommand(Cli, &Adrv9001CliSweepSsiDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliReadDpdCaptureDataDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliReadDpdCoefficientsDef);
+  Cli_RegisterCommand(Cli, &Adrv9001CliWriteDpdCoefficientsDef);
 
   return Adrv9001Status_Success;
 }
