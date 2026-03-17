@@ -412,7 +412,7 @@ static int32_t Rflan_Initialize( void )
       .TxEnableMode = ADI_ADRV9001_PIN_MODE,
       .Rx1RssiOffsetdB = -20,
       .Rx2RssiOffsetdB = -20,
-      .Init = &rf1_initialize_init_8,
+      .Init = &rf1_init_2,//rf1_initialize_init_8,
 	  .InitializeFn = rf1_initialize,
 	  .InitializeFn_new = rf2_initialize,
       .CalibrateFn = rf1_calibrate,

@@ -13,7 +13,7 @@
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 
-adi_adrv9001_RxGainTableRow_t rf2_initialize_gainTableRows_16[] = { { 
+adi_adrv9001_RxGainTableRow_t rf2_initialize_rf2_gainTableRows_16[] = { { 
 		.rxFeGain = 251, 
 		.extControl = 0, 
 		.adcTiaGain = 0, 

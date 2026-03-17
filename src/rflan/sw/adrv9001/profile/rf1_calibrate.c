@@ -13,12 +13,12 @@
 /* External LO optimal frequencies: 60 MHz to 12 GHz*/
 /* */
 /* FPGA: v0.0.0*/
-/* Device Driver: v68.16.2*/
-/* Firmware: v0.22.49*/
-/* Profile Generator: v0.53.11.0*/
-/* Stream Generator Assembly: v0.7.15.0*/
-/* Transceiver Evaluation Software: v0.28.0*/
-/* ADRV9001 Plugin: v0.28.0*/
+/* Device Driver: v68.20.12*/
+/* Firmware: v0.22.64*/
+/* Profile Generator: v0.53.13.0*/
+/* Stream Generator Assembly: v0.7.18.0*/
+/* Transceiver Evaluation Software: v0.29.0*/
+/* ADRV9001 Plugin: v0.29.0*/
 
 
 #include "rf1_calibrate.h"
@@ -27,424 +27,52 @@ int rf1_calibrate(adi_adrv9001_Device_t * adrv9001Device_0)
 	int32_t error_code = 0;
 
 
-	adi_adrv9001_InitCals_t initCals_1 = { 
+	adi_adrv9001_InitCals_t initCals_ADRV9001_ALL = { 
 		.sysInitCalMask = (adi_adrv9001_InitCalibrations_e) 0, 
 		.chanInitCalMask = { ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY | ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_TCAL | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY, ADI_ADRV9001_INIT_CAL_TX_QEC | ADI_ADRV9001_INIT_CAL_TX_LO_LEAKAGE | ADI_ADRV9001_INIT_CAL_TX_LB_PD | ADI_ADRV9001_INIT_CAL_TX_BBAF | ADI_ADRV9001_INIT_CAL_TX_BBAF_GD | ADI_ADRV9001_INIT_CAL_TX_ATTEN_DELAY | ADI_ADRV9001_INIT_CAL_TX_DAC | ADI_ADRV9001_INIT_CAL_TX_PATH_DELAY | ADI_ADRV9001_INIT_CAL_RX_HPADC_FLASH | ADI_ADRV9001_INIT_CAL_RX_LPADC | ADI_ADRV9001_INIT_CAL_RX_TIA_CUTOFF | ADI_ADRV9001_INIT_CAL_RX_GROUP_DELAY | ADI_ADRV9001_INIT_CAL_RX_QEC_FIC | ADI_ADRV9001_INIT_CAL_RX_RF_DC_OFFSET | ADI_ADRV9001_INIT_CAL_RX_GAIN_PATH_DELAY  }, 
 		.calMode = ADI_ADRV9001_INIT_CAL_MODE_ALL, 
 		.force = false };
 
-	uint8_t errorFlag_1 = 0;
-	error_code = adi_adrv9001_cals_InitCals_Run(adrv9001Device_0, &initCals_1, 300000, &errorFlag_1);
-
+	uint8_t errorFlag_ADRV9001_ALL = 0;
+	error_code = adi_adrv9001_cals_InitCals_Run(adrv9001Device_0, &initCals_ADRV9001_ALL, 300000, &errorFlag_ADRV9001_ALL);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	uint8_t readData_2 = 0;
-	error_code = adi_adrv9001_spi_Byte_Read(adrv9001Device_0, 11, &readData_2);
-
 	
+	error_code = adi_adrv9001_spi_Byte_Read(adrv9001Device_0, 11, &errorFlag_ADRV9001_ALL);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	uint32_t internalPathDelays_ns_3[6] = { 0 };
-	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, internalPathDelays_ns_3, 6);
-
-	int32_t internalPathDelays_ns_3_indexer = 1;
-	for (internalPathDelays_ns_3_indexer = 1; internalPathDelays_ns_3_indexer < 6; internalPathDelays_ns_3_indexer++)
-	{
-	}
 	
+	uint32_t internalPathDelays_ns_RX_1[6] = { 0 };
+	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, internalPathDelays_ns_RX_1, 6);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	uint32_t internalPathDelays_ns_4[6] = { 0 };
-	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, internalPathDelays_ns_4, 6);
-
-	int32_t internalPathDelays_ns_4_indexer = 1;
-	for (internalPathDelays_ns_4_indexer = 1; internalPathDelays_ns_4_indexer < 6; internalPathDelays_ns_4_indexer++)
-	{
-	}
 	
+	uint32_t internalPathDelays_ns_TX_1[6] = { 0 };
+	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, internalPathDelays_ns_TX_1, 6);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	uint32_t internalPathDelays_ns_5[6] = { 0 };
-	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, internalPathDelays_ns_5, 6);
-
-	int32_t internalPathDelays_ns_5_indexer = 1;
-	for (internalPathDelays_ns_5_indexer = 1; internalPathDelays_ns_5_indexer < 6; internalPathDelays_ns_5_indexer++)
-	{
-	}
 	
+	uint32_t internalPathDelays_ns_TX_2[6] = { 0 };
+	error_code = adi_adrv9001_cals_InternalPathDelay_Get(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, internalPathDelays_ns_TX_2, 6);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	uint8_t minGainIndex_6 = 0;
-	uint8_t maxGainIndex_6 = 0;
-	error_code = adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get(adrv9001Device_0, ADI_CHANNEL_1, &minGainIndex_6, &maxGainIndex_6);
-
 	
-	
+	uint8_t minGainIndex_1 = 187;
+	uint8_t maxGainIndex_1 = 255;
+	error_code = adi_adrv9001_Rx_GainControl_MinMaxGainIndex_Get(adrv9001Device_0, ADI_CHANNEL_1, &minGainIndex_1, &maxGainIndex_1);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_RxGainTableRow_t gainTableRows_7[] = { { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }, { 
-		.rxFeGain = 0, 
-		.extControl = 0, 
-		.adcTiaGain = 0, 
-		.digGain = 0, 
-		.phaseOffset = 0 }  };
-
-	uint16_t numGainIndicesRead_7 = 0;
-	error_code = adi_adrv9001_Rx_GainTable_Read(adrv9001Device_0, ADI_CHANNEL_1, 255, gainTableRows_7, 69, &numGainIndicesRead_7);
-
-	int32_t gainTableRows_7_indexer = 1;
-	for (gainTableRows_7_indexer = 1; gainTableRows_7_indexer < 69; gainTableRows_7_indexer++)
-	{
-	}
 	
-	
+	uint16_t numGainIndicesRead_1 = 0;
+	error_code = adi_adrv9001_Rx_GainTable_Read(adrv9001Device_0, ADI_CHANNEL_1, 255, rf1_gainTableRows_1, 69, &numGainIndicesRead_1);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	
 	error_code = adi_adrv9001_Tx_DataPath_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_1, false);
-
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	
 	error_code = adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_SSI_TYPE_LVDS, false);
-
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	
 	error_code = adi_adrv9001_Tx_DataPath_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, false);
-
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	
 	error_code = adi_adrv9001_Ssi_Loopback_Set(adrv9001Device_0, ADI_CHANNEL_2, ADI_ADRV9001_SSI_TYPE_LVDS, false);
-
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	
 
 	return error_code;
 

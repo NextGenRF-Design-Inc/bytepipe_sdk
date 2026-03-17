@@ -104,7 +104,8 @@ profile_parse()
 
 	sed -i '/printf/d' $outDir/*.c
 	sed -i '/getchar/d' $outDir/*.c
-	sed -i 's/int initialize(adi_adrv9001_Device_t * adrv9001Device_0.*/int initialize(adi_adrv9001_Device_t * adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_fpga9001_Device_t \* fpga9001Device_0, adi_adrv9001_Device_t \* adrv9001Device_0)/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
 	sed -i '/#include "adi_fpga9001/d' $outDir/*
 	sed -i '/error_code = adi_fpga9001/d' $outDir/*
 	sed -i '/linux_uio_init/d' $outDir/*
@@ -122,9 +123,16 @@ profile_parse()
   for f in $outDir/* ; do mv -- "$outDir/$(basename ${f})" "$outDir/${name}_$(basename ${f})" ; done  
   
   sed -i "s/initialize/${name}_initialize/g" $outDir/*
+  sed -i "s/init_2/${name}_init_2/g" $outDir/*
   sed -i "s/calibrate/${name}_calibrate/g" $outDir/*
   sed -i "s/configure/${name}_configure/g" $outDir/*  
-  
+  sed -i "s/gainTableRows_ORX/${name}_gainTableRows_ORX/g" $outDir/*
+  sed -i "s/gainTableRows_RX/${name}_gainTableRows_RX/g" $outDir/*
+  sed -i "s/gpioCtrlInitCfg/${name}_gpioCtrlInitCfg/g" $outDir/*
+  sed -i "s/attenTableRows/${name}_attenTableRows/g" $outDir/*
+  sed -i "s/gainTableRows_1/${name}_gainTableRows_1/g" $outDir/*
+  sed -i "s/agcCfg_1/${name}_agcCfg_1/g" $outDir/*
+
   sed -i "s/_INITIALIZE_H_/_${name^^}_INITIALIZE_H_/g" $outDir/*    
   sed -i "s/_CONFIGURE_H_/_${name^^}_CONFIGURE_H_/g" $outDir/*   
   sed -i "s/_CALIBRATE_H_/_${name^^}_CALIBRATE_H_/g" $outDir/*     

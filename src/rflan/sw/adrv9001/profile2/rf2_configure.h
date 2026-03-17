@@ -21,12 +21,12 @@ extern "C" {
 /* External LO optimal frequencies: 60 MHz to 12 GHz*/
 /* */
 /* FPGA: v0.0.0*/
-/* Device Driver: v68.16.2*/
-/* Firmware: v0.22.49*/
-/* Profile Generator: v0.53.11.0*/
-/* Stream Generator Assembly: v0.7.15.0*/
-/* Transceiver Evaluation Software: v0.28.0*/
-/* ADRV9001 Plugin: v0.28.0*/
+/* Device Driver: v68.20.12*/
+/* Firmware: v0.22.64*/
+/* Profile Generator: v0.53.13.0*/
+/* Stream Generator Assembly: v0.7.18.0*/
+/* Transceiver Evaluation Software: v0.29.0*/
+/* ADRV9001 Plugin: v0.29.0*/
 
 
 #include "adi_adrv9001_bbdc.h"
@@ -39,6 +39,7 @@ extern "C" {
 #include "adi_adrv9001_tx.h"
 #include <stdlib.h>
 
+extern adi_adrv9001_GainControlCfg_t rf2_agcCfg_1;
 #define ADI_HANDLE_ERROR(error_code, device_context) if (0 != error_code) \
 { \
     printf("Device API call returned non-zero error code\n"); \
