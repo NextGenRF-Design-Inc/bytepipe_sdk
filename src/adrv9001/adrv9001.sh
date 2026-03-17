@@ -45,6 +45,8 @@ download_sdk()
 {	
 	wget -nc "https://www.analog.com/media/en/evaluation-boards-kits/evaluation-software/adrv9001-sdk-eval-software.zip"
 	unzip adrv9001-sdk-eval-software.zip  
+	(cd adrv9001-sdk.* && cp -r adrv9001-sdk ../.)
+	#rm -f adrv9001-sdk.*
 	chmod -R 777 adrv9001-sdk
 }
     

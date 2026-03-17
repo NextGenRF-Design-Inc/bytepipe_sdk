@@ -100,6 +100,7 @@ app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devi
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001/private/include
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001/private/include/bitfields/c0
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001/public/include
+app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/devices/adrv9001/internal/include
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/common
 app config -name rpu include-path $wrkDir/adrv9001-sdk/pkg/production/c_src/third_party/adi_pmag_macros
 app config -name rpu include-path $srcDir/axi_dma/sw
