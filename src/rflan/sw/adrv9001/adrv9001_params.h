@@ -45,7 +45,6 @@
 
 typedef enum
 {
-  Adrv9001ParamId_HwVer                                         ,
   Adrv9001ParamId_LogPath                                       ,
   Adrv9001ParamId_Tx1Attn                                       ,
   Adrv9001ParamId_Tx2Attn                                       ,
@@ -118,10 +117,6 @@ typedef enum
   Adrv9001ParamId_Tx2TestMode                                   ,
   Adrv9001ParamId_Rx1TestMode                                   ,
   Adrv9001ParamId_Rx2TestMode                                   ,
-  Adrv9001ParamId_Tx1TestData                                   ,
-  Adrv9001ParamId_Tx2TestData                                   ,
-  Adrv9001ParamId_Rx1TestData                                   ,
-  Adrv9001ParamId_Rx2TestData                                   ,
   Adrv9001ParamId_Rx1InputPort                                  ,
   Adrv9001ParamId_Rx2InputPort                                  ,  
   Adrv9001ParamId_Tx1DpdEnable                                  ,

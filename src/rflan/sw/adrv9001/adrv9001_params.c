@@ -299,22 +299,6 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     sscanf(Value, "%hhu", &tmp);
     status = Adrv9001_SetRxTestMode( Adrv9001, ADI_CHANNEL_2, (adi_adrv9001_SsiTestModeData_e)tmp );
   }
-  else if( Id == Adrv9001ParamId_Tx1TestData )
-  {
-
-  }
-  else if( Id == Adrv9001ParamId_Tx2TestData )
-  {
-
-  }
-  else if( Id == Adrv9001ParamId_Rx1TestData )
-  {
-
-  }
-  else if( Id == Adrv9001ParamId_Rx2TestData )
-  {
-
-  }
 
   else if( Id == Adrv9001ParamId_Tx1DpdEnable )
   {
@@ -564,11 +548,7 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
 
   adrv9001_t *Adrv9001 = Instance->Adrv9001;
 
-  if( Id == Adrv9001ParamId_HwVer )
-  {
-    return Adrv9001Status_InvalidParameter;
-  }
-  else if( Id == Adrv9001ParamId_LogPath )
+  if( Id == Adrv9001ParamId_LogPath )
   {
     strcpy(Value, Adrv9001->LogPath );
   }
@@ -977,26 +957,6 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
 
     sprintf(Value, "%hhu", tmp);
   }
-  /*
-  else if( Id == Adrv9001ParamId_Tx1DpdCoefficients
-  {
-    adi_adrv9001_DpdCoefficients_t tmp;
-
-    if((status = Adrv9001_GetTxDPDCoefficients( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
-      return status;
-
-    sprintf(Value, "%?", tmp);
-  }
-  else if( Id == Adrv9001ParamId_Tx2DpdCoefficients
-  {
-    adi_adrv9001_DpdCoefficients_t tmp;
-
-    if((status = Adrv9001_GetTxDPDCoefficients( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
-      return status;
-
-    sprintf(Value, "%?", tmp);
-  }
-  */
   else if( Id == Adrv9001ParamId_Tx1DpdStatus)
   {
     adi_adrv9001_DpdChannelStatus_t tmp;
@@ -1029,22 +989,6 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
     p += sprintf(p, "%s%ld\r\n","rxPeakPower_100th_dB = ",tmp.rxPeakPower_100th_dB);
     p += sprintf(p, "%s%ld\r\n","txAvgPower_100th_dB = ",tmp.txAvgPower_100th_dB);
     p += sprintf(p, "%s%ld\r\n","rxAvgPower_100th_dB = ",tmp.rxAvgPower_100th_dB);
-  }
-  else if( Id == Adrv9001ParamId_Tx1TestData )
-  {
-
-  }
-  else if( Id == Adrv9001ParamId_Tx2TestData )
-  {
-
-  }
-  else if( Id == Adrv9001ParamId_Rx1TestData )
-  {
-
-  }
-  else if( Id == Adrv9001ParamId_Rx2TestData )
-  {
-
   }
   else if( Id == Adrv9001ParamId_Rx1InputPort )
   {

@@ -682,7 +682,7 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
     Adrv9001Profile.Tx2DpdInitCfg.enable = Enable;
   }
 
-  //if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
+  
   if( Enable )
   {
     if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
