@@ -592,22 +592,16 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
 
 int32_t Adrv9001_SetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_coefficients_Set(&Instance->Device,channel,coefficients)) != 0)
-    return status;
+  return adi_adrv9001_dpd_coefficients_Set(&Instance->Device,channel,coefficients);
 }
 
 int32_t Adrv9001_GetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_coefficients_Get(&Instance->Device,channel,coefficients)) != 0)
-    return status;
+  return adi_adrv9001_dpd_coefficients_Get(&Instance->Device,channel,coefficients);
 }
 int32_t Adrv9001_ReadDpdCaptureData( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t iData_tx[], int32_t qData_tx[], int32_t iData_elb[], int32_t qData_elb[], uint32_t length, bool autoIncrement)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_CaptureData_Read( &Instance->Device, channel ,iData_tx,qData_tx,iData_elb, qData_elb,length,autoIncrement )) != 0)
-    return status;
+  return adi_adrv9001_dpd_CaptureData_Read( &Instance->Device, channel ,iData_tx,qData_tx,iData_elb, qData_elb,length,autoIncrement );
 }
 
 int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdChannelStatus_t* dpdChannelStatus )
@@ -673,16 +667,38 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
 {
 
+  int32_t error_code = 0;
+  adi_adrv9001_TrackingCals_t trackingCals;
+  error_code = adi_adrv9001_cals_Tracking_Get((adi_adrv9001_Device_t *)&Instance->Device, &trackingCals);
+  if(error_code != 0)
+  	  return error_code;
+  bool isEnabled = false;
+
   if(channel == ADI_CHANNEL_1)
   {
     Adrv9001Profile.Tx1DpdInitCfg.enable = Enable;
+    isEnabled = ((trackingCals.chanTrackingCalMask[0] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+    if( (isEnabled & !Enable) || (!isEnabled & Enable) )
+    {
+      trackingCals.chanTrackingCalMask[0] ^= ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC;
+    }
   }
   else if(channel == ADI_CHANNEL_2)
   {
     Adrv9001Profile.Tx2DpdInitCfg.enable = Enable;
+    isEnabled = ((trackingCals.chanTrackingCalMask[1] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+    if( (isEnabled & !Enable) || (!isEnabled & Enable) )
+    {
+      trackingCals.chanTrackingCalMask[1] ^= ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC;
+    }
   }
 
+  error_code = adi_adrv9001_cals_Tracking_Set((adi_adrv9001_Device_t *)&Instance->Device, &trackingCals);
+  if(error_code != 0)
+	  return error_code;
   
+
+  /*
   if( Enable )
   {
     if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
@@ -693,7 +709,7 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
 	if( Adrv9001_ReLoadProfile(Instance) !=0 )
 	  return Adrv9001Status_ProfileReloadErr;
   }
-
+*/
 
   return Adrv9001Status_Success;
 }

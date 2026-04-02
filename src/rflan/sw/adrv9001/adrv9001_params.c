@@ -83,11 +83,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
 
   adrv9001_t *Adrv9001 = Instance->Adrv9001;
 
-  if( Id == Adrv9001ParamId_HwVer )
-  {
-    return Adrv9001Status_InvalidParameter;
-  }
-  else if( Id == Adrv9001ParamId_LogPath )
+  if( Id == Adrv9001ParamId_LogPath )
   {
     sprintf( Adrv9001->LogPath, "%s", Value );
   }
@@ -989,6 +985,24 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
     p += sprintf(p, "%s%ld\r\n","rxPeakPower_100th_dB = ",tmp.rxPeakPower_100th_dB);
     p += sprintf(p, "%s%ld\r\n","txAvgPower_100th_dB = ",tmp.txAvgPower_100th_dB);
     p += sprintf(p, "%s%ld\r\n","rxAvgPower_100th_dB = ",tmp.rxAvgPower_100th_dB);
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdEnable )
+  {
+    uint8_t tmp;
+
+    if((status = Adrv9001_GetTxDpdEnable(Adrv9001, ADI_CHANNEL_1, (bool)tmp)) != 0)
+    	return status;
+
+    sprintf(Value, "%hhu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdEnable )
+  {
+    uint8_t tmp;
+
+    if((status = Adrv9001_GetTxDpdEnable(Adrv9001, ADI_CHANNEL_2, (bool)tmp)) != 0)
+    	return status;
+
+    sprintf(Value, "%hhu", tmp);
   }
   else if( Id == Adrv9001ParamId_Rx1InputPort )
   {

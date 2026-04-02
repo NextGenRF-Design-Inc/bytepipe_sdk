@@ -552,14 +552,14 @@ static void Cli_RxTask( cli_t *Instance )
      {
        /* Save character */
    //    if ( isprint((uint8_t)c) && (Instance->CmdBufLen < Instance->CmdBufSize) )
-       if ( Instance->CmdBufLen < Instance->CmdBufSize )
+       if ( Instance->CmdBufLen < (Instance->CmdBufSize - 1) )
        {
          /* Echo */
          const char str[2] = {c,0};
 
          Cli_Printf(Instance, str, Instance->CallbackRef );
          Instance->CmdBuf[Instance->CmdBufLen++] = c;
-         Instance->CmdBuf[Instance->CmdBufLen + 1] = 0;
+         Instance->CmdBuf[Instance->CmdBufLen] = 0;// + 1] = 0;
 
        }
      }

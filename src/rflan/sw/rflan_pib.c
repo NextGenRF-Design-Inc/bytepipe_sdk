@@ -45,9 +45,9 @@ static rflan_params_t  RflanPibDefaults =
   .PibSize        = sizeof(rflan_params_t),
 
 #ifdef RFLAN_LWIP_ENABLE
-  .IpAddr         =  "192.168.1.12",
-  .IpMask         =  "255.255.255.0",
-  .IpGwAddr       =  "192.168.1.1",
+  .IpAddr         =  "192.168.001.012",
+  .IpMask         =  "255.255.255.000",
+  .IpGwAddr       =  "192.168.001.001",
   .LwipEnable     = 1,
 #endif
 
