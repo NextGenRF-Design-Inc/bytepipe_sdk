@@ -988,21 +988,21 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
   }
   else if( Id == Adrv9001ParamId_Tx1DpdEnable )
   {
-    uint8_t tmp;
-
-    if((status = Adrv9001_GetTxDpdEnable(Adrv9001, ADI_CHANNEL_1, (bool)tmp)) != 0)
+	//bool tmp;
+	adi_adrv9001_DpdInitCfg_t tmp;
+    if((status = Adrv9001_GetTxDpdEnable(Adrv9001, ADI_CHANNEL_1, &tmp)) != 0)
     	return status;
 
-    sprintf(Value, "%hhu", tmp);
+    sprintf(Value, "%hhu", (uint8_t)tmp.enable);
   }
   else if( Id == Adrv9001ParamId_Tx2DpdEnable )
   {
-    uint8_t tmp;
-
-    if((status = Adrv9001_GetTxDpdEnable(Adrv9001, ADI_CHANNEL_2, (bool)tmp)) != 0)
+    //bool tmp;
+    adi_adrv9001_DpdInitCfg_t tmp;
+    if((status = Adrv9001_GetTxDpdEnable(Adrv9001, ADI_CHANNEL_2, &tmp)) != 0)
     	return status;
 
-    sprintf(Value, "%hhu", tmp);
+    sprintf(Value, "%hhu", (uint8_t)tmp.enable);
   }
   else if( Id == Adrv9001ParamId_Rx1InputPort )
   {
