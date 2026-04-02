@@ -69,28 +69,32 @@ static int32_t RflanPib_SetVirtualByNameByString( rflan_pib_t *Instance, char *n
 
 #ifdef VERSA_CLOCK5_ENABLE
 
-  else if( strcmp( name, "GtrClockFreq0") == 0 )
+  //else if( strcmp( name, "GtrClockFreq0") == 0 )
+  else if( strstr( "GtrClockFreq0",name ) != NULL )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
     status = VersaClock5_SetClockFreq(Instance->VersaClock5, 0, tmp);
   }
 
-  else if( strcmp( &name[3], "GtrClockFreq1") == 0 )
+  //else if( strcmp( &name[3], "GtrClockFreq1") == 0 )
+  else if( strstr( "GtrClockFreq1",name ) != NULL  )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
     status = VersaClock5_SetClockFreq(Instance->VersaClock5, 1, tmp);
   }
 
-  else if( strcmp( &name[3], "GtrClockFreq2") == 0 )
+  //else if( strcmp( &name[3], "GtrClockFreq2") == 0 )
+  else if( strstr( "GtrClockFreq2",name ) != NULL  )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
     status = VersaClock5_SetClockFreq(Instance->VersaClock5, 2, tmp);
   }
 
-  else if( strcmp( &name[3], "GtrClockFreq3") == 0 )
+  //else if( strcmp( &name[3], "GtrClockFreq3") == 0 )
+  else if( strstr( "GtrClockFreq3",name ) != NULL  )
   {
     uint32_t tmp;
     Pib_StrToNum(str, Instance->Pib.Def[id].var_type, &tmp);
