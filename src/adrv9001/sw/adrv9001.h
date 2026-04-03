@@ -486,7 +486,7 @@ int32_t Adrv9001_LoadRxChannelFilter    ( adrv9001_t *Instance, adi_common_Chann
 int32_t Adrv9001_SetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value);
 int32_t Adrv9001_GetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value);
 int32_t Adrv9001_SetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value );
-int32_t Adrv9001_GetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value );
+int32_t Adrv9001_GetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value );
 
 int32_t Adrv9001_SetGainControlMode     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e mode );
 int32_t Adrv9001_GetGainControlMode     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e *mode );

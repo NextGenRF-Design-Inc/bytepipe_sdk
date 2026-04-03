@@ -328,6 +328,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     Adrv9001_SetTxExternalPathDelay( Adrv9001, ADI_CHANNEL_1, tmp);
     status = (int32_t)Adrv9001Status_Success;
   }
+  /*
   else if( Id == Adrv9001ParamId_Tx1ExternalLoopbackPower)
   {
     int16_t tmp;
@@ -335,6 +336,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     Adrv9001_SetTxExternalLoopbackPower( Adrv9001, ADI_CHANNEL_1, tmp);
     status = (int32_t)Adrv9001Status_Success;
   }
+  */
   else if( Id == Adrv9001ParamId_Tx1DpdNumberofSamples)
   {
     uint32_t tmp;
@@ -370,6 +372,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     Adrv9001_SetTxDpdDetectionPeakThreshold( Adrv9001, ADI_CHANNEL_1, tmp);
     status = (int32_t)Adrv9001Status_Success;
   }
+
   else if( Id == Adrv9001ParamId_Tx2ExternalPathDelay)
   {
     uint32_t tmp;
@@ -377,6 +380,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     Adrv9001_SetTxExternalPathDelay( Adrv9001, ADI_CHANNEL_2, tmp);
     status = (int32_t)Adrv9001Status_Success;
   }
+  /*
   else if( Id == Adrv9001ParamId_Tx2ExternalLoopbackPower)
   {
     int16_t tmp;
@@ -384,6 +388,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     Adrv9001_SetTxExternalLoopbackPower( Adrv9001, ADI_CHANNEL_2, tmp);
     status = (int32_t)Adrv9001Status_Success;
   }
+ */
   else if( Id == Adrv9001ParamId_Tx2DpdNumberofSamples)
   {
     uint32_t tmp;
@@ -419,6 +424,7 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     Adrv9001_SetTxDpdDetectionPeakThreshold( Adrv9001, ADI_CHANNEL_2, tmp);
     status = (int32_t)Adrv9001Status_Success;
   }
+
   else if( Id == Adrv9001ParamId_Tx1SsiEnableDly)
   {
 	uint32_t tmp;
@@ -678,19 +684,19 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
   }
   else if( Id == Adrv9001ParamId_TxRx1SsiLoopBack )
   {
-    bool tmp;
+	uint8_t tmp;
     if((status = Adrv9001_GetTxToRxLoopBack( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
       return status;
 
-    sprintf(Value, "%s", tmp? "True" : "False");
+    sprintf(Value, "%hhu", (uint8_t)tmp );
   }
   else if( Id == Adrv9001ParamId_TxRx2SsiLoopBack )
   {
-    bool tmp;
+	uint8_t tmp;
     if((status = Adrv9001_GetTxToRxLoopBack( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
       return status;
 
-    sprintf(Value, "%s", tmp? "True" : "False");
+    sprintf(Value, "%hhu", (uint8_t)tmp );
   }
   else if( Id == Adrv9001ParamId_FirmwareVersion )
   {

@@ -470,12 +470,12 @@ int32_t Adrv9001_SetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumb
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_GetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value )
+int32_t Adrv9001_GetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value )
 {
   if( channel == ADI_CHANNEL_1 )
-    *Value = Instance->Tx1ToRx1Loopback;
+    *Value = (uint8_t)Instance->Tx1ToRx1Loopback;
   else
-    *Value = Instance->Tx2ToRx2Loopback;
+    *Value = (uint8_t)Instance->Tx2ToRx2Loopback;
 
   return Adrv9001Status_Success;
 }
@@ -844,6 +844,7 @@ int32_t Adrv9001_SetTxExternalPathDelay( adrv9001_t *Instance, adi_common_Channe
   return Adrv9001Status_Success;
 }
 
+/*
 int32_t Adrv9001_SetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int16_t Power)
 {
   //todo: put DpdExternalLoopbackPower into a revised adrv9001_init object so it can be incorporated during a Adrv9001_LoadNewProfile call
@@ -861,36 +862,94 @@ int32_t Adrv9001_SetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_Ch
 
   return Adrv9001Status_Success;
 }
+*/
 
+int32_t Adrv9001_SetDpdConfigure(adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdCfg_t *dpdConfig)
+{
+	int32_t status;
+	adi_adrv9001_Device_t *Adrv9001Device = &Instance->Device;
+
+	//Enter Calibrated Mode
+	adi_common_Port_e port = ADI_TX;
+
+	adi_adrv9001_ChannelState_e State;
+	if( adi_adrv9001_Radio_Channel_State_Get( Adrv9001Device, port, channel, &State ) != 0)
+	  return Adrv9001Status_ReadErr;
+
+	adi_adrv9001_ChannelEnableMode_e mode;
+	if(adi_adrv9001_Radio_ChannelEnableMode_Get( Adrv9001Device, port, channel, &mode) != 0)
+	  return Adrv9001Status_ReadErr;
+
+	if( mode == ADI_ADRV9001_PIN_MODE )
+	{
+	  /* Set SPI Mode */
+	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(Adrv9001Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+	    return Adrv9001Status_WriteErr;
+	}
+
+	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+	if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+	{
+	  if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+	    return status;
+    }
+
+	status = adi_adrv9001_dpd_Configure(Adrv9001Device, channel, dpdConfig);
+
+	//Exit Calibrated Mode
+	if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+	if(mode == ADI_ADRV9001_PIN_MODE)
+	{
+	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+	    return Adrv9001Status_WriteErr;
+	}
+
+	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+	{
+	  if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+	    return status;
+	}
+	return status;
+}
 int32_t Adrv9001_SetTxDpdNumberofSamples( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t SampleCnt)
 {
   int32_t status;
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdCfg.numberOfSamples = SampleCnt;
-    if( Adrv9001Profile.Tx1DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Adrv9001Profile.Tx1DpdCfg);
-    }
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdCfg.numberOfSamples = SampleCnt;
-    if( Adrv9001Profile.Tx2DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
-    }
-  }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.numberOfSamples = SampleCnt;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+	return status;
+
   return status;
 }
 
 int32_t Adrv9001_SetTxDpdRxTxNormalizationLowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.rxTxNormalizationLowerThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+  	return status;
+  /*
   if(channel == ADI_CHANNEL_1)
   {
     Adrv9001Profile.Tx1DpdCfg.rxTxNormalizationLowerThreshold = Threshold;
@@ -907,16 +966,23 @@ int32_t Adrv9001_SetTxDpdRxTxNormalizationLowerThreshold( adrv9001_t *Instance, 
       status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
     }
   }
-
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
   */
+
   return status;
 }
 int32_t Adrv9001_SetTxDpdRxTxNormalizationUpperThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.rxTxNormalizationUpperThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+    return status;
+  /*
   if(channel == ADI_CHANNEL_1)
   {
     Adrv9001Profile.Tx1DpdCfg.rxTxNormalizationUpperThreshold = Threshold;
@@ -933,16 +999,24 @@ int32_t Adrv9001_SetTxDpdRxTxNormalizationUpperThreshold( adrv9001_t *Instance, 
       status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
     }
   }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
   */
+
   return status;
 }
 
 int32_t Adrv9001_SetTxDpdDetectionPowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.detectionPowerThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+    return status;
+  /*
   if(channel == ADI_CHANNEL_1)
   {
     Adrv9001Profile.Tx1DpdCfg.detectionPowerThreshold = Threshold;
@@ -959,16 +1033,24 @@ int32_t Adrv9001_SetTxDpdDetectionPowerThreshold( adrv9001_t *Instance, adi_comm
       status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
     }
   }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
   */
+
   return status;
 }
 
 int32_t Adrv9001_SetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.detectionPeakThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+    return status;
+  /*
   if(channel == ADI_CHANNEL_1)
   {
     Adrv9001Profile.Tx1DpdCfg.detectionPeakThreshold = Threshold;
@@ -985,9 +1067,6 @@ int32_t Adrv9001_SetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_commo
       status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
     }
   }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
   */
 
   
