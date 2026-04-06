@@ -126,6 +126,12 @@ Please review the video found below for additional information.
 
 [![generating_rflan_profile](docs/generating_rflan_profile.png)](https://youtu.be/SMOLgKAgsfg)
 
+The method of updating the TES profile has changed to allow for users to enable/disable DPD. The "enable" profile is entered first followed by the "disable" profile. This is illustrated in the image below. 
+
+![dual_profile](docs/dual_profile.png)
+
+Currently, the second profile is loaded by the function named "Adrv9001_SetTxDpdEnable". If a user wishes to load a second profile for other reasons, they will need to modify the rflan source code. If the user has no need for a second profile, they will need to enter the same c99 file folder name twice.
+
 
 # Programming BytePipe RFLAN
 
