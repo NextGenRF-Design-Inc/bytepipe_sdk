@@ -330,7 +330,8 @@ int32_t Adrv9001_LoadDefaultProfile( adrv9001_t *Instance )
   /* Enable Logging */
   Instance->Device.common.error.logEnable = 1;
 
-  if((status = Instance->InitializeFn( &Instance->Device )) != 0)
+  //if((status = Instance->InitializeFn( &Instance->Device )) != 0)
+  if((status = Instance->InitializeFn( Instance)) != 0)
     return Adrv9001Status_ProfileInitErr;
 
   //usleep(1000);

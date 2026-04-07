@@ -105,17 +105,18 @@ profile_parse()
 	cp -r $inDir/configure*.h $outDir
 
 	#binary file upload (v29)
-  perl ../src/rflan/replace.pl $inDir/initialize.c $outDir/initialize.c
+	arm_bin_size=$(wc -c < $inDir/arm_binary_STANDARD_BYTES_252.bin)
+	stream_bin_size=$(wc -c < $inDir/stream_binary_STANDARD_BYTES_252.bin)
+  perl ../src/rflan/replace.pl $inDir/initialize.c $outDir/initialize.c $arm_bin_size $stream_bin_size
 
 	sed -i '/printf/d' $outDir/*.c
 	sed -i '/getchar/d' $outDir/*.c
-	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
-	sed -i 's/int initialize(adi_fpga9001_Device_t \* fpga9001Device_0, adi_adrv9001_Device_t \* adrv9001Device_0)/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adrv9001_t \* adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_fpga9001_Device_t \* fpga9001Device_0, adi_adrv9001_Device_t \* adrv9001Device_0)/int initialize(adrv9001_t \* Instance)/g' $outDir/*
 	sed -i '/#include "adi_fpga9001/d' $outDir/*
 	sed -i '/error_code = adi_fpga9001/d' $outDir/*
 	sed -i '/linux_uio_init/d' $outDir/*
   
-  sed -i '1i #include "FreeRTOS.h"' $outDir/initialize.c
 	sed -i '1i #include "adrv9001.h"' $outDir/initialize*
 	sed -i '1i #include "adrv9001.h"' $outDir/configure*
 	sed -i 's/, adi_fpga9001_Device_t \* fpga9001Device_0//g' $outDir/*
