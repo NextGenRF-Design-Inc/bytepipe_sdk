@@ -59,9 +59,9 @@ typedef struct {
   uint32_t            PibSize;              ///< Length of PIB in bytes
   uint32_t            FwVer;                ///< Firmware Version
   uint32_t            HwVer;                ///< Hardware Version
-  char                IpAddr[20];           ///< IP Address
-  char                IpMask[20];           ///< IP Mask
-  char                IpGwAddr[20];         ///< IP Gateway Address
+  char                IpAddr[PIB_NAME_SIZE]; //[20];   ///< IP Address
+  char                IpMask[PIB_NAME_SIZE]; //[20];   ///< IP Mask
+  char                IpGwAddr[PIB_NAME_SIZE]; //[20]; ///< IP Gateway Address
   uint8_t             LwipEnable;           ///< Enable LWIP
 } rflan_params_t;
 

@@ -104,14 +104,17 @@ profile_parse()
 	cp -r $inDir/configure*.c $outDir
 	cp -r $inDir/configure*.h $outDir
 
+	#binary file upload (v29)
+  perl ../src/rflan/replace.pl $inDir/initialize.c $outDir/initialize.c
+
 	sed -i '/printf/d' $outDir/*.c
 	sed -i '/getchar/d' $outDir/*.c
-	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
-	sed -i 's/int initialize(adi_fpga9001_Device_t \* fpga9001Device_0, adi_adrv9001_Device_t \* adrv9001Device_0)/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adrv9001_t \* adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_fpga9001_Device_t \* fpga9001Device_0, adi_adrv9001_Device_t \* adrv9001Device_0)/int initialize(adrv9001_t \* Instance)/g' $outDir/*
 	sed -i '/#include "adi_fpga9001/d' $outDir/*
 	sed -i '/error_code = adi_fpga9001/d' $outDir/*
 	sed -i '/linux_uio_init/d' $outDir/*
-
+  
 	sed -i '1i #include "adrv9001.h"' $outDir/initialize*
 	sed -i '1i #include "adrv9001.h"' $outDir/configure*
 	sed -i 's/, adi_fpga9001_Device_t \* fpga9001Device_0//g' $outDir/*
@@ -124,6 +127,8 @@ profile_parse()
   
   for f in $outDir/* ; do mv -- "$outDir/$(basename ${f})" "$outDir/${name}_$(basename ${f})" ; done  
   
+  
+
   sed -i "s/initialize/${name}_initialize/g" $outDir/*
   sed -i "s/init_2/${name}_init_2/g" $outDir/*
   sed -i "s/calibrate/${name}_calibrate/g" $outDir/*
@@ -139,7 +144,7 @@ profile_parse()
   sed -i "s/_CONFIGURE_H_/_${name^^}_CONFIGURE_H_/g" $outDir/*   
   sed -i "s/_CALIBRATE_H_/_${name^^}_CALIBRATE_H_/g" $outDir/*     
 
-
+  
   
 }
 

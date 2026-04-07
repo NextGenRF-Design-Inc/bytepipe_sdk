@@ -330,7 +330,8 @@ int32_t Adrv9001_LoadDefaultProfile( adrv9001_t *Instance )
   /* Enable Logging */
   Instance->Device.common.error.logEnable = 1;
 
-  if((status = Instance->InitializeFn( &Instance->Device )) != 0)
+  //if((status = Instance->InitializeFn( &Instance->Device )) != 0)
+  if((status = Instance->InitializeFn( Instance)) != 0)
     return Adrv9001Status_ProfileInitErr;
 
   //usleep(1000);
@@ -470,12 +471,12 @@ int32_t Adrv9001_SetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumb
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_GetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value )
+int32_t Adrv9001_GetTxToRxLoopBack( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value )
 {
   if( channel == ADI_CHANNEL_1 )
-    *Value = Instance->Tx1ToRx1Loopback;
+    *Value = (uint8_t)Instance->Tx1ToRx1Loopback;
   else
-    *Value = Instance->Tx2ToRx2Loopback;
+    *Value = (uint8_t)Instance->Tx2ToRx2Loopback;
 
   return Adrv9001Status_Success;
 }
@@ -592,22 +593,16 @@ int32_t Adrv9001_GetSsiClockDelay( adrv9001_t *Instance, adi_common_Port_e port,
 
 int32_t Adrv9001_SetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_coefficients_Set(&Instance->Device,channel,coefficients)) != 0)
-    return status;
+  return adi_adrv9001_dpd_coefficients_Set(&Instance->Device,channel,coefficients);
 }
 
 int32_t Adrv9001_GetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_coefficients_Get(&Instance->Device,channel,coefficients)) != 0)
-    return status;
+  return adi_adrv9001_dpd_coefficients_Get(&Instance->Device,channel,coefficients);
 }
 int32_t Adrv9001_ReadDpdCaptureData( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t iData_tx[], int32_t qData_tx[], int32_t iData_elb[], int32_t qData_elb[], uint32_t length, bool autoIncrement)
 {
-  int32_t status = 0;
-  if((status = adi_adrv9001_dpd_CaptureData_Read( &Instance->Device, channel ,iData_tx,qData_tx,iData_elb, qData_elb,length,autoIncrement )) != 0)
-    return status;
+  return adi_adrv9001_dpd_CaptureData_Read( &Instance->Device, channel ,iData_tx,qData_tx,iData_elb, qData_elb,length,autoIncrement );
 }
 
 int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdChannelStatus_t* dpdChannelStatus )
@@ -669,20 +664,98 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 
   return Adrv9001Status_Success;
 }
+int32_t Adrv9001_SetTxDpdClgcTrackingEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
+{
+  int32_t status;
+  adi_common_Port_e port = ADI_TX;
+  adi_adrv9001_Device_t *adrv9001Device = (adi_adrv9001_Device_t *)&Instance->Device;
+
+  adi_adrv9001_ChannelState_e State;
+  if( adi_adrv9001_Radio_Channel_State_Get( adrv9001Device, port, channel, &State ) != 0)
+	return Adrv9001Status_ReadErr;
+
+  adi_adrv9001_ChannelEnableMode_e mode;
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( adrv9001Device, port, channel, &mode) != 0)
+	return Adrv9001Status_ReadErr;
+
+  if( mode == ADI_ADRV9001_PIN_MODE )
+  {
+	/* Set SPI Mode */
+	if(adi_adrv9001_Radio_ChannelEnableMode_Set(adrv9001Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+	  return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+	if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  int32_t error_code = 0;
+  bool isEnabled = false;
+  adi_adrv9001_TrackingCals_t trackingCals;
+  error_code = adi_adrv9001_cals_Tracking_Get(adrv9001Device, &trackingCals);
+  ADI_HANDLE_ERROR(error_code, &adrv9001Device);
+
+  if(channel == ADI_CHANNEL_1)
+  {
+    isEnabled = ((trackingCals.chanTrackingCalMask[0] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+    if( (isEnabled & !Enable) || (!isEnabled & Enable) )
+    {
+      trackingCals.chanTrackingCalMask[0] ^= ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC;
+    }
+  }
+  else if(channel == ADI_CHANNEL_2)
+  {
+    isEnabled = ((trackingCals.chanTrackingCalMask[1] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+    if( (isEnabled & !Enable) || (!isEnabled & Enable) )
+    {
+      trackingCals.chanTrackingCalMask[1] ^= ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC;
+    }
+  }
+  error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device, &trackingCals);
+  ADI_HANDLE_ERROR(error_code, &adrv9001Device);
+
+  if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  if(mode == ADI_ADRV9001_PIN_MODE)
+  {
+	if(adi_adrv9001_Radio_ChannelEnableMode_Set(adrv9001Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+	  return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+	if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  return Adrv9001Status_Success;
+}
+
 
 int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
 {
 
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdInitCfg.enable = Enable;
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdInitCfg.enable = Enable;
-  }
+  int32_t error_code = 0;
 
-  //if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
+  /* Dpd Pause */
+  /*
+  error_code = Adrv9001_SetTxDpdClgcTrackingEnable(Instance, channel, Enable );
+  if(error_code != 0)
+	  return error_code;
+  */
+
   if( Enable )
   {
     if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
@@ -698,12 +771,9 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_GetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Enable )
+int32_t Adrv9001_GetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdInitCfg_t *dpdConfig)
 {
-  adi_adrv9001_DpdInitCfg_t dpdConfig;
-  int32_t status = adi_adrv9001_dpd_Initial_Inspect(&Instance->Device, channel,&dpdConfig);
-  Enable = &dpdConfig.enable;
-  return status;
+  return adi_adrv9001_dpd_Initial_Inspect(&Instance->Device, channel,dpdConfig);
 }
 
 int32_t Adrv9001_SetTxExternalPathDelay( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Delay)
@@ -747,10 +817,6 @@ int32_t Adrv9001_SetTxExternalPathDelay( adrv9001_t *Instance, adi_common_Channe
   }
 
   status = adi_adrv9001_cals_ExternalPathDelay_Set(&Instance->Device, channel, Delay);
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
 
   if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
   {
@@ -772,151 +838,138 @@ int32_t Adrv9001_SetTxExternalPathDelay( adrv9001_t *Instance, adi_common_Channe
   return Adrv9001Status_Success;
 }
 
-int32_t Adrv9001_SetTxExternalLoopbackPower( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int16_t Power)
+int32_t Adrv9001_SetDpdConfigure(adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdCfg_t *dpdConfig)
 {
-  //todo: put DpdExternalLoopbackPower into a revised adrv9001_init object so it can be incorporated during a Adrv9001_LoadNewProfile call
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdExternalLoopbackPower = Power;
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdExternalLoopbackPower = Power;
-  }
-  //if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
-  //if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    //return Adrv9001Status_ProfileReloadErr;
+	int32_t status;
+	adi_adrv9001_Device_t *Adrv9001Device = &Instance->Device;
 
-  return Adrv9001Status_Success;
+	//Enter Calibrated Mode
+	adi_common_Port_e port = ADI_TX;
+
+	adi_adrv9001_ChannelState_e State;
+	if( adi_adrv9001_Radio_Channel_State_Get( Adrv9001Device, port, channel, &State ) != 0)
+	  return Adrv9001Status_ReadErr;
+
+	adi_adrv9001_ChannelEnableMode_e mode;
+	if(adi_adrv9001_Radio_ChannelEnableMode_Get( Adrv9001Device, port, channel, &mode) != 0)
+	  return Adrv9001Status_ReadErr;
+
+	if( mode == ADI_ADRV9001_PIN_MODE )
+	{
+	  /* Set SPI Mode */
+	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(Adrv9001Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+	    return Adrv9001Status_WriteErr;
+	}
+
+	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+	if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+	{
+	  if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+	    return status;
+    }
+
+	status = adi_adrv9001_dpd_Configure(Adrv9001Device, channel, dpdConfig);
+
+	//Exit Calibrated Mode
+	if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
+	}
+
+	if(mode == ADI_ADRV9001_PIN_MODE)
+	{
+	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+	    return Adrv9001Status_WriteErr;
+	}
+
+	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+	{
+	  if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+	    return status;
+	}
+	return status;
 }
-
 int32_t Adrv9001_SetTxDpdNumberofSamples( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t SampleCnt)
 {
   int32_t status;
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdCfg.numberOfSamples = SampleCnt;
-    if( Adrv9001Profile.Tx1DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Adrv9001Profile.Tx1DpdCfg);
-    }
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdCfg.numberOfSamples = SampleCnt;
-    if( Adrv9001Profile.Tx2DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
-    }
-  }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.numberOfSamples = SampleCnt;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+	return status;
+
   return status;
 }
 
 int32_t Adrv9001_SetTxDpdRxTxNormalizationLowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdCfg.rxTxNormalizationLowerThreshold = Threshold;
-    if( Adrv9001Profile.Tx1DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Adrv9001Profile.Tx1DpdCfg);
-    }
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdCfg.rxTxNormalizationLowerThreshold = Threshold;
-    if( Adrv9001Profile.Tx2DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
-    }
-  }
+  adi_adrv9001_DpdCfg_t dpdConfig;
 
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.rxTxNormalizationLowerThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+  	return status;
+
   return status;
 }
 int32_t Adrv9001_SetTxDpdRxTxNormalizationUpperThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdCfg.rxTxNormalizationUpperThreshold = Threshold;
-    if( Adrv9001Profile.Tx1DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Adrv9001Profile.Tx1DpdCfg);
-    }
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdCfg.rxTxNormalizationUpperThreshold = Threshold;
-    if( Adrv9001Profile.Tx2DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
-    }
-  }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.rxTxNormalizationUpperThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+    return status;
+
   return status;
 }
 
 int32_t Adrv9001_SetTxDpdDetectionPowerThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdCfg.detectionPowerThreshold = Threshold;
-    if( Adrv9001Profile.Tx1DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Adrv9001Profile.Tx1DpdCfg);
-    }
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdCfg.detectionPowerThreshold = Threshold;
-    if( Adrv9001Profile.Tx2DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
-    }
-  }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.detectionPowerThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+    return status;
+
   return status;
 }
 
 int32_t Adrv9001_SetTxDpdDetectionPeakThreshold( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint32_t Threshold)
 {
   int32_t status;
-  if(channel == ADI_CHANNEL_1)
-  {
-    Adrv9001Profile.Tx1DpdCfg.detectionPeakThreshold = Threshold;
-    if( Adrv9001Profile.Tx1DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_1, &Adrv9001Profile.Tx1DpdCfg);
-    }
-  }
-  else if(channel == ADI_CHANNEL_2)
-  {
-    Adrv9001Profile.Tx2DpdCfg.detectionPeakThreshold = Threshold;
-    if( Adrv9001Profile.Tx2DpdInitCfg.enable == true)
-    {
-      status = adi_adrv9001_dpd_Configure(&Instance->Device, ADI_CHANNEL_2, &Adrv9001Profile.Tx2DpdCfg);
-    }
-  }
-  /*
-  if( Adrv9001_LoadNewProfile(Instance,&Adrv9001Profile) !=0 )
-    return Adrv9001Status_ProfileReloadErr;
-  */
+  adi_adrv9001_DpdCfg_t dpdConfig;
+
+  if((status = adi_adrv9001_dpd_Inspect(&Instance->Device, channel, &dpdConfig)) != 0)
+    return status;
+
+  dpdConfig.detectionPeakThreshold = Threshold;
+
+  if((status = Adrv9001_SetDpdConfigure(Instance, channel, &dpdConfig)) != 0)
+    return status;
 
   
   return status;
@@ -1339,10 +1392,6 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
     return status;
 
   usleep(1000);
-
-  /* Construct Profile Obj */
-  //if( Adrv9001_ConstructProfile(Instance, &Adrv9001Profile) != 0)
-     //return Adrv9001Status_ProfileErr;
 
   if( Init->HopIrqId != 0x00 )
   {
@@ -2519,12 +2568,6 @@ int32_t Adrv9001_LogWrite(void *devHalCfg, uint32_t logLevel, const char *commen
 
 int32_t Adrv9001_DelayUs(void *devHalCfg, uint32_t time_us)
 {
-  //	while( time_us > 1000 )
-  //	{
-  //	  vTaskDelay( portTICK_PERIOD_MS );
-  //
-  //	  time_us -= 1000;
-  //	}
   usleep(time_us);
 
   return Adrv9001Status_Success;

@@ -23,9 +23,12 @@
 
 
 #include "rf1_initialize.h"
-int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
+int rf1_initialize(adrv9001_t * Instance)
 {
+
 	int32_t error_code = 0;
+	adi_adrv9001_Device_t * adrv9001Device_0 = &Instance->Device;
+
 
 
 	/* Begin region  IAdrv9001BoardEe.Initialize(initializationParameters, phase) */
@@ -50,31 +53,45 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	
 	error_code = adi_adrv9001_arm_AhbSpiBridge_Enable(adrv9001Device_0);
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);	
 	
+	FRESULT fr;
+	UINT br; // Bytes read
+	FIL stream_binary_STANDARD_BYTES_252_FILE;
+	int64_t stream_binary_STANDARD_BYTES_252_FILE_SIZE;
 	uint8_t* stream_binary_STANDARD_BYTES_252;
-	FILE *stream_binary_STANDARD_BYTES_252_FILE = fopen("stream_binary_STANDARD_BYTES_252.bin", "rb");
-	fseek(stream_binary_STANDARD_BYTES_252_FILE, 0, SEEK_END);
-	int64_t stream_binary_STANDARD_BYTES_252_FILE_SIZE = ftell(stream_binary_STANDARD_BYTES_252_FILE);
-	fseek(stream_binary_STANDARD_BYTES_252_FILE, 0, SEEK_SET);
-	stream_binary_STANDARD_BYTES_252 = (uint8_t *) malloc(stream_binary_STANDARD_BYTES_252_FILE_SIZE * sizeof(uint8_t));
-	fread(stream_binary_STANDARD_BYTES_252, sizeof(uint8_t), stream_binary_STANDARD_BYTES_252_FILE_SIZE, stream_binary_STANDARD_BYTES_252_FILE);
-	fclose(stream_binary_STANDARD_BYTES_252_FILE);
-	
-	error_code = adi_adrv9001_Stream_Image_Write(adrv9001Device_0, 0, stream_binary_STANDARD_BYTES_252, 32768, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+	fr = f_open(&stream_binary_STANDARD_BYTES_252_FILE, "stream_binary_STANDARD_BYTES_252.bin", FA_OPEN_EXISTING | FA_READ);
+	if( fr == FR_OK )
+	{
+		stream_binary_STANDARD_BYTES_252_FILE_SIZE = f_size(&stream_binary_STANDARD_BYTES_252_FILE);
+	    stream_binary_STANDARD_BYTES_252 = (uint8_t*) Instance->Malloc(sizeof(uint8_t) * stream_binary_STANDARD_BYTES_252_FILE_SIZE);
+	    if (stream_binary_STANDARD_BYTES_252 != NULL) {
+	        f_read(&stream_binary_STANDARD_BYTES_252_FILE, stream_binary_STANDARD_BYTES_252, stream_binary_STANDARD_BYTES_252_FILE_SIZE, &br);
+	    }
+	    f_close(&stream_binary_STANDARD_BYTES_252_FILE);
+	}
+
+	error_code = adi_adrv9001_Stream_Image_Write(adrv9001Device_0, 0, stream_binary_STANDARD_BYTES_252, stream_binary_STANDARD_BYTES_252_FILE_SIZE, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	Instance->Free(stream_binary_STANDARD_BYTES_252);	
 	
+	FIL arm_binary_STANDARD_BYTES_252_FILE;
+	int64_t arm_binary_STANDARD_BYTES_252_FILE_SIZE;
 	uint8_t* arm_binary_STANDARD_BYTES_252;
-	FILE *arm_binary_STANDARD_BYTES_252_FILE = fopen("arm_binary_STANDARD_BYTES_252.bin", "rb");
-	fseek(arm_binary_STANDARD_BYTES_252_FILE, 0, SEEK_END);
-	int64_t arm_binary_STANDARD_BYTES_252_FILE_SIZE = ftell(arm_binary_STANDARD_BYTES_252_FILE);
-	fseek(arm_binary_STANDARD_BYTES_252_FILE, 0, SEEK_SET);
-	arm_binary_STANDARD_BYTES_252 = (uint8_t *) malloc(arm_binary_STANDARD_BYTES_252_FILE_SIZE * sizeof(uint8_t));
-	fread(arm_binary_STANDARD_BYTES_252, sizeof(uint8_t), arm_binary_STANDARD_BYTES_252_FILE_SIZE, arm_binary_STANDARD_BYTES_252_FILE);
-	fclose(arm_binary_STANDARD_BYTES_252_FILE);
-	
-	error_code = adi_adrv9001_arm_Image_Write(adrv9001Device_0, 0, arm_binary_STANDARD_BYTES_252, 310272, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
+	fr = f_open(&arm_binary_STANDARD_BYTES_252_FILE, "arm_binary_STANDARD_BYTES_252.bin", FA_OPEN_EXISTING | FA_READ);
+	if( fr == FR_OK )
+	{
+		arm_binary_STANDARD_BYTES_252_FILE_SIZE = f_size(&arm_binary_STANDARD_BYTES_252_FILE);
+	    arm_binary_STANDARD_BYTES_252 = (uint8_t*) Instance->Malloc(sizeof(uint8_t) * arm_binary_STANDARD_BYTES_252_FILE_SIZE);
+	    if (arm_binary_STANDARD_BYTES_252 != NULL) {
+	        f_read(&arm_binary_STANDARD_BYTES_252_FILE, arm_binary_STANDARD_BYTES_252, arm_binary_STANDARD_BYTES_252_FILE_SIZE, &br);
+	    }
+	    f_close(&arm_binary_STANDARD_BYTES_252_FILE);
+	}
+
+	error_code = adi_adrv9001_arm_Image_Write(adrv9001Device_0, 0, arm_binary_STANDARD_BYTES_252, arm_binary_STANDARD_BYTES_252_FILE_SIZE, ADI_ADRV9001_ARM_SINGLE_SPI_WRITE_MODE_STANDARD_BYTES_252);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	Instance->Free(arm_binary_STANDARD_BYTES_252);
 	
 	error_code = adi_adrv9001_arm_Profile_Write(adrv9001Device_0, &rf1_init_2);
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
