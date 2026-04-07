@@ -4,7 +4,7 @@ use warnings;
 use File::Path qw(make_path);
 
 # 1. Define the file path
-my ($input_path, $output_path, $arm_bin_size, $stream_bin_size) = @ARGV;
+my ($input_path, $output_path) = @ARGV;
 
 
 # 2. Read the entire file into a single string

@@ -105,9 +105,7 @@ profile_parse()
 	cp -r $inDir/configure*.h $outDir
 
 	#binary file upload (v29)
-	arm_bin_size=$(wc -c < $inDir/arm_binary_STANDARD_BYTES_252.bin)
-	stream_bin_size=$(wc -c < $inDir/stream_binary_STANDARD_BYTES_252.bin)
-  perl ../src/rflan/replace.pl $inDir/initialize.c $outDir/initialize.c $arm_bin_size $stream_bin_size
+  perl ../src/rflan/replace.pl $inDir/initialize.c $outDir/initialize.c
 
 	sed -i '/printf/d' $outDir/*.c
 	sed -i '/getchar/d' $outDir/*.c
