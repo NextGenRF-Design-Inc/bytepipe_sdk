@@ -109,7 +109,7 @@ profile_parse()
 
 	sed -i '/printf/d' $outDir/*.c
 	sed -i '/getchar/d' $outDir/*.c
-	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adrv9001_t \* adrv9001Device_0)/g' $outDir/*
+	sed -i 's/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0.*/int initialize(adi_adrv9001_Device_t \* adrv9001Device_0)/g' $outDir/*
 	sed -i 's/int initialize(adi_fpga9001_Device_t \* fpga9001Device_0, adi_adrv9001_Device_t \* adrv9001Device_0)/int initialize(adrv9001_t \* Instance)/g' $outDir/*
 	sed -i '/#include "adi_fpga9001/d' $outDir/*
 	sed -i '/error_code = adi_fpga9001/d' $outDir/*

@@ -60,7 +60,12 @@ int rf2_initialize(adrv9001_t * Instance)
 	FIL stream_binary_STANDARD_BYTES_252_FILE;
 	int64_t stream_binary_STANDARD_BYTES_252_FILE_SIZE;
 	uint8_t* stream_binary_STANDARD_BYTES_252;
-	fr = f_open(&stream_binary_STANDARD_BYTES_252_FILE, "stream_binary_STANDARD_BYTES_252.bin", FA_OPEN_EXISTING | FA_READ);
+	char* stream_binary_PATH = Instance->Malloc(strlen(Instance->BasePath) + strlen("stream_binary_STANDARD_BYTES_252.bin") + 1);
+	if (stream_binary_PATH) {
+	    strcpy(stream_binary_PATH, Instance->BasePath);
+	    strcat(stream_binary_PATH, "stream_binary_STANDARD_BYTES_252.bin");
+	}
+	fr = f_open(&stream_binary_STANDARD_BYTES_252_FILE, stream_binary_PATH, FA_OPEN_EXISTING | FA_READ);
 	if( fr == FR_OK )
 	{
 		stream_binary_STANDARD_BYTES_252_FILE_SIZE = f_size(&stream_binary_STANDARD_BYTES_252_FILE);
@@ -78,7 +83,12 @@ int rf2_initialize(adrv9001_t * Instance)
 	FIL arm_binary_STANDARD_BYTES_252_FILE;
 	int64_t arm_binary_STANDARD_BYTES_252_FILE_SIZE;
 	uint8_t* arm_binary_STANDARD_BYTES_252;
-	fr = f_open(&arm_binary_STANDARD_BYTES_252_FILE, "arm_binary_STANDARD_BYTES_252.bin", FA_OPEN_EXISTING | FA_READ);
+	char* arm_binary_PATH = Instance->Malloc(strlen(Instance->BasePath) + strlen("arm_binary_STANDARD_BYTES_252.bin") + 1);
+	if (arm_binary_PATH) {
+	  strcpy(arm_binary_PATH, Instance->BasePath);
+	  strcat(arm_binary_PATH, "arm_binary_STANDARD_BYTES_252.bin");
+	}
+	fr = f_open(&arm_binary_STANDARD_BYTES_252_FILE, arm_binary_PATH, FA_OPEN_EXISTING | FA_READ);
 	if( fr == FR_OK )
 	{
 		arm_binary_STANDARD_BYTES_252_FILE_SIZE = f_size(&arm_binary_STANDARD_BYTES_252_FILE);

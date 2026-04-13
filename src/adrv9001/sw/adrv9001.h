@@ -193,7 +193,9 @@ typedef void (*adrv9001_rf_state_cb_t)( void *CallbackRef, adi_adrv9001_ChannelS
 
 typedef void (*adrv9001_hop_irq_cb_t)( void *CallbackRef );
 
-typedef int  (*adrv9001_initialize_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+typedef struct adrv9001_s adrv9001_t; //must be placed before "typedef int  (*adrv9001_initialize_fn_t)( adrv9001_t * Instance );"
+typedef struct adrv9001_init_s adrv9001_init_t; //must be placed before "typedef int  (*adrv9001_initialize_fn_t)( adrv9001_t * Instance );"
+typedef int  (*adrv9001_initialize_fn_t)( adrv9001_t * Instance );
 
 typedef int  (*adrv9001_calibrate_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
 typedef int  (*adrv9001_configure_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
@@ -295,11 +297,12 @@ typedef struct {
   uint32_t            Qdata  : 8;
 }adrv9001_ssi_port_delay_t;
 
-typedef struct {
+typedef struct adrv9001_s{
   adi_adrv9001_Device_t	                Device;            ///< ADI ADRV9001 Instance
   adi_adrv9001_Init_t                  *Params;            ///< ADRV9001 Parameters
   axi_adrv9001_t                        Axi;               ///< AXI Instance
   FIL                                   LogFil;            ///< Log File
+  char                                 *BasePath;              ///< File System Path
   uint8_t                               PendingReboot;     ///< ADRV9001 needs reboot due to profile changes
   uint8_t                               Initialized;
   XScuGic                              *IrqInstance;       ///< Processor Interrupt Controller Instance
@@ -352,7 +355,7 @@ typedef struct {
   uint32_t                              HwVer;
 }adrv9001_t;
 
-typedef struct {
+typedef struct adrv9001_init_s{
   adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
   adi_adrv9001_ChannelEnableMode_e      RxEnableMode;
   char                                 *LogFilename;           ///< Log Filename

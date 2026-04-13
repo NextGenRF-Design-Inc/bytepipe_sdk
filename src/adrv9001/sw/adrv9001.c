@@ -254,7 +254,7 @@ int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
 	/* Enable Logging */
 	Instance->Device.common.error.logEnable = 1;
 
-	if((status = Instance->InitializeFn_new( &Instance->Device )) != 0)
+	if((status = Instance->InitializeFn_new( Instance )) != 0)
 	  return Adrv9001Status_ProfileInitErr;
 
 	if((status = Instance->CalibrateFn_new( &Instance->Device )) != 0)
@@ -1171,11 +1171,11 @@ int32_t Adrv9001_SetTxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 
 int32_t Adrv9001_GetRxDataSrc( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adrv9001_rx_data_src_t *Value )
 {
-  bool Loopback;
+  uint8_t Loopback;
   if( Adrv9001_GetTxToRxLoopBack( Instance, channel, &Loopback ) != 0)
     return Adrv9001Status_ReadErr;
   
-  if(Loopback == true)
+  if((bool)Loopback == true)
   {
     *Value = Adrv9001RxDataSrc_TxLoopback;
   }
@@ -1343,16 +1343,7 @@ int32_t Adrv9001_Initialize( adrv9001_t *Instance, adrv9001_init_t *Init )
   Instance->Tx2DisableDly   = Init->Tx2DisableDly;
   Instance->Rx1SsiDisableDly= Init->Rx1SsiDisableDly;
   Instance->Rx2SsiDisableDly= Init->Rx2SsiDisableDly;
-
-
-
-
-
-
-
-
-
-
+  Instance->BasePath        = Init->BasePath;
 
 
   /* Assign Hal Reference to adrv9001 */
