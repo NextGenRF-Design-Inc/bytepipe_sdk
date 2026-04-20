@@ -94,13 +94,7 @@
 #define ADRV9001_TEST_MODE_PATTERN        (0xABCDABCD)
 #define DPD_MAX_SAMPLES                 (4096)
 //extern adi_adrv9001_Init_t initialize_init_8;
-/*
-typedef struct
-{
-	uint8_t CurrentChunk;
-	uint8_t ChunkTotal;
-}bychunks_t;
-*/
+
 /**
 * \brief Code indicated status of request
 */
@@ -284,9 +278,6 @@ typedef struct {
   adi_adrv9001_TrackingCals_t                 TrackingCals;
 }adrv9001_profile_t;
 
-//typedef int  (*adrv9001_initialize_new_fn_t)( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance );
-//typedef int  (*adrv9001_configure_new_fn_t) ( adrv9001_t *Instance, adrv9001_profile_t *ProfileInstance );
-//typedef int  (*adrv9001_calibrate_new_fn_t) ( adrv9001_t *Instance);
 /**
 ** SSI Delay
 */

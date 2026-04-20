@@ -341,7 +341,7 @@ static void Adrv9001Cli_ReadDpdCoefficients(cli_t *CliInstance, const char *cmd,
   }
 
   Cli_Printf(CliInstance,"DPD coefficients ( region %u ): ",DpdCoeffs.region);
-  for(int i = 0; i < ADI_ADRV9001_DPD_NUM_COEFFICIENTS-2; i++)
+  for(int i = 0; i < ADI_ADRV9001_DPD_NUM_COEFFICIENTS-1; i++)
   {
     Cli_Printf(CliInstance,"%ld,",DpdCoeffs.coefficients[i]);
   }
@@ -358,10 +358,10 @@ static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, 
   int32_t status = 0;
   uint32_t Length;
 
-  static int32_t iData_tx[DPD_MAX_SAMPLES+1] = {0};
-  static int32_t qData_tx[DPD_MAX_SAMPLES+1] = {0};
-  static int32_t iData_elb[DPD_MAX_SAMPLES+1] = {0};
-  static int32_t qData_elb[DPD_MAX_SAMPLES+1] = {0};
+  static int32_t iData_tx[DPD_MAX_SAMPLES] = {0};
+  static int32_t qData_tx[DPD_MAX_SAMPLES] = {0};
+  static int32_t iData_elb[DPD_MAX_SAMPLES] = {0};
+  static int32_t qData_elb[DPD_MAX_SAMPLES] = {0};
 
   Adrv9001_ClearError( Adrv9001Params->Adrv9001 );
 
@@ -387,28 +387,28 @@ static void Adrv9001Cli_ReadDpdCaptureData(cli_t *CliInstance, const char *cmd, 
   }
 
   Cli_Printf(CliInstance,"iData_tx: ");
-  for(int i = 0; i < Length-2; i++)
+  for(int i = 0; i < Length-1; i++)
   {
     Cli_Printf(CliInstance,"%ld,",iData_tx[i]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",iData_tx[Length-1]);
 
   Cli_Printf(CliInstance,"qData_tx: ");
-  for(int j = 0; j < Length-2; j++)
+  for(int j = 0; j < Length-1; j++)
   {
     Cli_Printf(CliInstance,"%ld,",qData_tx[j]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",qData_tx[Length-1]);
 
   Cli_Printf(CliInstance,"iData_elb: ");
-  for(int k = 0; k < Length-2; k++)
+  for(int k = 0; k < Length-1; k++)
   {
     Cli_Printf(CliInstance,"%ld,",iData_elb[k]);
   }
   Cli_Printf(CliInstance,"%ld\r\n",iData_elb[Length-1]);
 
   Cli_Printf(CliInstance,"qData_elb: ");
-  for(int l = 0; l < Length-2; l++)
+  for(int l = 0; l < Length-1; l++)
   {
     Cli_Printf(CliInstance,"%ld,",qData_elb[l]);
   }
