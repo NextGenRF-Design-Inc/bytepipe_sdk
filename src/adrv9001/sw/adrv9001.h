@@ -372,14 +372,6 @@ typedef struct adrv9001_init_s{
   int32_t                              *Rx2ChfCoeff;
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
-  /*
-  uint32_t                              Tx1DpdExternalPathDelay;
-  uint32_t                              Tx2DpdExternalPathDelay;
-  adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
-  adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
-  adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
-  adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
-  */
   uint32_t                              AxiClockFreqHz;
 
   uint32_t                              Tx1SsiEnableDly;
@@ -424,7 +416,7 @@ void AxiAdrv9001_SetSsiDisableCnt       ( uint32_t Base, adi_common_Port_e Port,
 void AxiAdrv9001_SetSsiEnableCnt        ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 void AxiAdrv9001_SetDisableCnt          ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 int32_t Adrv9001_ReLoadProfile          ( adrv9001_t *Instance);
-//int32_t Adrv9001_ReLoadProfile_ByChunks ( adrv9001_t *Instance);
+
 int32_t Adrv9001_LoadNewProfile         ( adrv9001_t *Instance , adrv9001_profile_t *ProfileInstance);
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );

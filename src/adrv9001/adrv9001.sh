@@ -138,6 +138,7 @@ profile_parse()
   sed -i "s/gpioCtrlInitCfg/${name}_gpioCtrlInitCfg/g" $outDir/*
   sed -i "s/attenTableRows/${name}_attenTableRows/g" $outDir/*
   sed -i "s/gainTableRows_1/${name}_gainTableRows_1/g" $outDir/*
+  sed -i "s/gainTableRows_2/${name}_gainTableRows_2/g" $outDir/*
   sed -i "s/agcCfg_1/${name}_agcCfg_1/g" $outDir/*
 
   sed -i "s/_INITIALIZE_H_/_${name^^}_INITIALIZE_H_/g" $outDir/*    
