@@ -314,14 +314,7 @@ static void Adrv9001Cli_WriteDpdCoefficients(cli_t *CliInstance, const char *cmd
     Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
     return;
   }
-/*
-  Cli_Printf(CliInstance,"DPD coefficients ( region %u ): ",DpdCoeffs.region);
-  for(int i = 0; i < ADI_ADRV9001_DPD_NUM_COEFFICIENTS-1; i++)
-  {
-    Cli_Printf(CliInstance,"%ld,",DpdCoeffs.coefficients[i]);
-  }
-  Cli_Printf(CliInstance,"%ld\r\n",DpdCoeffs.coefficients[ADI_ADRV9001_DPD_NUM_COEFFICIENTS-1]);
-*/
+
   return;
 
 }
