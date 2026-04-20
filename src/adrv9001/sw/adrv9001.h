@@ -193,7 +193,9 @@ typedef void (*adrv9001_rf_state_cb_t)( void *CallbackRef, adi_adrv9001_ChannelS
 
 typedef void (*adrv9001_hop_irq_cb_t)( void *CallbackRef );
 
-typedef int  (*adrv9001_initialize_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
+typedef struct adrv9001_s adrv9001_t; //must be placed before "typedef int  (*adrv9001_initialize_fn_t)( adrv9001_t * Instance );"
+typedef struct adrv9001_init_s adrv9001_init_t; //must be placed before "typedef int  (*adrv9001_initialize_fn_t)( adrv9001_t * Instance );"
+typedef int  (*adrv9001_initialize_fn_t)( adrv9001_t * Instance );
 
 typedef int  (*adrv9001_calibrate_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
 typedef int  (*adrv9001_configure_fn_t)( adi_adrv9001_Device_t * adrv9001Device_0 );
@@ -295,11 +297,12 @@ typedef struct {
   uint32_t            Qdata  : 8;
 }adrv9001_ssi_port_delay_t;
 
-typedef struct {
+typedef struct adrv9001_s{
   adi_adrv9001_Device_t	                Device;            ///< ADI ADRV9001 Instance
   adi_adrv9001_Init_t                  *Params;            ///< ADRV9001 Parameters
   axi_adrv9001_t                        Axi;               ///< AXI Instance
   FIL                                   LogFil;            ///< Log File
+  char                                 *BasePath;              ///< File System Path
   uint8_t                               PendingReboot;     ///< ADRV9001 needs reboot due to profile changes
   uint8_t                               Initialized;
   XScuGic                              *IrqInstance;       ///< Processor Interrupt Controller Instance
@@ -352,7 +355,7 @@ typedef struct {
   uint32_t                              HwVer;
 }adrv9001_t;
 
-typedef struct {
+typedef struct adrv9001_init_s{
   adi_adrv9001_ChannelEnableMode_e      TxEnableMode;
   adi_adrv9001_ChannelEnableMode_e      RxEnableMode;
   char                                 *LogFilename;           ///< Log Filename
@@ -369,14 +372,6 @@ typedef struct {
   int32_t                              *Rx2ChfCoeff;
   float                                 TxAttn[2];
   bool                                  TxBoost[2];
-  /*
-  uint32_t                              Tx1DpdExternalPathDelay;
-  uint32_t                              Tx2DpdExternalPathDelay;
-  adi_adrv9001_DpdInitCfg_t             Tx1DpdInitCfg;
-  adi_adrv9001_DpdInitCfg_t             Tx2DpdInitCfg;
-  adi_adrv9001_DpdCfg_t                 Tx1DpdCfg;
-  adi_adrv9001_DpdCfg_t                 Tx2DpdCfg;
-  */
   uint32_t                              AxiClockFreqHz;
 
   uint32_t                              Tx1SsiEnableDly;
@@ -421,7 +416,7 @@ void AxiAdrv9001_SetSsiDisableCnt       ( uint32_t Base, adi_common_Port_e Port,
 void AxiAdrv9001_SetSsiEnableCnt        ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 void AxiAdrv9001_SetDisableCnt          ( uint32_t Base, adi_common_Port_e Port, adi_common_ChannelNumber_e Channel, uint32_t SampleCnt );
 int32_t Adrv9001_ReLoadProfile          ( adrv9001_t *Instance);
-//int32_t Adrv9001_ReLoadProfile_ByChunks ( adrv9001_t *Instance);
+
 int32_t Adrv9001_LoadNewProfile         ( adrv9001_t *Instance , adrv9001_profile_t *ProfileInstance);
 int32_t Adrv9001_LoadDefaultProfile     ( adrv9001_t *Instance );
 int32_t Adrv9001_Initialize             ( adrv9001_t *Instance, adrv9001_init_t *Init );
@@ -486,7 +481,7 @@ int32_t Adrv9001_LoadRxChannelFilter    ( adrv9001_t *Instance, adi_common_Chann
 int32_t Adrv9001_SetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value);
 int32_t Adrv9001_GetRxToTxLoopBack      (adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value);
 int32_t Adrv9001_SetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Value );
-int32_t Adrv9001_GetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool *Value );
+int32_t Adrv9001_GetTxToRxLoopBack      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Value );
 
 int32_t Adrv9001_SetGainControlMode     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e mode );
 int32_t Adrv9001_GetGainControlMode     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_RxGainControlMode_e *mode );
@@ -527,5 +522,5 @@ int32_t Adrv9001_GetDpdStatus           ( adrv9001_t *Instance, adi_common_Chann
 int32_t Adrv9001_ReadDpdCaptureData     ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, int32_t iData_tx[], int32_t qData_tx[], int32_t iData_elb[], int32_t qData_elb[], uint32_t length, bool autoIncrement);
 int32_t Adrv9001_GetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients);
 int32_t Adrv9001_SetTxDPDCoefficients( adrv9001_t *Instance, adi_common_ChannelNumber_e channel,adi_adrv9001_DpdCoefficients_t *coefficients);
-
+int32_t Adrv9001_GetTxDpdEnable      ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, adi_adrv9001_DpdInitCfg_t *dpdConfig);//bool *Enable );
 #endif
