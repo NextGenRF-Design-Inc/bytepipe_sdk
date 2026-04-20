@@ -297,27 +297,7 @@ int32_t Adrv9001_LoadRxChannelFilter( adrv9001_t *Instance, adi_common_ChannelNu
 
   return Adrv9001Status_Success;
 }
-/*
-int32_t Adrv9001_LoadNewProfile( adrv9001_t *Instance , adrv9001_profile_t *ProfileInstance)
-{
-  int32_t status;
 
-  //printf("\r\nAdrv9001 Load Profile\r\n\r\n");
-
-  //if((status = Instance->InitializeFn_new( &Instance->Device )) != 0)
-  if((status = Instance->InitializeFn_new( &Instance->Device, ProfileInstance)) != 0)
-    return Adrv9001Status_ProfileInitErr;
-
-  if((status = Instance->CalibrateFn_new( &Instance->Device )) != 0)
-    return Adrv9001Status_ProfileCalErr;
-
-  if((status = Instance->ConfigureFn_new( &Instance->Device, ProfileInstance )) != 0)
-    return Adrv9001Status_ProfileCfgErr;
-
-
-  return Adrv9001Status_Success;
-}
-*/
 int32_t Adrv9001_LoadDefaultProfile( adrv9001_t *Instance )
 {
   int32_t status;
