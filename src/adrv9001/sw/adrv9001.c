@@ -1879,6 +1879,9 @@ int32_t Adrv9001_SetTxDpdEnable( adrv9001_t *Instance, adi_common_ChannelNumber_
   {
     if( Adrv9001_LoadDefaultProfile(Instance) !=0 )
       return Adrv9001Status_ProfileReloadErr;
+    /* Configure Profile */
+    if( Adrv9001_ConfigureProfile( Instance, NULL, NULL ) != 0)
+      return Adrv9001Status_ProfileReloadErr;
   }
   else
   {
