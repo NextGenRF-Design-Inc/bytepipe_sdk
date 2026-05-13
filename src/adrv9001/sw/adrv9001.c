@@ -1432,6 +1432,154 @@ int32_t Adrv9001_ReLoadProfile_ByChunks(adrv9001_t *Instance)
 
 }
 */
+int32_t Adrv9001_GetTxDpdClgcTrackingEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Enable )
+{
+  int32_t status;
+  adi_common_Port_e port = ADI_TX;
+  adi_adrv9001_Device_t *adrv9001Device = (adi_adrv9001_Device_t *)&Instance->Device;
+
+  adi_adrv9001_ChannelState_e State;
+  if( adi_adrv9001_Radio_Channel_State_Get( adrv9001Device, port, channel, &State ) != 0)
+	return Adrv9001Status_ReadErr;
+
+  adi_adrv9001_ChannelEnableMode_e mode;
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( adrv9001Device, port, channel, &mode) != 0)
+	return Adrv9001Status_ReadErr;
+
+  if( mode == ADI_ADRV9001_PIN_MODE )
+  {
+	/* Set SPI Mode */
+	if(adi_adrv9001_Radio_ChannelEnableMode_Set(adrv9001Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+	  return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+	if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  int32_t error_code = 0;
+  //bool isEnabled = false;
+  adi_adrv9001_TrackingCals_t trackingCals;
+  error_code = adi_adrv9001_cals_Tracking_Get(adrv9001Device, &trackingCals);
+  ADI_HANDLE_ERROR(error_code, &adrv9001Device);
+
+  if(channel == ADI_CHANNEL_1)
+  {
+    *Enable = (uint8_t)((trackingCals.chanTrackingCalMask[0] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+  }
+  else if(channel == ADI_CHANNEL_2)
+  {
+	*Enable = (uint8_t)((trackingCals.chanTrackingCalMask[1] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+  }
+
+
+  if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  if(mode == ADI_ADRV9001_PIN_MODE)
+  {
+	if(adi_adrv9001_Radio_ChannelEnableMode_Set(adrv9001Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+	  return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+	if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  return Adrv9001Status_Success;
+}
+
+int32_t Adrv9001_SetTxDpdClgcTrackingEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable )
+{
+  int32_t status;
+  adi_common_Port_e port = ADI_TX;
+  adi_adrv9001_Device_t *adrv9001Device = (adi_adrv9001_Device_t *)&Instance->Device;
+
+  adi_adrv9001_ChannelState_e State;
+  if( adi_adrv9001_Radio_Channel_State_Get( adrv9001Device, port, channel, &State ) != 0)
+	return Adrv9001Status_ReadErr;
+
+  adi_adrv9001_ChannelEnableMode_e mode;
+  if(adi_adrv9001_Radio_ChannelEnableMode_Get( adrv9001Device, port, channel, &mode) != 0)
+	return Adrv9001Status_ReadErr;
+
+  if( mode == ADI_ADRV9001_PIN_MODE )
+  {
+	/* Set SPI Mode */
+	if(adi_adrv9001_Radio_ChannelEnableMode_Set(adrv9001Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
+	  return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  if( State != ADI_ADRV9001_CHANNEL_CALIBRATED )
+  {
+	if((status = Adrv9001_ToCalibrated( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  int32_t error_code = 0;
+  bool isEnabled = false;
+  adi_adrv9001_TrackingCals_t trackingCals;
+  error_code = adi_adrv9001_cals_Tracking_Get(adrv9001Device, &trackingCals);
+  ADI_HANDLE_ERROR(error_code, &adrv9001Device);
+
+  if(channel == ADI_CHANNEL_1)
+  {
+    isEnabled = ((trackingCals.chanTrackingCalMask[0] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+    if( (isEnabled & !Enable) || (!isEnabled & Enable) )
+    {
+      trackingCals.chanTrackingCalMask[0] ^= ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC;
+    }
+  }
+  else if(channel == ADI_CHANNEL_2)
+  {
+    isEnabled = ((trackingCals.chanTrackingCalMask[1] & ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC) == ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC);
+    if( (isEnabled & !Enable) || (!isEnabled & Enable) )
+    {
+      trackingCals.chanTrackingCalMask[1] ^= ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC;
+    }
+  }
+  error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device, &trackingCals);
+  ADI_HANDLE_ERROR(error_code, &adrv9001Device);
+
+  if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+  {
+	if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  if(mode == ADI_ADRV9001_PIN_MODE)
+  {
+	if(adi_adrv9001_Radio_ChannelEnableMode_Set(adrv9001Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
+	  return Adrv9001Status_WriteErr;
+  }
+
+  if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
+  {
+	if((status = Adrv9001_ToRfEnabled( Instance, port, channel )) != 0)
+	  return status;
+  }
+
+  return Adrv9001Status_Success;
+}
 
 int32_t Adrv9001_ReLoadProfile(adrv9001_t *Instance)
 {

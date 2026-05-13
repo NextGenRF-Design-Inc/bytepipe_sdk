@@ -328,6 +328,18 @@ int32_t Adrv9001Params_SetByIdByString( adrv9001_params_t *Instance, adrv9001_pa
     sscanf(Value, "%hhu", &tmp);
     status = Adrv9001_SetTxDpdEnable(Adrv9001, ADI_CHANNEL_2, (bool)tmp);
   }
+  else if( Id == Adrv9001ParamId_Tx1DpdClgcTrackingEnable )
+  {
+    uint8_t tmp;
+    sscanf(Value, "%hhu", &tmp);
+    status = Adrv9001_SetTxDpdClgcTrackingEnable(Adrv9001, ADI_CHANNEL_1, (bool)tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdClgcTrackingEnable )
+  {
+    uint8_t tmp;
+    sscanf(Value, "%hhu", &tmp);
+    status = Adrv9001_SetTxDpdClgcTrackingEnable(Adrv9001, ADI_CHANNEL_2, (bool)tmp);
+  }
 
   else if( Id == Adrv9001ParamId_Rx1InputPort )
   {
@@ -1089,6 +1101,24 @@ int32_t Adrv9001Params_GetStringById( adrv9001_params_t *Instance, uint16_t Id, 
       return status; 
     
     sprintf(Value, "%lu", tmp);
+  }
+  else if( Id == Adrv9001ParamId_Tx1DpdClgcTrackingEnable )
+  {
+    uint8_t tmp;
+
+    if((status = Adrv9001_GetTxDpdClgcTrackingEnable( Adrv9001, ADI_CHANNEL_1, &tmp )) != 0)
+      return status;
+
+    sprintf(Value, "%hhu", tmp & 0x1);
+  }
+  else if( Id == Adrv9001ParamId_Tx2DpdClgcTrackingEnable )
+  {
+	uint8_t tmp;
+
+    if((status = Adrv9001_GetTxDpdClgcTrackingEnable( Adrv9001, ADI_CHANNEL_2, &tmp )) != 0)
+      return status;
+
+    sprintf(Value, "%hhu", tmp & 0x1);
   }
   else if( Id == Adrv9001ParamId_Tx1DpdRxTxNormalizationLowerThreshold)
   {
