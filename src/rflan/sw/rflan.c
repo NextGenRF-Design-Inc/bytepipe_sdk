@@ -624,5 +624,37 @@ uint32_t Rflan_GetHwVer( void )
 
   return hwv;
 }
+static uint32_t count_fh_tx=0;
+static uint32_t axi_gpio=0;
+static uint32_t axi_gpio_get=0;
+void change_fh_table_tx(void)
+{
+  uint32_t Value;
+  AxiAdrv9001_GetDgpioDir(&RflanAdrv9001.Axi, &Value );
 
 
+  Value &= ~(0x0A);
+
+  AxiAdrv9001_SetDgpioDir(&RflanAdrv9001.Axi,Value); //dgpio01 and dgpio03 output used for HOP_SIGNAL LO1 e LO2
+
+  //count_fh_tx++;
+  //axi_gpio ^= 0x0A;
+
+  AxiAdrv9001_GetDgpio(&RflanAdrv9001.Axi,&axi_gpio_get);
+  axi_gpio = axi_gpio_get ^ 0x08;
+  AxiAdrv9001_SetDgpio(&RflanAdrv9001.Axi,axi_gpio);
+
+  /*
+  if (count_fh_tx & 0x01)
+  {
+    axi_gpio |= 0x08;
+    AxiAdrv9001_SetDgpio(&RflanAdrv9001.Axi,axi_gpio);
+  }
+  else
+  {
+    axi_gpio &= ~0x08;
+    //axi_gpio = 0x00;
+    AxiAdrv9001_SetDgpio(&RflanAdrv9001.Axi,axi_gpio);
+  }
+  */
+}
