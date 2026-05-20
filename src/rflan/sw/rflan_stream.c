@@ -185,6 +185,8 @@ int32_t RflanStream_StopTransfer( rflan_stream_t *Instance, rflan_stream_channel
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
+  extern void change_fh_table_tx(void);
+  change_fh_table_tx();
 
   return RflanStreamStatus_Success;
 }

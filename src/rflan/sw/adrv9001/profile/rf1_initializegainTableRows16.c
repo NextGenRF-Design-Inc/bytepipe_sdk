@@ -3,6 +3,7 @@
 #include "adi_adrv9001_arm.h"
 #include "adi_adrv9001_cals.h"
 #include "adi_adrv9001_dpd.h"
+#include "adi_adrv9001_fh.h"
 #include "adi_adrv9001_gpio.h"
 #include "adi_adrv9001_mcs.h"
 #include "adi_adrv9001_powermanagement.h"

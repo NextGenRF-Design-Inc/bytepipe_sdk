@@ -31,6 +31,7 @@ extern "C" {
 
 #include "adi_adrv9001_bbdc.h"
 #include "adi_adrv9001_cals.h"
+#include "adi_adrv9001_dpd.h"
 #include "adi_adrv9001_gpio.h"
 #include "adi_adrv9001_powersavingandmonitormode.h"
 #include "adi_adrv9001_radio.h"

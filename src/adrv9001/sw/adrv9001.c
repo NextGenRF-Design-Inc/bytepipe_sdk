@@ -3040,6 +3040,8 @@ int32_t Adrv9001_ToRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_
     Adrv9001_SetTxAttn( Instance, channel, Instance->TxAttn[channel -1] );
     Adrv9001_SetTxBoost( Instance, channel, Instance->TxBoost[channel -1] );
   }
+  extern void change_fh_table_tx(void);
+  change_fh_table_tx();
 
   return Adrv9001Status_Success;
 }
