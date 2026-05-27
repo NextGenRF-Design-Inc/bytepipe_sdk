@@ -185,8 +185,41 @@ int32_t RflanStream_StopTransfer( rflan_stream_t *Instance, rflan_stream_channel
   if((status = AxiDma_Stop( Dma )) != 0)
     return status;
 
-  extern void change_fh_table_tx(void);
-  change_fh_table_tx();
+  //extern void change_fh_table_tx(void);
+  //change_fh_table_tx();
+
+  return RflanStreamStatus_Success;
+}
+
+int32_t RflanStream_StopHopTransfer( rflan_stream_t *Instance, rflan_stream_channel_t Channel )
+{
+
+  int32_t status;
+  adi_common_Port_e AdiPort;
+  adi_common_ChannelNumber_e AdiChannel;
+
+  axi_dma_t *Dma = RflanStream_GetDma(Instance, Channel);
+
+  if((status = RflanStream_ChannelToAdrvPortChannel( Channel, &AdiPort, &AdiChannel )) != 0)
+    return status;
+
+  if((status = Adrv9001_ToPrimed( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
+    return status;
+
+
+
+  if((status = AxiDma_Stop( Dma )) != 0)
+    return status;
+
+  if((status = Adrv9001_SetHopSignal( Instance->Adrv9001, AdiPort, AdiChannel, 0)) != 0)
+        return status;
+
+  //extern void change_fh_table_tx(void);
+  //change_fh_table_tx();
+
+  //usleep(1);
+
+
 
   return RflanStreamStatus_Success;
 }
@@ -214,7 +247,39 @@ int32_t RflanStream_StartTransfer( rflan_stream_t *Instance, uint32_t Addr, uint
   if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
     return status;
 
+  //extern void change_fh_table_tx(void);
+  //change_fh_table_tx();
 
+  return RflanStreamStatus_Success;
+}
+
+int32_t RflanStream_StartHopTransfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel, bool Cyclic )
+{
+  int32_t status;
+  adi_common_Port_e AdiPort;
+  adi_common_ChannelNumber_e AdiChannel;
+
+  axi_dma_t *Dma = RflanStream_GetDma(Instance, Channel);
+
+  AxiDma_SetCyclic(Dma, Cyclic);
+  AxiDma_SetSampleCnt(Dma, WordCnt);
+
+  if((status = RflanStream_ChannelToAdrvPortChannel( Channel, &AdiPort, &AdiChannel )) != 0)
+    return status;
+
+  if((status = AxiDma_Stop( Dma )) != 0)
+    return status;
+
+  if((status = AxiDma_StartTransfer(Dma)) != 0)
+    return status;
+
+  if((status = Adrv9001_ToRfEnabled( Instance->Adrv9001, AdiPort, AdiChannel )) != 0)
+    return status;
+
+  //usleep(1); //minimum time between fh setup signal and hop signal is 3usec. usleep(1) is a 1 ms delay. If this this too long, then I sugget looking into another implementation for driving setup and hop signals.
+
+  if((status = Adrv9001_SetHopSignal( Instance->Adrv9001, AdiPort, AdiChannel, 1)) != 0)
+    return status;
 
   return RflanStreamStatus_Success;
 }

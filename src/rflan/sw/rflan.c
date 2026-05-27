@@ -472,7 +472,9 @@ static int32_t Rflan_Initialize( void )
     /* Disable Tx2 */
     Adrv9001_SetGpioPinLevel( &RflanAdrv9001, RflanTx2EnablePin, ADI_ADRV9001_GPIO_PIN_LEVEL_LOW );
   }  
-  
+
+
+
   
 
   /* Set DAC Voltage */
@@ -538,6 +540,26 @@ static int32_t Rflan_Initialize( void )
   }
 
 #endif
+
+  adi_adrv9001_GpioPin_e HopPin;
+  uint32_t DgpioDirValue;
+  adi_adrv9001_FhCfg_t fhConfig;
+
+  if((status = adi_adrv9001_fh_Configuration_Inspect(&RflanAdrv9001.Device,&fhConfig))!=0)
+      return status;
+
+
+  for(int i = 0; i < 2; i++)
+  {
+	  AxiAdrv9001_GetDgpioDir(&RflanAdrv9001.Axi, &DgpioDirValue );
+	  HopPin = fhConfig.hopSignalGpioConfig[i].pin;
+	  if(HopPin == ADI_ADRV9001_GPIO_UNASSIGNED)
+		  continue;
+	  else
+	  {
+		  AxiAdrv9001_SetDgpioDir(&RflanAdrv9001.Axi,DgpioDirValue & ~(1UL << (uint8_t)(HopPin - 1)));
+	  }
+  }
 
   return status;
 }

@@ -101,11 +101,13 @@ typedef struct{
 }rflan_stream_t;
 
 
-int32_t RflanStream_Initialize    ( rflan_stream_t *Instance, rflan_stream_init_t *Init );
-int32_t RflanStream_Disable       ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
-int32_t RflanStream_StartTransfer ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel, bool Cyclic );
-int32_t RflanStream_Transfer      ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel );
-int32_t RflanStream_StopTransfer  ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
+int32_t RflanStream_Initialize      ( rflan_stream_t *Instance, rflan_stream_init_t *Init );
+int32_t RflanStream_Disable         ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
+int32_t RflanStream_StartTransfer   ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel, bool Cyclic );
+int32_t RflanStream_Transfer        ( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel );
+int32_t RflanStream_StopTransfer    ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
+int32_t RflanStream_StopHopTransfer ( rflan_stream_t *Instance, rflan_stream_channel_t Channel );
+int32_t RflanStream_StartHopTransfer( rflan_stream_t *Instance, uint32_t Addr, uint32_t WordCnt, rflan_stream_channel_t Channel, bool Cyclic );
 
 #endif
 #endif

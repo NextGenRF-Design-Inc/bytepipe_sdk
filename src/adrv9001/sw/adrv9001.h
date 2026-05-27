@@ -463,6 +463,7 @@ int32_t Adrv9001_GetAdcVoltage          ( adrv9001_t *Instance, adi_adrv9001_Aux
 int32_t Adrv9001_GetAdcEnable           ( adrv9001_t *Instance, adi_adrv9001_AuxAdc_e Channel, bool *Value );
 int32_t Adrv9001_SetAdcEnable           ( adrv9001_t *Instance, adi_adrv9001_AuxAdc_e Channel, bool Value );
 
+int32_t Adrv9001_SetHopSignal           ( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint8_t Value );
 int32_t Adrv9001_LoadHopTable           ( adrv9001_t *Instance, uint8_t size );
 int32_t Adrv9001_SetHopTableFrequency   ( adrv9001_t *Instance, uint8_t index, uint64_t Freq );
 int32_t Adrv9001_GetHopTableFrequency   ( adrv9001_t *Instance, uint8_t index, uint64_t *Freq );
@@ -522,6 +523,7 @@ int32_t Adrv9001_GetRxInputPort         ( adrv9001_t *Instance, adi_common_Chann
 
 int32_t Adrv9001_EnableManualInputPorts ( adrv9001_t *Instance, bool Enable );
 
+int32_t Adrv9001_DpdRetune              ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel);
 int32_t Adrv9001_SetTxDpdEnable         ( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable );
 int32_t Adrv9001_SetTxDpdClgcTrackingEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, bool Enable );
 int32_t Adrv9001_GetTxDpdClgcTrackingEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Enable );

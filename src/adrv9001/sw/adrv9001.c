@@ -1432,6 +1432,22 @@ int32_t Adrv9001_ReLoadProfile_ByChunks(adrv9001_t *Instance)
 
 }
 */
+int32_t Adrv9001_DpdRetune( adrv9001_t *Instance, adi_common_ChannelNumber_e channel)
+{
+	int32_t status = 0;
+	adi_adrv9001_DpdCfg_t dpdConfig;
+
+	if((status = adi_adrv9001_dpd_Inspect(&Instance->Device,channel,&dpdConfig)) != 0)
+		return status;
+
+	dpdConfig.resetLuts = true;
+
+	if((status = adi_adrv9001_dpd_Configure(&Instance->Device,channel,&dpdConfig)) != 0)
+		return status;
+
+	return status;
+}
+
 int32_t Adrv9001_GetTxDpdClgcTrackingEnable( adrv9001_t *Instance, adi_common_ChannelNumber_e channel, uint8_t *Enable )
 {
   int32_t status;
@@ -1954,11 +1970,7 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 {
 	int32_t status;
 	adi_common_Port_e port = ADI_TX;
-
-	adi_adrv9001_ChannelState_e State;
-	if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
-	  return Adrv9001Status_ReadErr;
-
+    usleep(1);
 	adi_adrv9001_ChannelEnableMode_e mode;
 	if(adi_adrv9001_Radio_ChannelEnableMode_Get( &Instance->Device, port, channel, &mode) != 0)
 	  return Adrv9001Status_ReadErr;
@@ -1969,6 +1981,12 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
 	    return Adrv9001Status_WriteErr;
     }
+
+	adi_adrv9001_ChannelState_e State;
+	if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
+	  return Adrv9001Status_ReadErr;
+
+
 
 	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
 	{
@@ -3040,8 +3058,8 @@ int32_t Adrv9001_ToRfEnabled( adrv9001_t *Instance, adi_common_Port_e port, adi_
     Adrv9001_SetTxAttn( Instance, channel, Instance->TxAttn[channel -1] );
     Adrv9001_SetTxBoost( Instance, channel, Instance->TxBoost[channel -1] );
   }
-  extern void change_fh_table_tx(void);
-  change_fh_table_tx();
+  //extern void change_fh_table_tx(void);
+  //change_fh_table_tx();
 
   return Adrv9001Status_Success;
 }
@@ -3245,7 +3263,8 @@ int32_t Adrv9001_TxSsiTest( adrv9001_t *Instance, adi_common_ChannelNumber_e cha
 
   status = Adrv9001_TxTestModeCheck( Instance, channel, testMode, fixedPattern );
 
-  Adrv9001_ToPrimed( Instance, ADI_TX, channel );
+  if((status = Adrv9001_ToPrimed( Instance, ADI_TX, channel )) != 0)
+      return status;
 
   AxiAdrv9001_SetTxDataSrc( &Instance->Axi, prevDataSrc, channel );
 
@@ -3945,6 +3964,95 @@ int32_t Adrv9001_ResetbPinSet( void *devHalCfg, uint8_t pinLevel )
   }
   return Adrv9001Status_Success;
 }
+
+int32_t Adrv9001_SetPsEnableMask( adrv9001_t *Instance, uint8_t Value )
+{
+  int32_t status = 0;
+  uint32_t DgpioValue = 0;
+  AxiAdrv9001_GetDgpio(&Instance->Axi, &DgpioValue );
+
+  //take Value (rx1-bit0, rx2-bit1, tx1-bit2, tx2-bit3) and convert to to DgpioValue (dgpio0-bit0 ... dgpio15-bit15)
+  for(int i = 0; i < 4; i++)
+  {
+    if(Value & (0x1 << i))
+    {
+      switch(i)
+      {
+        case 0:
+          DgpioValue |= (0x1 << ADRV9001_RX1_PS_ENABLE_ADDR);
+          break;
+        case 1:
+          DgpioValue |= (0x1 << ADRV9001_RX2_PS_ENABLE_ADDR);
+          break;
+        case 2:
+          DgpioValue |= (0x1 << ADRV9001_TX1_PS_ENABLE_ADDR);
+          break;
+        case 3:
+          DgpioValue |= (0x1 << ADRV9001_TX2_PS_ENABLE_ADDR);
+          break;
+
+      }
+    }
+  }
+  
+  AxiAdrv9001_SetDgpio(&Instance->Axi, DgpioValue );
+
+  return status;
+  
+}
+
+int32_t Adrv9001_GetLOHopPin( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, adi_adrv9001_GpioPin_e *pin)
+{
+  int32_t status;
+  adi_adrv9001_FhCfg_t fhConfig;
+  adi_adrv9001_Pll_e LO;
+
+  if((status = adi_adrv9001_fh_Configuration_Inspect(&Instance->Device,&fhConfig))!=0)
+    return status;
+
+  if(port == ADI_RX)
+  {
+    if(channel == ADI_CHANNEL_1)
+      LO = Instance->Params->clocks.rx1LoSelect;
+    else if(channel == ADI_CHANNEL_2)
+      LO = Instance->Params->clocks.rx2LoSelect;
+  }
+  else if(port == ADI_TX)
+  {
+    if(channel == ADI_CHANNEL_1)
+      LO = Instance->Params->clocks.tx1LoSelect;
+    else if(channel == ADI_CHANNEL_2)
+      LO = Instance->Params->clocks.tx2LoSelect;
+  }
+
+  
+  *pin = fhConfig.hopSignalGpioConfig[(uint16_t)(LO-1)].pin;
+
+  
+
+  return status;
+}
+int32_t Adrv9001_SetHopSignal( adrv9001_t *Instance, adi_common_Port_e port, adi_common_ChannelNumber_e channel, uint8_t Value )
+{
+  int32_t status = 0;
+  adi_adrv9001_GpioPin_e pin;
+  //uint32_t DgpioValue;
+  //AxiAdrv9001_GetDgpioDir(&Instance->Axi, &DgpioValue );
+
+
+  //DgpioValue &= ~(0x0A);
+
+  //AxiAdrv9001_SetDgpioDir(&Instance->Axi,DgpioValue); //dgpio01 and dgpio03 output used for HOP_SIGNAL LO1 e LO2
+
+  if((status = Adrv9001_GetLOHopPin(Instance, port, channel, &pin)) != 0)
+    return status;
+  
+  AxiAdrv9001_SetDgpioPin(&Instance->Axi, (uint8_t)(pin-1), Value ); //adi_adrv9001_GpioPin_e has ADI_ADRV9001_GPIO_UNASSIGNED as index 0 and ADI_ADRV9001_GPIO_DIGITAL_00 as index 1, so 1 is subtracted for hdl use
+  
+
+  return status;
+}
+
 
 int32_t Adrv9001_GetHopFrequency( adrv9001_t *Instance, uint64_t *Value )
 {

@@ -279,6 +279,22 @@ static void Adrv9001Cli_SweepSsi(cli_t *CliInstance, const char *cmd, adrv9001_p
   }
 }
 
+static void Adrv9001Cli_DpdRetune(cli_t *CliInstance, const char *cmd, adrv9001_params_t *Adrv9001Params )
+{
+  int32_t status = 0;
+  adi_common_ChannelNumber_e Channel;
+  adi_common_Port_e Port;
+
+  Adrv9001_ClearError( Adrv9001Params->Adrv9001 );
+
+  Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
+
+  if((status = Adrv9001_DpdRetune(Adrv9001Params->Adrv9001,Channel)) != 0)
+	  return status;
+
+  return status;
+}
+
 static void Adrv9001Cli_WriteDpdCoefficients(cli_t *CliInstance, const char *cmd, adrv9001_params_t *Adrv9001Params )
 {
   static adi_adrv9001_DpdCoefficients_t DpdCoeffs;
@@ -516,6 +532,16 @@ cli_cmd_t Adrv9001CliGetParamDef =
     NULL
 };
 
+cli_cmd_t Adrv9001CliDpdRetuneDef =
+{
+    "Adrv9001DpdRetune",
+    "Adrv9001DpdRetune:  Force Dpd Engine to retune \r\n"
+    "Adrv9001DpdRetune < Port (Tx1, Tx2) >\r\n\r\n",
+    (CliCmdFn_t)Adrv9001Cli_DpdRetune,
+    1,
+    NULL
+};
+
 cli_cmd_t Adrv9001CliReadDpdCaptureDataDef =
 {
     "Adrv9001ReadDpdCaptureData",
@@ -561,6 +587,7 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
   Adrv9001CliReadDpdCaptureDataDef.userData = Adrv9001Params;
   Adrv9001CliReadDpdCoefficientsDef.userData = Adrv9001Params;
   Adrv9001CliWriteDpdCoefficientsDef.userData = Adrv9001Params;
+  Adrv9001CliDpdRetuneDef.userData = Adrv9001Params;
 
   Cli_RegisterCommand(Cli, &Adrv9001CliGetParamDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliSetParamDef);
@@ -573,6 +600,7 @@ int32_t Adrv9001Cli_Initialize( cli_t *Cli, adrv9001_params_t *Adrv9001Params )
   Cli_RegisterCommand(Cli, &Adrv9001CliReadDpdCaptureDataDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliReadDpdCoefficientsDef);
   Cli_RegisterCommand(Cli, &Adrv9001CliWriteDpdCoefficientsDef);
+  Cli_RegisterCommand(Cli, &Adrv9001CliDpdRetuneDef);
 
   return Adrv9001Status_Success;
 }

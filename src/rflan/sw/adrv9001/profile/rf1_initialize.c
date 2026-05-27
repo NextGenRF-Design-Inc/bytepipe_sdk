@@ -141,9 +141,9 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 		.pin = ADI_ADRV9001_GPIO_UNASSIGNED, 
 		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
 		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, { 
-		.pin = ADI_ADRV9001_GPIO_ANALOG_08, 
+		.pin = ADI_ADRV9001_GPIO_UNASSIGNED, 
 		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
-		.master = ADI_ADRV9001_GPIO_MASTER_ADRV9001 }  }, 
+		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  }, 
 		.rx_ext_frontend_ctrl = { { 
 		.pin = ADI_ADRV9001_GPIO_UNASSIGNED, 
 		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
@@ -252,7 +252,7 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_Carrier_t carrier_33 = { 
 		.loGenOptimization = ADI_ADRV9001_LO_GEN_OPTIMIZATION_POWER_CONSUMPTION, 
-		.carrierFrequency_Hz = 159612500, 
+		.carrierFrequency_Hz = 900000000, 
 		.intermediateFrequency_Hz = 0, 
 		.manualRxport = ADI_ADRV9001_RX_A };
 
@@ -303,7 +303,7 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &delays_34);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, 223500);
+	error_code = adi_adrv9001_cals_ExternalPathDelay_Set(adrv9001Device_0, ADI_CHANNEL_2, 3000);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9001_Ssi_PowerDown_Set(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, ADI_ADRV9001_SSI_POWER_DOWN_DISABLED);
@@ -366,10 +366,10 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 		.txPortHopSignals = { ADI_ADRV9001_FH_HOP_SIGNAL_1, ADI_ADRV9001_FH_HOP_SIGNAL_2  }, 
 		.rxZeroIfEnable = false, 
 		.hopSignalGpioConfig = { { 
-		.pin = ADI_ADRV9001_GPIO_DIGITAL_01, 
+		.pin = ADI_ADRV9001_GPIO_DIGITAL_03, 
 		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
 		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }, { 
-		.pin = ADI_ADRV9001_GPIO_DIGITAL_03, 
+		.pin = ADI_ADRV9001_GPIO_DIGITAL_04, 
 		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
 		.master = ADI_ADRV9001_GPIO_MASTER_BBIC }  }, 
 		.hopTableSelectConfig = { 
@@ -386,8 +386,8 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 		.maxRxGainIndex = 255, 
 		.minTxAtten_mdB = 0, 
 		.maxTxAtten_mdB = 0, 
-		.minOperatingFrequency_Hz = 159612500, 
-		.maxOperatingFrequency_Hz = 159612500, 
+		.minOperatingFrequency_Hz = 4800000000, 
+		.maxOperatingFrequency_Hz = 4830000000, 
 		.minFrameDuration_us = 360, 
 		.txAnalogPowerOnFrameDelay = 0, 
 		.numTableIndexPins = 0, 
@@ -454,30 +454,16 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 		.tx2Attenuation_fifthdB = 0, 
 		.rx1GainIndex = 255, 
 		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 159612500 }, { 
+		.hopFrequencyHz = 4800000000 }, { 
 		.rx1OffsetFrequencyHz = 0, 
 		.rx2OffsetFrequencyHz = 0, 
 		.tx1Attenuation_fifthdB = 0, 
 		.tx2Attenuation_fifthdB = 0, 
 		.rx1GainIndex = 255, 
 		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 159712500 }, { 
-		.rx1OffsetFrequencyHz = 0, 
-		.rx2OffsetFrequencyHz = 0, 
-		.tx1Attenuation_fifthdB = 0, 
-		.tx2Attenuation_fifthdB = 0, 
-		.rx1GainIndex = 255, 
-		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 159812500 }, { 
-		.rx1OffsetFrequencyHz = 0, 
-		.rx2OffsetFrequencyHz = 0, 
-		.tx1Attenuation_fifthdB = 0, 
-		.tx2Attenuation_fifthdB = 0, 
-		.rx1GainIndex = 255, 
-		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 159912500 }  };
+		.hopFrequencyHz = 4810000000 }  };
 
-	error_code = adi_adrv9001_fh_HopTable_Static_Configure(adrv9001Device_0, ADI_ADRV9001_FHMODE_LO_RETUNE_REALTIME_PROCESS_DUAL_HOP, ADI_ADRV9001_FH_HOP_SIGNAL_1, ADI_ADRV9001_FHHOPTABLE_A, hopTable_58, 4);
+	error_code = adi_adrv9001_fh_HopTable_Static_Configure(adrv9001Device_0, ADI_ADRV9001_FHMODE_LO_RETUNE_REALTIME_PROCESS_DUAL_HOP, ADI_ADRV9001_FH_HOP_SIGNAL_1, ADI_ADRV9001_FHHOPTABLE_A, hopTable_58, 2);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_FhHopFrame_t hopTable_59[] = { { 
@@ -487,30 +473,16 @@ int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0)
 		.tx2Attenuation_fifthdB = 0, 
 		.rx1GainIndex = 255, 
 		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 160012500 }, { 
+		.hopFrequencyHz = 4820000000 }, { 
 		.rx1OffsetFrequencyHz = 0, 
 		.rx2OffsetFrequencyHz = 0, 
 		.tx1Attenuation_fifthdB = 0, 
 		.tx2Attenuation_fifthdB = 0, 
 		.rx1GainIndex = 255, 
 		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 160112500 }, { 
-		.rx1OffsetFrequencyHz = 0, 
-		.rx2OffsetFrequencyHz = 0, 
-		.tx1Attenuation_fifthdB = 0, 
-		.tx2Attenuation_fifthdB = 0, 
-		.rx1GainIndex = 255, 
-		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 160212500 }, { 
-		.rx1OffsetFrequencyHz = 0, 
-		.rx2OffsetFrequencyHz = 0, 
-		.tx1Attenuation_fifthdB = 0, 
-		.tx2Attenuation_fifthdB = 0, 
-		.rx1GainIndex = 255, 
-		.rx2GainIndex = 255, 
-		.hopFrequencyHz = 160312500 }  };
+		.hopFrequencyHz = 4830000000 }  };
 
-	error_code = adi_adrv9001_fh_HopTable_Static_Configure(adrv9001Device_0, ADI_ADRV9001_FHMODE_LO_RETUNE_REALTIME_PROCESS_DUAL_HOP, ADI_ADRV9001_FH_HOP_SIGNAL_2, ADI_ADRV9001_FHHOPTABLE_A, hopTable_59, 4);
+	error_code = adi_adrv9001_fh_HopTable_Static_Configure(adrv9001Device_0, ADI_ADRV9001_FHMODE_LO_RETUNE_REALTIME_PROCESS_DUAL_HOP, ADI_ADRV9001_FH_HOP_SIGNAL_2, ADI_ADRV9001_FHHOPTABLE_A, hopTable_59, 2);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 

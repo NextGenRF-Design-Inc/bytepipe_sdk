@@ -668,6 +668,43 @@ static void RflanCli_StreamStart(cli_t *CliInstance, const char *cmd, rflan_cli_
   Cli_Printf(CliInstance,"Stream Start %s\r\n",StatusString(status));
 }
 
+static void RflanCli_StreamHopStart(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
+{
+  uint16_t len;
+  int32_t status;
+  int32_t SampleCnt;
+  uint8_t Cyclic;
+
+  const char *str = Cli_FindParameter( cmd, 1, &len );
+
+  Cli_GetParameter(cmd, 2, CliParamTypeU8, &Cyclic);
+  Cli_GetParameter(cmd, 3, CliParamTypeS32, &SampleCnt);
+
+  if(strncmp(str, "Tx1", 3) == 0 )
+  {
+    status = RflanStream_StartHopTransfer( Instance->RflanStream, RFLAN_DMA_TX1_BUF_ADDR, SampleCnt, RflanStreamChannel_Tx1, Cyclic );
+  }
+  else if(strncmp(str, "Tx2", 3) == 0 )
+  {
+    status = RflanStream_StartHopTransfer( Instance->RflanStream, RFLAN_DMA_TX2_BUF_ADDR, SampleCnt, RflanStreamChannel_Tx2, Cyclic );
+  }
+  else if(strncmp(str, "Rx1", 3) == 0 )
+  {
+    status = RflanStream_StartHopTransfer( Instance->RflanStream, RFLAN_DMA_RX1_BUF_ADDR, SampleCnt, RflanStreamChannel_Rx1, Cyclic );
+  }
+  else if(strncmp(str, "Rx2", 3) == 0 )
+  {
+    status = RflanStream_StartHopTransfer( Instance->RflanStream, RFLAN_DMA_RX2_BUF_ADDR, SampleCnt, RflanStreamChannel_Rx2, Cyclic );
+  }
+  else
+  {
+    Cli_Printf(CliInstance,"Invalid Parameter\r\n");
+    return;
+  }
+
+  Cli_Printf(CliInstance,"Stream Start %s\r\n",StatusString(status));
+}
+
 static void RflanCli_StreamBufLoad(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
 {
   uint16_t len;
@@ -783,6 +820,39 @@ static void RflanCli_StreamStop(cli_t *CliInstance, const char *cmd, rflan_cli_t
   Cli_Printf(CliInstance,"Stream Stop %s\r\n",StatusString(status));
 }
 
+static void RflanCli_StreamHopStop(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
+{
+  uint16_t len;
+  int32_t status;
+
+  const char *str = Cli_FindParameter( cmd, 1, &len );
+
+  if(strncmp(str, "Tx1", 3) == 0 )
+  {
+    status = RflanStream_StopHopTransfer( Instance->RflanStream, RflanStreamChannel_Tx1 );
+  }
+  else if(strncmp(str, "Tx2", 3) == 0 )
+  {
+    status = RflanStream_StopHopTransfer( Instance->RflanStream, RflanStreamChannel_Tx2 );
+  }
+  else if(strncmp(str, "Rx1", 3) == 0 )
+  {
+    status = RflanStream_StopHopTransfer( Instance->RflanStream, RflanStreamChannel_Rx1 );
+  }
+  else if(strncmp(str, "Rx2", 3) == 0 )
+  {
+    status = RflanStream_StopHopTransfer( Instance->RflanStream, RflanStreamChannel_Rx2 );
+  }
+  else
+  {
+    Cli_Printf(CliInstance,"Invalid Parameter\r\n");
+    return;
+  }
+
+  Cli_Printf(CliInstance,"Stream Stop %s\r\n",StatusString(status));
+}
+
+
 #endif
 
 static void RflanCli_ExecuteScript(cli_t *CliInstance, const char *cmd, rflan_cli_t *Instance)
@@ -868,6 +938,16 @@ static cli_cmd_t RflanCliStreamStopDef =
   NULL
 };
 
+static cli_cmd_t RflanCliStreamHopStopDef =
+{
+  "RflanStreamHopStop",
+  "RflanStreamHopStop: Disable Stream and Bring Hop Signal Low \r\n"
+  "RflanStreamHopStop < Channel (Tx1, Tx2, Rx1, Rx2) >\r\n\n",
+  (CliCmdFn_t)RflanCli_StreamHopStop,
+  1,
+  NULL
+};
+
 static cli_cmd_t RflanCliStreamBufSaveDef =
 {
   "RflanStreamBufSave",
@@ -914,6 +994,16 @@ static cli_cmd_t RflanCliStreamStartDef =
   "RflanStreamStart: Start streaming data from programmable logic to memory \r\n"
   "RflanStreamStart < Channel (Tx1, Tx2, Rx1, Rx2), Cyclic (0 or 1), SampleCnt >\r\n\n",
   (CliCmdFn_t)RflanCli_StreamStart,
+  3,
+  NULL
+};
+
+static cli_cmd_t RflanCliStreamHopStartDef =
+{
+  "RflanStreamHopStart",
+  "RflanStreamHopStart: Start streaming data from programmable logic to memory and bring hop signal high \r\n"
+  "RflanStreamHopStart < Channel (Tx1, Tx2, Rx1, Rx2), Cyclic (0 or 1), SampleCnt >\r\n\n",
+  (CliCmdFn_t)RflanCli_StreamHopStart,
   3,
   NULL
 };
@@ -1007,6 +1097,8 @@ int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init )
   RflanCliStreamBufPutDef.userData = Instance;
   RflanCliStreamStartDef.userData = Instance;
   RflanCliStreamStopDef.userData = Instance;
+  RflanCliStreamHopStartDef.userData = Instance;
+  RflanCliStreamHopStopDef.userData = Instance;
 #endif
 
   Cli_RegisterCommand(Instance->Cli, &RflanCliLsDef);
@@ -1022,6 +1114,8 @@ int32_t RflanCli_Initialize( rflan_cli_t *Instance, rflan_cli_init_t *Init )
   Cli_RegisterCommand(Instance->Cli, &RflanCliStreamBufPutDef);
   Cli_RegisterCommand(Instance->Cli, &RflanCliStreamStartDef);
   Cli_RegisterCommand(Instance->Cli, &RflanCliStreamStopDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamHopStartDef);
+  Cli_RegisterCommand(Instance->Cli, &RflanCliStreamHopStopDef);
 #endif
 
   Cli_RegisterCommand(Instance->Cli, &RflanCliExecuteScriptDef);
