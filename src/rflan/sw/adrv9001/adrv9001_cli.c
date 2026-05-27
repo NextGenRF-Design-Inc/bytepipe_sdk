@@ -290,9 +290,13 @@ static void Adrv9001Cli_DpdRetune(cli_t *CliInstance, const char *cmd, adrv9001_
   Adrv9001Cli_GetPortChannelParameter(CliInstance, cmd, 1, &Channel, &Port);
 
   if((status = Adrv9001_DpdRetune(Adrv9001Params->Adrv9001,Channel)) != 0)
-	  return status;
+  {
+	  Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
+	  //return status;
+  }
 
-  return status;
+  Cli_Printf(CliInstance,"%s\r\n",StatusString( status ));
+  //return status;
 }
 
 static void Adrv9001Cli_WriteDpdCoefficients(cli_t *CliInstance, const char *cmd, adrv9001_params_t *Adrv9001Params )

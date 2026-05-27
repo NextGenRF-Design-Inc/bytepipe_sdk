@@ -1981,7 +1981,7 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_SPI_MODE) != 0)
 	    return Adrv9001Status_WriteErr;
     }
-
+/*
 	adi_adrv9001_ChannelState_e State;
 	if( adi_adrv9001_Radio_Channel_State_Get( &Instance->Device, port, channel, &State ) != 0)
 	  return Adrv9001Status_ReadErr;
@@ -2000,21 +2000,23 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 	    return status;
 	}
 
-
+*/
 	if( adi_adrv9001_dpd_channel_Status_Get( &Instance->Device, channel, dpdChannelStatus) != 0)
 	    return Adrv9001Status_DpdStatusErr;
-
-
-	if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
-	{
-	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
-	    return status;
-	}
 
 	if(mode == ADI_ADRV9001_PIN_MODE)
 	{
 	  if(adi_adrv9001_Radio_ChannelEnableMode_Set(&Instance->Device, port, channel, ADI_ADRV9001_PIN_MODE) != 0)
 	    return Adrv9001Status_WriteErr;
+	}
+
+
+/*
+
+	if( (mode == ADI_ADRV9001_PIN_MODE) || ( State == ADI_ADRV9001_CHANNEL_PRIMED ) || (State == ADI_ADRV9001_CHANNEL_RF_ENABLED) )
+	{
+	  if((status = Adrv9001_ToPrimed( Instance, port, channel )) != 0)
+	    return status;
 	}
 
 	if( State == ADI_ADRV9001_CHANNEL_RF_ENABLED )
@@ -2023,7 +2025,7 @@ int32_t Adrv9001_GetDpdStatus( adrv9001_t *Instance, adi_common_ChannelNumber_e 
 	    return status;
 	}
 
-
+*/
 
   return Adrv9001Status_Success;
 }

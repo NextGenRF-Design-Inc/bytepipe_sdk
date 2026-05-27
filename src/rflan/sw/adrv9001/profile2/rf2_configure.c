@@ -35,7 +35,15 @@ int rf2_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Rx_Loid_Configure(adrv9001Device_0, ADI_CHANNEL_1, &loidConfig_1);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_GainControlCfg_t agcCfg_2 = { 
+	adi_adrv9001_GpioCfg_t gpioConfig_2 = { 
+		.pin = ADI_ADRV9001_GPIO_ANALOG_08, 
+		.polarity = ADI_ADRV9001_GPIO_POLARITY_NORMAL, 
+		.master = ADI_ADRV9001_GPIO_MASTER_ADRV9001 };
+
+	error_code = adi_adrv9001_gpio_Configure(adrv9001Device_0, ADI_ADRV9001_GPIO_SIGNAL_TX2_EXT_FRONTEND_CONTROL, &gpioConfig_2);
+
+	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	adi_adrv9001_GainControlCfg_t agcCfg_3 = { 
 		.peakWaitTime = 4, 
 		.maxGainIndex = 255, 
 		.minGainIndex = 195, 
@@ -69,25 +77,25 @@ int rf2_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.agcUnderRangeLowInterval = 50, 
 		.agcUnderRangeMidInterval = 2, 
 		.agcUnderRangeHighInterval = 4, 
-		.apdHighThresh = 26, 
-		.apdLowThresh = 18, 
+		.apdHighThresh = 13, 
+		.apdLowThresh = 9, 
 		.apdUpperThreshPeakExceededCount = 6, 
 		.apdLowerThreshPeakExceededCount = 3, 
-		.apdGainStepAttack = 4, 
+		.apdGainStepAttack = 1, 
 		.apdGainStepRecovery = 0, 
-		.enableHbOverload = false, 
+		.enableHbOverload = true, 
 		.hbOverloadDurationCount = 1, 
 		.hbOverloadThreshCount = 1, 
-		.hbHighThresh = 8191, 
+		.hbHighThresh = 4114, 
 		.hbUnderRangeLowThresh = 5826, 
 		.hbUnderRangeMidThresh = 8230, 
-		.hbUnderRangeHighThresh = 5812, 
+		.hbUnderRangeHighThresh = 2913, 
 		.hbUpperThreshPeakExceededCount = 6, 
 		.hbUnderRangeHighThreshExceededCount = 3, 
-		.hbGainStepHighRecovery = 4, 
+		.hbGainStepHighRecovery = 1, 
 		.hbGainStepLowRecovery = 6, 
 		.hbGainStepMidRecovery = 4, 
-		.hbGainStepAttack = 4, 
+		.hbGainStepAttack = 1, 
 		.hbOverloadPowerMode = 0, 
 		.hbUnderRangeMidThreshExceededCount = 3, 
 		.hbUnderRangeLowThreshExceededCount = 3, 
@@ -99,11 +107,11 @@ int rf2_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 		.gpioFreezePin = ADI_ADRV9001_GPIO_UNASSIGNED, 
 		.agcFreezeType = ADI_ADRV9001_RX_AGC_HW_FREEZE };
 
-	error_code = adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_1, &agcCfg_2);
+	error_code = adi_adrv9001_Rx_GainControl_Configure(adrv9001Device_0, ADI_CHANNEL_1, &agcCfg_3);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	uint32_t gpIntMask_3 = 0;
-	error_code = adi_adrv9001_gpio_GpIntMask_Get(adrv9001Device_0, &gpIntMask_3);
+	uint32_t gpIntMask_4 = 0;
+	error_code = adi_adrv9001_gpio_GpIntMask_Get(adrv9001Device_0, &gpIntMask_4);
 
 	
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
@@ -122,50 +130,57 @@ int rf2_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9001_Tx_Attenuation_Set(adrv9001Device_0, ADI_CHANNEL_2, 10000);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_RxInterfaceGainCtrl_t rxInterfaceGainConfig_9 = { 
+	adi_adrv9001_RxInterfaceGainCtrl_t rxInterfaceGainConfig_10 = { 
 		.updateInstance = ADI_ADRV9001_RX_INTERFACE_GAIN_UPDATE_TIMING_NOW, 
-		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_MANUAL, 
+		.controlMode = ADI_ADRV9001_RX_INTERFACE_GAIN_CONTROL_AUTOMATIC, 
 		.gain = ADI_ADRV9001_RX_INTERFACE_GAIN_0_DB, 
 		.rssiDuration = 255, 
 		.rssiMovingAverageDuration = 10, 
 		.gainControlAutomaticThreshold_dBFS = -2, 
 		.signalPAR = 15, 
-		.enableFastAttack = false };
+		.enableFastAttack = true };
 
-	error_code = adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_1, &rxInterfaceGainConfig_9);
+	error_code = adi_adrv9001_Rx_InterfaceGain_Configure(adrv9001Device_0, ADI_CHANNEL_1, &rxInterfaceGainConfig_10);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t powerSavingCfg_10 = { 
+	adi_adrv9001_PowerSavingAndMonitorMode_ChannelPowerSavingCfg_t powerSavingCfg_11 = { 
 		.channelDisabledPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED, 
 		.gpioPinPowerDownMode = ADI_ADRV9001_POWERSAVINGANDMONITORMODE_CHANNEL_MODE_DISABLED };
 
-	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_1, &powerSavingCfg_10);
+	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_1, &powerSavingCfg_11);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_2, &powerSavingCfg_10);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_ChannelEnablementDelays_t delays_12 = { 
-		.riseToOnDelay = 1475, 
-		.riseToAnalogOnDelay = 0, 
-		.fallToOffDelay = 0, 
-		.guardDelay = 0, 
-		.holdDelay = 1162 };
-
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &delays_12);
+	error_code = adi_adrv9001_powerSavingAndMonitorMode_ChannelPowerSaving_Configure(adrv9001Device_0, ADI_CHANNEL_2, &powerSavingCfg_11);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	adi_adrv9001_ChannelEnablementDelays_t delays_13 = { 
 		.riseToOnDelay = 1475, 
 		.riseToAnalogOnDelay = 0, 
-		.fallToOffDelay = 418, 
+		.fallToOffDelay = 0, 
+		.guardDelay = 0, 
+		.holdDelay = 433152 };
+
+	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_RX, ADI_CHANNEL_1, &delays_13);
+
+	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
+	adi_adrv9001_ChannelEnablementDelays_t delays_14 = { 
+		.riseToOnDelay = 170680, 
+		.riseToAnalogOnDelay = 169206, 
+		.fallToOffDelay = 170680, 
 		.guardDelay = 0, 
 		.holdDelay = 0 };
 
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &delays_13);
+	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_1, &delays_14);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &delays_13);
+	adi_adrv9001_ChannelEnablementDelays_t delays_15 = { 
+		.riseToOnDelay = 0, 
+		.riseToAnalogOnDelay = 0, 
+		.fallToOffDelay = 0, 
+		.guardDelay = 0, 
+		.holdDelay = 0 };
+
+	error_code = adi_adrv9001_Radio_ChannelEnablementDelays_Configure(adrv9001Device_0, ADI_TX, ADI_CHANNEL_2, &delays_15);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 	error_code = adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_1, 65536);
@@ -174,54 +189,51 @@ int rf2_configure(adi_adrv9001_Device_t * adrv9001Device_0)
 	error_code = adi_adrv9010_bbdc_LoopGain_Set(adrv9001Device_0, ADI_CHANNEL_2, 65536);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_TrackingCals_t trackingCals_17 = { 
+	adi_adrv9001_TrackingCals_t trackingCals_18 = { 
 		.chanTrackingCalMask = { ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC | ADI_ADRV9001_TRACKING_CAL_RX_GAIN_CONTROL_DETECTORS | ADI_ADRV9001_TRACKING_CAL_RX_RSSI, ADI_ADRV9001_TRACKING_CAL_TX_DPD_CLGC | ADI_ADRV9001_TRACKING_CAL_RX_BBDC | ADI_ADRV9001_TRACKING_CAL_RX_QEC_FIC  } };
 
-	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &trackingCals_17);
+	error_code = adi_adrv9001_cals_Tracking_Set(adrv9001Device_0, &trackingCals_18);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_DpdCfg_t dpdConfig_18 = { 
+	adi_adrv9001_DpdCfg_t dpdConfig_19 = { 
 		.numberOfSamples = 4096, 
 		.additionalPowerScale = 4, 
-		.rxTxNormalizationLowerThreshold = 33954698, 
-		.rxTxNormalizationUpperThreshold = 269711752, 
+		.rxTxNormalizationLowerThreshold = 3395470, 
+		.rxTxNormalizationUpperThreshold = 33954698, 
 		.detectionPowerThreshold = 53942350, 
-		.detectionPeakThreshold = 214748365, 
+		.detectionPeakThreshold = 21474836, 
 		.countsLessThanPowerThreshold = 4096, 
 		.countsGreaterThanPeakThreshold = 0, 
 		.immediateLutSwitching = true, 
 		.useSpecialFrame = false, 
 		.resetLuts = false, 
-		.timeFilterCoefficient = 0, 
+		.timeFilterCoefficient = 1073741824, 
 		.dpdSamplingRate_Hz = 0, 
 		.clgcLoopOpen = 0, 
 		.clgcGainTarget_HundredthdB = 0, 
 		.clgcFilterAlpha = 1610612736, 
 		.clgcLastGain_HundredthdB = 0, 
 		.clgcFilteredGain_HundredthdB = 0, 
-		.captureDelay_us = 100, 
+		.captureDelay_us = 1000, 
 		.enableRepeatedEstimationInTDD = false };
 
-	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_18);
+	error_code = adi_adrv9001_dpd_Configure(adrv9001Device_0, ADI_CHANNEL_2, &dpdConfig_19);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	adi_adrv9001_DpdFhRegions_t dpdFhRegions_19[] = { { 
-		.startFrequency_Hz = 4792320000, 
-		.endFrequency_Hz = 4807680000 }, { 
-		.startFrequency_Hz = 4802320000, 
-		.endFrequency_Hz = 4817680000 }, { 
-		.startFrequency_Hz = 4812320000, 
-		.endFrequency_Hz = 4827680000 }, { 
-		.startFrequency_Hz = 4822320000, 
-		.endFrequency_Hz = 4837680000 }  };
+	adi_adrv9001_DpdFhRegions_t dpdFhRegions_20[] = { { 
+		.startFrequency_Hz = 159562500, 
+		.endFrequency_Hz = 159662500 }, { 
+		.startFrequency_Hz = 159662500, 
+		.endFrequency_Hz = 159762500 }, { 
+		.startFrequency_Hz = 159762500, 
+		.endFrequency_Hz = 159862500 }, { 
+		.startFrequency_Hz = 159862500, 
+		.endFrequency_Hz = 159962500 }  };
 
-	error_code = adi_adrv9001_dpd_fh_regions_Configure(adrv9001Device_0, ADI_CHANNEL_2, dpdFhRegions_19, 4);
-
-	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_SPI);
+	error_code = adi_adrv9001_dpd_fh_regions_Configure(adrv9001Device_0, ADI_CHANNEL_2, dpdFhRegions_20, 4);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
-	error_code = adi_adrv9001_Rx_Gain_Set(adrv9001Device_0, ADI_CHANNEL_1, 247);
+	error_code = adi_adrv9001_Rx_GainControl_Mode_Set(adrv9001Device_0, ADI_CHANNEL_1, ADI_ADRV9001_RX_GAIN_CONTROL_MODE_AUTO);
 
 	ADI_HANDLE_ERROR(error_code, adrv9001Device_0);
 
