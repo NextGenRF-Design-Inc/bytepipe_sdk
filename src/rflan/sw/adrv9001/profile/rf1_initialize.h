@@ -63,7 +63,7 @@ extern adi_adrv9001_GpioCtrlInitCfg_t rf1_gpioCtrlInitCfg;
     printf("Variable name: %s \n", device_context->common.error.varName); \
     printf("Error message: %s \n", device_context->common.error.errormessage); \
 }
-int rf1_initialize(adi_adrv9001_Device_t * adrv9001Device_0);
+int rf1_initialize(adrv9001_t * Instance);
 
 
 #ifdef __cplusplus

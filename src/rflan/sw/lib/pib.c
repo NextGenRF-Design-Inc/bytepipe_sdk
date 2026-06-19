@@ -313,8 +313,8 @@ int32_t Pib_SetByNameByString( pib_t *Instance, char *name, char *str )
   int32_t status;
   int32_t id;
 
-  uint8_t *value = calloc(1, strlen(str));
-
+  //uint8_t *value = calloc(1, strlen(str));
+  uint8_t *value = calloc(1, PIB_NAME_SIZE + 1);
   do
   {
     if( value == NULL )
